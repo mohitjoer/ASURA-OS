@@ -28,6 +28,8 @@ __pycache__/
 /bin/
 /pkg/
 /tmp/
+go.work
+go.work.sum
 
 # IDE and editor files
 .vscode/
@@ -60,9 +62,10 @@ Thumbs.db
 /AGENTS.md
 /CLAUDE.md
 GEMINI.md
-agents
-skills/
+/agents
+/skills/
 .skills/
+!shell/agent/skills/
 # Generated diagram output. The HTML is a build artifact of the archify tool,
 # not a source file; the candidate JSON next to it is the thing worth keeping.
 .archify/

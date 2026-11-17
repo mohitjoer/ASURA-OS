@@ -73,6 +73,8 @@ Item {
     readonly property var activeRoute: {
         if (activeMode === "all")
             return LauncherState.routeForMode("all", query);
+        if (activeMode === "menu")
+            return LauncherState.routeForMode("menu", query);
         if (activeMode === "image")
             return LauncherState.routeForMode("image", query);
         if (activeMode === "file")
@@ -106,6 +108,7 @@ Item {
         && providerSet.web.answer.available
     readonly property string modeLabel: {
         if (activeMode === "all") return "ALL";
+        if (activeMode === "menu") return "MENU";
         if (activeMode === "image") return "IMG";
         if (activeMode === "file") return "FILE";
         if (activeMode === "recent") return "REC";
@@ -267,7 +270,7 @@ Item {
     }
 
     function validateProviderSet() {
-        var requiredProviders = ["actions", "apps", "recent", "web"];
+        var requiredProviders = ["actions", "apps", "menu", "recent", "web"];
         for (var index = 0; index < requiredProviders.length; index++) {
             var name = requiredProviders[index];
             if (!providerSet[name])
@@ -282,6 +285,8 @@ Item {
             return Dispatcher.resultsFor(null, query, "", Metrics.maxResults);
         if (activeMode === "all")
             return Dispatcher.resultsFor("apps", query, "", Metrics.maxResults);
+        if (activeMode === "menu")
+            return Dispatcher.resultsFor("menu", query, "", Metrics.maxResults);
         if (activeMode === "image")
             return Dispatcher.resultsFor("find", query, "/image", Metrics.maxResults);
         if (activeMode === "file")
@@ -565,11 +570,16 @@ Item {
 
     function executeAction(action) {
         if (!action || action.enabled === false
-                || typeof action.execute !== "function") {
+                || (typeof action.execute !== "function" && !action.mode)) {
             actionError = Ui.I18n.tr("ACTION UNAVAILABLE");
             return;
         }
         try {
+            if (action.mode) {
+                selectMode(action.mode);
+                actionError = "";
+                return;
+            }
             action.execute();
             actionError = "";
             if (action.closeOnExecute !== false)
@@ -1045,7 +1055,7 @@ Item {
         windowFocusActive: root.interactionRegion === "windows"
         askQuestion: root.askQuestion
                 answer: providerSet.web ? providerSet.web.answer : ({ available: false })
-        onLeadActivated: root.activateCurrent()
+        onActivateRequested: root.activateCurrent()
         onResultSelected: (resultKey, rank) => root.selectResult(resultKey, rank)
         onActionFocusRequested: actionId => root.focusedActionId = actionId
         onActionExecuteRequested: actionId => root.executeAction(

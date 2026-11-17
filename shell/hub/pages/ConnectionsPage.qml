@@ -1315,10 +1315,10 @@ Item {
         }
 
         // revive a stopped bluetoothd. pkexec raises the polkit prompt;
-        // enable --now so it also survives the next boot.
+        // works with systemd or runit on Void Linux.
         Process {
             id: svcProc
-            command: ["pkexec", "systemctl", "enable", "--now", "bluetooth.service"]
+            command: ["pkexec", "sh", "-c", "if command -v systemctl >/dev/null 2>&1; then systemctl enable --now bluetooth.service; elif [ -d /etc/sv/bluetoothd ]; then ln -sf /etc/sv/bluetoothd /var/service/ && sv up bluetoothd; fi"]
             stdout: StdioCollector {}
             stderr: StdioCollector {}
             onExited: function(exitCode) {
@@ -1945,10 +1945,14 @@ Item {
                     width: 16; height: 1; color: Tokens.ink
                     anchors.verticalCenter: parent.verticalCenter
                 }
-                Text {
-                    text: "A"; color: Tokens.ink; font.family: Tokens.mono
-                    font.pixelSize: 11; anchors.verticalCenter: parent.verticalCenter
-                }
+                Image {
+                width: 12; height: 12
+                anchors.verticalCenter: parent.verticalCenter
+                source: Qt.resolvedUrl("../../assets/asura-logo-on-dark.svg")
+                sourceSize.width: 24; sourceSize.height: 24
+                fillMode: Image.PreserveAspectFit
+                smooth: true
+            }
                 Text {
                     text: I18n.tr("DEVICES"); color: Tokens.inkMuted; font.family: Tokens.ui
                     font.pixelSize: 9; font.weight: Font.Medium; font.letterSpacing: Tokens.trackMark

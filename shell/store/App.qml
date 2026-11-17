@@ -38,7 +38,7 @@ Rectangle {
     property string pendingRoute: ""
     onNavigationCategoriesChanged: if (app.pendingRoute !== "" && app.validRoute(app.pendingRoute)) app.openRoute(app.pendingRoute)
 
-    // The catalogue plus whatever apt found for the typed query that the shelf
+    // The catalogue plus whatever search found for the typed query that the shelf
     // does not already hold.
     readonly property var searchableItems: Store.items.concat(Store.found.filter(hit =>
             !Store.items.some(item => item.category === hit.category && item.id === hit.id))).map(item => {
@@ -83,7 +83,8 @@ Rectangle {
     readonly property bool showHero: view === "discover" && categoryID === "" && !searchOpen && collection.length > 0
     // The Themes category browses per provider through a subtab strip; the filter
     // narrows the collection to one provider or to the installed library.
-    readonly property bool themesBrowse: app.categoryID === "colorschemes" && app.view === "discover" && !app.searchOpen
+    // The backend calls it "themes"; "colorschemes" is kept as an alias so a mixed catalogue still browses.
+    readonly property bool themesBrowse: (app.categoryID === "themes" || app.categoryID === "colorschemes") && app.view === "discover" && !app.searchOpen
     // The Decor tab browses its three catalogues through the same strip; here a
     // plate is a category, so picking one simply routes to it.
     readonly property bool decorBrowse: app.decorFamily.indexOf(app.categoryID) >= 0
@@ -113,7 +114,7 @@ Rectangle {
         var out = [];
         var its = Store.items;
         for (var i = 0; i < its.length; i++) {
-            if (its[i].category !== "colorschemes")
+            if (its[i].category !== "themes" && its[i].category !== "colorschemes")
                 continue;
             var pv = (its[i].metadata && its[i].metadata.provider) ? its[i].metadata.provider : "Community";
             if (!seen[pv]) { seen[pv] = true; out.push(pv); }
@@ -128,7 +129,7 @@ Rectangle {
         var its = Store.items;
         for (var i = 0; i < its.length; i++) {
             var it = its[i];
-            if (it.category !== "colorschemes")
+            if (it.category !== "themes" && it.category !== "colorschemes")
                 continue;
             var pv = (it.metadata && it.metadata.provider) ? it.metadata.provider : "Community";
             if (pv === app.providerFilter && it.installed !== true && it.downloadPaused !== true
@@ -158,7 +159,7 @@ Rectangle {
         var its = Store.items;
         for (var i = 0; i < its.length; i++) {
             var it = its[i];
-            if (it.category !== "colorschemes")
+            if (it.category !== "themes" && it.category !== "colorschemes")
                 continue;
             var pv = (it.metadata && it.metadata.provider) ? it.metadata.provider : "Community";
             if (pv === provider)

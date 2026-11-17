@@ -2,6 +2,7 @@ var MODES = Object.freeze({
   REST: "rest",
   FEDERATED: "federated",
   ALL: "all",
+  MENU: "menu",
   IMAGE: "image",
   FILE: "file",
   RECENT: "recent",
@@ -11,6 +12,7 @@ var MODES = Object.freeze({
 
 var SCOPED_MODES = new Set([
   MODES.ALL,
+  MODES.MENU,
   MODES.IMAGE,
   MODES.FILE,
   MODES.RECENT
@@ -19,6 +21,7 @@ var SCOPED_MODES = new Set([
 var BODY_MODES = new Set([
   MODES.FEDERATED,
   MODES.ALL,
+  MODES.MENU,
   MODES.IMAGE,
   MODES.FILE,
   MODES.RECENT,
@@ -72,6 +75,8 @@ function routeForMode(mode, query) {
   switch (mode) {
   case MODES.ALL:
     return { providerId: "apps", prefix: "", query: visibleQuery };
+  case MODES.MENU:
+    return { providerId: "menu", prefix: "", query: visibleQuery };
   case MODES.IMAGE:
     return { providerId: "find", prefix: "/image", query: visibleQuery };
   case MODES.FILE:
@@ -189,11 +194,9 @@ function moveResultIndex(index, count, key) {
   const requested = Number(index) | 0;
   if (requested < 0) return 0;
   const current = Math.max(0, Math.min(length - 1, requested));
-  if (key === "Up") return Math.max(0, current - 2);
-  if (key === "Down") return Math.min(length - 1, current + 2);
-  if (key === "Left") return current % 2 === 0 ? current : current - 1;
-  if (key === "Right") return current % 2 === 0 && current + 1 < length
-    ? current + 1 : current;
+  // the ledger is a single column: Up/Down step one row, Left/Right stay.
+  if (key === "Up") return Math.max(0, current - 1);
+  if (key === "Down") return Math.min(length - 1, current + 1);
   return current;
 }
 

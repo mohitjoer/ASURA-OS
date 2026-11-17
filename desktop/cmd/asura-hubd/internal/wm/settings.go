@@ -517,6 +517,12 @@ func diffOptions(o Overrides, follow bool) hlOpts {
 		out.set("misc:middle_click_paste", in.MiddleClickPaste)
 	}
 
+	if in.WorkspaceSwipe != di.WorkspaceSwipe {
+		out.set("gestures:workspace_swipe", in.WorkspaceSwipe)
+	}
+	if in.SwipeFingers != di.SwipeFingers {
+		out.set("gestures:workspace_swipe_fingers", in.SwipeFingers)
+	}
 	if in.SwipeInvert != di.SwipeInvert {
 		out.set("gestures:workspace_swipe_invert", in.SwipeInvert)
 	}
@@ -607,6 +613,8 @@ func fullOptions(o Overrides, follow bool) hlOpts {
 	out.set("cursor:inactive_timeout", c.InactiveTimeout)
 	out.set("cursor:hide_on_key_press", c.HideOnKeyPress)
 	out.set("misc:middle_click_paste", in.MiddleClickPaste)
+	out.set("gestures:workspace_swipe", in.WorkspaceSwipe)
+	out.set("gestures:workspace_swipe_fingers", in.SwipeFingers)
 	out.set("gestures:workspace_swipe_invert", in.SwipeInvert)
 	out.set("gestures:workspace_swipe_create_new", in.SwipeCreateNew)
 	out.set("gestures:workspace_swipe_distance", in.SwipeDistance)
@@ -943,7 +951,8 @@ func genGesture(o Overrides) string {
 
 // genMotion is the window-motion toggles the Look tab owns, kept out of the
 // option diff so wobble can define its own curve. full restates the base feel
-// too, so a preview can switch a toggle back off.
+// too, so a preview can switch a toggle back off; the base feel is the cheap
+// shipped set (session/hyprland/animations.conf) mirrored here.
 func genMotion(o Overrides, full bool) string {
 	a := o.Appearance
 	var b strings.Builder
@@ -951,16 +960,16 @@ func genMotion(o Overrides, full bool) string {
 	case a.WobblyWindows:
 		b.WriteString("animation = windowsMove, 1, 5, asuraWobble\n")
 	case full:
-		b.WriteString("animation = windowsMove, 1, 3.2, asuraSettle\n")
+		b.WriteString("animation = windowsMove, 1, 2, default\n")
 	}
 	switch a.WindowStyle {
 	case "slide", "gnomed":
-		fmt.Fprintf(&b, "animation = windowsIn, 1, 3.8, asuraBloom, %s\n", a.WindowStyle)
-		fmt.Fprintf(&b, "animation = windowsOut, 1, 2.4, asuraSettle, %s\n", a.WindowStyle)
+		fmt.Fprintf(&b, "animation = windowsIn, 1, 2, default, %s\n", a.WindowStyle)
+		fmt.Fprintf(&b, "animation = windowsOut, 1, 2, default, %s\n", a.WindowStyle)
 	default:
 		if full {
-			b.WriteString("animation = windowsIn, 1, 3.8, asuraBloom, popin 78%\n")
-			b.WriteString("animation = windowsOut, 1, 2.4, asuraSettle, popin 86%\n")
+			b.WriteString("animation = windowsIn, 1, 2, default, popin 78%\n")
+			b.WriteString("animation = windowsOut, 1, 1.5, default, popin 86%\n")
 		}
 	}
 	return b.String()

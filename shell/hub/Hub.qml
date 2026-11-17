@@ -15,7 +15,6 @@ import "schema/KeybindsPage.js" as KeybindsSchema
 import "schema/DisplaysPage.js" as DisplaysSchema
 import "schema/GpuPage.js" as GpuSchema
 import "schema/RecordingPage.js" as RecordingSchema
-import "schema/DictationPage.js" as DictationSchema
 import "schema/LauncherPage.js" as LauncherSchema
 import "schema/FastfetchPage.js" as FastfetchSchema
 import "schema/WidgetsPage.js" as WidgetsSchema
@@ -44,8 +43,8 @@ import qs.FrameBars
 Rectangle {
     id: hub
 
-    implicitWidth: 1400
-    implicitHeight: 880
+    implicitWidth: 1000
+    implicitHeight: 700
     color: Tokens.paper
     focus: true
 
@@ -63,6 +62,7 @@ Rectangle {
         if (s === "windows") return "windowmanager";
         if (s === "cursor") return "input";
         if (s === "autostart" || s === "environment") return "session";
+        if (s === "agent") return "addons";
         return s;
     }
     // An explicit jump (the nav IPC, i.e. the Store's "open in settings") must
@@ -81,11 +81,9 @@ Rectangle {
     property string query: ""
     readonly property bool hasVoiceEngine: false
 
-    // progressive disclosure: one global Advanced switch (in the rail) reveals the
-    // deep knobs across every schema page. persisted like `section`, restored at
-    // startup by `advancedGet` below.
-    property bool advanced: false
-    onAdvancedChanged: Quickshell.execDetached(["asura-hubd", "config", "set", "advanced", hub.advanced ? "1" : "0"])
+    // Advanced mode is permanently enabled across the Hub: every schema page,
+    // power-user section, and deep tuning knob is always accessible by default.
+    readonly property bool advanced: true
 
     // The full catalogue. `wired` marks the pages whose content and
     // persistence are ported; the rest render an honest porting plate rather
@@ -103,7 +101,7 @@ Rectangle {
     readonly property var groups: [
         { name: "OVERVIEW", items: [ { key: "profile", name: "Profile" }, { key: "global", name: "General" }, { key: "updates", name: "Updates" } ] },
         { name: "DEVICES", items: [
-            { key: "displays", name: "Displays", needs: { cap: "monitorConfig" } }, { key: "connections", name: "Connections" },
+            { key: "displays", name: "Displays", needs: { cap: "monitorConfig" } }, { key: "audio", name: "Audio" }, { key: "connections", name: "Connections" },
             { key: "input", name: "Input" }, { key: "gpu", name: "Graphics & Power" } ] },
         { name: "LOOK", items: [
             { key: "animations", name: "Animations" }, { key: "lockscreen", name: "Lockscreen" } ] },
@@ -118,11 +116,10 @@ Rectangle {
             { key: "windowrules", name: "Window Rules", adv: true } ] },
         { name: "SYSTEM", items: [
             { key: "performance", name: "Performance" }, { key: "session", name: "Session" },
-            { key: "recording", name: "Recording" }, { key: "dictation", name: "Dictation", needs: { voiceEngine: true } }, { key: "fastfetch", name: "Fastfetch", adv: true },
+            { key: "recording", name: "Recording" }, { key: "fastfetch", name: "Fastfetch", adv: true },
             { key: "import", name: "Import config", adv: true, wired: true } ] },
-        { name: "ASURA", items: [ { key: "asura", name: "Asura" } ] },
         { name: "EXTEND", items: [
-            { key: "addons", name: "Add-ons" }, { key: "agent", name: "Agent" } ] },
+            { key: "addons", name: "Add-ons" } ] },
         { name: "", items: [ { key: "credits", name: "Credits" } ] }
     ]
 
@@ -131,14 +128,13 @@ Rectangle {
     // is the texture, and every gloss is the real word, never decoration:
     // Section rail navigation items
     readonly property var jpName: ({
-        "profile": "", "displays": "", "input": "", "keybinds": "",
-        "connections": "", "gpu": "", "recording": "", "dictation": "",
+        "profile": "", "displays": "", "audio": "", "input": "", "keybinds": "",
+        "connections": "", "gpu": "", "recording": "",
         "plugins": "", "bar-studio": "", "desktop": "", "launcher": "", "fastfetch": "",
         "widgets": "", "lockscreen": "", "animations": "",
         "addons": "", "windowrules": "", "appoverrides": "", "layerrules": "",
-        "session": "", "performance": "", "agent": "",
-        "updates": "", "credits": "", "global": "", "import": "", "windowmanager": "",
-        "asura": "A"
+        "session": "", "performance": "",
+        "updates": "", "credits": "", "global": "", "import": "", "windowmanager": ""
     })
 
     // Extra search vocabulary per section: the words a user actually types that
@@ -154,7 +150,6 @@ Rectangle {
         "keybinds": "shortcuts hotkeys binds keys browser terminal editor files launch super",
         "gpu": "graphics nvidia amd vram passthrough vfio rendering hybrid performance cpu governor epp frequency thermal battery charge ceiling aspm profile",
         "recording": "screen record capture video screencast screenshot fps codec framerate",
-        "dictation": "voice typing speech transcribe whisper microphone stt",
         "windowmanager": "compositor window manager wm wayland switch change swap session provider window windows rounding corners softness gaps border borders thickness colour tiling layout opacity transparency transparent dim blur shadow float snap resize animation spread offset",
         "plugins": "plugin plugins hyprland compositor hyprpm title bar titlebar hyprbars glass hyprglass image border imgborders cursor motion dynamic cursors focus flash hyprfocus key sound sounds keyboard keysounds typing click clicky thock creamy cherry mx topre mechvibes switch version abi mismatch rebuild build update add git repository install",
         "bar-studio": "bar frame rails zones widgets menus surfaces style catalogue layout framebars sidebar dock dockapps pinned pin magnify autohide auto-hide media chip peek labels edge taskbar",
@@ -170,11 +165,9 @@ Rectangle {
         "layerrules": "layer rule namespace blur dim bar notification surface",
         "session": "session login startup autostart launch run command boot environment variable env var export",
         "performance": "performance battery power saving save lowpower potato lag cpu gpu ram memory idle freeze reduce motion fps",
-        "agent": "asura agent ai assistant vault memory skills chat code llm needle engine acp",
         "updates": "update upgrade version channel commit behind check origin",
         "import": "import bring migrate dotfiles config existing kitty fish fastfetch drop folder git backup undo restore adopt",
-        "credits": "credits thanks acknowledgement gratitude contributor",
-        "asura": "idle dim blank lock timeout screen screensaver sleep suspend session"
+        "credits": "credits thanks acknowledgement gratitude contributor"
     })
 
     // ── global search ────────────────────────────────────────────────────
@@ -187,7 +180,7 @@ Rectangle {
         "bar-studio": BarStudioSchema.rows, "desktop": DesktopSchema.rows, "windowmanager": WindowSettingsSchema.rows, "plugins": PluginsSchema.rows,
         "input": InputSchema.rows, "keybinds": KeybindsSchema.rows,
         "displays": DisplaysSchema.rows, "gpu": GpuSchema.rows,
-        "recording": RecordingSchema.rows, "dictation": DictationSchema.rows,
+        "recording": RecordingSchema.rows,
         "launcher": LauncherSchema.rows, "fastfetch": FastfetchSchema.rows,
         "widgets": WidgetsSchema.rows, "lockscreen": LockscreenSchema.rows,
         "animations": AnimationsSchema.rows, "addons": AddonsSchema.rows,
@@ -286,8 +279,7 @@ Rectangle {
         "mouse": "input pointer", "pointer": "input", "keyboard": "input", "touchpad": "input trackpad", "trackpad": "input touchpad",
         "clock": "widgets desktop", "notifications": "layerrules",
         "update": "updates upgrade", "upgrade": "updates", "blur": "windows glass", "rounding": "windows corners", "corners": "windows rounding",
-        "animation": "animations motion", "motion": "animations", "gpu": "graphics", "graphics": "gpu",
-        "voice": "dictation", "speech": "dictation voice", "microphone": "dictation", "mic": "dictation"
+        "animation": "animations motion", "motion": "animations", "gpu": "graphics", "graphics": "gpu"
     })
     // a query word expands to itself plus its synonyms, so a term is satisfied by
     // any one of them (and never dilutes multi-word coverage).
@@ -493,9 +485,7 @@ Rectangle {
         return (prov && prov.length) ? base.concat(prov) : base;
     }
     function pageFile(s) {
-        // not under pages/: it draws the settings registry, not a page of its own
-        if (s === "asura") return Qt.resolvedUrl("AsuraPage.qml");
-        var map = { "plugins": "PluginsPage", "profile": "ProfilePage", "bar-studio": "BarStudioPage", "desktop": "DesktopPage", "session": "SessionPage", "layerrules": "LayerRulesPage", "windowrules": "WindowRulesPage", "appoverrides": "AppOverridesPage", "animations": "AnimationsPage", "input": "InputPage", "keybinds": "KeybindsPage", "dictation": "DictationPage", "displays": "DisplaysPage", "connections": "ConnectionsPage", "gpu": "GpuPage", "updates": "UpdatesPage", "agent": "AgentPage", "recording": "RecordingPage", "performance": "PerformancePage", "launcher": "LauncherPage", "lockscreen": "LockscreenPage", "fastfetch": "FastfetchPage", "addons": "AddonsPage", "widgets": "WidgetsPage", "credits": "CreditsPage" };
+        var map = { "plugins": "PluginsPage", "profile": "ProfilePage", "bar-studio": "BarStudioPage", "desktop": "DesktopPage", "session": "SessionPage", "layerrules": "LayerRulesPage", "windowrules": "WindowRulesPage", "appoverrides": "AppOverridesPage", "animations": "AnimationsPage", "input": "InputPage", "keybinds": "KeybindsPage", "displays": "DisplaysPage", "connections": "ConnectionsPage", "gpu": "GpuPage", "audio": "AudioPage", "updates": "UpdatesPage", "recording": "RecordingPage", "performance": "PerformancePage", "launcher": "LauncherPage", "lockscreen": "LockscreenPage", "fastfetch": "FastfetchPage", "addons": "AddonsPage", "widgets": "WidgetsPage", "credits": "CreditsPage" };
         map.global = "GlobalPage";
         map["import"] = "ImportPage";
         map.windowmanager = "WindowManagerPage";
@@ -525,6 +515,9 @@ Rectangle {
         "frameBars.menus.quick-settings.anchor": "left",
         "frameBars.menus.quick-settings.expansion": "always",
         "frameBars.menus.quick-settings.minWidth": 410,
+        "frameBars.menus.notifications.anchor": "right",
+        "frameBars.menus.notifications.expansion": "always",
+        "frameBars.menus.notifications.minWidth": 410,
         "weatherLocation": "", "weatherUnit": "auto", "formatLocale": "",
         "enabled": true, "bars": 64, "thickness": 0.58, "bloom": 0.6,
         "color": "", "color2": "", "gradient": false,
@@ -535,21 +528,21 @@ Rectangle {
         "markText": "A", "markImage": "", "markTint": true, "name": "Asura",
         "reloadCover": ReloadCoverModel.empty(),
         "language": "auto", "barStyle": "qsbar", "obi": {}, "nacre": NacreConfig.defaultConfig(), "qsbar": {}, "dock": {},
-        "qsbar.barPosition": "top", "qsbar.barShellStyle": "fit", "qsbar.barScale": 1.0,
+        "qsbar.barPosition": "top", "qsbar.barShellStyle": "full", "qsbar.barScale": 1.0,
         "qsbar.barAutoHide": false, "qsbar.barBorderEnabled": true, "qsbar.barCornerRadius": 6,
         "qsbar.panelTooltipBorderEnabled": true, "qsbar.barShadowEnabled": false, "qsbar.barFrostEnabled": false,
-        "qsbar.barGapTop": 3, "qsbar.barGapBottom": 0, "qsbar.barGapLeft": 0, "qsbar.barGapRight": 0,
-        "qsbar.launcherLogoMode": "text", "qsbar.launcherLogoText": "asura", "qsbar.launcherLogoIcon": "asura",
+        "qsbar.barGapTop": 0, "qsbar.barGapBottom": 0, "qsbar.barGapLeft": 0, "qsbar.barGapRight": 0,
+        "qsbar.launcherLogoMode": "icon", "qsbar.launcherLogoText": "asura", "qsbar.launcherLogoIcon": "asura",
         "qsbar.workspaceStyle": "default", "qsbar.workspaceMode": "active",
         "qsbar.widgets.battery": true, "qsbar.widgets.bluetooth": true, "qsbar.widgets.brightness": true,
         "qsbar.widgets.cpu": true, "qsbar.widgets.cpuTemperature": true, "qsbar.widgets.gpu": true,
-        "qsbar.widgets.layout": true, "qsbar.widgets.media": true, "qsbar.widgets.mpris": true,
+        "qsbar.widgets.media": true, "qsbar.widgets.mpris": true,
         "qsbar.widgets.memory": true, "qsbar.widgets.network": true, "qsbar.widgets.power": true,
         "qsbar.widgets.quick": true, "qsbar.widgets.status": true, "qsbar.widgets.storage": true,
         "qsbar.widgets.volume": true, "qsbar.widgets.weather": true, "qsbar.widgets.claude": false,
         "qsbar.barTemperatureSource": "cpu", "qsbar.audioBoost": false, "qsbar.aiTools": "claude,codex,opencode",
         "qsbar.clock12h": false, "qsbar.weatherImperial": false,
-        "dock.enabled": true, "dock.edge": "auto", "dock.style": "islands", "dock.autohide": true,
+        "dock.enabled": true, "dock.edge": "auto", "dock.style": "floating", "dock.autohide": true,
         "dock.magnify": true, "dock.labels": true, "dock.shadow": true, "dock.frost": true, "dock.media": false,
         "clipboard.widthPercent": 65, "clipboard.heightPercent": 42, "clipboard.bottomPercent": 0,
         "clipboard.panelRadius": 18, "clipboard.paneRadius": 12, "clipboard.cardRadius": 9,
@@ -577,7 +570,7 @@ Rectangle {
     function settingsFiles() {
         var s = hub.section;
         if (hub.pageFile(s) === "") return [];
-        if (s === "import" || s === "asura") return [];
+        if (s === "import") return [];
         var ce = hub.cfgDir;
         var home = Quickshell.env("HOME") || "";
         var out = [];
@@ -661,12 +654,11 @@ Rectangle {
     readonly property var liveKeys: [
         "frameBars", "frameEnabled", "frameOpacity", "frameThickness", "frameCorner", "fontFamily", "fontSize", "barStyle", "obi", "nacre", "qsbar", "dock",
         "qsbar.barPosition", "qsbar.barShellStyle", "qsbar.barScale", "qsbar.barAutoHide",
-        "qsbar.barBorderEnabled", "qsbar.barCornerRadius", "qsbar.panelTooltipBorderEnabled", "qsbar.barShadowEnabled", "qsbar.barFrostEnabled",
-        "qsbar.barGapTop", "qsbar.barGapBottom", "qsbar.barGapLeft", "qsbar.barGapRight",
+        "qsbar.panelTooltipBorderEnabled", "qsbar.barShadowEnabled", "qsbar.barFrostEnabled",
         "qsbar.launcherLogoMode", "qsbar.launcherLogoText", "qsbar.launcherLogoIcon", "qsbar.workspaceMode", "qsbar.workspaceStyle",
         "qsbar.widgets.status", "qsbar.widgets.quick", "qsbar.widgets.volume", "qsbar.widgets.brightness", "qsbar.widgets.battery", "qsbar.widgets.power",
         "qsbar.widgets.network", "qsbar.widgets.bluetooth", "qsbar.widgets.weather", "qsbar.widgets.media", "qsbar.widgets.mpris", "qsbar.widgets.cpu",
-        "qsbar.widgets.memory", "qsbar.widgets.gpu", "qsbar.widgets.cpuTemperature", "qsbar.widgets.storage", "qsbar.widgets.layout", "qsbar.widgets.claude",
+        "qsbar.widgets.memory", "qsbar.widgets.gpu", "qsbar.widgets.cpuTemperature", "qsbar.widgets.storage",
         "qsbar.barTemperatureSource", "qsbar.audioBoost", "qsbar.clock12h", "qsbar.weatherImperial", "qsbar.aiTools",
         "dock.enabled", "dock.edge", "dock.style", "dock.autohide", "dock.magnify", "dock.media", "dock.frost", "dock.shadow", "dock.labels",
         "clipboard.widthPercent", "clipboard.heightPercent", "clipboard.bottomPercent", "clipboard.panelRadius", "clipboard.paneRadius", "clipboard.cardRadius"
@@ -825,7 +817,11 @@ Rectangle {
         return out;
     }
 
-    Component.onCompleted: rebase()
+    Component.onCompleted: {
+        rebase();
+        var envPage = Quickshell.env("ASURA_HUB_PAGE");
+        if (envPage && envPage.length > 0) hub.navigate(envPage);
+    }
     Process {
         id: sectionGet
         command: ["asura-hubd", "config", "get", "section"]
@@ -837,14 +833,6 @@ Rectangle {
                 var s = hub.canonicalSection(this.text.trim());
                 if (s && hub.pageFile(s) !== "" && hub.sectionAvailable(s)) hub.section = s;
             }
-        }
-    }
-    Process {
-        id: advancedGet
-        command: ["asura-hubd", "config", "get", "advanced"]
-        running: true
-        stdout: StdioCollector {
-            onStreamFinished: { if (this.text.trim() === "1") hub.advanced = true; }
         }
     }
 
@@ -1104,13 +1092,17 @@ Rectangle {
                 Row {
                     anchors { left: parent.left; verticalCenter: parent.verticalCenter; leftMargin: Tokens.s4 }
                     spacing: Tokens.s3
-                    Text { text: "A"; color: Tokens.ink; font.family: Tokens.mono; font.pixelSize: 22 }
+                    AsuraLogo {
+                        size: 26
+                        variant: "white"
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
                     Column {
                         spacing: 1
                         anchors.verticalCenter: parent.verticalCenter
                         Text {
                             text: "ASURA"; color: Tokens.ink; font.family: Tokens.ui
-                            font.pixelSize: 14; font.weight: Font.Medium; font.letterSpacing: 2.4
+                            font.pixelSize: 14; font.weight: Font.DemiBold; font.letterSpacing: 2.4
                         }
                         Text {
                             text: I18n.tr("SETTINGS"); color: Tokens.inkMuted
@@ -1129,41 +1121,12 @@ Rectangle {
             }
         }
 
-        // The one global switch at the foot: Advanced reveals the deep per-page
-        // knobs inside a schema page (the rail always lists every section). It
-        // persists and restores at startup by `advancedGet` / the settings
-        // daemon.
-        Item {
-            id: advToggle
-            anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
-            anchors.leftMargin: Tokens.s5; anchors.rightMargin: Tokens.s5
-            anchors.bottomMargin: Tokens.s4
-            height: Tokens.ctlH
-            Rectangle {
-                anchors { left: parent.left; right: parent.right; top: parent.top; topMargin: -Tokens.s3 }
-                height: 1; color: Tokens.lineSoft
-            }
-            Text {
-                anchors { left: parent.left; right: advSw.left; rightMargin: Tokens.s3; verticalCenter: parent.verticalCenter }
-                elide: Text.ElideRight
-                text: I18n.tr("Advanced")
-                color: hub.advanced ? Tokens.ink : Tokens.inkMuted
-                font.family: Tokens.ui; font.pixelSize: Tokens.fSmall
-                font.weight: Font.Medium; font.letterSpacing: Tokens.trackLabel
-            }
-            Sw {
-                id: advSw
-                anchors { right: parent.right; verticalCenter: parent.verticalCenter }
-                on: hub.advanced
-                onToggled: (v) => hub.advanced = v
-            }
-        }
-
         Flickable {
             id: navFlick
-            anchors { left: parent.left; right: parent.right; top: railHead.bottom; bottom: advToggle.top }
+            anchors { left: parent.left; right: parent.right; top: railHead.bottom; bottom: parent.bottom }
             anchors.margins: Tokens.s5
             anchors.topMargin: Tokens.s4
+            anchors.bottomMargin: Tokens.s4
             contentHeight: nav.height
             clip: true
             ScrollBar.vertical: ScrollRail { policy: ScrollBar.AsNeeded }
@@ -1409,7 +1372,7 @@ Rectangle {
             Row {
                 spacing: Tokens.s2
                 Rectangle { width: 16; height: 1; color: Tokens.ink; anchors.verticalCenter: parent.verticalCenter }
-                Text { text: "A"; color: Tokens.ink; font.family: Tokens.mono; font.pixelSize: 11; anchors.verticalCenter: parent.verticalCenter }
+                AsuraLogo { size: 12; variant: "white"; anchors.verticalCenter: parent.verticalCenter }
                 Text {
                     text: I18n.tr(hub.groupFor(hub.section)); color: Tokens.inkMuted
                     font.family: Tokens.ui; font.pixelSize: 9; font.weight: Font.Medium

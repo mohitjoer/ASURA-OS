@@ -1,4 +1,4 @@
-# Adapted from Ryoku's apps/zsh/ryoku.zsh (GPL-3.0).
+# Asura OS zsh configuration
 [[ ${__ASURA_ZSH_LOADED:-0} == 1 ]] && return
 __ASURA_ZSH_LOADED=1
 
@@ -19,24 +19,56 @@ if [[ -s "$NVM_DIR/nvm.sh" ]]; then
   }
 fi
 
-export EDITOR="${EDITOR:-zed}" VISUAL="${VISUAL:-zed}"
+# Editor selection: use GUI zed --wait when available in a display session,
+# falling back cleanly to terminal editors (nano, vi) on TTY, SSH, or headless
+if [[ -n "$DISPLAY" || -n "$WAYLAND_DISPLAY" ]] && command -v zed >/dev/null 2>&1; then
+  export EDITOR="${EDITOR:-zed --wait}" VISUAL="${VISUAL:-zed --wait}"
+else
+  for _editor in nano vi; do
+    if command -v "$_editor" >/dev/null 2>&1; then
+      export EDITOR="${EDITOR:-$_editor}" VISUAL="${VISUAL:-$_editor}"
+      break
+    fi
+  done
+  export EDITOR="${EDITOR:-nano}" VISUAL="${VISUAL:-nano}"
+fi
 
 [[ -o interactive ]] || return
 
 _asura_cfg=${XDG_CONFIG_HOME:-$HOME/.config}
-# A starship.toml of the user'"'"'s own (at $_asura_cfg/starship.toml) wins over the packaged one.
+_cache=${XDG_CACHE_HOME:-$HOME/.cache}/zsh
+mkdir -p "$_cache"
+
+# Helper: evaluate and cache CLI init hooks, invalidating only when binary mtime changes
+_asura_cache_eval() {
+  local tool="$1"
+  shift
+  local bin_path cache_file
+  bin_path=$(command -v "$tool" 2>/dev/null) || return
+  cache_file="$_cache/init_${tool}.zsh"
+  if [[ ! -f "$cache_file" || "$bin_path" -nt "$cache_file" ]]; then
+    "$@" >| "$cache_file" 2>/dev/null
+  fi
+  source "$cache_file"
+}
+
+# A starship.toml of the user's own (at $_asura_cfg/starship.toml) wins over the packaged one.
 # The packaged starship.toml lives at $_asura_cfg/asura/apps/starship/starship.toml
 [[ -z $STARSHIP_CONFIG && ! -e $_asura_cfg/starship.toml ]] &&
   export STARSHIP_CONFIG=$_asura_cfg/asura/apps/starship/starship.toml
-command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
-command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init zsh --cmd cd)"
-command -v mise >/dev/null 2>&1 && eval "$(mise activate zsh)"
-command -v fzf >/dev/null 2>&1 && eval "$(fzf --zsh)"
+
+_asura_cache_eval starship starship init zsh
+_asura_cache_eval zoxide zoxide init zsh --cmd cd
+_asura_cache_eval mise mise activate zsh
+_asura_cache_eval fzf fzf --zsh
 
 autoload -Uz compinit
-_cache=${XDG_CACHE_HOME:-$HOME/.cache}/zsh
-mkdir -p "$_cache"
-compinit -d "$_cache/zcompdump"
+# Skip expensive security directory audits on every shell launch if dump is under 24 hours old
+if [[ -n "$_cache/zcompdump"(#qN.m-1) ]]; then
+  compinit -C -d "$_cache/zcompdump"
+else
+  compinit -d "$_cache/zcompdump"
+fi
 
 [[ -r /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]] &&
   source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
@@ -49,10 +81,8 @@ if [[ -r /usr/share/zsh-history-substring-search/zsh-history-substring-search.zs
   bindkey '^[[B' history-substring-search-down
 fi
 
-# Atuin for enhanced history (sqlite-backed, syncable)
-if command -v atuin >/dev/null 2>&1; then
-  eval "$(atuin init zsh --disable-up-arrow)"
-fi
+# Atuin for enhanced history (cached init)
+_asura_cache_eval atuin atuin init zsh --disable-up-arrow
 
 # Sourced last: the highlighter wraps the widgets that exist when it loads.
 if [[ -r /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
@@ -98,11 +128,26 @@ fast() {
 }
 
 if [[ -o interactive ]] && command -v fastfetch >/dev/null 2>&1; then
-  # Suppress fastfetch on bare console login (tty1) before graphical session starts
-  if [[ -n "$WAYLAND_DISPLAY" || -n "$DISPLAY" || "$(tty 2>/dev/null)" != "/dev/tty1" ]]; then
-    fastfetch
+  # Display system summary on top-level terminal launch, suppressing in subshells
+  if [[ -z "$__ASURA_FASTFETCH_SHOWN" ]]; then
+    # Suppress fastfetch on bare console login (tty1) before graphical session starts
+    if [[ -n "$WAYLAND_DISPLAY" || -n "$DISPLAY" || "$XDG_SESSION_TYPE" == "wayland" || "$(tty 2>/dev/null)" != "/dev/tty1" ]]; then
+      export __ASURA_FASTFETCH_SHOWN=1
+      fastfetch
+    fi
   fi
 fi
+
+# Opt-in mimalloc high-performance allocator wrapper
+with-mimalloc() {
+  if [[ -f /usr/lib/libmimalloc.so.3 ]]; then
+    LD_PRELOAD="/usr/lib/libmimalloc.so.3${LD_PRELOAD:+:$LD_PRELOAD}" "$@"
+  elif [[ -f /usr/lib/libmimalloc.so ]]; then
+    LD_PRELOAD="/usr/lib/libmimalloc.so${LD_PRELOAD:+:$LD_PRELOAD}" "$@"
+  else
+    "$@"
+  fi
+}
 
 # Ghostty injects its integration into the shell it starts itself; this covers
 # nested shells (exec zsh, tmux, sudo -E). The script guards against a second load.

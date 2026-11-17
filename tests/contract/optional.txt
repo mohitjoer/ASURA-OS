@@ -18,6 +18,7 @@ warp-cli               # Cloudflare WARP quick toggle in CloudflareWarpToggle.qm
 ydotool                # virtual keyboard daemon in Ydotool.qml
 easyeffects            # audio effects quick toggle in EasyEffectsToggle.qml
 inxi                   # hardware info tool in qsbar Theme.qml
+loadkeys               # gated by command -v in shell/hub/pages/InputPage.qml; ships in kbd, a base-system dependency
 uv                     # Python package runner in asura-stage
 usbreset               # USB audio reset helper in asura-restart-audio
 docker                 # Docker engine in stash-cobalt-server.sh
@@ -62,3 +63,4 @@ xorriso                # ISO creation utility in asura-vmd
 yt-dlp                 # media downloader in stash
 zbarimg                # QR barcode reader in asura-cmd-qr-scan
 zenity                 # graphical dialog fallback in chat/shot/vm
+asura-agent            # optional resident assistant layer, removed from default image

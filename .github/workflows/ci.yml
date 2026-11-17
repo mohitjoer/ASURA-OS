@@ -42,8 +42,8 @@ jobs:
     timeout-minutes: 10
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
         with:
           go-version-file: system/hardware/go.mod
           cache-dependency-path: system/hardware/go.mod
@@ -63,8 +63,8 @@ jobs:
     timeout-minutes: 10
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
         with:
           go-version-file: desktop/go.mod
           cache-dependency-path: |
@@ -93,7 +93,7 @@ jobs:
     timeout-minutes: 5
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v5
       - name: Both modules declare the same Go version
         run: |
           declared() { sed -n 's/^go[[:space:]][[:space:]]*\([0-9][0-9.]*\).*/\1/p' "$1"; }
@@ -112,8 +112,8 @@ jobs:
     timeout-minutes: 10
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
         with:
           go-version-file: desktop/go.mod
           cache-dependency-path: |
@@ -141,7 +141,7 @@ jobs:
     timeout-minutes: 10
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v5
       - name: session/session_test.sh
         run: sh session/session_test.sh
       - name: session/greeter_test.sh
@@ -155,7 +155,7 @@ jobs:
     timeout-minutes: 10
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v5
       - name: shell/shell_test.sh
         run: sh shell/shell_test.sh
       - name: Branding assets
@@ -215,7 +215,7 @@ jobs:
     timeout-minutes: 5
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v5
       - name: Shell syntax check — release scripts
         run: |
           for f in session/*.sh session/**/*.sh installation/*.sh system/helpers/**/*.sh tests/**/*.sh; do
@@ -235,8 +235,8 @@ jobs:
     timeout-minutes: 15
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
         with:
           go-version-file: desktop/go.mod
           cache-dependency-path: |
@@ -251,227 +251,83 @@ jobs:
   # PART 8: Void Linux Live ISO build
   # ==========================================================================
   iso:
-    name: ISO — build Asura OS (Void Linux)
+    name: ISO — build Asura OS
     timeout-minutes: 60
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
-        with:
-          go-version-file: system/hardware/go.mod
-          cache-dependency-path: |
-            system/hardware/go.mod
-            desktop/go.mod
-      - name: Install ISO build tools
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends \
-            squashfs-tools xorriso grub-pc-bin grub-efi-amd64-bin \
-            dosfstools mtools python3-yaml curl git tar xz-utils
-      - name: Validate Void ISO builder
-        run: sh installation/build-iso-void_test.sh
-      - name: Build Asura OS Void ISO
-        run: sudo env "PATH=$PATH" installation/build-iso-void.sh "$RUNNER_TEMP/asura-void-iso"
-      - name: Verify ISO output
-        run: |
-          set -eu
-          sudo chmod -R a+rwX "$RUNNER_TEMP/asura-void-iso"
-          iso="$(find "$RUNNER_TEMP/asura-void-iso" -type f \( -name '*.iso' -o -name '*.hybrid.iso' \) -print -quit)"
-          if [ -z "$iso" ]; then
-            echo "::error::void-mklive completed without producing an ISO"
-            ls -laR "$RUNNER_TEMP/asura-void-iso"
-            exit 1
-          fi
-          test -s "$iso"
-          echo "ISO: $iso ($(du -h "$iso" | cut -f1))"
-          sha256sum "$iso" | tee "$iso.sha256"
-      - name: Verify Live rootfs shared libraries and binary integrity
-        run: |
-          set -eu
-          MNT="$RUNNER_TEMP/iso-mount"
-          SQUASH_MNT="$RUNNER_TEMP/squash-mount"
-          ROOTFS_MNT="$RUNNER_TEMP/rootfs-mount"
-          mkdir -p "$MNT" "$SQUASH_MNT" "$ROOTFS_MNT"
-          iso="$(find "$RUNNER_TEMP/asura-void-iso" -type f \( -name '*.iso' -o -name '*.hybrid.iso' \) -print -quit)"
-          sudo mount -o loop,ro "$iso" "$MNT"
-          sudo mount -o loop,ro "$MNT/LiveOS/squashfs.img" "$SQUASH_MNT"
-
-          cleanup() {
-            if [ -d "$ROOTFS_MNT" ] && mountpoint -q "$ROOTFS_MNT"; then
-              sudo umount "$ROOTFS_MNT" || true
-            fi
-            if [ -d "$SQUASH_MNT" ] && mountpoint -q "$SQUASH_MNT"; then
-              sudo umount "$SQUASH_MNT" || true
-            fi
-            if [ -d "$MNT" ] && mountpoint -q "$MNT"; then
-              sudo umount "$MNT" || true
-            fi
-          }
-          trap cleanup EXIT
-
-          TARGET_ROOT="$SQUASH_MNT"
-          if [ -f "$SQUASH_MNT/LiveOS/rootfs.img" ]; then
-            sudo mount -o loop,ro "$SQUASH_MNT/LiveOS/rootfs.img" "$ROOTFS_MNT"
-            TARGET_ROOT="$ROOTFS_MNT"
-          fi
-
-          echo "== Checking Hyprland, QuickShell, and Asura binaries in rootfs ($TARGET_ROOT) =="
-          failed=0
-          check_binary() {
-            bin="$1"
-            echo "Checking $bin..."
-            if [ ! -f "$TARGET_ROOT$bin" ]; then
-              echo "::error::Binary $bin is missing from Live rootfs!"
-              failed=$((failed + 1))
-              return
-            fi
-            ldso="$(find "$TARGET_ROOT/usr/lib"* "$TARGET_ROOT/lib"* -name 'ld-linux*.so*' 2>/dev/null | head -n 1 || true)"
-            if [ -n "$ldso" ] && [ -x "$ldso" ]; then
-              missing=$(LD_LIBRARY_PATH="$TARGET_ROOT/usr/lib:$TARGET_ROOT/lib" "$ldso" --list "$TARGET_ROOT$bin" 2>&1 | grep "not found" || true)
-            else
-              missing=$(LD_LIBRARY_PATH="$TARGET_ROOT/usr/lib:$TARGET_ROOT/lib" ldd "$TARGET_ROOT$bin" 2>&1 | grep "not found" || true)
-            fi
-            if [ -n "$missing" ]; then
-              echo "::error::Binary $bin has missing shared libraries:"
-              echo "$missing"
-              failed=$((failed + 1))
-            else
-              echo "  OK: all shared libraries resolved for $bin"
-            fi
-          }
-
-          check_binary "/usr/bin/Hyprland"
-          check_binary "/usr/bin/asura"
-          check_binary "/usr/bin/asura-shell"
-          check_binary "/usr/bin/asura-sysd"
-          if [ -f "$TARGET_ROOT/usr/bin/quickshell" ]; then
-            check_binary "/usr/bin/quickshell"
-          fi
-
-          # Verify Plymouth label plugin
-          if [ ! -f "$TARGET_ROOT/usr/lib/plymouth/label.so" ]; then
-            echo "::error::Plymouth label.so is missing from /usr/lib/plymouth!"
-            failed=$((failed + 1))
-          else
-            echo "  OK: /usr/lib/plymouth/label.so present"
-          fi
-
-          # Verify no foreign libsystemd requirement in libseat
-          if [ -f "$TARGET_ROOT/usr/lib/libseat.so.1" ]; then
-            if readelf -d "$TARGET_ROOT/usr/lib/libseat.so.1" 2>/dev/null | grep -q "libsystemd.so.0"; then
-              echo "::error::/usr/lib/libseat.so.1 is dynamically linked against libsystemd.so.0!"
-              failed=$((failed + 1))
-            else
-              echo "  OK: /usr/lib/libseat.so.1 is native (no libsystemd requirement)"
-            fi
-          fi
-
-          cleanup
-          trap - EXIT
-
-          if [ "$failed" -gt 0 ]; then
-            echo "Rootfs library validation failed with $failed error(s)!"
-            exit 1
-          fi
-          echo "Rootfs library and binary validation passed cleanly!"
-      - name: Test ISO headless boot in QEMU
-        timeout-minutes: 6
-        run: |
-          set -eu
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends qemu-system-x86 netpbm
-          iso="$(find "$RUNNER_TEMP/asura-void-iso" -type f \( -name '*.iso' -o -name '*.hybrid.iso' \) -print -quit)"
-
-          mkdir -p "$RUNNER_TEMP/qemu-test"
-          SERIAL_LOG="$RUNNER_TEMP/qemu-test/serial.log"
-          QMP_SOCK="$RUNNER_TEMP/qemu-test/qmp.sock"
-          SCREENSHOT="$RUNNER_TEMP/qemu-test/boot-screen.ppm"
-          SCREENSHOT_PNG="$RUNNER_TEMP/qemu-test/boot-screen.png"
-
-          KVM_FLAG=""
-          if [ -w /dev/kvm ]; then
-            KVM_FLAG="-enable-kvm -cpu host"
-          else
-            KVM_FLAG="-cpu max"
-          fi
-
-          echo "Starting QEMU boot test ($KVM_FLAG)..."
-          qemu-system-x86_64 \
-            $KVM_FLAG \
-            -m 2048 \
-            -smp 2 \
-            -cdrom "$iso" \
-            -boot d \
-            -vga std \
-            -display vnc=127.0.0.1:0 \
-            -serial file:"$SERIAL_LOG" \
-            -qmp unix:"$QMP_SOCK",server,nowait \
-            -daemonize \
-            -pidfile "$RUNNER_TEMP/qemu-test/qemu.pid"
-
-          echo "Waiting for boot sequence (~60-90s in software emulation)..."
-          for i in $(seq 1 60); do
-            sleep 2
-            if [ -f "$SERIAL_LOG" ] && grep -qaE "runit: enter stage: /etc/runit/2|asura-os login:|turnstiled: Initializing" "$SERIAL_LOG"; then
-              echo "Detected Stage 2 init / desktop runtime in serial log at ~$((i * 2))s!"
-              break
-            fi
-          done
-
-
-          # Capture QEMU virtual screen via QMP screendump
-          python3 -c '
-            import socket, json, time, sys
-            sock_path = sys.argv[1]
-            ppm_path = sys.argv[2]
-            time.sleep(1)
-            try:
-                s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-                s.connect(sock_path)
-                s.recv(1024)
-                s.sendall(b"{\"execute\": \"qmp_capabilities\"}\n")
-                s.recv(1024)
-                cmd = json.dumps({"execute": "screendump", "arguments": {"filename": ppm_path}}) + "\n"
-                s.sendall(cmd.encode())
-                s.recv(1024)
-                s.close()
-                print("Captured screenshot to " + ppm_path)
-            except Exception as e:
-                print("Warning: screenshot capture failed: " + str(e))
-            ' "$QMP_SOCK" "$SCREENSHOT" || true
-
-
-
-          if [ -f "$SCREENSHOT" ] && command -v pnmtopng >/dev/null 2>&1; then
-            pnmtopng "$SCREENSHOT" > "$SCREENSHOT_PNG" 2>/dev/null || true
-          fi
-
-          # Stop QEMU
-          if [ -f "$RUNNER_TEMP/qemu-test/qemu.pid" ]; then
-            kill "$(cat "$RUNNER_TEMP/qemu-test/qemu.pid")" 2>/dev/null || true
-          fi
-
-          echo "== Serial Console Output =="
-          head -n 40 "$SERIAL_LOG" 2>/dev/null || true
-          echo "..."
-          tail -n 40 "$SERIAL_LOG" 2>/dev/null || true
-          echo "==========================="
+      - uses: actions/checkout@v5
+      # Build, rootfs check and QEMU boot test are shared with release.yml, so a
+      # release is built and tested by exactly the steps every CI run uses.
+      - name: Build, verify and boot-test the ISO
+        id: iso
+        uses: ./.github/actions/build-iso
+      - name: Checksum
+        run: sha256sum "${{ steps.iso.outputs.iso }}" | tee "${{ steps.iso.outputs.iso }}.sha256"
       - name: Upload QEMU Boot Artifacts (Screenshot & Serial Log)
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v6
         with:
           name: asura-boot-test-artifacts
           path: |
             ${{ runner.temp }}/qemu-test/serial.log
-            ${{ runner.temp }}/qemu-test/boot-screen.*
+            ${{ runner.temp }}/qemu-test/boot-screen.png
           if-no-files-found: ignore
           retention-days: 7
       - name: Upload ISO artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v6
         with:
-          name: asura-os-beta-001
+          name: asura-os-iso
           path: |
-            ${{ runner.temp }}/asura-void-iso/*.iso
-            ${{ runner.temp }}/asura-void-iso/*.iso.sha256
+            ${{ runner.temp }}/asura-iso/*.iso
+            ${{ runner.temp }}/asura-iso/*.iso.sha256
           if-no-files-found: error
+          retention-days: 7
+
+  # ==========================================================================
+  # PART 9: End-to-end install of the ISO just built
+  # ==========================================================================
+  # installation/ci/installer-e2e.sh runs this checkout's installer inside the
+  # ISO's own live rootfs onto a disk image (BIOS). `plain` then boots the
+  # installed disk in QEMU and waits for runit stage 2; `luks` unlocks the
+  # encrypted disk with its passphrase and checks crypttab, fstab and GRUB.
+  #
+  # Non-blocking while it proves itself: it was written without a machine that
+  # could build the ISO, so its first runs are its first test. Drop
+  # continue-on-error once it has passed on dev-unstable.
+  installer-e2e:
+    name: Installer — end to end (${{ matrix.mode }})
+    needs: iso
+    continue-on-error: true
+    timeout-minutes: 30
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [plain, luks]
+    steps:
+      - uses: actions/checkout@v5
+      - name: Enable KVM for the boot test
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Install the test's tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends qemu-system-x86 cryptsetup parted
+      - uses: actions/download-artifact@v7
+        with:
+          name: asura-os-iso
+          path: iso
+      - name: Install from the ISO, then check the result
+        run: |
+          iso="$(find iso -name '*.iso' -print -quit)"
+          sh installation/ci/installer-e2e.sh "$iso" "${{ matrix.mode }}" "$RUNNER_TEMP/installer-e2e"
+      - name: Upload the install log and serial console
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: installer-e2e-${{ matrix.mode }}
+          path: ${{ runner.temp }}/installer-e2e/
+          if-no-files-found: ignore
           retention-days: 7

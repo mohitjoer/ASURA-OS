@@ -85,22 +85,29 @@ Item {
         precision: SystemClock.Minutes
     }
 
-    HeroCrop {
-        anchors.fill: parent
-        source: LauncherConfig.heroImage
-        fallbackSource: Qt.resolvedUrl("../../shared/art/hands-adam.png")
-        focalX: LauncherConfig.heroPosX
-        focalY: LauncherConfig.heroPosY
-        strength: LauncherConfig.heroStrength
-    }
-
+    // Sleek monochrome ASURA launcher header background
     Rectangle {
+        id: bgCard
         anchors.fill: parent
-        gradient: Gradient {
-            GradientStop { position: 0; color: Qt.rgba(root.shade, root.shade, root.shade, 0.52) }
-            GradientStop { position: 0.34; color: Qt.rgba(root.shade, root.shade, root.shade, 0.06) }
-            GradientStop { position: 0.68; color: Qt.rgba(root.shade, root.shade, root.shade, 0.10) }
-            GradientStop { position: 1; color: Qt.rgba(root.shade, root.shade, root.shade, 0.64) }
+        color: Tokens.light ? Qt.rgba(0.96, 0.96, 0.97, 0.96) : Qt.rgba(0.08, 0.08, 0.09, 0.96)
+
+        // Subtle upper surface reflection
+        Rectangle {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            height: 1
+            color: Tokens.light ? Qt.rgba(1, 1, 1, 0.7) : Qt.rgba(1, 1, 1, 0.1)
+        }
+
+        // Soft vertical depth gradient
+        Rectangle {
+            anchors.fill: parent
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: Qt.rgba(root.shade, root.shade, root.shade, 0.08) }
+                GradientStop { position: 0.5; color: "transparent" }
+                GradientStop { position: 1.0; color: Qt.rgba(1 - root.shade, 1 - root.shade, 1 - root.shade, 0.08) }
+            }
         }
     }
 
@@ -190,29 +197,25 @@ Item {
     Column {
         anchors.left: parent.left
         anchors.top: parent.top
-        anchors.leftMargin: 16 * root.s
-        anchors.topMargin: 12 * root.s
-        spacing: 1 * root.s
+        anchors.leftMargin: 18 * root.s
+        anchors.topMargin: 14 * root.s
+        spacing: 2 * root.s
 
         Text {
             visible: LauncherConfig.showGreeting && !root.compressed
             text: root.greeting
-            color: Theme.bright
-            style: Text.Raised
-            styleColor: Qt.rgba(root.shade, root.shade, root.shade, 0.82)
+            color: Theme.faint
             font.family: Theme.mono
             font.pixelSize: 9 * root.s
             font.weight: Font.DemiBold
-            font.letterSpacing: 1.5 * root.s
+            font.letterSpacing: 1.8 * root.s
         }
 
         Text {
             text: Qt.formatTime(root.now, "HH:mm")
             color: Theme.bright
-            style: Text.Raised
-            styleColor: Qt.rgba(root.shade, root.shade, root.shade, 0.86)
             font.family: Theme.font
-            font.pixelSize: (root.compressed ? 17 : 28) * root.s
+            font.pixelSize: (root.compressed ? 18 : 28) * root.s
             font.weight: Font.Light
             font.features: ({ "tnum": 1 })
         }
@@ -221,13 +224,13 @@ Item {
     Column {
         anchors.right: parent.right
         anchors.top: parent.top
-        anchors.rightMargin: 16 * root.s
-        anchors.topMargin: 12 * root.s
-        spacing: 1 * root.s
+        anchors.rightMargin: 18 * root.s
+        anchors.topMargin: 14 * root.s
+        spacing: 2 * root.s
 
         Row {
             anchors.right: parent.right
-            spacing: 5 * root.s
+            spacing: 6 * root.s
             visible: LauncherConfig.showWeather && Weather.available
 
             Shared.WeatherGlyph {
@@ -243,8 +246,6 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 text: Weather.temp
                 color: Theme.bright
-                style: Text.Raised
-                styleColor: Qt.rgba(root.shade, root.shade, root.shade, 0.86)
                 font.family: Theme.font
                 font.pixelSize: (root.compressed ? 14 : 19) * root.s
                 font.weight: Font.Medium
@@ -256,9 +257,7 @@ Item {
             anchors.right: parent.right
             visible: LauncherConfig.showWeather && Weather.available && !root.compressed
             text: Weather.condition
-            color: Theme.subtle
-            style: Text.Raised
-            styleColor: Qt.rgba(root.shade, root.shade, root.shade, 0.86)
+            color: Theme.faint
             font.family: Theme.font
             font.pixelSize: 10 * root.s
         }
@@ -266,47 +265,54 @@ Item {
         Text {
             anchors.right: parent.right
             text: root.dateText
-            color: Theme.bright
-            style: Text.Raised
-            styleColor: Qt.rgba(root.shade, root.shade, root.shade, 0.86)
+            color: Theme.subtle
             font.family: Theme.mono
-            font.pixelSize: 9 * root.s
-            font.letterSpacing: 0.6 * root.s
+            font.pixelSize: 10 * root.s
+            font.letterSpacing: 0.8 * root.s
         }
     }
 
     Item {
         id: queryLine
         anchors.horizontalCenter: parent.horizontalCenter
-        y: (root.compressed ? 39 : 105) * root.s
-        width: Math.min(parent.width - 48 * root.s, 430 * root.s)
-        height: 30 * root.s
+        y: (root.compressed ? 32 : 92) * root.s
+        width: Math.min(parent.width - 48 * root.s, 480 * root.s)
+        height: 40 * root.s
 
-        Item {
+        // Ambient soft drop shadow
+        Rectangle {
+            anchors.fill: parent
+            anchors.topMargin: 2 * root.s
+            radius: 10 * root.s
+            color: Theme.shadow
+            opacity: 0.35
+            antialiasing: true
+        }
+
+        // The field: translucent frosted well with hairline contact border
+        Rectangle {
+            id: well
+            anchors.fill: parent
+            radius: 10 * root.s
+            color: Tokens.light ? Qt.rgba(0.93, 0.93, 0.94, 0.92) : Qt.rgba(0.12, 0.12, 0.13, 0.88)
+            border.width: 1
+            border.color: field.activeFocus ? Theme.bright : Qt.rgba(1, 1, 1, 0.15)
+            Behavior on border.color {
+                ColorAnimation { duration: Motion.selection; easing.type: Easing.OutCubic }
+            }
+        }
+
+        Text {
             id: searchGlyph
             anchors.left: parent.left
-            anchors.verticalCenter: field.verticalCenter
-            width: 16 * root.s
-            height: 16 * root.s
-
-            Rectangle {
-                anchors.left: parent.left
-                anchors.top: parent.top
-                width: 9 * root.s
-                height: 9 * root.s
-                radius: width / 2
-                color: "transparent"
-                border.width: Math.max(1, 1.4 * root.s)
-                border.color: Theme.bright
-            }
-            Rectangle {
-                width: 7 * root.s
-                height: Math.max(1, 1.4 * root.s)
-                color: Theme.bright
-                x: 8 * root.s
-                y: 10 * root.s
-                rotation: 45
-                transformOrigin: Item.Left
+            anchors.leftMargin: 12 * root.s
+            anchors.verticalCenter: parent.verticalCenter
+            text: "search"
+            font.family: "Material Symbols Rounded"
+            font.pixelSize: 18 * root.s
+            color: field.activeFocus ? Theme.bright : Theme.faint
+            Behavior on color {
+                ColorAnimation { duration: Motion.fast }
             }
         }
 
@@ -314,16 +320,16 @@ Item {
             id: field
             anchors.left: searchGlyph.right
             anchors.leftMargin: 10 * root.s
-            anchors.right: parent.right
+            anchors.right: trailingItem.left
+            anchors.rightMargin: 8 * root.s
             anchors.verticalCenter: parent.verticalCenter
-            height: 26 * root.s
+            height: 28 * root.s
             color: Theme.bright
             selectionColor: Theme.modeActive
             selectedTextColor: Theme.onModeActive
-            font.family: Theme.mono
+            font.family: Theme.font
             font.pixelSize: 13 * root.s
-            font.weight: Font.Medium
-            font.letterSpacing: query.length === 0 ? 1.2 * root.s : 0
+            font.weight: Font.Normal
             selectByMouse: true
             clip: true
             Accessible.role: Accessible.EditableText
@@ -383,29 +389,72 @@ Item {
             anchors.left: field.left
             anchors.verticalCenter: field.verticalCenter
             visible: field.text.length === 0 && field.preeditText.length === 0
-            text: I18n.tr("TYPE TO SEARCH")
+            text: I18n.tr("Search apps, files, commands…")
             color: Theme.faint
-            style: Text.Raised
-            styleColor: Qt.rgba(root.shade, root.shade, root.shade, 0.86)
-            font.family: Theme.mono
-            font.pixelSize: 11 * root.s
-            font.weight: Font.Medium
-            font.letterSpacing: 1.3 * root.s
+            font.family: Theme.font
+            font.pixelSize: 13 * root.s
+            font.weight: Font.Normal
         }
 
-        Rectangle {
-            anchors.left: field.left
-            anchors.right: field.right
-            anchors.bottom: parent.bottom
-            height: Math.max(1, root.s)
-            color: field.activeFocus ? Theme.bright : Theme.faint
+        Item {
+            id: trailingItem
+            anchors.right: parent.right
+            anchors.rightMargin: 12 * root.s
+            anchors.verticalCenter: parent.verticalCenter
+            width: clearBtn.visible ? 20 * root.s : escBadge.implicitWidth
+            height: 20 * root.s
+
+            Item {
+                id: clearBtn
+                anchors.fill: parent
+                visible: field.text.length > 0
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "close"
+                    font.family: "Material Symbols Rounded"
+                    font.pixelSize: 15 * root.s
+                    color: clearTap.hovered ? Theme.bright : Theme.faint
+                    Behavior on color { ColorAnimation { duration: Motion.fast } }
+                }
+                HoverHandler { id: clearTap; cursorShape: Qt.PointingHandCursor }
+                TapHandler {
+                    onTapped: {
+                        field.text = "";
+                        field.forceActiveFocus();
+                    }
+                }
+            }
+
+            Rectangle {
+                id: escBadge
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.right: parent.right
+                visible: field.text.length === 0
+                width: escLabel.implicitWidth + 8 * root.s
+                height: 16 * root.s
+                radius: 3 * root.s
+                color: Qt.rgba(1, 1, 1, 0.08)
+                border.width: 1
+                border.color: Qt.rgba(1, 1, 1, 0.12)
+
+                Text {
+                    id: escLabel
+                    anchors.centerIn: parent
+                    text: "ESC"
+                    font.family: Theme.mono
+                    font.pixelSize: 8 * root.s
+                    font.weight: Font.DemiBold
+                    color: Theme.faint
+                }
+            }
         }
     }
 
     Row {
         id: modeKeys
         anchors.horizontalCenter: parent.horizontalCenter
-        y: (root.compressed ? 83 : 154) * root.s
+        y: (root.compressed ? 78 : 146) * root.s
         spacing: 7 * root.s
 
         HeroVariant.ModeKey {
@@ -413,6 +462,12 @@ Item {
             label: I18n.tr("ALL")
             active: root.activeMode === "all"
             onActivated: root.modeRequested("all")
+        }
+        HeroVariant.ModeKey {
+            s: root.s
+            label: I18n.tr("MENU")
+            active: root.activeMode === "menu"
+            onActivated: root.modeRequested("menu")
         }
         HeroVariant.ModeKey {
             s: root.s

@@ -304,9 +304,8 @@ Item {
     function applyOptionsArg() { return String(pg.hv("desktop.input.kbOptions") || ""); }
     Process {
         id: sysApplyProc
-        // set-x11-keymap takes LAYOUT MODEL VARIANT OPTIONS; the empty model
-        // keeps the default, and the other three are the saved keyboard keys.
-        command: ["localectl", "set-x11-keymap", pg.applyLayoutArg(), "", pg.applyVariantArg(), pg.applyOptionsArg()]
+        // set-x11-keymap takes LAYOUT MODEL VARIANT OPTIONS; on Void Linux falls back to rc.conf/loadkeys.
+        command: ["sh", "-c", "localectl set-x11-keymap \"$1\" \"\" \"$2\" \"$3\" 2>/dev/null || (pkexec sh -c \"grep -q '^KEYMAP=' /etc/rc.conf 2>/dev/null && sed -i 's/^KEYMAP=.*/KEYMAP=$1/' /etc/rc.conf || echo 'KEYMAP=$1' >> /etc/rc.conf; command -v loadkeys >/dev/null 2>&1 && loadkeys $1 || true\")", "sh", pg.applyLayoutArg(), pg.applyVariantArg(), pg.applyOptionsArg()]
         onExited: (code, status) => {
             pg.sysApplyState = code === 0 ? "ok" : "err";
             sysApplyClear.restart();
@@ -618,9 +617,13 @@ Item {
                 width: 16; height: 1; color: Tokens.ink
                 anchors.verticalCenter: parent.verticalCenter
             }
-            Text {
-                text: "A"; color: Tokens.ink; font.family: Tokens.mono
-                font.pixelSize: 11; anchors.verticalCenter: parent.verticalCenter
+            Image {
+                width: 12; height: 12
+                anchors.verticalCenter: parent.verticalCenter
+                source: Qt.resolvedUrl("../../assets/asura-logo-on-dark.svg")
+                sourceSize.width: 24; sourceSize.height: 24
+                fillMode: Image.PreserveAspectFit
+                smooth: true
             }
             Text {
                 text: I18n.tr("DEVICES"); color: Tokens.inkMuted; font.family: Tokens.ui

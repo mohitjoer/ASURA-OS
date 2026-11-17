@@ -41,7 +41,7 @@ CACHE="${ASURA_VENDOR_CACHE:-${XDG_CACHE_HOME:-$HOME/.cache}/asura/vendor}"
 II_NAME="ii"
 II_REPO="end4"
 II_URL="https://github.com/end-4/dots-hyprland.git"
-II_COMMIT="2f2a376fdb2ad738bf55f693dd0b474b64bb0ab8"
+II_COMMIT="21733c3ca7f4edc20faafedea844dc96002c6f7f"
 II_PATH="dots/.config/quickshell/ii"
 II_DEST="."
 II_LICENCE="COPYING"
@@ -77,7 +77,10 @@ modules/ii/sidebarRight
 modules/ii/overview
 modules/ii/notificationPopup
 modules/ii/onScreenDisplay
+modules/ii/regionSelector
+modules/ii/sessionScreen
 modules/ii/mediaControls
+modules/ii/screenCorners
 modules/ii/cheatsheet
 modules/ii/background
 modules/ii/lock
@@ -112,6 +115,36 @@ GlobalStates.qml
 #                   application framework on the desktop. Asura's version
 #                   has the same two properties — a source and a size — and
 #                   nothing else.
+#   MaterialSymbol.qml
+#                   upstream's Material Symbols icon widget, which asks for a
+#                   font the base layer does not carry. Asura's version maps
+#                   the Material Symbol names onto the Font Awesome 4.7
+#                   codepoints the archive's font has, so the vendored
+#                   components' icons resolve instead of rendering nothing.
+#   ScreenshotAction.qml
+#                   upstream's screenshot-command builder. The one difference
+#                   is the OCR binary's name: upstream calls `tesseract`, and
+#                   on Void that name belongs to a game — the OCR engine is
+#                   packaged as `tesseract-ocr`, which is what Asura's version
+#                   calls. Every other branch is upstream's, unchanged.
+#   regionSelector/RegionSelector.qml
+#                   upstream's region-selector entry point, which registers
+#                   one IPC handler and one global shortcut for each of its
+#                   five actions. Asura's version reaches one action — text
+#                   recognition — through the shell's own IPC bridge, because
+#                   the desktop's other halves of the other actions already
+#                   exist elsewhere and an entry point for a missing command
+#                   is a control that runs nothing.
+#   sessionScreen/SessionScreen.qml
+#                   upstream's full-screen session menu, which registers one
+#                   IPC handler and three global shortcuts and calls its
+#                   Session singleton for each of eight actions — logout by
+#                   killing every window and the compositor, poweroff through
+#                   loginctl. Asura's version registers none of them, carries
+#                   the four actions the desktop has (lock through the
+#                   daemon's hyprlock; logout, reboot and shutdown through
+#                   the shell's confirmation dialog), and leaves the rest
+#                   out for the same reason as the selector's.
 #
 # They are Asura's files, in Asura's tree, at upstream's paths. That is the
 # overlay: the vendored components are upstream's, the context they run in is
@@ -120,6 +153,11 @@ EXCLUDE_FILES="
 modules/common/Appearance.qml
 modules/common/Config.qml
 modules/common/widgets/AppIcon.qml
+modules/common/widgets/MaterialSymbol.qml
+modules/common/utils/ScreenshotAction.qml
+modules/ii/regionSelector/RegionSelector.qml
+modules/ii/sessionScreen/SessionScreen.qml
+modules/ii/screenCorners/ScreenCorners.qml
 GlobalStates.qml
 "
 
@@ -309,6 +347,23 @@ cmd_verify() {
     fi
     bad=0
     total=0
+
+    # The pins in this script and in the manifest must agree. If they don't,
+    # the next `sync` would silently rewrite the tree to the script's commit.
+    pinbad=0
+    for pair in "$II_NAME $II_COMMIT" "$SHAPES_NAME $SHAPES_COMMIT"; do
+        # shellcheck disable=SC2086
+        set -- $pair
+        recorded=$(awk -v n="$1" '
+            /^  - name: / { cur=$3 }
+            cur==n && /^    pinned_commit: / { print $2; exit }
+        ' "$VENDOR_DIR/manifest.yaml")
+        if [ "$recorded" != "$2" ]; then
+            log "PIN      $1: vendor.sh has $2, manifest.yaml has ${recorded:-nothing}"
+            pinbad=$((pinbad + 1))
+        fi
+    done
+
     # shellcheck disable=SC2162
     while read -r path blob; do
         [ -n "$path" ] || continue
@@ -330,23 +385,39 @@ $(awk '
     /^      - path: / { p=$3; getline b; sub(/.*blob: /,"",b); print p, b }
 ' "$VENDOR_DIR/manifest.yaml")
 EOF
-    if [ "$bad" -eq 0 ]; then
+    if [ "$bad" -eq 0 ] && [ "$pinbad" -eq 0 ]; then
         log "ok - $total vendored files are byte-identical to the pinned commits"
         return 0
     fi
-    log "FAIL - $bad of $total vendored files differ from the pinned commits"
+    [ "$bad" -eq 0 ] || log "FAIL - $bad of $total vendored files differ from the pinned commits"
+    [ "$pinbad" -eq 0 ] || log "FAIL - $pinbad pin(s) in vendor.sh disagree with manifest.yaml"
     return 1
 }
 
 cmd_update() {
     [ -n "${1:-}" ] || { log "usage: vendor.sh update <component> <commit>"; exit 2; }
+    # A pin is a full commit id: a short one can become ambiguous later.
+    case "${2:-}" in
+        *[!0-9a-f]*|"") log "update: <commit> must be a full 40-character commit id"; exit 2 ;;
+    esac
+    [ "${#2}" -eq 40 ] || { log "update: <commit> must be a full 40-character commit id"; exit 2; }
     case "$1" in
-        "$II_NAME") II_COMMIT=$2 ;;
-        "$SHAPES_NAME") SHAPES_COMMIT=$2 ;;
+        "$II_NAME") II_COMMIT=$2; var=II_COMMIT ;;
+        "$SHAPES_NAME") SHAPES_COMMIT=$2; var=SHAPES_COMMIT ;;
         *) log "unknown component: $1"; exit 2 ;;
     esac
     fetch_pin
     cmd_sync
+
+    # Write the new pin back into this script. Without this the manifest moves
+    # and the script does not, and the next `sync` reverts the tree.
+    self="$VENDOR_DIR/vendor.sh"
+    tmp=$(mktemp)
+    sed "s/^${var}=\"[0-9a-f]*\"\$/${var}=\"$2\"/" "$self" >"$tmp"
+    grep -q "^${var}=\"$2\"\$" "$tmp" || { rm -f "$tmp"; log "update: could not record $var in $self"; exit 1; }
+    cat "$tmp" >"$self"
+    rm -f "$tmp"
+    log "pinned $1 at $2 in vendor.sh and manifest.yaml"
 }
 
 case "${1:-}" in

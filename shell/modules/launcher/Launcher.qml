@@ -12,6 +12,7 @@ Scope {
 
     property var screen: null
     property bool active: false
+    property string initialMode: ""
 
     // A genuine dismiss (click-out, Esc, or launching an app) hides the variant
     // itself; the controller resets launcherOpen so the flag never goes stale
@@ -83,7 +84,7 @@ Scope {
 
     function show(mon) {
         if (!pendingId && variantReady)
-            variantLoader.item.show(mon);
+            variantLoader.item.show(mon, root.initialMode);
     }
 
     function hide() {

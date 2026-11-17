@@ -3,14 +3,53 @@
 #
 # Usage: installation/build-iso-void.sh [build-directory]
 #
+# ASURA_VERSION=0.1.0-beta.1 names the image asura-os-0.1.0-beta.1-x86_64.iso
+# and records IMAGE_VERSION in /etc/os-release. Unset, the image is
+# asura-os-x86_64.iso. The file name never names the base layer.
+#
 set -eu
 
 REPO_ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 BUILD_DIR=${1:-"$REPO_ROOT/build/iso-void"}
 ARCH=${ASURA_ARCH:-x86_64}
 MIRROR=${ASURA_MIRROR:-https://repo-fastly.voidlinux.org/current}
-ISO_NAME=asura-os-x86_64
+ASURA_VERSION=${ASURA_VERSION:-}
+case "$ASURA_VERSION" in
+	*[!0-9A-Za-z.+-]*)
+		echo "build-iso-void: ASURA_VERSION may contain only letters, digits, '.', '+' and '-'" >&2
+		exit 2
+		;;
+esac
+if [ -n "$ASURA_VERSION" ]; then
+	ISO_NAME="asura-os-${ASURA_VERSION}-x86_64"
+else
+	ISO_NAME=asura-os-x86_64
+fi
 ISO_TITLE="Asura OS x86_64"
+export GOWORK=off
+
+# Pinned binary versions and checksum verification file
+ZED_VERSION="v1.27.0"
+OPENCODE_VERSION="2.2.6"
+CHECKSUMS_FILE="$REPO_ROOT/installation/binary-checksums.txt"
+
+verify_checksum() {
+	_file="$1"
+	_name=$(basename "$_file")
+	_expected=$(awk -v n="$_name" '$2 == n {print $1}' "$CHECKSUMS_FILE")
+	if [ -z "$_expected" ]; then
+		echo "build-iso-void: ERROR: No pinned SHA-256 checksum found for $_name in $CHECKSUMS_FILE" >&2
+		exit 1
+	fi
+	_actual=$(sha256sum "$_file" | awk '{print $1}')
+	if [ "$_actual" != "$_expected" ]; then
+		echo "build-iso-void: ERROR: Checksum mismatch for $_name!" >&2
+		echo "  Expected: $_expected" >&2
+		echo "  Actual:   $_actual" >&2
+		exit 1
+	fi
+	echo "build-iso-void: verified SHA-256 for $_name ($_actual)"
+}
 
 for tool in python3 git curl; do
 	if ! command -v "$tool" >/dev/null 2>&1; then
@@ -65,46 +104,39 @@ if [ -d "$REPO_ROOT/public/fonts" ]; then
 	cp -L "$REPO_ROOT/public/fonts"/* "$INCLUDE_DIR/usr/share/fonts/TTF/"
 fi
 
-cat >"$INCLUDE_DIR/etc/fonts/fonts.conf" <<'EOF'
-<?xml version="1.0"?>
-<!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
-<fontconfig>
-  <dir>/usr/share/fonts</dir>
-  <dir>/usr/share/fonts/TTF</dir>
-  <cachedir>/var/cache/fontconfig</cachedir>
-  <match target="pattern">
-    <test qual="any" name="family"><string>sans-serif</string></test>
-    <edit name="family" mode="assign" binding="same"><string>DejaVu Sans</string></edit>
-  </match>
-  <match target="pattern">
-    <test qual="any" name="family"><string>Sans</string></test>
-    <edit name="family" mode="assign" binding="same"><string>DejaVu Sans</string></edit>
-  </match>
-  <match target="pattern">
-    <test qual="any" name="family"><string>monospace</string></test>
-    <edit name="family" mode="assign" binding="same"><string>DejaVu Sans Mono</string></edit>
-  </match>
-</fontconfig>
-EOF
-
+# Configure fontconfig local preferences without destroying the main system fonts.conf
 cat >"$INCLUDE_DIR/etc/fonts/local.conf" <<'EOF'
 <?xml version="1.0"?>
 <!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
 <fontconfig>
   <dir>/usr/share/fonts</dir>
   <dir>/usr/share/fonts/TTF</dir>
-  <match target="pattern">
-    <test qual="any" name="family"><string>Sans</string></test>
-    <edit name="family" mode="assign" binding="same"><string>DejaVu Sans</string></edit>
-  </match>
-  <match target="pattern">
-    <test qual="any" name="family"><string>sans-serif</string></test>
-    <edit name="family" mode="assign" binding="same"><string>DejaVu Sans</string></edit>
-  </match>
-  <match target="pattern">
-    <test qual="any" name="family"><string>monospace</string></test>
-    <edit name="family" mode="assign" binding="same"><string>DejaVu Sans Mono</string></edit>
-  </match>
+  <alias>
+    <family>sans-serif</family>
+    <prefer>
+      <family>Inter</family>
+      <family>Space Grotesk</family>
+      <family>Noto Sans</family>
+      <family>DejaVu Sans</family>
+    </prefer>
+  </alias>
+  <alias>
+    <family>sans</family>
+    <prefer>
+      <family>Inter</family>
+      <family>Space Grotesk</family>
+      <family>Noto Sans</family>
+      <family>DejaVu Sans</family>
+    </prefer>
+  </alias>
+  <alias>
+    <family>monospace</family>
+    <prefer>
+      <family>JetBrainsMono Nerd Font</family>
+      <family>JetBrains Mono</family>
+      <family>DejaVu Sans Mono</family>
+    </prefer>
+  </alias>
 </fontconfig>
 EOF
 
@@ -112,7 +144,7 @@ cat >"$INCLUDE_DIR/etc/plymouth/plymouthd.conf" <<'EOF'
 [Daemon]
 Theme=asura
 ShowDelay=0
-DeviceTimeout=2
+DeviceTimeout=8
 EOF
 
 cat >"$INCLUDE_DIR/etc/dracut.conf.d/50-plymouth.conf" <<'EOF'
@@ -133,6 +165,9 @@ HOME_URL="https://asuraos.dev/"
 SUPPORT_URL="https://asuraos.dev/support"
 BUG_REPORT_URL="https://github.com/mohitjoer/Asura-OS/issues"
 EOF
+if [ -n "$ASURA_VERSION" ]; then
+	printf 'IMAGE_VERSION=%s\n' "$ASURA_VERSION" >>"$INCLUDE_DIR/etc/os-release"
+fi
 
 printf 'asura-os\n' >"$INCLUDE_DIR/etc/hostname"
 
@@ -207,16 +242,19 @@ EOF
 
 
 
+# System locale configuration (enforce UTF-8 default across apps and terminals)
+mkdir -p "$INCLUDE_DIR/etc"
+cat > "$INCLUDE_DIR/etc/locale.conf" <<'LOCALECFG'
+LANG=en_US.UTF-8
+LC_ALL=en_US.UTF-8
+LOCALECFG
+
 # Copy branding assets
 mkdir -p "$INCLUDE_DIR/usr/share/asura/branding"
 cp "$REPO_ROOT/public/asura-logo.svg" \
 	"$INCLUDE_DIR/usr/share/asura/branding/"
 cp "$REPO_ROOT/public/asura-logo-on-dark.svg" \
 	"$INCLUDE_DIR/usr/share/asura/branding/"
-if [ -f "$REPO_ROOT/public/asura-logo-red.svg" ]; then
-	cp "$REPO_ROOT/public/asura-logo-red.svg" \
-		"$INCLUDE_DIR/usr/share/asura/branding/"
-fi
 if [ -f "$REPO_ROOT/public/branding/boot-splash.png" ]; then
 	cp "$REPO_ROOT/public/branding/boot-splash.png" \
 		"$INCLUDE_DIR/usr/share/asura/branding/boot-splash.png"
@@ -256,10 +294,12 @@ if [ -d "$REPO_ROOT/session/units" ]; then
 	cp "$REPO_ROOT/session/units"/* "$INCLUDE_DIR/usr/lib/systemd/user/"
 fi
 
-# Copy default wallpapers to /usr/share/asura/backgrounds/
+# Copy default wallpapers to /usr/share/asura/backgrounds/ and /etc/skel/Pictures/Wallpapers/
 mkdir -p "$INCLUDE_DIR/usr/share/asura/backgrounds"
+mkdir -p "$INCLUDE_DIR/etc/skel/Pictures/Wallpapers"
 if [ -d "$REPO_ROOT/public/wallpapers" ]; then
 	cp "$REPO_ROOT/public/wallpapers"/* "$INCLUDE_DIR/usr/share/asura/backgrounds/"
+	cp "$REPO_ROOT/public/wallpapers"/* "$INCLUDE_DIR/etc/skel/Pictures/Wallpapers/"
 fi
 
 for s in asura-hub asura-idle asura-pin asura-reload-cover asura-shot asura-vm asura-wallpaper-ui asura-welcome asura-greeter; do
@@ -269,6 +309,11 @@ for s in asura-hub asura-idle asura-pin asura-reload-cover asura-shot asura-vm a
 done
 if [ -d "$REPO_ROOT/session/scripts" ]; then
 	cp "$REPO_ROOT/session/scripts"/* "$INCLUDE_DIR/usr/bin/"
+fi
+
+if [ -d "$REPO_ROOT/session/grub" ]; then
+	mkdir -p "$INCLUDE_DIR/usr/share/asura/session/grub"
+	cp "$REPO_ROOT/session/grub"/* "$INCLUDE_DIR/usr/share/asura/session/grub/"
 fi
 
 # Copy all shell scripts (asura-app, asura-cmd-*, asura-summon, etc.) to /usr/bin/
@@ -288,6 +333,11 @@ for hdir in audio display input perf pkg; do
 done
 cp "$REPO_ROOT/system/helpers/prime-run" "$INCLUDE_DIR/usr/bin/prime-run"
 cp "$REPO_ROOT/system/helpers/fan-profile" "$INCLUDE_DIR/usr/bin/fan-profile"
+cp "$REPO_ROOT/system/helpers/systemctl" "$INCLUDE_DIR/usr/bin/systemctl"
+cp "$REPO_ROOT/system/helpers/asura-gpu" "$INCLUDE_DIR/usr/bin/asura-gpu"
+chmod 755 "$INCLUDE_DIR/usr/bin/systemctl"
+cp "$REPO_ROOT/system/helpers/journalctl" "$INCLUDE_DIR/usr/bin/journalctl"
+chmod 755 "$INCLUDE_DIR/usr/bin/journalctl"
 cp "$REPO_ROOT/installation/asura-installer.sh" "$INCLUDE_DIR/usr/bin/asura-installer"
 chmod 755 "$INCLUDE_DIR/usr/bin/asura-installer"
 touch "$INCLUDE_DIR/etc/asura-live"
@@ -302,6 +352,43 @@ cp "$REPO_ROOT/shell"/org.asura.*.gschema.xml "$INCLUDE_DIR/usr/share/glib-2.0/s
 mkdir -p "$INCLUDE_DIR/usr/share/applications"
 if [ -d "$REPO_ROOT/session/applications" ]; then
 	cp "$REPO_ROOT/session/applications"/*.desktop "$INCLUDE_DIR/usr/share/applications/" 2>/dev/null || true
+fi
+
+# Stage core application desktop shortcuts and custom branding icons into ISO include
+mkdir -p "$INCLUDE_DIR/etc/skel/Desktop"
+mkdir -p "$INCLUDE_DIR/usr/share/icons/hicolor/scalable/apps"
+mkdir -p "$INCLUDE_DIR/usr/share/icons/hicolor/512x512/apps"
+mkdir -p "$INCLUDE_DIR/usr/share/pixmaps"
+
+# Asura Store desktop shortcut and store icon
+if [ -f "$REPO_ROOT/session/applications/asura-store.desktop" ]; then
+	cp "$REPO_ROOT/session/applications/asura-store.desktop" "$INCLUDE_DIR/usr/share/applications/"
+	cp "$REPO_ROOT/session/applications/asura-store.desktop" "$INCLUDE_DIR/etc/skel/Desktop/"
+	chmod 755 "$INCLUDE_DIR/etc/skel/Desktop/asura-store.desktop"
+fi
+if [ -f "$REPO_ROOT/shell/assets/asura-store.svg" ]; then
+	cp "$REPO_ROOT/shell/assets/asura-store.svg" "$INCLUDE_DIR/usr/share/icons/hicolor/scalable/apps/"
+	cp "$REPO_ROOT/shell/assets/asura-store.svg" "$INCLUDE_DIR/usr/share/pixmaps/"
+fi
+if [ -f "$REPO_ROOT/shell/assets/asura-store.png" ]; then
+	cp "$REPO_ROOT/shell/assets/asura-store.png" "$INCLUDE_DIR/usr/share/icons/hicolor/512x512/apps/"
+	cp "$REPO_ROOT/shell/assets/asura-store.png" "$INCLUDE_DIR/usr/share/pixmaps/"
+fi
+
+# Asura Installer desktop shortcut and icon
+if [ -f "$REPO_ROOT/session/applications/asura-installer.desktop" ]; then
+	cp "$REPO_ROOT/session/applications/asura-installer.desktop" "$INCLUDE_DIR/usr/share/applications/"
+	cp "$REPO_ROOT/session/applications/asura-installer.desktop" "$INCLUDE_DIR/etc/skel/Desktop/"
+	chmod 755 "$INCLUDE_DIR/etc/skel/Desktop/asura-installer.desktop"
+fi
+if [ -f "$REPO_ROOT/shell/assets/asura-installer.svg" ]; then
+	cp "$REPO_ROOT/shell/assets/asura-installer.svg" "$INCLUDE_DIR/usr/share/icons/hicolor/scalable/apps/"
+	cp "$REPO_ROOT/shell/assets/asura-installer.svg" "$INCLUDE_DIR/usr/share/pixmaps/"
+fi
+
+# Asura Sysmon desktop entry
+if [ -f "$REPO_ROOT/session/applications/asura-sysmon.desktop" ]; then
+	cp "$REPO_ROOT/session/applications/asura-sysmon.desktop" "$INCLUDE_DIR/usr/share/applications/"
 fi
 # Install Zed code editor desktop entry on ISO
 cat > "$INCLUDE_DIR/usr/share/applications/dev.zed.Zed.desktop" <<'EOF'
@@ -318,26 +405,44 @@ Categories=TextEditor;Development;IDE;
 MimeType=text/plain;text/x-chdr;text/x-csrc;text/x-c++hdr;text/x-c++src;text/x-rust;text/x-python;text/x-go;application/json;application/xml;text/markdown;
 Keywords=Text;Editor;Development;
 EOF
-ln -sf dev.zed.Zed.desktop "$INCLUDE_DIR/usr/share/applications/zed.desktop"
 
 # Download and install official standalone Zed binary if not already cached
 ZED_CACHE="$BUILD_DIR/zed"
 mkdir -p "$ZED_CACHE"
-if [ ! -f "$ZED_CACHE/zed-linux-x86_64.tar.gz" ]; then
-	echo "build-iso-void: downloading Zed editor..."
-	curl -sSL -o "$ZED_CACHE/zed-linux-x86_64.tar.gz" "https://github.com/zed-industries/zed/releases/latest/download/zed-linux-x86_64.tar.gz" || true
+ZED_ARCHIVE="$ZED_CACHE/zed-linux-x86_64.tar.gz"
+if [ ! -f "$ZED_ARCHIVE" ]; then
+	echo "build-iso-void: downloading Zed editor $ZED_VERSION..."
+	curl -sSL -f -o "$ZED_ARCHIVE" "https://github.com/zed-industries/zed/releases/download/${ZED_VERSION}/zed-linux-x86_64.tar.gz" || {
+		echo "build-iso-void: failed to download Zed $ZED_VERSION" >&2
+		exit 1
+	}
 fi
-if [ -f "$ZED_CACHE/zed-linux-x86_64.tar.gz" ]; then
-	mkdir -p "$INCLUDE_DIR/usr/lib/zed" "$INCLUDE_DIR/usr/bin"
-	tar -xzf "$ZED_CACHE/zed-linux-x86_64.tar.gz" --strip-components=1 -C "$INCLUDE_DIR/usr/lib/zed" 2>/dev/null || true
-	if [ -x "$INCLUDE_DIR/usr/lib/zed/bin/zed" ]; then
-		ln -sf /usr/lib/zed/bin/zed "$INCLUDE_DIR/usr/bin/zed"
-		mkdir -p "$INCLUDE_DIR/usr/share/icons/hicolor"
-		if [ -d "$INCLUDE_DIR/usr/lib/zed/share/icons/hicolor" ]; then
-			cp -rn "$INCLUDE_DIR/usr/lib/zed/share/icons/hicolor"/* "$INCLUDE_DIR/usr/share/icons/hicolor/" 2>/dev/null || true
-		fi
+verify_checksum "$ZED_ARCHIVE"
+mkdir -p "$INCLUDE_DIR/usr/lib/zed" "$INCLUDE_DIR/usr/bin"
+tar -xzf "$ZED_ARCHIVE" --strip-components=1 -C "$INCLUDE_DIR/usr/lib/zed"
+if [ -x "$INCLUDE_DIR/usr/lib/zed/bin/zed" ]; then
+	ln -sf /usr/lib/zed/bin/zed "$INCLUDE_DIR/usr/bin/zed"
+	mkdir -p "$INCLUDE_DIR/usr/share/icons/hicolor"
+	if [ -d "$INCLUDE_DIR/usr/lib/zed/share/icons/hicolor" ]; then
+		cp -rn "$INCLUDE_DIR/usr/lib/zed/share/icons/hicolor"/* "$INCLUDE_DIR/usr/share/icons/hicolor/" 2>/dev/null || true
 	fi
 fi
+
+# Download and install official standalone OpenCode CLI (v2) binary if not already cached
+OPENCODE_CACHE="$BUILD_DIR/opencode"
+mkdir -p "$OPENCODE_CACHE"
+OPENCODE_ARCHIVE="$OPENCODE_CACHE/opencode-v${OPENCODE_VERSION}-linux-x64.tgz"
+if [ ! -f "$OPENCODE_ARCHIVE" ]; then
+	echo "build-iso-void: downloading OpenCode CLI v${OPENCODE_VERSION}..."
+	curl -sSL -f -o "$OPENCODE_ARCHIVE" "https://registry.npmjs.org/@opencode/cli-linux-x64/-/cli-linux-x64-${OPENCODE_VERSION}.tgz" || {
+		echo "build-iso-void: failed to download OpenCode CLI v${OPENCODE_VERSION}" >&2
+		exit 1
+	}
+fi
+verify_checksum "$OPENCODE_ARCHIVE"
+mkdir -p "$INCLUDE_DIR/usr/bin"
+tar -xzf "$OPENCODE_ARCHIVE" -O package/bin/opencode > "$INCLUDE_DIR/usr/bin/opencode"
+chmod 755 "$INCLUDE_DIR/usr/bin/opencode"
 if [ -d "$REPO_ROOT/apps/mimeapps" ]; then
 	cp "$REPO_ROOT/apps/mimeapps"/asura-mimeapps.list "$INCLUDE_DIR/usr/share/applications/" 2>/dev/null || true
 fi
@@ -348,6 +453,25 @@ if [ -d "$REPO_ROOT/apps" ]; then
 	cp -r "$REPO_ROOT/apps"/* "$INCLUDE_DIR/usr/share/asura/apps/"
 fi
 
+# Stage system-wide skills and pre-seed OpenCode / cross-agent skills
+mkdir -p "$INCLUDE_DIR/usr/share/asura/skills"
+if [ -d "$REPO_ROOT/shell/agent/skills" ]; then
+	cp -r "$REPO_ROOT/shell/agent/skills"/* "$INCLUDE_DIR/usr/share/asura/skills/" 2>/dev/null || true
+fi
+mkdir -p "$INCLUDE_DIR/etc/skel/.agents/skills"
+cp -r "$INCLUDE_DIR/usr/share/asura/skills"/* "$INCLUDE_DIR/etc/skel/.agents/skills/" 2>/dev/null || true
+mkdir -p "$INCLUDE_DIR/etc/skel/.config/opencode/skills"
+cp -r "$INCLUDE_DIR/usr/share/asura/skills"/* "$INCLUDE_DIR/etc/skel/.config/opencode/skills/" 2>/dev/null || true
+cat >"$INCLUDE_DIR/etc/skel/.config/opencode/opencode.json" <<'EOF'
+{
+  "$schema": "https://opencode.ai/config.json",
+  "skills": [
+    "/usr/share/asura/skills",
+    "~/.agents/skills"
+  ]
+}
+EOF
+
 # Copy Hyprland configuration, runit services, and shell tree
 cp -r "$REPO_ROOT/session/hyprland"/* "$INCLUDE_DIR/usr/share/asura/hyprland/"
 if [ -d "$REPO_ROOT/session/sddm" ]; then
@@ -356,43 +480,42 @@ fi
 cp -r "$REPO_ROOT/shell"/* "$INCLUDE_DIR/usr/share/asura/shell/"
 cp -r "$REPO_ROOT/system/runit/user-services"/* "$INCLUDE_DIR/usr/share/asura/runit/services/"
 
+# Ensure XBPS tools are available (if running on a non-Void host, fetch xbps-static)
+if ! command -v xbps-rindex >/dev/null 2>&1 || ! command -v xbps-install >/dev/null 2>&1; then
+	echo "build-iso-void: xbps tools not found on host, setting up xbps-static..."
+	XBPS_STATIC_DIR="$BUILD_DIR/xbps-static"
+	if [ ! -x "$XBPS_STATIC_DIR/usr/bin/xbps-install" ] || [ ! -x "$XBPS_STATIC_DIR/usr/bin/xbps-rindex" ]; then
+		mkdir -p "$XBPS_STATIC_DIR"
+		curl -sSL "https://repo-fastly.voidlinux.org/static/xbps-static-latest.x86_64-musl.tar.xz" | tar -xJ -C "$XBPS_STATIC_DIR"
+	fi
+	export PATH="$XBPS_STATIC_DIR/usr/bin:$PATH"
+fi
+
 # Stage native Void Linux Hyprland compositor stack and libraries
 echo "build-iso-void: staging native Void Linux Hyprland stack..."
 HYPR_CACHE="$BUILD_DIR/hyprland-pkgs"
 mkdir -p "$HYPR_CACHE"
 
-# Dynamically resolve latest Makrennel package filenames from repo metadata to prevent version drift
-RESOLVED_PKGS=$(python3 - <<'PY' 2>/dev/null || true
-import urllib.request, plistlib, subprocess
-wanted = ['tomlplusplus', 'hyprutils', 'aquamarine', 'hyprlang', 'hyprcursor', 'hyprgraphics', 'libspng', 'sdbus-cpp', 'hyprland', 'xdg-desktop-portal-hyprland', 'hyprland-qtutils']
-url = 'https://raw.githubusercontent.com/Makrennel/hyprland-void/repository-x86_64-glibc/x86_64-repodata'
-try:
-    req = urllib.request.Request(url, headers={'User-Agent': 'Asura-ISO-Builder'})
-    data = urllib.request.urlopen(req, timeout=10).read()
-    p = subprocess.Popen(['tar', '--zstd', '-xO', 'index.plist'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-    plist_bytes, _ = p.communicate(data)
-    plist = plistlib.loads(plist_bytes)
-    res = [f"{plist[pkg]['pkgver']}.x86_64.xbps" for pkg in wanted if pkg in plist]
-    if len(res) == len(wanted):
-        print(" ".join(res))
-except Exception:
-    pass
-PY
-)
-
-HYPR_PKGS="${RESOLVED_PKGS:-tomlplusplus-3.4.0_1.x86_64.xbps hyprutils-0.7.1_1.x86_64.xbps aquamarine-0.8.0_2.x86_64.xbps hyprlang-0.6.3_1.x86_64.xbps hyprcursor-0.1.12_1.x86_64.xbps hyprgraphics-0.1.3_2.x86_64.xbps libspng-0.7.4_1.x86_64.xbps sdbus-cpp-2.1.0_1.x86_64.xbps hyprland-0.49.0_1.x86_64.xbps xdg-desktop-portal-hyprland-1.3.9_2.x86_64.xbps hyprland-qtutils-0.1.4_1.x86_64.xbps}"
+HYPR_PKGS="tomlplusplus-3.4.0_1.x86_64.xbps hyprutils-0.7.1_1.x86_64.xbps aquamarine-0.8.0_2.x86_64.xbps hyprlang-0.6.3_1.x86_64.xbps hyprcursor-0.1.12_1.x86_64.xbps hyprgraphics-0.1.3_2.x86_64.xbps libspng-0.7.4_1.x86_64.xbps sdbus-cpp-2.1.0_1.x86_64.xbps hyprland-0.49.0_1.x86_64.xbps xdg-desktop-portal-hyprland-1.3.9_2.x86_64.xbps hyprland-qtutils-0.1.4_1.x86_64.xbps hypridle-0.1.6_2.x86_64.xbps hyprlock-0.8.2_1.x86_64.xbps"
 for hpkg in $HYPR_PKGS; do
 	if [ ! -f "$HYPR_CACHE/$hpkg" ]; then
-		curl -sSL -o "$HYPR_CACHE/$hpkg" "https://raw.githubusercontent.com/Makrennel/hyprland-void/repository-x86_64-glibc/$hpkg" || true
+		echo "build-iso-void: downloading $hpkg..."
+		curl -sSL -f -o "$HYPR_CACHE/$hpkg" "https://raw.githubusercontent.com/Makrennel/hyprland-void/repository-x86_64-glibc/$hpkg" || {
+			echo "build-iso-void: failed to download $hpkg" >&2
+			exit 1
+		}
 	fi
-	if [ -f "$HYPR_CACHE/$hpkg" ]; then
-		tar -xf "$HYPR_CACHE/$hpkg" -C "$INCLUDE_DIR" 2>/dev/null || true
-	fi
+	verify_checksum "$HYPR_CACHE/$hpkg"
+	tar -xf "$HYPR_CACHE/$hpkg" -C "$INCLUDE_DIR"
 done
 rm -f "$INCLUDE_DIR/props.plist" "$INCLUDE_DIR/files.plist"
 if [ -f "$INCLUDE_DIR/usr/libexec/xdg-desktop-portal-hyprland" ]; then
 	cp "$INCLUDE_DIR/usr/libexec/xdg-desktop-portal-hyprland" "$INCLUDE_DIR/usr/bin/xdg-desktop-portal-hyprland" 2>/dev/null || true
 fi
+
+echo "build-iso-void: indexing local Hyprland package repository..."
+xbps-rindex -a "$HYPR_CACHE"/*.xbps
+
 # Compatibility soname symlinks for Void libraries with newer ABI bumps
 mkdir -p "$INCLUDE_DIR/usr/lib"
 ln -sf libdisplay-info.so.3 "$INCLUDE_DIR/usr/lib/libdisplay-info.so.2"
@@ -437,9 +560,21 @@ cp "$REPO_ROOT/system/udev"/*.rules "$INCLUDE_DIR/etc/udev/rules.d/"
 if [ -d "$REPO_ROOT/system/modprobe.d" ]; then
 	cp "$REPO_ROOT/system/modprobe.d"/*.conf "$INCLUDE_DIR/etc/modprobe.d/"
 fi
+if [ -d "$REPO_ROOT/system/modules-load.d" ]; then
+	mkdir -p "$INCLUDE_DIR/etc/modules-load.d"
+	cp "$REPO_ROOT/system/modules-load.d"/*.conf "$INCLUDE_DIR/etc/modules-load.d/"
+fi
+
+if [ -d "$REPO_ROOT/system/tlp.d" ]; then
+	mkdir -p "$INCLUDE_DIR/etc/tlp.d"
+	cp "$REPO_ROOT/system/tlp.d"/*.conf "$INCLUDE_DIR/etc/tlp.d/"
+fi
 cp "$REPO_ROOT/system/sysctl.d/99-asura-performance.conf" "$INCLUDE_DIR/etc/sysctl.d/99-asura-performance.conf"
 cp "$REPO_ROOT/session/turnstile/turnstile.conf" "$INCLUDE_DIR/etc/turnstile/turnstile.conf"
 cp "$REPO_ROOT/system/xbps.d/asura.conf" "$INCLUDE_DIR/etc/xbps.d/asura.conf"
+# Default host firewall (block inbound, allow outbound), loaded by the nftables runit service
+cp "$REPO_ROOT/system/nftables/nftables.conf" "$INCLUDE_DIR/etc/nftables.conf"
+cp "$REPO_ROOT/system/xbps.d/asura.conf" "$INCLUDE_DIR/etc/xbps.d/00-repository-main.conf"
 
 # Default environment for seatd & Wayland
 cat >"$INCLUDE_DIR/etc/environment" <<'EOF'
@@ -453,6 +588,9 @@ EOF
 # Build and copy Asura Go control binaries into include tree
 echo "build-iso-void: building Asura Go binaries..."
 (
+	export GOWORK=off
+	export GOFLAGS="-buildvcs=false"
+	git config --global --add safe.directory '*' 2>/dev/null || true
 	cd "$REPO_ROOT/desktop"
 	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/asura" ./cmd/asura
 	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/asura-sysd" ./cmd/asura-sysd
@@ -461,8 +599,51 @@ echo "build-iso-void: building Asura Go binaries..."
 	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/asura-shell" ./cmd/asura-shell
 	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/asura-wallpaper" ./cmd/asura-wallpaper
 	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/apm" ./cmd/apm
-	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/asura-store" ./cmd/asura-store
-	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/asura-agent" ./cmd/asura-agent
+	# Build Asura Store (prioritizing standalone repository https://github.com/ASURA-OS/asura-store)
+	STORE_SRC="${ASURA_STORE_SRC:-}"
+	if [ -z "$STORE_SRC" ]; then
+		if [ -d "$REPO_ROOT/../asura-store" ]; then
+			STORE_SRC="$REPO_ROOT/../asura-store"
+		elif [ -d "/home/mohit/code/asura-store" ]; then
+			STORE_SRC="/home/mohit/code/asura-store"
+		elif [ -d "/home/mohit/code/asura/asura-store" ]; then
+			STORE_SRC="/home/mohit/code/asura/asura-store"
+		fi
+	fi
+	if [ -n "$STORE_SRC" ] && [ -d "$STORE_SRC/cmd/asura-store" ]; then
+		echo "build-iso-void: building asura-store from standalone repo ($STORE_SRC)..."
+		( cd "$STORE_SRC/cmd/asura-store" && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o "$INCLUDE_DIR/usr/bin/asura-store" . )
+		if [ -d "$STORE_SRC/catalog" ]; then
+			mkdir -p "$INCLUDE_DIR/usr/share/asura/store/catalog"
+			cp -r "$STORE_SRC/catalog"/* "$INCLUDE_DIR/usr/share/asura/store/catalog/" 2>/dev/null || true
+		fi
+	else
+		echo "build-iso-void: building asura-store from desktop tree..."
+		CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/asura-store" ./cmd/asura-store
+	fi
+
+	# Build Asura Resource Monitor (prioritizing standalone repository https://github.com/ASURA-OS/asura-sysmon)
+	SYSMON_SRC="${ASURA_SYSMON_SRC:-}"
+	if [ -z "$SYSMON_SRC" ]; then
+		if [ -d "$REPO_ROOT/../asura-sysmon" ]; then
+			SYSMON_SRC="$REPO_ROOT/../asura-sysmon"
+		elif [ -d "/home/mohit/code/asura-sysmon" ]; then
+			SYSMON_SRC="/home/mohit/code/asura-sysmon"
+		elif [ -d "/home/mohit/code/asura/asura-sysmon" ]; then
+			SYSMON_SRC="/home/mohit/code/asura/asura-sysmon"
+		fi
+	fi
+	if [ -n "$SYSMON_SRC" ] && [ -d "$SYSMON_SRC/cmd/asura-sysmon" ]; then
+		echo "build-iso-void: building asura-sysmon from standalone repo ($SYSMON_SRC)..."
+		( cd "$SYSMON_SRC/cmd/asura-sysmon" && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o "$INCLUDE_DIR/usr/bin/asura-sysmon" . )
+		mkdir -p "$INCLUDE_DIR/usr/share/asura/sysmon"
+		cp -r "$REPO_ROOT/shell/sysmon"/* "$INCLUDE_DIR/usr/share/asura/sysmon/" 2>/dev/null || true
+	else
+		echo "build-iso-void: building asura-sysmon from desktop tree..."
+		CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/asura-sysmon" ./cmd/asura-sysmon
+		mkdir -p "$INCLUDE_DIR/usr/share/asura/sysmon"
+		cp -r "$REPO_ROOT/shell/sysmon"/* "$INCLUDE_DIR/usr/share/asura/sysmon/" 2>/dev/null || true
+	fi
 	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/asura-vm-mon" ./cmd/asura-vm/mon
 	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/asura-vm-ssh" ./cmd/asura-vm/remote
 	cp -f "$REPO_ROOT/desktop/cmd/asura-vm/asura-vmd" "$INCLUDE_DIR/usr/bin/asura-vmd"
@@ -613,8 +794,10 @@ export ZRAM_SIZE=50
 export ZRAM_PRIORITY=32767
 EOF
 
-# Stage Layer 3: mimalloc global lock-free allocator preload
-echo "/usr/lib/libmimalloc.so.3" > "$INCLUDE_DIR/etc/ld.so.preload"
+# Stage Layer 3: mimalloc opt-in runner helper (avoid global ld.so.preload)
+cp "$REPO_ROOT/system/helpers/with-mimalloc" "$INCLUDE_DIR/usr/bin/with-mimalloc"
+chmod 0755 "$INCLUDE_DIR/usr/bin/with-mimalloc"
+rm -f "$INCLUDE_DIR/etc/ld.so.preload"
 
 # Stage Layer 3: ananicy-cpp auto-nice rules for compilers, scanners, UI, and games
 mkdir -p "$INCLUDE_DIR/etc/ananicy.d" "$INCLUDE_DIR/etc/ananicy-cpp"
@@ -643,7 +826,7 @@ for group, body in manifest.items():
 
 filtered = [p for p in packages if p != "base-system"]
 all_requested = sorted(dict.fromkeys(str(p) for p in filtered))
-custom_pkgs = {"hyprland", "xdg-desktop-portal-hyprland"}
+custom_pkgs = {"hyprland", "xdg-desktop-portal-hyprland", "hypridle", "hyprlock"}
 out = [p for p in all_requested if p not in custom_pkgs]
 print(" ".join(out))
 PY
@@ -654,7 +837,13 @@ MKLIVE_DIR="$BUILD_DIR/void-mklive"
 if [ ! -d "$MKLIVE_DIR" ]; then
 	echo "build-iso-void: cloning void-mklive..."
 	git clone --depth 1 https://github.com/void-linux/void-mklive.git "$MKLIVE_DIR"
+elif [ -d "$MKLIVE_DIR/.git" ]; then
+	git -C "$MKLIVE_DIR" checkout -f
 fi
+
+# Pre-trust custom package repository keys in void-mklive keys directory
+mkdir -p "$MKLIVE_DIR/keys"
+cp "$INCLUDE_DIR/var/db/xbps/keys"/*.plist "$MKLIVE_DIR/keys/" 2>/dev/null || true
 
 # Overwrite upstream mklive issue, motd, and splash data files to eliminate upstream branding
 if [ -d "$MKLIVE_DIR/data" ]; then
@@ -672,17 +861,21 @@ if [ -f "$MKLIVE_DIR/mklive.sh" ]; then
 	sed -i 's/--add-drivers "ahci"/--add-drivers "ahci vboxvideo vmwgfx virtio_gpu bochs qxl simpledrm"/g' "$MKLIVE_DIR/mklive.sh"
 	sed -i 's|--repository=https://repo-default.voidlinux.org/current/musl||g' "$MKLIVE_DIR/mklive.sh"
 	sed -i "s|https://repo-default.voidlinux.org/current|$MIRROR|g" "$MKLIVE_DIR/mklive.sh"
-	sed -i 's/loglevel=4/loglevel=4 quiet splash rd.plymouth=1 plymouth.enable=1 console=tty0/g' "$MKLIVE_DIR/mklive.sh"
+	sed -i 's/loglevel=4/quiet splash loglevel=3 rd.udev.log_level=3 udev.log_level=3 rd.plymouth=1 plymouth.enable=1 vt.global_cursor_default=0 fbcon=nodefer console=ttyS0,115200 console=tty0/g' "$MKLIVE_DIR/mklive.sh"
+	# Stage /EFI/BOOT into ISO9660 filesystem so xorriso emerges /EFI/BOOT
+	sed -i 's|mkdir -p "${GRUB_EFI_TMPDIR}"/EFI/BOOT|mkdir -p "${GRUB_EFI_TMPDIR}"/EFI/BOOT "$IMAGEDIR"/EFI/BOOT|g' "$MKLIVE_DIR/mklive.sh"
+	sed -i 's|cp -f "$VOIDTARGETDIR/tmp/boot${EFI_ARCH,,}.efi" "${GRUB_EFI_TMPDIR}/EFI/BOOT/BOOT${EFI_ARCH^^}.EFI"|cp -f "$VOIDTARGETDIR/tmp/boot${EFI_ARCH,,}.efi" "${GRUB_EFI_TMPDIR}/EFI/BOOT/BOOT${EFI_ARCH^^}.EFI"\n\t\tcp -f "$VOIDTARGETDIR/tmp/boot${EFI_ARCH,,}.efi" "$IMAGEDIR/EFI/BOOT/BOOT${EFI_ARCH^^}.EFI"|g' "$MKLIVE_DIR/mklive.sh"
+	sed -i 's|cp -f grub/grub.cfg "$GRUB_DIR"|mkdir -p "$IMAGEDIR/EFI/BOOT" "$GRUB_DIR"\n    cp -f grub/grub.cfg "$GRUB_DIR"\n    cp -f grub/grub.cfg "$IMAGEDIR/EFI/BOOT/grub.cfg"|g' "$MKLIVE_DIR/mklive.sh"
 fi
 if [ -f "$MKLIVE_DIR/lib.sh" ]; then
 	sed -i 's|--repository=https://repo-default.voidlinux.org/current/musl||g' "$MKLIVE_DIR/lib.sh"
 	sed -i "s|https://repo-default.voidlinux.org/current|$MIRROR|g" "$MKLIVE_DIR/lib.sh"
 fi
 
-# Patch dracut vmklive module to use asura-os hostname, asura user, and include _seatd/input groups
+# Patch dracut vmklive module to use asura-os hostname, asura user, and include _seatd/input/asura-hw groups
 if [ -f "$MKLIVE_DIR/dracut/vmklive/adduser.sh" ]; then
 	sed -i 's/echo void-live >/echo asura-os >/g' "$MKLIVE_DIR/dracut/vmklive/adduser.sh"
-	sed -i 's/-G audio,video,wheel/-G audio,video,wheel,_seatd,input,tty,storage,network/g' "$MKLIVE_DIR/dracut/vmklive/adduser.sh"
+	sed -i 's/-G audio,video,wheel/-G audio,video,wheel,_seatd,input,tty,storage,network,asura-hw/g' "$MKLIVE_DIR/dracut/vmklive/adduser.sh"
 	sed -i 's/USERNAME=anon/USERNAME=asura/g' "$MKLIVE_DIR/dracut/vmklive/adduser.sh"
 	sed -i 's/voidlinux/asura/g' "$MKLIVE_DIR/dracut/vmklive/adduser.sh"
 	sed -i 's/99-void-live/99-asura-live/g' "$MKLIVE_DIR/dracut/vmklive/adduser.sh"
@@ -721,13 +914,13 @@ MENU COLOR tabmsg       * #66666666 #00000000 none
 LABEL linux
 MENU LABEL Asura OS (Live Session)
 KERNEL /boot/vmlinuz
-APPEND initrd=/boot/initrd root=live:CDLABEL=ASURA_LIVE init=/sbin/init ro rd.luks=0 rd.md=0 rd.dm=0 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@
+APPEND initrd=/boot/initrd root=live:CDLABEL=ASURA_LIVE init=/sbin/init ro rd.luks=0 rd.md=0 rd.dm=0 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ locale.LANG=@@LOCALE@@ vga=current @@BOOT_CMDLINE@@
 
 LABEL linuxram
 MENU LABEL Asura OS (Copy to RAM)
 
 KERNEL /boot/vmlinuz
-APPEND initrd=/boot/initrd root=live:CDLABEL=ASURA_LIVE init=/sbin/init ro rd.luks=0 rd.md=0 rd.dm=0 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ rd.live.ram
+APPEND initrd=/boot/initrd root=live:CDLABEL=ASURA_LIVE init=/sbin/init ro rd.luks=0 rd.md=0 rd.dm=0 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ locale.LANG=@@LOCALE@@ vga=current @@BOOT_CMDLINE@@ rd.live.ram
 
 LABEL reboot
 MENU LABEL Reboot System
@@ -739,31 +932,41 @@ COM32 poweroff.c32
 BOOTCFG
 fi
 
-# Prune cluttered extra speech and nogfx entries from GRUB configuration
+# Prune cluttered extra speech and nogfx entries from GRUB configuration, and enable serial console
 if [ -f "$MKLIVE_DIR/grub/grub_void.cfg.pre" ]; then
 	sed -i 's/timeout=15/timeout=3/g' "$MKLIVE_DIR/grub/grub_void.cfg.pre"
-fi
-
-# Ensure XBPS tools are available (if running on a non-Void host, fetch xbps-static)
-if ! command -v xbps-install >/dev/null 2>&1; then
-	echo "build-iso-void: xbps-install not found on host, setting up xbps-static..."
-	XBPS_STATIC_DIR="$BUILD_DIR/xbps-static"
-	if [ ! -x "$XBPS_STATIC_DIR/usr/bin/xbps-install" ]; then
-		mkdir -p "$XBPS_STATIC_DIR"
-		curl -sSL "https://repo-fastly.voidlinux.org/static/xbps-static-latest.x86_64-musl.tar.xz" | tar -xJ -C "$XBPS_STATIC_DIR"
-	fi
-	export PATH="$XBPS_STATIC_DIR/usr/bin:$PATH"
+	sed -i 's/terminal_input console/terminal_input console serial/g' "$MKLIVE_DIR/grub/grub_void.cfg.pre"
+	sed -i 's/terminal_output gfxterm/terminal_output gfxterm serial/g' "$MKLIVE_DIR/grub/grub_void.cfg.pre"
+	sed -i '1s/^/insmod serial\nserial --speed=115200 --unit=0 --word=8 --parity=no --stop=1\n/' "$MKLIVE_DIR/grub/grub_void.cfg.pre"
 fi
 
 # Post-setup script to configure users and seat permissions inside ROOTFS
 POSTSETUP_SCRIPT="$BUILD_DIR/postsetup.sh"
-cat >"$POSTSETUP_SCRIPT" <<'EOF'
+cat >"$POSTSETUP_SCRIPT" <<EOF
 #!/bin/sh
-ROOTFS="$1"
+ROOTFS="\$1"
+HYPR_CACHE="$HYPR_CACHE"
+ASURA_VERSION="$ASURA_VERSION"
+REPO_ROOT="$REPO_ROOT"
+INCLUDE_DIR="$INCLUDE_DIR"
+EOF
+cat >>"$POSTSETUP_SCRIPT" <<'EOF'
 
-# Enable core system runit services (Layer 1 seatd, Layer 3 scx-lavd, ananicy-cpp, zramen)
+# Generate and enforce UTF-8 system locale
+mkdir -p "$ROOTFS/etc"
+echo "LANG=en_US.UTF-8" > "$ROOTFS/etc/locale.conf"
+echo "LC_ALL=en_US.UTF-8" >> "$ROOTFS/etc/locale.conf"
+if [ -f "$ROOTFS/etc/default/libc-locales" ]; then
+	sed -i 's/^#\(en_US.UTF-8 UTF-8\)/\1/' "$ROOTFS/etc/default/libc-locales"
+	chroot "$ROOTFS" xbps-reconfigure -f glibc-locales 2>/dev/null || true
+fi
+# Remove obsolete btop desktop entries
+rm -f "$ROOTFS/usr/share/applications/btop.desktop"
+rm -f "$ROOTFS/home/asura/Desktop/btop.desktop"
+
+# Enable core system runit services (Layer 1 seatd, Layer 3 scx-lavd, ananicy-cpp, zramen). Docker is opt-in: not enabled by default (podman is the default container tool).
 mkdir -p "$ROOTFS/etc/runit/runsvdir/default"
-for svc in dbus seatd udevd NetworkManager acpid turnstiled tlp zramen asura-sysd asura-boot-guard; do
+for svc in dbus seatd elogind udevd NetworkManager acpid turnstiled tlp zramen chronyd nftables cupsd asura-sysd asura-boot-guard; do
 	if [ -d "$ROOTFS/etc/sv/$svc" ]; then
 		ln -sf "/etc/sv/$svc" "$ROOTFS/etc/runit/runsvdir/default/$svc"
 	fi
@@ -787,18 +990,30 @@ if [ -f "$ROOTFS/etc/pam.d/system-login" ] && ! grep -q 'pam_turnstile.so' "$ROO
 	echo "session optional pam_turnstile.so" >> "$ROOTFS/etc/pam.d/system-login"
 fi
 
+# Hook elogind into PAM session stack if present (registers the session with
+# login1 so polkit sees a valid subject and asurad can spawn its agent)
+if [ -f "$ROOTFS/etc/pam.d/system-login" ] && ! grep -q 'pam_elogind.so' "$ROOTFS/etc/pam.d/system-login"; then
+	echo "session optional pam_elogind.so" >> "$ROOTFS/etc/pam.d/system-login"
+fi
+
+# The power key stays with acpid: elogind must not also handle it (one writer)
+mkdir -p "$ROOTFS/etc/elogind/logind.conf.d"
+printf '[Login]\nHandlePowerKey=ignore\nHandleSuspendKey=ignore\nHandleHibernateKey=ignore\nHandleLidSwitch=ignore\n' > "$ROOTFS/etc/elogind/logind.conf.d/90-asura-powerkey.conf"
+
 # Configure seat permissions and groups for default user
+chroot "$ROOTFS" getent group asura-hw >/dev/null 2>&1 || chroot "$ROOTFS" groupadd -r asura-hw || true
+chroot "$ROOTFS" getent group docker >/dev/null 2>&1 || chroot "$ROOTFS" groupadd -r docker || true
 for user in anon asura; do
 	if chroot "$ROOTFS" id "$user" >/dev/null 2>&1; then
-		chroot "$ROOTFS" usermod -aG _seatd,video,audio,input,wheel,storage,network "$user" || true
+		chroot "$ROOTFS" usermod -aG _seatd,video,audio,input,wheel,storage,network,asura-hw,docker "$user" || true
 	fi
 done
 
 # Ensure user asura exists with zsh login shell and configure autologin
 if ! chroot "$ROOTFS" id asura >/dev/null 2>&1; then
-	chroot "$ROOTFS" useradd -m -s /bin/zsh -U -G _seatd,video,audio,input,wheel,storage,network asura || true
+	chroot "$ROOTFS" useradd -m -s /bin/zsh -U -G _seatd,video,audio,input,wheel,storage,network,asura-hw,docker asura || true
 else
-	chroot "$ROOTFS" usermod -s /bin/zsh asura || true
+	chroot "$ROOTFS" usermod -aG asura-hw,docker -s /bin/zsh asura || true
 fi
 echo "asura:asura" | chroot "$ROOTFS" chpasswd 2>/dev/null || true
 
@@ -844,18 +1059,21 @@ mkdir -p "$ROOTFS/home/asura/.config/asura" "$ROOTFS/etc/skel/.config/asura" \
          "$ROOTFS/home/asura/Downloads" "$ROOTFS/home/asura/Music" \
          "$ROOTFS/home/asura/Pictures" "$ROOTFS/home/asura/Videos" \
          "$INCLUDE_DIR/etc/skel/Desktop"
-if [ -f "$REPO_ROOT/session/applications/asura-installer.desktop" ]; then
-	cp "$REPO_ROOT/session/applications/asura-installer.desktop" "$ROOTFS/home/asura/Desktop/"
-	cp "$REPO_ROOT/session/applications/asura-installer.desktop" "$INCLUDE_DIR/etc/skel/Desktop/"
-	chmod 755 "$ROOTFS/home/asura/Desktop/asura-installer.desktop" 2>/dev/null || true
-	chmod 755 "$INCLUDE_DIR/etc/skel/Desktop/asura-installer.desktop" 2>/dev/null || true
+# Ensure live user desktop shortcuts are deployed and executable
+mkdir -p "$ROOTFS/home/asura/Desktop"
+if [ -d "$ROOTFS/etc/skel/Desktop" ]; then
+	cp -a "$ROOTFS/etc/skel/Desktop"/* "$ROOTFS/home/asura/Desktop/" 2>/dev/null || true
 fi
+chmod 755 "$ROOTFS/home/asura/Desktop"/*.desktop 2>/dev/null || true
+chown -R asura:asura "$ROOTFS/home/asura/Desktop" 2>/dev/null || true
 if [ -d "$ROOTFS/usr/share/asura" ]; then
 	cp -a "$ROOTFS/usr/share/asura"/* "$ROOTFS/home/asura/.config/asura/"
 	cp -a "$ROOTFS/usr/share/asura"/* "$ROOTFS/etc/skel/.config/asura/"
 fi
 cp -a "$ROOTFS/etc/skel/.config/ghostty"/* "$ROOTFS/home/asura/.config/ghostty/" 2>/dev/null || true
 cp -a "$ROOTFS/etc/skel/.config/fastfetch"/* "$ROOTFS/home/asura/.config/fastfetch/" 2>/dev/null || true
+cp -a "$ROOTFS/etc/skel/.config/opencode" "$ROOTFS/home/asura/.config/" 2>/dev/null || true
+cp -a "$ROOTFS/etc/skel/.agents" "$ROOTFS/home/asura/" 2>/dev/null || true
 cp -a "$ROOTFS/etc/skel/.zshrc" "$ROOTFS/home/asura/.zshrc" 2>/dev/null || true
 chroot "$ROOTFS" su - asura -c "asura materialize" 2>/dev/null || true
 chroot "$ROOTFS" su - asura -c "xdg-user-dirs-update" 2>/dev/null || true
@@ -868,9 +1086,12 @@ if [ -f "$ROOTFS/etc/plymouth/plymouthd.conf" ]; then
 	sed -i 's/^Theme=.*/Theme=asura/' "$ROOTFS/etc/plymouth/plymouthd.conf"
 fi
 
-# Silence runit boot messages and sysctl dump while Plymouth splash is active
+# Boot status goes to Plymouth while it runs; the stock functions file stays
+# intact — its msg/msg_warn/msg_error are OVERRIDDEN below, and everything
+# else it defines (detect_container, emergency_shell, ...) must survive, or
+# stage 1 dies with "detect_container: not found" on every boot.
 if [ -f "$ROOTFS/etc/runit/functions" ]; then
-	cat >"$ROOTFS/etc/runit/functions" <<'FNEOF'
+	cat >>"$ROOTFS/etc/runit/functions" <<'FNEOF'
 msg() {
 	if command -v plymouth >/dev/null 2>&1 && plymouth --ping 2>/dev/null; then
 		plymouth update --status="$*" 2>/dev/null || true
@@ -892,13 +1113,134 @@ msg_error() {
 		printf "=> ERROR: %s\n" "$*"
 	fi
 }
+msg_ok() {
+	if command -v plymouth >/dev/null 2>&1 && plymouth --ping 2>/dev/null; then
+		:
+	else
+		printf "\033[1m\033[32m OK\033[m\n"
+	fi
+}
 FNEOF
+fi
+
+if [ -f "$ROOTFS/etc/runit/core-services/03-console-setup.sh" ]; then
+	# Prevent setfont on tty0 from resetting video mode and destroying Plymouth canvas
+	sed -i 's|setfont |! command -v plymouth >/dev/null 2>\&1 \|\| ! plymouth --ping 2>/dev/null \&\& setfont |g' "$ROOTFS/etc/runit/core-services/03-console-setup.sh"
+fi
+
+if [ -f "$ROOTFS/etc/runit/core-services/02-kmods.sh" ]; then
+	# Upstream's cleanup strips `.ko` and `.ko.gz` from modules-load -v output
+	# but not `.ko.zst`, so zstd-compressed module names print during boot.
+	python3 - "$ROOTFS/etc/runit/core-services/02-kmods.sh" <<'PY'
+import sys
+p = sys.argv[1]
+s = open(p).read()
+s = s.replace(r"s:\.ko\(\.gz\)\? ::g", r"s:\.ko\(\.gz\|\.zst\)\? ::g")
+open(p, "w").write(s)
+PY
 fi
 
 if [ -f "$ROOTFS/etc/runit/core-services/08-sysctl.sh" ]; then
 	sed -i 's/sysctl -p/sysctl -q -p/g' "$ROOTFS/etc/runit/core-services/08-sysctl.sh"
 	sed -i 's/sysctl --system/sysctl -q --system/g' "$ROOTFS/etc/runit/core-services/08-sysctl.sh"
 fi
+
+mkdir -p "$ROOTFS/etc/xbps.d"
+cp "$REPO_ROOT/system/xbps.d/asura.conf" "$ROOTFS/etc/xbps.d/asura.conf" 2>/dev/null || true
+cp "$REPO_ROOT/system/xbps.d/asura.conf" "$ROOTFS/etc/xbps.d/00-repository-main.conf" 2>/dev/null || true
+
+if [ -d "$REPO_ROOT/system/modules-load.d" ]; then
+	mkdir -p "$ROOTFS/etc/modules-load.d"
+	cp "$REPO_ROOT/system/modules-load.d"/*.conf "$ROOTFS/etc/modules-load.d/" 2>/dev/null || true
+fi
+
+if [ -d "$REPO_ROOT/system/tlp.d" ]; then
+	mkdir -p "$ROOTFS/etc/tlp.d"
+	cp "$REPO_ROOT/system/tlp.d"/*.conf "$ROOTFS/etc/tlp.d/" 2>/dev/null || true
+fi
+
+# Default host firewall. Copied again here because the nftables package's own
+# /etc/nftables.conf is laid down when packages install into the rootfs.
+cp "$REPO_ROOT/system/nftables/nftables.conf" "$ROOTFS/etc/nftables.conf"
+
+# Ensure wpa_supplicant does not run as a standalone runit service (managed by NetworkManager)
+rm -f "$ROOTFS/etc/runit/runsvdir/default/wpa_supplicant" "$ROOTFS/var/service/wpa_supplicant"
+rm -f "$ROOTFS/etc/ld.so.preload"
+
+# Deploy systemctl and journalctl compatibility bridge into ROOTFS
+mkdir -p "$ROOTFS/usr/bin"
+cp "$REPO_ROOT/system/helpers/systemctl" "$ROOTFS/usr/bin/systemctl" 2>/dev/null || true
+chmod 755 "$ROOTFS/usr/bin/systemctl" 2>/dev/null || true
+cp "$REPO_ROOT/system/helpers/journalctl" "$ROOTFS/usr/bin/journalctl" 2>/dev/null || true
+chmod 755 "$ROOTFS/usr/bin/journalctl" 2>/dev/null || true
+
+# Ensure portal executable symlink is available in /usr/bin if installed in /usr/libexec
+if [ -f "$ROOTFS/usr/libexec/xdg-desktop-portal-hyprland" ] && [ ! -f "$ROOTFS/usr/bin/xdg-desktop-portal-hyprland" ]; then
+	ln -sf /usr/libexec/xdg-desktop-portal-hyprland "$ROOTFS/usr/bin/xdg-desktop-portal-hyprland" 2>/dev/null || true
+fi
+
+# Register custom Hyprland packages into ROOTFS pkgdb so xbps-query -l tracks them
+python3 - "$ROOTFS" "$HYPR_CACHE" <<'PY'
+import sys, os, plistlib, tarfile
+
+rootfs = sys.argv[1] if len(sys.argv) > 1 else ""
+hypr_cache = sys.argv[2] if len(sys.argv) > 2 else ""
+
+if not hypr_cache or not os.path.isdir(hypr_cache):
+    sys.exit(0)
+
+pkgdb_path = os.path.join(rootfs, "var/db/xbps/pkgdb-0.38.plist")
+pkgdb = {}
+if os.path.exists(pkgdb_path):
+    try:
+        with open(pkgdb_path, "rb") as f:
+            pkgdb = plistlib.load(f)
+    except Exception:
+        pass
+
+for fname in os.listdir(hypr_cache):
+    if not fname.endswith(".xbps"):
+        continue
+    fpath = os.path.join(hypr_cache, fname)
+    try:
+        with tarfile.open(fpath, "r:*") as tar:
+            props_file = None
+            files_file = None
+            for m in tar.getmembers():
+                if m.name in ("./props.plist", "props.plist"):
+                    props_file = tar.extractfile(m)
+                elif m.name in ("./files.plist", "files.plist"):
+                    files_file = tar.extractfile(m)
+            if props_file:
+                pkg_props = plistlib.load(props_file)
+                pkgver = pkg_props.get("pkgver", fname.replace(".xbps", ""))
+                pkg_props["state"] = "installed"
+                # Soname-compat fix: Makrennel's prebuilts declare the old
+                # shlib names, but the base layer ships the newer ABI. Rewrite
+                # shlib-requires to the names the installed libraries actually
+                # provide, so xbps-install -Su does not abort later. Runtime
+                # resolution still uses the compat symlinks created above.
+                requires = pkg_props.get("shlib-requires")
+                if isinstance(requires, list):
+                    fixed = []
+                    for r in requires:
+                        r = r.replace("libdisplay-info.so.2", "libdisplay-info.so.3")
+                        r = r.replace("libjxl.so.0.11", "libjxl.so.0.12")
+                        r = r.replace("libjxl_threads.so.0.11", "libjxl_threads.so.0.12")
+                        fixed.append(r)
+                    pkg_props["shlib-requires"] = fixed
+                pkgdb[pkgver] = pkg_props
+                if files_file:
+                    dest_files = os.path.join(rootfs, f"var/db/xbps/{pkgver}-files.plist")
+                    with open(dest_files, "wb") as out_f:
+                        out_f.write(files_file.read())
+    except Exception as e:
+        print(f"postsetup: warning registering {fname}: {e}", file=sys.stderr)
+
+os.makedirs(os.path.dirname(pkgdb_path), exist_ok=True)
+with open(pkgdb_path, "wb") as f:
+    plistlib.dump(pkgdb, f)
+PY
 
 # Overwrite OS identity inside ROOTFS
 cat >"$ROOTFS/etc/os-release" <<'OSREL'
@@ -912,6 +1254,9 @@ HOME_URL="https://asuraos.dev/"
 SUPPORT_URL="https://asuraos.dev/support"
 BUG_REPORT_URL="https://github.com/mohitjoer/Asura-OS/issues"
 OSREL
+if [ -n "$ASURA_VERSION" ]; then
+	printf 'IMAGE_VERSION=%s\n' "$ASURA_VERSION" >>"$ROOTFS/etc/os-release"
+fi
 
 # Branding replacement: Change Welcome to Void! to Welcome to Asura OS! in the boot sequence
 for runit_file in "$ROOTFS/etc/runit/1" "$ROOTFS/etc/runit/2" "$ROOTFS/etc/runit/3" "$ROOTFS/etc/rc.local"; do
@@ -925,6 +1270,11 @@ done
 # Configure fontconfig cache permissions and hardware battery threshold in /etc/rc.local
 mkdir -p "$ROOTFS/var/cache/fontconfig" "$INCLUDE_DIR/var/cache/fontconfig"
 chmod 1777 "$ROOTFS/var/cache/fontconfig" "$INCLUDE_DIR/var/cache/fontconfig" 2>/dev/null || true
+mkdir -p "$ROOTFS/usr/share/fonts/TTF"
+if [ -d "$REPO_ROOT/public/fonts" ]; then
+	cp -L "$REPO_ROOT/public/fonts"/* "$ROOTFS/usr/share/fonts/TTF/" 2>/dev/null || true
+fi
+chroot "$ROOTFS" fc-cache -f 2>/dev/null || true
 if [ -f "$ROOTFS/etc/rc.local" ]; then
 	if ! grep -q 'charge_control_end_threshold' "$ROOTFS/etc/rc.local"; then
 		echo 'for b in /sys/class/power_supply/BAT*/charge_control_end_threshold; do [ -f "$b" ] && echo 80 > "$b" 2>/dev/null || true; done' >> "$ROOTFS/etc/rc.local"
@@ -1062,7 +1412,26 @@ chmod +x "$POSTSETUP_SCRIPT"
 
 FINAL_ISO="$BUILD_DIR/$ISO_NAME.iso"
 
-# Run mklive to produce the image with boot splash & hybrid graphics
+# Run mklive to produce the image with boot splash & hybrid graphics.
+#
+# Flag audit (void-mklive revision at clone time):
+#   -a ARCH        target architecture (x86_64)
+#   -b base-system base metapackage
+#   -v linux       kernel package (`-k` is the CONSOLE KEYMAP in void-mklive;
+#                  passing `-k linux` there made the live image boot with
+#                  `KEYMAP=linux`, which loadkeys cannot open)
+#   -r HYPR_CACHE  extra repository (hyprland-void) for hyprland packages
+#   -r MIRROR      Void mirror (passed twice: hypr repo + void repo)
+#   -p PACKAGES    package list from system/packages-void.yaml
+#   -I INCLUDE_DIR overlay rootfs (ASURA's files laid over the base)
+#   -i gzip        initramfs compression
+#   -s zstd        ISO squashfs compression
+#   -S "..."       runit services enabled in the live image
+#   -C "..."       kernel cmdline (quiet splash for Plymouth, console for serial)
+#   -x POSTSETUP   post-install hook script
+#   -T ISO_TITLE   volume label
+#   -o FINAL_ISO   output path
+# SPLASH_IMAGE env points at the boot splash PNG consumed by mklive.
 echo "build-iso-void: generating ISO with void-mklive..."
 (
 	cd "$MKLIVE_DIR"
@@ -1070,14 +1439,15 @@ echo "build-iso-void: generating ISO with void-mklive..."
 	./mklive.sh \
 		-a "$ARCH" \
 		-b base-system \
-		-k linux \
+		-v linux \
+		-r "$HYPR_CACHE" \
 		-r "$MIRROR" \
 		-p "$PACKAGES" \
 		-I "$INCLUDE_DIR" \
 		-i gzip \
 		-s zstd \
-		-S "dbus seatd NetworkManager zramen" \
-		-C "loglevel=4 quiet splash rd.plymouth=1 plymouth.enable=1 console=tty0 live.user=asura live.autologin nvidia-drm.modeset=1 nvidia-drm.fbdev=1 NVreg_DynamicPowerManagement=0x02 nowatchdog mitigations=off preempt=full" \
+		-S "dbus seatd elogind NetworkManager zramen" \
+		-C "quiet splash loglevel=3 rd.udev.log_level=3 udev.log_level=3 rd.plymouth=1 plymouth.enable=1 vt.global_cursor_default=0 fbcon=nodefer console=ttyS0,115200 console=tty0 live.user=asura live.autologin nowatchdog mitigations=off preempt=full" \
 		-x "$POSTSETUP_SCRIPT" \
 		-T "$ISO_TITLE" \
 		-o "$FINAL_ISO"

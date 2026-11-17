@@ -263,11 +263,6 @@ func source(env Env, relative string) (string, error) {
 	return strings.Join(lines, "\n"), nil
 }
 
-// widgetSource is how Bar.qml names a widget: `"Widgets/" + name + ".qml"`.
-// Matched rather than inferred, so the check follows the source instead of
-// guessing a convention and disagreeing with it.
-var widgetSource = regexp.MustCompile(`"Widgets/"\s*\+\s*[A-Za-z_][A-Za-z0-9_.]*\s*\+\s*"\.qml"`)
-
 // catalogueEntry is one `"name": "WidgetName"` pair in the catalogue map.
 var catalogueEntry = regexp.MustCompile(`"([A-Za-z0-9_-]+)"\s*:\s*"([A-Za-z0-9_-]+)"`)
 
@@ -974,6 +969,25 @@ func checkUnusedWrapperProperties(env Env, files []string) []Finding {
 		}
 	}
 
+	// The overlays. They are Asura's files at upstream's paths — the files
+	// the vendored components read their settings through — and the tree
+	// they sit in is upstream's, so the own/vendored partition above classes
+	// them as upstream's and never asks them. A wrapper property whose only
+	// reader is an overlay is a setting the shell reads, and reporting it
+	// dead is a false positive; the overlays are declared in overlayFiles
+	// (vendor.go), the same list the vendor script's EXCLUDE_FILES mirrors.
+	for path := range overlayFiles {
+		body, err := source(env, path)
+		if err != nil {
+			continue
+		}
+		for _, match := range regexp.MustCompile(
+			`\bConfig\.([A-Za-z_][A-Za-z0-9_]*)`,
+		).FindAllStringSubmatch(body, -1) {
+			used[match[1]] = true
+		}
+	}
+
 	var findings []Finding
 	for name := range declared {
 		if used[name] || wrapperExempt[name] {
@@ -1163,7 +1177,7 @@ func assignsToProperty(body, name string) bool {
 				continue
 			}
 		}
-		if declares(body[:start], name) {
+		if declares(body[:start]) {
 			continue
 		}
 		return true
@@ -1176,7 +1190,7 @@ func assignsToProperty(body, name string) bool {
 // The keywords are the three a QML file's JavaScript can bind a name with,
 // and the name has to start the declaration rather than end it: `constant`
 // is not `const`.
-func declares(before, name string) bool {
+func declares(before string) bool {
 	trimmed := strings.TrimRight(before, " \t")
 	for _, keyword := range []string{"const", "let", "var"} {
 		if !strings.HasSuffix(trimmed, keyword) {

@@ -273,7 +273,7 @@ Item {
                 }
                 Menus.QsTile {
                     width: tileGrid.tileWidth
-                    icon: "coffee"
+                    icon: "lightbulb"
                     label: I18n.tr("Keep awake")
                     sub: Toggles.keepAwake ? I18n.tr("On") + root.awakeFor() : I18n.tr("Off")
                     on: Toggles.keepAwake
@@ -286,6 +286,22 @@ Item {
                     sub: Toggles.dnd ? I18n.tr("On") : I18n.tr("Off")
                     on: Toggles.dnd
                     onToggled: Toggles.toggleDnd()
+                }
+                Menus.QsTile {
+                    width: tileGrid.tileWidth
+                    icon: "keyboard"
+                    label: I18n.tr("Keyboard")
+                    sub: {
+                        var val = KeyboardLayout.variant || "";
+                        if (!val) return "US";
+                        var m = val.match(/\(([^)]+)\)/);
+                        return m ? m[1].toUpperCase() : val.toUpperCase();
+                    }
+                    on: false
+                    hasPage: true
+                    pageTip: I18n.tr("Keyboard settings")
+                    onToggled: Wm.cycleKeyboardLayout()
+                    onPageRequested: Quickshell.execDetached(["asura-hub", "input"])
                 }
                 Menus.QsTile {
                     visible: Wm.caps.liveConfigEval === true || Toggles.gameMode
@@ -343,13 +359,6 @@ Item {
             Menus.MediaHero {
                 width: parent.width
                 active: root.open
-            }
-
-            Menus.QsSection { width: parent.width; label: I18n.tr("Calendar") }
-            Menus.QsCalendarEmbed {
-                width: parent.width
-                s: 1
-                open: root.open
             }
 
             Menus.QsSection { width: parent.width; label: I18n.tr("System") }

@@ -1,4 +1,11 @@
 # Template file for 'hyprland'
+#
+# NOT USED YET. Nothing builds this template: the live ISO installs prebuilt
+# Hyprland 0.49.0 from Makrennel/hyprland-void (HYPR_PKGS in
+# installation/build-iso-void.sh). Before it can replace that, it needs a
+# checksum= line, the 0.53 build dependencies (hyprgraphics, hyprwayland-scanner
+# and current hyprutils/hyprlang/aquamarine templates), and the ISO switched
+# over. See the Hyprland item in docs/roadmap.md (M4).
 pkgname=hyprland
 version=0.53.3
 revision=1

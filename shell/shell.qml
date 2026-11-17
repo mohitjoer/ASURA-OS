@@ -30,6 +30,13 @@ import "modules/notifications"
 import "modules/capture"
 import "modules/confirm"
 import qs.Ui.Singletons
+// The wrapper at the shell root is reached by its module name, because this
+// file also imports directories whose singletons include a `Config` of their
+// own (qs.Services', the shell.json one), and an unqualified `Config` here
+// resolves to the imported one — a write that the engine accepts and then
+// drops, with no error and no value anywhere. The overlay files reach it the
+// same way, as `Root.Config`.
+import qs as RootCfg
 
 /**
  * The single resident Asura shell instance.
@@ -66,6 +73,34 @@ ShellRoot {
     // providers as surfaces migrate) at load rather than on the first keybind.
     ServiceLoader {
         services: [ShellState, ScreenTime, Keypresses, KeyboardLayout]
+    }
+
+    // The settings reader: the schemas' current values, through the tool.
+    //
+    // A process inside a singleton is a process that never runs. That is the
+    // one thing about a singleton the engine does not make work, and it is
+    // silent: the shell carries on and the value never arrives. So the root
+    // reads, the way the homegrown shell's root read, and pushes the answer
+    // into the wrapper (Config) the GSettings-backed settings are bound
+    // through. A write lands here as an IPC call to reloadSettings and the
+    // read runs again; nothing polls, because a shell that re-reads its
+    // settings on a clock redraws on a clock rather than on a change.
+    Process {
+        id: settingsReader
+        command: ["asura", "config", "values"]
+        running: true
+
+        stdout: StdioCollector {
+            id: settingsOut
+            waitForEnd: true
+            onStreamFinished: {
+                try {
+                    RootCfg.Config.values = JSON.parse(settingsOut.text);
+                } catch (error) {
+                    console.warn("Config: the settings could not be read:", error);
+                }
+            }
+        }
     }
 
     // The dim scrim; hypridle owns the idle clock (session/hyprland/hypridle.conf).
@@ -272,7 +307,13 @@ ShellRoot {
                 Launcher {
                     screen: perScreen.modelData
                     active: launcherLoader.showNow
-                    onRequestClose: if (perScreen.st) perScreen.st.launcherOpen = false
+                    initialMode: perScreen.st ? perScreen.st.launcherInitialMode : ""
+                    onRequestClose: {
+                        if (perScreen.st) {
+                            perScreen.st.launcherOpen = false;
+                            perScreen.st.launcherInitialMode = "";
+                        }
+                    }
                 }
             }
             Timer { id: launcherHold; interval: 15000 }
@@ -436,8 +477,25 @@ ShellRoot {
                 st.barRevealed = !st.barRevealed;
             break;
         case "launcher":
-            if (st)
-                st.launcherOpen = !st.launcherOpen;
+            if (st) {
+                if (st.launcherOpen && st.launcherInitialMode !== "menu") {
+                    st.launcherOpen = false;
+                } else {
+                    st.launcherInitialMode = "";
+                    st.launcherOpen = true;
+                }
+            }
+            break;
+        case "menu":
+            if (st) {
+                if (st.launcherOpen && st.launcherInitialMode === "menu") {
+                    st.launcherOpen = false;
+                    st.launcherInitialMode = "";
+                } else {
+                    st.launcherInitialMode = "menu";
+                    st.launcherOpen = true;
+                }
+            }
             break;
         case "overview":
             if (Wm.caps.nativeOverview)
@@ -450,6 +508,9 @@ ShellRoot {
 
         case "quicksettings":
             ShellState.requestSurfaceActive("quick-settings", undefined);
+            break;
+        case "notifications":
+            ShellState.requestSurfaceActive("notifications", undefined);
             break;
         case "wallpaper-menu":
             ShellState.requestSurfaceActive("wallpaper", undefined);
@@ -707,6 +768,11 @@ ShellRoot {
         onPressed: root.toggleSurface("quicksettings")
     }
     CustomShortcut {
+        name: "notifications"
+        description: I18n.tr("Open notifications on the active monitor")
+        onPressed: root.toggleSurface("notifications")
+    }
+    CustomShortcut {
         name: "wallpaper-menu"
         description: I18n.tr("Open the wallpaper and theme menu on the active monitor")
         onPressed: root.toggleSurface("wallpaper-menu")
@@ -765,8 +831,14 @@ ShellRoot {
             case "launcher":
                 root.toggleSurface("launcher");
                 break;
+            case "menu":
+                root.toggleSurface("menu");
+                break;
             case "quick":
                 root.toggleSurface("quicksettings");
+                break;
+            case "notifications":
+                root.toggleSurface("notifications");
                 break;
             case "sidebar":
                 root.toggleSurface("stash");
@@ -795,10 +867,37 @@ ShellRoot {
         // the screenshot itself with the compositor's screencopy.
         function toggleScreenshot(): void { root.toggleSurface("screenshot"); }
 
+        // Super+Shift+T opens the region selector in its one action, text
+        // recognition: a rectangle or a circle drawn on the screen, read
+        // with tesseract-ocr, and the words land on the clipboard. The
+        // compositor's configuration and the keybinding catalogue both name
+        // this function, so it may not rename alone.
+        function ocr(): void {
+            if (regionSelector.item)
+                regionSelector.item.ocr();
+        }
+
+        // Ctrl+Alt+Delete toggles the session screen — the full-screen
+        // power menu the vendored kit draws: lock through the daemon's
+        // hyprlock, logout and reboot and shutdown through the confirmation
+        // dialog. The chord is the one upstream binds to this screen's own
+        // global shortcut; here it reaches the flag through this bridge,
+        // which both sides of the bind contract name, so it may not rename
+        // alone. The sidebar's power button opens the same screen.
+        function session(): void {
+            GlobalStates.sessionOpen = !GlobalStates.sessionOpen;
+        }
+
         // A Hub write to the idle keys lands here: hypridle reads its timeouts
         // when it starts, so `asura-idle apply` restarts it only if they changed.
-        // Every other setting is read reactively by the shell itself.
-        function reloadSettings(): void { Quickshell.execDetached(["asura-idle", "apply"]); }
+        // Every other setting is read by the reader at the root, which runs
+        // again here — the surfaces bind to the values it pushes, so they move
+        // under it with no further work.
+        function reloadSettings(): void {
+            settingsReader.running = false;
+            settingsReader.running = true;
+            Quickshell.execDetached(["asura-idle", "apply"]);
+        }
     }
 
     function toggleCheatsheet() {
@@ -850,6 +949,41 @@ ShellRoot {
     Loader {
         id: asuraSwitcher
         source: "Switcher.qml"
+    }
+
+    // The region selector, the vendored OCR surface: draw a rectangle or a
+    // circle, and the text inside it is recognised onto the clipboard. It is
+    // opened through the IPC bridge — the compositor's configuration and the
+    // keybinding catalogue both say `ocr` — and it closes itself when the
+    // selection ends. The Loader confines it the same way it confines the
+    // sheet and the switcher: a selector that will not load is a selector
+    // that does not open, not a desktop that does not boot.
+    Loader {
+        id: regionSelector
+        source: "modules/ii/regionSelector/RegionSelector.qml"
+    }
+
+    // The session screen, the vendored power menu: lock, logout, reboot and
+    // shutdown, on a translucent overlay layer over the focused screen. It
+    // is toggled through the IPC bridge (Ctrl+Alt+Delete) and opened by the
+    // sidebar's power button; it closes itself on a click anywhere, Escape,
+    // or the lock engaging. The Scope is cheap while closed — its window is
+    // built on the flag, not at load — and the Loader confines it the same
+    // way it confines the selector and the switcher: a menu that will not
+    // load is a menu that does not open, not a desktop that does not boot.
+    Loader {
+        id: sessionScreen
+        source: "modules/ii/sessionScreen/SessionScreen.qml"
+    }
+
+    // The screen corners: a rounded black corner on every corner of every
+    // screen, hidden over a fullscreen window. Off in the Hub (Desktop &
+    // Dock), the module stays loaded and its windows stay unmapped. The
+    // Loader confines it like the selector and the session screen: corners
+    // that will not load are square corners, not a desktop that does not boot.
+    Loader {
+        id: screenCorners
+        source: "modules/ii/screenCorners/ScreenCorners.qml"
     }
 
     PanelWindow {

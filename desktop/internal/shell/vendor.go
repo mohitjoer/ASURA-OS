@@ -82,6 +82,7 @@ var vendoredRoots = map[string]bool{
 	"store":        true,
 	"vm":           true,
 	"wallpaper-ui": true,
+	"sysmon":       true,
 }
 
 // overlayFiles are the files Asura supplies at upstream's paths.
@@ -104,10 +105,15 @@ var vendoredRoots = map[string]bool{
 // about which paths are Asura's. TestTheOverlayListMatchesTheVendorScript
 // keeps them together.
 var overlayFiles = map[string]string{
-	"GlobalStates.qml":                   "the vendored components read these flags by name",
-	"modules/common/Appearance.qml":      "the vendored components read these tokens by name",
-	"modules/common/Config.qml":          "the vendored components read these options by name",
-	"modules/common/widgets/AppIcon.qml": "the vendored components read this icon by name",
+	"GlobalStates.qml":                             "the vendored components read these flags by name",
+	"modules/common/Appearance.qml":                "the vendored components read these tokens by name",
+	"modules/common/Config.qml":                    "the vendored components read these options by name",
+	"modules/common/utils/ScreenshotAction.qml":    "builds the selector's commands with the OCR engine's base-layer name, tesseract-ocr, which is what the base layer calls it because plain tesseract is a game",
+	"modules/common/widgets/AppIcon.qml":           "the vendored components read this icon by name",
+	"modules/common/widgets/MaterialSymbol.qml":    "maps Material Symbol names to Font Awesome 4.7 codepoints; upstream expects a font the base layer does not carry",
+	"modules/ii/regionSelector/RegionSelector.qml": "the selector's entry point reaches its one Asura action, text recognition, through the shell's own IPC bridge instead of registering its own",
+	"modules/ii/sessionScreen/SessionScreen.qml":   "the session menu's entry point reaches its four Asura actions through the shell's own IPC bridge, the daemon's hyprlock and the confirmation dialog instead of registering its own IPC and shortcuts or calling upstream's Session singleton",
+	"modules/ii/screenCorners/ScreenCorners.qml":   "the corner-panel module reaches its four sidebar-toggle actions through GlobalStates.sidebarLeftOpen / sidebarRightOpen instead of registering its own IPC or shortcuts",
 }
 
 // isVendored reports whether a file belongs to the vendored upstream tree.
@@ -826,14 +832,15 @@ func declaredQMLModules(root string) (map[string]bool, bool) {
 			modules[strings.TrimPrefix(name, "qml6-module-")] = true
 		} else if strings.HasPrefix(name, "qt6-") {
 			modules[name] = true
-			if name == "qt6-declarative" {
+			switch name {
+			case "qt6-declarative":
 				modules["qtquick"] = true
 				modules["qtquick-controls"] = true
 				modules["qtquick-layouts"] = true
 				modules["qtquick-templates"] = true
 				modules["qtquick-shapes"] = true
 				modules["qtquick-effects"] = true
-			} else if name == "qt6-qt5compat" {
+			case "qt6-qt5compat":
 				modules["qt5compat-graphicaleffects"] = true
 			}
 		}

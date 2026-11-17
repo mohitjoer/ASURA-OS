@@ -60,12 +60,27 @@ var Pages = []Page{
 	{
 		Slug:    "desktop",
 		Title:   "Desktop & Dock",
-		Summary: "Bar and dock placement, autohide, and pinned favorite applications",
+		Summary: "Bar and dock placement, autohide, pinned favorite applications, and rounded screen corners",
 		Keys: []string{
 			"org.asura.shell.bar-position",
 			"org.asura.shell.dock-position",
 			"org.asura.shell.dock-autohide",
 			"org.asura.shell.favorites",
+			"org.asura.shell.screen-corners",
+		},
+	},
+	{
+		Slug:    "region-selector",
+		Title:   "Region Selector",
+		Summary: "What the OCR selection snaps to and how it draws",
+		Keys: []string{
+			"org.asura.shell.region-selector-target-windows",
+			"org.asura.shell.region-selector-target-layers",
+			"org.asura.shell.region-selector-target-labels",
+			"org.asura.shell.region-selector-aim-lines",
+			"org.asura.shell.region-selector-selection-padding",
+			"org.asura.shell.region-selector-circle-stroke-width",
+			"org.asura.shell.region-selector-circle-padding",
 		},
 	},
 }

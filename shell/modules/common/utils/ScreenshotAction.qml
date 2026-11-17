@@ -1,5 +1,15 @@
 pragma ComponentBehavior: Bound
 pragma Singleton
+// The screenshot command builder, as Asura ships it.
+//
+// This is an overlay: upstream's version of this file is the same builder,
+// and the one difference is the OCR binary's name. Upstream calls `tesseract`
+// in the character-recognition command; on Asura's base layer that name
+// belongs to a game, and the OCR engine is packaged as `tesseract-ocr`,
+// which is what this file calls. Every other branch — copy, edit, search,
+// record — is upstream's, unchanged, because Asura's region selector reaches
+// only the character-recognition action and the rest exists so the command
+// builder stays whole.
 import qs.modules.common
 import qs.modules.common.utils
 import qs.modules.common.functions
@@ -65,7 +75,7 @@ Singleton {
                 return ["bash", "-c", `${cropInPlace} && xdg-open "${root.imageSearchEngineBaseUrl}$(${uploadAndGetUrl(screenshotPath)})" && ${cleanup}`]
                 break;
             case ScreenshotAction.Action.CharRecognition:
-                return ["bash", "-c", `${cropInPlace} && tesseract '${StringUtils.shellSingleQuoteEscape(screenshotPath)}' stdout -l $(tesseract --list-langs | awk 'NR>1{print $1}' | tr '\\n' '+' | sed 's/\\+$/\\n/') | wl-copy && ${cleanup}`]
+                return ["bash", "-c", `${cropInPlace} && tesseract-ocr '${StringUtils.shellSingleQuoteEscape(screenshotPath)}' stdout -l $(tesseract-ocr --list-langs | awk 'NR>1{print $1}' | tr '\\n' '+' | sed 's/\\+$/\\n/') | wl-copy && ${cleanup}`]
                 break;
             case ScreenshotAction.Action.Record:
                 return ["bash", "-c", `${Directories.recordScriptPath} --region '${slurpRegion}'`]

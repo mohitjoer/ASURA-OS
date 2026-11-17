@@ -218,7 +218,7 @@ Scope {
         }
     }
 
-    function show(mon) {
+    function show(mon, initialMode) {
         recoveryDelay.stop();
         recoveryTarget = "";
         var target = String(mon || "");
@@ -230,6 +230,12 @@ Scope {
 
         requestedMonitor = target;
         openRequested = true;
+        if (activeLauncher) {
+            if (initialMode)
+                activeLauncher.selectMode(initialMode);
+            else
+                activeLauncher.returnToRest();
+        }
         dispatchLifecycle({
             type: "show",
             monitor: target,

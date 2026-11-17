@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#141720"/>
+      <stop offset="100%" stop-color="#0a0c10"/>
+    </linearGradient>
+    <linearGradient id="bag" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#222735"/>
+      <stop offset="100%" stop-color="#12151e"/>
+    </linearGradient>
+    <linearGradient id="handle" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#94a3b8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Squircle Canvas Base -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <rect width="510" height="510" x="1" y="1" rx="111" fill="none" stroke="#2a3243" stroke-width="2"/>
+
+  <!-- Handle Shadow -->
+  <path d="M 196 148 C 196 76, 316 76, 316 148" fill="none" stroke="#000000" stroke-width="24" stroke-linecap="round" opacity="0.5"/>
+  <!-- Handle -->
+  <path d="M 196 144 C 196 72, 316 72, 316 144" fill="none" stroke="url(#handle)" stroke-width="20" stroke-linecap="round"/>
+  <!-- Handle Joint Fasteners -->
+  <rect x="186" y="140" width="20" height="24" rx="6" fill="#64748b"/>
+  <rect x="306" y="140" width="20" height="24" rx="6" fill="#64748b"/>
+
+  <!-- Bag Shadow -->
+  <path d="M 112 164 L 400 164 Q 426 164 422 196 L 404 416 Q 400 448 368 448 L 144 448 Q 112 448 108 416 L 90 196 Q 86 164 112 164 Z" 
+        fill="#000000" opacity="0.6"/>
+
+  <!-- Bag Body -->
+  <path d="M 112 156 L 400 156 Q 426 156 422 188 L 404 408 Q 400 440 368 440 L 144 440 Q 112 440 108 408 L 90 188 Q 86 156 112 156 Z" 
+        fill="url(#bag)" stroke="#384257" stroke-width="3"/>
+
+  <!-- Bag Top Fold Trim -->
+  <path d="M 100 196 L 412 196" stroke="#2b3242" stroke-width="3"/>
+
+  <!-- 2x2 App Grid -->
+  <!-- App 1: Star / Discover -->
+  <rect x="176" y="228" width="70" height="70" rx="18" fill="#ffffff"/>
+  <path d="M 211 245 Q 211 263 229 263 Q 211 263 211 281 Q 211 263 193 263 Q 211 263 211 245 Z" fill="#0f172a"/>
+
+  <!-- App 2: Download / Install -->
+  <rect x="266" y="228" width="70" height="70" rx="18" fill="#1b202c" stroke="#4b5568" stroke-width="2"/>
+  <path d="M 301 246 L 301 274 M 291 265 L 301 275 L 311 265 M 289 283 L 313 283" 
+        fill="none" stroke="#f8fafc" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- App 3: Code / Dev Tools -->
+  <rect x="176" y="318" width="70" height="70" rx="18" fill="#1b202c" stroke="#4b5568" stroke-width="2"/>
+  <path d="M 197 353 L 206 344 M 225 344 L 216 353 M 205 362 L 217 362" 
+        fill="none" stroke="#f8fafc" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- App 4: Media / Applications -->
+  <rect x="266" y="318" width="70" height="70" rx="18" fill="#ffffff"/>
+  <polygon points="293,340 315,353 293,366" fill="#0f172a"/>
+</svg>

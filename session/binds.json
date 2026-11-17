@@ -44,6 +44,15 @@
       "argument": "launcher"
     },
     {
+      "id": "menu",
+      "category": "desktop",
+      "label": "Open the ASURA menu",
+      "chord": "SUPER + ALT + Space",
+      "kind": "shell",
+      "action": "togglePopover",
+      "argument": "menu"
+    },
+    {
       "id": "quick-settings",
       "category": "desktop",
       "label": "Open the quick settings",
@@ -86,6 +95,14 @@
       "kind": "app",
       "action": "asura-shell",
       "argument": "lock"
+    },
+    {
+      "id": "session",
+      "category": "desktop",
+      "label": "Open the session screen",
+      "chord": "CTRL + ALT + Delete",
+      "kind": "shell",
+      "action": "session"
     },
     {
       "id": "settings",
@@ -200,6 +217,19 @@
       ]
     },
     {
+      "id": "sysmon",
+      "category": "apps",
+      "label": "Resource Monitor",
+      "chord": "CTRL + SHIFT + Escape",
+      "kind": "app",
+      "action": "asura-sysmon",
+      "also": [
+        {
+          "chord": "SUPER + SHIFT + Escape"
+        }
+      ]
+    },
+    {
       "id": "files",
       "category": "apps",
       "label": "Open the file manager",
@@ -304,6 +334,22 @@
       "argument": "--batch \"dispatch togglefloating ; dispatch resizeactive exact 1000 660 ; dispatch centerwindow\""
     },
     {
+      "id": "split",
+      "category": "windows",
+      "label": "Toggle the split direction of the tiled window",
+      "chord": "SUPER + J",
+      "kind": "wm",
+      "action": "togglesplit"
+    },
+    {
+      "id": "pseudo",
+      "category": "windows",
+      "label": "Pseudo-tile the floating window",
+      "chord": "SUPER + CTRL + P",
+      "kind": "wm",
+      "action": "pseudo"
+    },
+    {
       "id": "resize-mode",
       "category": "windows",
       "label": "Resize mode: arrows or hjkl, Esc exits",
@@ -341,7 +387,7 @@
       "label": "Move the window in that direction",
       "chord": "SUPER + SHIFT + Left",
       "kind": "wm",
-      "action": "movewindow",
+      "action": "swapwindow",
       "argument": "l",
       "also": [
         {
@@ -613,6 +659,14 @@
       "chord": "SUPER + SHIFT + C",
       "kind": "app",
       "action": "asura-cmd-color-picker"
+    },
+    {
+      "id": "ocr",
+      "category": "tools",
+      "label": "Recognize the text in a screen region",
+      "chord": "SUPER + SHIFT + T",
+      "kind": "shell",
+      "action": "ocr"
     },
     {
       "id": "volume-up",

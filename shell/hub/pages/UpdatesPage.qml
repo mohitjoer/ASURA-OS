@@ -224,11 +224,10 @@ Item {
             pg.dismiss();
     }
 
-    // The rest of the archive is apt's, not Asura's: `asura update` moves the
-    // Asura packages only. apt asks for the root password and for confirmation
-    // itself, in the terminal.
+    // The base system packages use XBPS: `asura update` moves the
+    // Asura packages only. xbps asks for root password and confirmation in terminal.
     function upgradeSystem() {
-        pg.inTerminal("sudo apt update && sudo apt upgrade");
+        pg.inTerminal("sudo xbps-install -Syu");
     }
 
     // dismiss a finished/failed run: clear the run-state file so the page and
@@ -268,9 +267,13 @@ Item {
                 width: 16; height: 1; color: Tokens.ink
                 anchors.verticalCenter: parent.verticalCenter
             }
-            Text {
-                text: "A"; color: Tokens.ink; font.family: Tokens.mono
-                font.pixelSize: 11; anchors.verticalCenter: parent.verticalCenter
+            Image {
+                width: 12; height: 12
+                anchors.verticalCenter: parent.verticalCenter
+                source: Qt.resolvedUrl("../../assets/asura-logo-on-dark.svg")
+                sourceSize.width: 24; sourceSize.height: 24
+                fillMode: Image.PreserveAspectFit
+                smooth: true
             }
             Text {
                 text: I18n.tr("SYSTEM"); color: Tokens.inkMuted; font.family: Tokens.ui
@@ -353,10 +356,12 @@ Item {
                         // the release line this box runs, and the next one when
                         // the channel has moved on ("Onogoro -> Amaterasu").
                         Text {
-                            visible: Updates.currentName !== ""
-                            text: "Asura " + Updates.currentName
+                            visible: true
+                            text: Updates.currentName !== ""
+                                ? ("ASURA " + Updates.currentName
                                   + (Updates.available && Updates.latestName !== "" && Updates.latestName !== Updates.currentName
-                                     ? "  \u2192  " + Updates.latestName : "")
+                                     ? "  \u2192  " + Updates.latestName : ""))
+                                : "ASURA OS"
                             color: Tokens.ink; font.family: Tokens.display
                             font.pixelSize: Tokens.fHero; font.weight: Font.Medium
                         }
@@ -614,7 +619,7 @@ Item {
                 // the section has to name what moves the rest.
                 Text {
                     width: idleCol.width
-                    text: I18n.tr("From Ubuntu's archive, kernel included. `asura update` moves Asura's own packages; take the rest with:  sudo apt update && sudo apt upgrade")
+                    text: I18n.tr("From the base archive, kernel included. `asura update` moves Asura's own packages; take the rest with:  sudo xbps-install -Syu")
                     color: Tokens.inkFaint
                     font.family: Tokens.ui; font.pixelSize: Tokens.fTiny
                     wrapMode: Text.WordWrap

@@ -17,11 +17,14 @@ type Provider interface {
 	Remove(ctx context.Context, id string) error
 }
 
-// providers is the ordered catalogue registry in rail order. Each later task
-// appends its provider here; BuildCatalog preserves this order. All providers
-// share one cache so a single probe fetches each source once.
+// providers is the ordered catalogue registry in rail order.
 func providers() []Provider {
-	return []Provider{aptProvider{}, barProvider{}}
+	return []Provider{
+		xbpsProvider{},
+		barProvider{},
+		pluginProvider{},
+		themeProvider{},
+	}
 }
 
 // owned reports whether the item is present on the machine: fully installed, or
@@ -53,11 +56,13 @@ func BuildCatalog(ctx context.Context, provs []Provider, refresh bool) Catalog {
 	wg.Wait()
 
 	cat := Catalog{
-		GeneratedAt: time.Now().UTC().Format(time.RFC3339),
-		Categories:  make([]Category, len(provs)),
-		Items:       []Item{},
+		GeneratedAt:   time.Now().UTC().Format(time.RFC3339),
+		WindowManager: runningWindowManager(),
+		Categories:    make([]Category, len(provs)),
+		Items:         []Item{},
 	}
 	anyFailure := false
+	hasRemoteItems := false
 	for i, p := range provs {
 		c := p.Category()
 		r := results[i]
@@ -73,6 +78,9 @@ func BuildCatalog(ctx context.Context, provs []Provider, refresh bool) Catalog {
 				if r.items[j].owned() {
 					c.InstalledCount++
 				}
+				if !isBuiltinCatalogItem(r.items[j]) {
+					hasRemoteItems = true
+				}
 			}
 			cat.Items = append(cat.Items, r.items...)
 		}
@@ -81,12 +89,15 @@ func BuildCatalog(ctx context.Context, provs []Provider, refresh bool) Catalog {
 		}
 		cat.Categories[i] = c
 	}
-	// The store is "offline" to the user only when a source failed AND there is
-	// nothing at all to show. Serving cached or partial data is normal
-	// resilience, not an offline state, so a stale-but-reachable source (or one
-	// category falling back to cache) never blanks the store or trips the banner.
-	cat.Offline = anyFailure && len(cat.Items) == 0
+	// Built-ins ship with the app, so they do not prove that a remote source or
+	// its cache was reachable. Cached remote items still count as usable data.
+	cat.Offline = anyFailure && !hasRemoteItems
 	return cat
+}
+
+func isBuiltinCatalogItem(item Item) bool {
+	core, _ := item.Metadata["core"].(bool)
+	return core
 }
 
 // providerFor returns the provider owning category id, or ok=false when none

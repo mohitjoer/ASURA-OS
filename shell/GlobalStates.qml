@@ -41,6 +41,18 @@ Singleton {
     property bool oskOpen: false
     property bool sessionOpen: false
 
+    // The session screen is the one flag in this list whose surface is a
+    // full-screen overlay layer over the focused screen rather than a panel
+    // beside them. The sidebar's power button opens it and the
+    // Ctrl+Alt+Delete bind toggles it; it closes itself, on a click
+    // anywhere, Escape, or the lock engaging.
+
+    // The region selector. It covers every screen while it is open, so it is
+    // not one of the panel flags above: there is no other surface it shares
+    // a screen with while it draws, and the selection ends it — the surface
+    // itself sets this false on dismiss.
+    property bool regionSelectorOpen: false
+
     // ------------------------------------------------------------------ lock
     //
     // Whether the session is locked. A locked screen hides the surfaces that

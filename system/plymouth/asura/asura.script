@@ -38,6 +38,11 @@ pct_y = bar_box_y + bar_box_h + 16;
 percent_sprite.SetPosition(screen_w / 2 - 50, pct_y, 10);
 percent_sprite.SetOpacity(1);
 
+prompt_sprite = Sprite();
+prompt_y = logo_y + logo_h + 24;
+entry_sprite = Sprite();
+entry_y = prompt_y + 28;
+
 current_progress = 0.05;
 boot_ticks = 0;
 
@@ -70,6 +75,8 @@ fun update_progress_ui() {
 }
 
 fun display_normal_callback() {
+    prompt_sprite.SetOpacity(0);
+    entry_sprite.SetOpacity(0);
     logo_sprite.SetOpacity(1);
     bar_box_sprite.SetOpacity(1);
     bar_fg_sprite.SetOpacity(1);
@@ -77,6 +84,79 @@ fun display_normal_callback() {
     update_progress_ui();
 }
 Plymouth.SetDisplayNormalFunction(display_normal_callback);
+
+fun display_password_callback(prompt, bullets) {
+    # Hide progress elements during passphrase entry
+    bar_box_sprite.SetOpacity(0);
+    bar_fg_sprite.SetOpacity(0);
+    percent_sprite.SetOpacity(0);
+    logo_sprite.SetOpacity(1);
+
+    # Clean display text
+    text = prompt;
+    if (!text || text == "") {
+        text = "Enter Passphrase:";
+    }
+
+    prompt_img = Image.Text(text, 1.0, 1.0, 1.0, 1.0, "DejaVu Sans Bold 11", "center");
+    if (!prompt_img) {
+        prompt_img = Image.Text(text, 1.0, 1.0, 1.0, 1.0, "Sans Bold 11", "center");
+    }
+    if (!prompt_img) {
+        prompt_img = Image.Text(text, 1.0, 1.0, 1.0, 1.0);
+    }
+    if (prompt_img) {
+        prompt_sprite.SetImage(prompt_img);
+        prompt_sprite.SetPosition(screen_w / 2 - prompt_img.GetWidth() / 2, prompt_y, 10);
+        prompt_sprite.SetOpacity(1);
+    }
+
+    # Render bullets
+    bullet_str = "";
+    for (i = 0; i < bullets; i++) {
+        bullet_str = bullet_str + "● ";
+    }
+    if (bullets == 0) {
+        bullet_str = "—";
+    }
+
+    bullet_img = Image.Text(bullet_str, 1.0, 1.0, 1.0, 1.0, "DejaVu Sans Bold 14", "center");
+    if (!bullet_img) {
+        bullet_img = Image.Text(bullet_str, 1.0, 1.0, 1.0, 1.0, "Sans Bold 14", "center");
+    }
+    if (!bullet_img) {
+        bullet_img = Image.Text(bullet_str, 1.0, 1.0, 1.0, 1.0);
+    }
+    if (bullet_img) {
+        entry_sprite.SetImage(bullet_img);
+        entry_sprite.SetPosition(screen_w / 2 - bullet_img.GetWidth() / 2, entry_y, 10);
+        entry_sprite.SetOpacity(1);
+    }
+}
+Plymouth.SetDisplayPasswordFunction(display_password_callback);
+
+fun display_question_callback(prompt, input) {
+    bar_box_sprite.SetOpacity(0);
+    bar_fg_sprite.SetOpacity(0);
+    percent_sprite.SetOpacity(0);
+    logo_sprite.SetOpacity(1);
+
+    prompt_img = Image.Text(prompt, 1.0, 1.0, 1.0, 1.0, "DejaVu Sans Bold 11", "center");
+    if (prompt_img) {
+        prompt_sprite.SetImage(prompt_img);
+        prompt_sprite.SetPosition(screen_w / 2 - prompt_img.GetWidth() / 2, prompt_y, 10);
+        prompt_sprite.SetOpacity(1);
+    }
+
+    input_text = input + "_";
+    input_img = Image.Text(input_text, 1.0, 1.0, 1.0, 1.0, "DejaVu Sans 11", "center");
+    if (input_img) {
+        entry_sprite.SetImage(input_img);
+        entry_sprite.SetPosition(screen_w / 2 - input_img.GetWidth() / 2, entry_y, 10);
+        entry_sprite.SetOpacity(1);
+    }
+}
+Plymouth.SetDisplayQuestionFunction(display_question_callback);
 
 fun progress_callback(duration, progress) {
     if (progress > current_progress) {
@@ -104,12 +184,6 @@ fun refresh_callback() {
         current_progress = simulated;
         update_progress_ui();
     }
-
-    # Safe fallback: if boot has progressed past 11 seconds (~550 ticks), auto-fade
-    # all sprites to ensure console, DRM master, and Wayland desktop are never obscured
-    if (boot_ticks > 550) {
-        quit_callback();
-    }
 }
 Plymouth.SetRefreshFunction(refresh_callback);
 
@@ -124,6 +198,8 @@ fun message_callback(msg) {
 Plymouth.SetDisplayMessageFunction(message_callback);
 
 fun quit_callback() {
+    prompt_sprite.SetOpacity(0);
+    entry_sprite.SetOpacity(0);
     logo_sprite.SetOpacity(0);
     bar_box_sprite.SetOpacity(0);
     bar_fg_sprite.SetOpacity(0);

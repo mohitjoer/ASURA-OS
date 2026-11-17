@@ -40,11 +40,11 @@ Item {
         ? Qt.rgba(Theme.onPrimary.r, Theme.onPrimary.g, Theme.onPrimary.b, 0.75)
         : Theme.inkOn(Theme.effectiveSurface, Theme.onSurfaceVariant, 3.0)
 
-    // Sleek single card surface — no nested boxes
+    // Sleek fully round pill surface
     Rectangle {
         id: cardBg
         anchors.fill: parent
-        radius: 12
+        radius: cardBg.height / 2
         color: root.tileBg
         border.width: root.on ? 0 : 1
         border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, face.containsMouse ? 0.20 : 0.08)
@@ -63,7 +63,10 @@ Item {
 
     Item {
         anchors.fill: parent
-        anchors.margins: 10
+        anchors.leftMargin: 18
+        anchors.rightMargin: 18
+        anchors.topMargin: 11
+        anchors.bottomMargin: 11
         opacity: root.available ? 1 : 0.45
         Behavior on opacity { NumberAnimation { duration: Motion.crossfade; easing.type: Motion.crossfadeCurve } }
 

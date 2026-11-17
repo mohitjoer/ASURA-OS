@@ -45,7 +45,19 @@ Item {
     // Data source: the daemon's `wm` topic when it is publishing (Wm.ready),
     // otherwise the module's own Hy feed reading the compositor directly, so the
     // expo still opens where the daemon is absent (no socket, every cap false).
+    //
+    // "Publishing" means the daemon actually has data, not merely that it
+    // declared the cap: a daemon that advertises windowGeometry but ships no
+    // windows or workspaces would blank the expo AND route every switch through
+    // actions that never fire — the overview that opens with nothing in it. So
+    // the daemon feed wins only when it has data, or when neither feed has any
+    // (a genuinely empty desktop, where the choice does not matter); otherwise
+    // the module's own hyprctl feed answers, which shows real cells and which
+    // switching demonstrably works through.
+    readonly property bool daemonHasData: Wm.windows.length > 0 || Wm.workspaces.length > 0
+    readonly property bool hyHasData: Hy.windows.length > 0 || Hy.workspaces.length > 0
     readonly property bool daemonFed: Wm.ready && Wm.caps.windowGeometry === true
+        && (root.daemonHasData || !root.hyHasData)
     readonly property var mon: Wm.outputByName(root.screenName) || Hy.outputByName(root.screenName)
     readonly property var monObj: root.mon
     readonly property real monScale: (root.monObj && root.monObj.scale > 0) ? root.monObj.scale : 1
@@ -166,6 +178,12 @@ Item {
         for (var i = 0; i < root.allWsIds.length; i++)
             if (root.deskOf(root.allWsIds[i]) === root.viewedDesktop)
                 out.push(root.allWsIds[i]);
+        // The workspace you are on always renders, even when the workspace feed
+        // is silent about it: an expo without the current space is an expo that
+        // cannot show where you are, and switching starts from seeing it.
+        if (root.viewedDesktop === root.activeDesktop && root.activeWsId > 0 && out.indexOf(root.activeWsId) < 0)
+            out.push(root.activeWsId);
+        out.sort(function (a, b) { return a - b; });
         return out;
     }
     // first globally free id in this block, for the "+" add slot. If this
@@ -182,9 +200,10 @@ Item {
         return root.newDesktopIdx * root.perDesktop + 1;
     }
     // The viewed desktop's occupied workspaces as full live cells, then ONE
-    // full-size "+" add cell. Empty / gap positions are not shown, and the add
-    // cell is always a full-size target (never a thin slat), so it is easy to
-    // hit and clicking it opens the next free workspace.
+    // compact "+" add slat. Empty / gap positions are not shown, and the add
+    // slat is thin like the gap slats: a full-size empty preview cell reads as
+    // a broken desktop when it is the only thing on screen, and a slim "+" at
+    // the end of the row reads as "add one more".
     readonly property var slotModel: {
         var out = [];
         for (var i = 0; i < root.wsList.length; i++) {
@@ -192,7 +211,7 @@ Item {
             if (root.wsHasWindows(id) || id === root.activeWsId)
                 out.push({ pos: id - root.blockBase, wsId: id, add: false, full: true });
         }
-        out.push({ pos: out.length + 1, wsId: -1, add: true, full: true });
+        out.push({ pos: out.length + 1, wsId: -1, add: true, full: false });
         return out;
     }
     readonly property int slotCount: root.slotModel.length
@@ -201,13 +220,14 @@ Item {
     readonly property real deskCardW: 122 * root.s
     readonly property real deskCardH: 58 * root.s
     readonly property real deskGap: 14 * root.s
-    readonly property real stripTopMargin: 40 * root.s
+    readonly property real stripRightMargin: 48 * root.s
+    readonly property real stripGap: 40 * root.s
 
     // ---- layout: cells wrap into as many rows as needed, shrinking so every
     // row fits the width AND all rows fit the height (no overflow, no scroll) ---
-    readonly property real regionTop: root.stripTopMargin + root.deskCardH + 46 * root.s
+    readonly property real regionTop: 80 * root.s
     readonly property real regionBottom: root.height - 78 * root.s
-    readonly property real availW: root.width - 2 * (72 * root.s)
+    readonly property real availW: root.width - (72 * root.s) - (root.deskCardW + root.stripRightMargin + root.stripGap)
     readonly property real availH: Math.max(150 * root.s, root.regionBottom - root.regionTop)
     readonly property real rowGap: 18 * root.s
     readonly property real thinRatio: 0.42  // a thin slat's width = full cell * this
@@ -466,11 +486,11 @@ Item {
     function deskAtRoot(px, py) {
         var lx = px - stripWrap.x;
         var ly = py - stripWrap.y;
-        if (ly < 0 || ly > root.deskCardH || lx < 0)
+        if (lx < 0 || lx > root.deskCardW || ly < 0)
             return root.noWs;
-        var unit = root.deskCardW + root.deskGap;
-        var i = Math.floor(lx / unit);
-        if (lx - i * unit > root.deskCardW)
+        var unit = root.deskCardH + root.deskGap;
+        var i = Math.floor(ly / unit);
+        if (ly - i * unit > root.deskCardH)
             return root.noWs;
         if (i < 0 || i >= root.deskList.length)
             return root.noWs;
@@ -484,40 +504,20 @@ Item {
         anchors.top: parent.top
         anchors.leftMargin: 52 * root.s
         anchors.topMargin: 46 * root.s
-        spacing: 11 * root.s
 
         BrandMark {
             anchors.verticalCenter: parent.verticalCenter
             size: 20 * root.s
         }
-        Column {
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: 1 * root.s
-            Text {
-                text: I18n.tr("OVERVIEW")
-                color: Theme.cream
-                font.family: Theme.mono
-                font.pixelSize: 12 * root.s
-                font.letterSpacing: 3 * root.s
-                font.weight: Font.DemiBold
-            }
-            Text {
-                text: I18n.tr("DESKTOP %1").arg(("0" + (root.viewedDesktop + 1)).slice(-2))
-                color: Theme.faint
-                font.family: Theme.mono
-                font.pixelSize: 9 * root.s
-                font.letterSpacing: 2 * root.s
-            }
-        }
     }
 
-    // ---- desktop strip (top centre) -------------------------------------------
+    // ---- desktop strip (right side) -------------------------------------------
     Item {
         id: stripWrap
-        x: (root.width - stripInner.width) / 2
-        y: root.stripTopMargin
-        width: stripInner.width
-        height: root.deskCardH
+        x: root.width - root.deskCardW - root.stripRightMargin
+        y: Math.max(root.regionTop, (root.height - stripInner.implicitHeight) / 2)
+        width: root.deskCardW
+        height: stripInner.implicitHeight
         DesktopStrip {
             id: stripInner
             s: root.s

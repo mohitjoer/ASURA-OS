@@ -729,7 +729,7 @@ in its profile.
 | 1 | Driver is in the kernel and the module is in the ISO initramfs | Nothing. `modinfo <module>` against the running kernel is the check. |
 | 2 | Driver is in the ISO's rescue module pool | `modprobe` from `/usr/lib/modules/<flavour>/extra/asura-rescue/` |
 | 3 | Driver binds, firmware blob missing | A package from the rescue pool, installed offline |
-| 4 | Out-of-tree driver, buildable on the target | `linux-headers` for the running kernel plus a toolchain, both on the ISO, then a DKMS build from a pool `.deb` |
+| 4 | Out-of-tree driver, buildable on the target | `linux-headers` for the running kernel plus a toolchain, both on the ISO, then a DKMS build from an offline `.xbps` package |
 | 5 | Secure Boot refuses the out-of-tree module | MOK enrolment at reboot, with `mokutil` on the ISO |
 | 6 | No route at all | `asura-firmware load` from USB, a local directory, or a LAN host |
 
@@ -747,7 +747,7 @@ anything useful to say, which is the only condition under which the bundle matte
 /asura-firmware/
   BUNDLE.IDX            # signed index: hardware ID -> pool items -> sha256
   BUNDLE.sig            # detached signature over BUNDLE.IDX
-  pool/*.deb            # firmware packages, DKMS sources, microcode
+  pool/*.xbps           # firmware packages, DKMS sources, microcode
   modules/<flavour>/*.ko.zst
   README.txt
 ```
@@ -756,7 +756,7 @@ Verification is not optional, because firmware loaded from removable media is an
 input path and [`SECURITY.md`](../SECURITY.md) scopes it accordingly. `BUNDLE.IDX` is verified
 against the public key at `/usr/share/asura/hardware/keys/firmware-bundle.pub` — inside the
 directory ASURA owns outright, so the key ships with the image and cannot be replaced by a
-mounted stick. Every `.deb` is checked against the digest in the verified index before it is
+mounted stick. Every `.xbps` is checked against the digest in the verified repository index (`xbps-rindex`) before it is
 installed. A failed signature aborts the whole load; there is no partial-apply path.
 
 `BUNDLE.IDX` is written for the machine being helped, not for the whole fleet. Its keys are
@@ -846,7 +846,7 @@ Four things in that output are deliberate and are each load-bearing:
 
 ### Installing base-layer firmware does not violate the boundary
 
-Worth stating because it looks like a violation and is not. `asura-firmware load` runs `dpkg -i`
+Worth stating because it looks like a violation and is not. `asura-firmware load` runs `xbps-install`
 on packages from the base layer and its firmware archive. Those packages write to `/lib/firmware`
 and `/usr/lib/modules`, which ASURA does not own. The boundary rule constrains *ASURA's* packages
 to `/usr/share/asura/` and `/etc/asura/`; installing a base-layer package is the base layer

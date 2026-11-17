@@ -4,6 +4,7 @@ import "apps"
 import "calc"
 import "find"
 import "media/mpris"
+import "menu"
 import "packages"
 import "radio"
 import "recent"
@@ -21,6 +22,7 @@ Item {
     Apps { id: appsProvider }
     Calc {}
     Find {}
+    Menu { id: menuProvider }
     Mpris {}
     Packages {}
     RadioTuner {}
@@ -35,6 +37,7 @@ Item {
     // AnswerPanel reads Web's async DDG instant answer.
     property alias actions: actionsProvider
     property alias apps: appsProvider
+    property alias menu: menuProvider
     property alias recent: recentProvider
     property alias web: webProvider
     property alias windows: windowsProvider

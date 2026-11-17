@@ -3,7 +3,7 @@
 ASURA Agent is the optional resident assistant: a machine-generated knowledge vault
 (hardware, packages, the desktop map, what the user changed, habits), a local daemon with
 a browser dashboard, the launcher's `\` quick ask, the sidebar chat, and a terminal ask
-that proposes commands. It is ported from Ryoku's Rashin (GPL-3.0, see `NOTICE.md`) and
+that proposes commands. It is ported from the prior project's Rashin (GPL-3.0, see `NOTICE.md`) and
 lives in `desktop/cmd/asura-agent`. It is off until the user switches it on in Settings,
 Agent, and while it is off nothing runs, indexes, or reaches a network.
 
@@ -12,10 +12,13 @@ on their own; the part that thinks is yours to plug in (next section).
 
 ## Plug in your own engine
 
+OpenCode is included as a default application in Asura OS (`opencode.desktop` in the launcher,
+configured with full ACP integration). You can also plug in any other agent engine.
+
 The engine is one key in `~/.config/asura/agent/config.json`:
 
 ```json
-{ "engine": { "command": ["your-agent", "acp"] } }
+{ "engine": { "command": ["opencode", "acp"] } }
 ```
 
 `engine.command` is an argv for any program that speaks the Agent Client Protocol
@@ -28,6 +31,23 @@ and the messages around it are `engine.go`. An engine needs `initialize`, `sessi
 `session/list`, models and commands are used when it offers them. If it dies, the last
 line it wrote to stderr is shown. `asura-agent setup` prints this, and `asura-agent
 status` says whether the command resolves.
+
+## Google Open Knowledge Format (OKF v0.1)
+
+The system vault (`~/.local/share/asura/agent/`) is generated as a structured Google Open Knowledge
+Format (OKF v0.1) bundle. Every document carries structured YAML frontmatter (`type`, `title`,
+`description`, `resource`, `tags`, `timestamp`) and graph links:
+
+- `index.md`: Type `Index`. Root table of contents, high-level system overview, and knowledge graph links to all subsystem documents.
+- `log.md`: Type `Changelog`. Chronological audit log of system indexing events, package drift, and state changes over time.
+- `system.md`: Type `Hardware Component`. CPU, GPU, memory, disks, battery, and displays telemetry.
+- `desktop.md`: Type `Desktop Subsystem`. Compositor map, shell surfaces, config paths, reload commands, bar layout, and GUI deep-links.
+- `packages.md`: Type `Package Inventory`. Native XBPS packages, Flatpaks, and pending updates.
+- `asura-repo.md`: Type `Repository Architecture`. Asura OS source tree architecture and directory map.
+- `user.md`: Type `User Configuration`. User dotfile overrides and live configuration diffs against baseline.
+- `habits.md`: Type `Workflow Patterns`. Locally mined shell history frequency, developer tool stack, and rhythms.
+- `memory/`: Persistent memory notes authored by agents across sessions.
+- `journal/`: Dated session notes named `YYYY-MM-DD.md`.
 
 **With no engine** the daemon still runs when enabled and keeps the vault current. `status`
 reports `ready: false` with `no agent engine configured: set engine.command in
@@ -69,7 +89,7 @@ the port also check that the Origin is localhost.
   with four read-only tools (system state, read file, list directory, code search), when a
   fast-lane provider is set: `asura-agent backend <provider>[:model]`. `ollama` and
   `local` need no key, the hosted presets read their key from the daemon's environment
-  (`systemctl --user edit asura-agent.service`). A key is never read from or written to
+  (edit `~/.config/service/asura-agent/run`). A key is never read from or written to
   a file. Without a provider, or when a question needs more than those tools, the ask goes
   to the engine.
 - **Chat** (sidebar and dashboard) is the engine's session. `asura-agent agent --json`
@@ -89,9 +109,9 @@ the port also check that the Origin is localhost.
 --snippet]`, `index`, `repo-index`, `setup`. `TestShellCallSitesAreImplemented` reads the
 QML and fails if the shell calls a verb or flag that is not here.
 
-## Not ported or changed from Ryoku
+## Not ported or changed from the prior project
 
-- No engine ships. Ryoku's resident agent, its installer, its config wiring and its
+- No engine ships. The prior project's resident agent, its installer, its config wiring and its
   PATH auto-detection of other coding agents are gone; `engine.command` replaces them.
 - No Secret Service key storage and no built-in model session: fast-lane keys come from
   the daemon's environment only.
@@ -100,4 +120,4 @@ QML and fails if the shell calls a verb or flag that is not here.
   the commands it can run over ACP.
 - The `term` shell adapter (zsh) belongs to the apps lane; it must call `asura-agent term
   --buffer` and export `ASURA_AGENT_LAST_CMD` and `ASURA_AGENT_LAST_STATUS`.
-- `prowl` (code index) is not in the Ubuntu archive; the code card and `search_code` say so.
+- `prowl` (code index) is not in the Void archive; the code card and `search_code` say so.

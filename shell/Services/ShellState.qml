@@ -105,6 +105,7 @@ Singleton {
             // Surface toggles, one per today's IpcHandler target so each keybind
             // becomes an in-process flip:
             property bool launcherOpen: false           // launcher
+            property string launcherInitialMode: ""     // initial mode override (e.g. "menu")
             property bool overviewOpen: false           // overview (Super+Tab expo)
             property bool clipboardOpen: false          // clipboard overlay (Super+V)
 

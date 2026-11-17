@@ -32,9 +32,9 @@ Item {
         if (l && l.left !== undefined) return l;
         return {
             version: 1,
-            left: ["launcher", "workspaces", "status", "cpu", "volume", "memory", "ai"],
+            left: ["launcher", "workspaces"],
             center: ["clock"],
-            right: ["media", "quick", "network", "power", "battery", "brightness", "cputemp", "storage", "gpu", "bluetooth", "layout"]
+            right: ["media", "ai", "cpu", "cputemp", "memory", "storage", "gpu", "volume", "brightness", "network", "bluetooth", "battery", "power", "status", "quick", "layout"]
         };
     }
 
@@ -62,9 +62,9 @@ Item {
     function resetLayout() {
         var def = {
             version: 1,
-            left: ["launcher", "workspaces", "status", "cpu", "volume", "memory", "ai"],
+            left: ["launcher", "workspaces"],
             center: ["clock"],
-            right: ["media", "quick", "network", "power", "battery", "brightness", "cputemp", "storage", "gpu", "bluetooth", "layout"]
+            right: ["media", "ai", "cpu", "cputemp", "memory", "storage", "gpu", "volume", "brightness", "network", "bluetooth", "battery", "power", "status", "quick", "layout"]
         };
         if (pg.hub) pg.hub.stageLive("qsbar.layout", def);
         else Settings.patch("qsbar.layout", def);
@@ -109,7 +109,7 @@ Item {
         schema: BarStudioSchema.rows
         draft: pg.hub ? pg.hub.draft : null
         defaults: pg.hub ? pg.hub.committed : ({})
-        advanced: pg.hub ? pg.hub.advanced : false
+        advanced: pg.hub ? pg.hub.advanced : true
         title: pg.pTitle
         eyebrow: pg.pEyebrow
         blurb: pg.pBlurb

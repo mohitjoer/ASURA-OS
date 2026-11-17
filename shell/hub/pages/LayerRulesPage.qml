@@ -156,9 +156,13 @@ Item {
                 width: 16; height: 1; color: Tokens.ink
                 anchors.verticalCenter: parent.verticalCenter
             }
-            Text {
-                text: "A"; color: Tokens.ink; font.family: Tokens.mono
-                font.pixelSize: 11; anchors.verticalCenter: parent.verticalCenter
+            Image {
+                width: 12; height: 12
+                anchors.verticalCenter: parent.verticalCenter
+                source: Qt.resolvedUrl("../../assets/asura-logo-on-dark.svg")
+                sourceSize.width: 24; sourceSize.height: 24
+                fillMode: Image.PreserveAspectFit
+                smooth: true
             }
             Text {
                 text: I18n.tr("COMPOSITOR"); color: Tokens.inkMuted; font.family: Tokens.ui
@@ -389,7 +393,7 @@ Item {
             schema: pg.provRows
             draft: pg.provDraft
             defaults: pg.provCommitted
-            advanced: pg.hub ? pg.hub.advanced : false
+            advanced: pg.hub ? pg.hub.advanced : true
             title: I18n.tr("Layer Rules")
             eyebrow: I18n.tr("COMPOSITOR")
             blurb: I18n.tr("Layer surfaces by namespace: blur, shadow, opacity and geometry.")

@@ -1,81 +1,88 @@
-# The store
+# ASURA Store
 
-ASURA Store is the package store window and command. It is a port of Ryoku's
-RyoStore: the software installs through package helpers, and the privilege comes from polkit.
+ASURA Store is the package and customization showroom window and CLI data plane for Asura OS. It provides browsing, discovery, and management of native packages, plugins, themes, and UI customizations, with privilege escalation safely handled through polkit.
 
-| Piece | Where | What it does |
+The canonical standalone repository is hosted at **[github.com/ASURA-OS/asura-store](https://github.com/ASURA-OS/asura-store)**.
+The tree in this repository keeps byte-identical mirrors of the standalone store:
+- `desktop/cmd/asura-store/` mirrors `cmd/asura-store/`
+- `shell/store/` and `shell/store.qml` mirror `ui/`
+- `desktop/catalog/` mirrors `catalog/`
+
+CI parity is automatically enforced on every push and PR via `.github/workflows/store-sync.yml`.
+
+| Component | Path | Function |
 |---|---|---|
-| `asura-store` | `desktop/cmd/asura-store` | The data plane: catalogue, search, install, remove, open. |
-| The window | `shell/store.qml`, `shell/store/` | RyoStore's window, ported as it was. |
-| `asura-pkg-add`, `asura-pkg-remove` | `system/helpers/pkg` | Run apt-get as root through `pkexec`. |
-| `session/asura-store` | `/usr/share/asura/session/asura-store` | Starts the window under a lock. It is not on `PATH`, because `/usr/bin/asura-store` is the command. |
+| `asura-store` | `desktop/cmd/asura-store` (binary `/usr/bin/asura-store`) | The Go data plane: catalogue, search, check, install, remove, open, settings. |
+| Store Window | `shell/store.qml`, `shell/store/` (`/usr/share/asura/store/ui`) | Quickshell showroom window: discover stage, search shelf, product overlays. |
+| Catalog | `desktop/catalog/` (`/usr/share/asura/store/catalog/`) | Local catalogue JSON (`plugins/`, `themes/`, `barstyles/`). Updated without recompilation. |
+| Launcher | `session/asura-store` (`/usr/share/asura/session/asura-store`) | Starts the store window under a single-instance lock. |
 
-## How an install happens
+## How an Install Happens
 
-1. The window runs `asura-store install apps vlc`.
-2. `asura-store` runs `asura-pkg-add --status vlc` as the user. Before any prompt, the
-   helper simulates the change with `apt-get -s` and refuses two things: a change that
-   would also remove other packages, and a package that only installs a snap (Ubuntu's
-   `firefox`, `chromium-browser` and `thunderbird` are snap launchers, and ASURA does not
-   use snap). The refusal is a sentence on stderr, which the window shows.
-3. The helper re-runs itself through `pkexec`. polkit asks the session's authentication
-   agent, which is `asura-shell`, for the password. Nothing in the store runs `sudo`.
-4. As root the helper runs `apt-get install` with apt's machine status on stdout, and
-   `asura-store` turns it into one `{"stage":"DOWNLOADING","percent":42}` line per step.
-   The stages are `AUTHORIZING`, `DOWNLOADING`, then `INSTALLING` (or `REMOVING`).
+The store UI executes `asura-store install CATEGORY ID`. The data plane outputs JSON progress events on stdout (`{"stage":"...", "percent":...}`) and status or error messages on stderr.
 
-A declined prompt, or no agent to ask, ends `pkexec` with 126 or 127, and the window says
-that authorization was declined. A removal goes the same way through `asura-pkg-remove`,
-and refuses to take any package besides the one named.
+### 1. Applications (`apps`)
+Applications are native packages.
+1. The store uses native package management tools (`xbps-query`, `xbps-install`, `xbps-remove`).
+2. Elevated transactions run through `pkexec`, querying the active desktop authentication agent (`asura-shell` polkit agent) for authorization.
+3. Progress transitions through defined stages: `AUTHORIZING`, `DOWNLOADING`, and `INSTALLING` (or `REMOVING`).
+4. If authentication is canceled or denied, `pkexec` returns cleanly and the store presents a clear authorization message.
+5. `asura-store` ignores `SIGPIPE` and `SIGHUP` to ensure background package transactions finish cleanly even if the window closes.
 
-Cancel is honoured until dpkg starts. The caller cannot signal a root process, so
-`asura-store` writes `cancel` to the helper's stdin, which stops apt-get only while it
-is downloading and only if no dpkg is running. After that the transaction finishes, because
-stopping apt-get under dpkg leaves a half-configured system. `asura-store` also ignores
-`SIGPIPE` and `SIGHUP`, so closing the window never kills a transaction partway.
+### 2. Plugins (`plugins`)
+Plugins extend Asura OS capabilities:
+1. The catalogue entry references the canonical upstream repository.
+2. The store runs `asura plugin install <upstream> --yes` (removal runs `asura plugin remove <id>`), matching the Hub Add-ons manager.
+3. Installed plugins reside in `~/.local/share/asura/plugins`.
 
-## The commands
+### 3. Themes (`themes`)
+Themes modify desktop styling and colors:
+1. Installing an existing theme writes its identifier into `~/.config/asura/current/theme.name`, picked up live by the shell.
+2. Removal protects the currently active theme, refusing to delete active configurations.
+
+### 4. Bar Styles (`barstyles`)
+Bar styles (`top`, `side`) are built directly into Asura OS shell. The store provides style discovery, preview, and selection via Bar Studio.
+
+## CLI Commands
 
 ```text
-asura-store catalog [--refresh] [--category ID]   JSON: categories and items
-asura-store search QUERY                          JSON: {"items": [...]} from the whole archive
-asura-store install CATEGORY ID                   progress lines on stdout, an error on stderr
-asura-store remove CATEGORY ID
-asura-store open SECTION                          discover | library | a category id
-asura-store settings CATEGORY [ID]                opens Settings (asura-shell hub open) on its page
+asura-store catalog [--refresh] [--category ID]    JSON: categories and items
+asura-store check                                  JSON: {"revision","updateAvailable","offline"}
+asura-store search QUERY                           JSON: {"items": [...]} from repository
+asura-store install CATEGORY ID                    Streamed progress lines on stdout, status on stderr
+asura-store remove CATEGORY ID                     Streamed progress lines on stdout, status on stderr
+asura-store open SECTION                           discover | library | window section
+asura-store settings CATEGORY [ID]                 Navigates Settings Hub (asura-shell hub open)
 ```
 
-`catalog` has two categories. `apps` is a shelf of about thirty packages with their
-summary, description, version and home page read from apt, and what is installed read
-from dpkg. `barstyles` lists the three built-in bar styles and the one `shell.json`
-selects, which is what Bar Studio's style shelf reads. Items follow Ryoku's JSON
-contract (`id`, `category`, `name`, `summary`, `installed`, `active`, `updateAvailable`,
-`unavailable`, ...), so a page ported from Ryoku reads them unchanged. Any other category
-is an error: `plugins`, `bundles`, `lockscreens`, `rices` and `fastfetch` do not exist.
+### Catalog Categories
+- `apps`: Curated desktop applications with summaries, descriptions, and install status queryable via `xbps-query`.
+- `plugins`: Antigravity and Asura OS plugins from verified upstreams.
+- `themes`: Local and curated desktop themes.
+- `barstyles`: Built-in bar styles for desktop customization.
 
-`search` reads `apt-cache search`, keeps the hits where every word is in the name or the
-one-line summary, leaves out libraries, headers and debug packages, and ranks an exact name
-first. The window runs it after a typed query pauses and shows the hits with the shelf.
+## Revisions and Update Checks
 
-## What is not here, and why
+Every freshly built catalog computes a deterministic revision hash (SHA-256 over item attributes, versions, manifests, and declared links).
+- Viewing the catalog acknowledges the revision at `~/.cache/asura-store/seen-revision`.
+- `asura-store check` inspects the active catalog and reports `{"revision","updateAvailable","offline"}`.
+- When an unseen catalog update is available, the store UI illuminates the refresh indicator.
 
-- **No remote catalogue.** Ryoku's plugins, bundles, rices, lockscreens, bar styles and
-  fastfetch styles are products of its `ryostore` repository, and none of it is ASURA's.
-  The extras actuator and the receipt transactions that installed them were not ported. A
-  plugin is a folder in `~/.local/share/asura/plugins`, and `asura plugin` installs and
-  removes it, so the Add-ons page calls that instead of the store.
-- **No Flatpak.** Ryoku's provider seam could take it, but a Flatpak provider is its own
-  listing, search, remote setup and progress parsing, not a few lines, and nothing calls
-  it. Flatpak is not installed on the development machine either.
-- **No PackageKit.** It is installed on the development laptop and bus-activatable, but
-  `pkexec apt-get` does the job without a second daemon, and the architecture plan does not
-  ship PackageKit.
-- **No Arch repos, multilib or AUR.** ASURA runs on Void Linux with a custom CachyOS-BORE kernel, not Arch Linux.
+## Search
 
-## Checks
+`asura-store search <query>` queries native repository indices using `xbps-query -Rs`, ranking exact matches first, filtering system libraries and debug packages, and combining results with installed state.
+
+## Deep Links & Settings Navigation
+
+- `asura-store open [section]` activates or raises the single-instance store window and navigates to the target section (`discover`, `library`, `apps`, etc.).
+- `asura-store settings CATEGORY [ID]` directly opens the relevant section in Asura Settings Hub (`asura-shell hub open`).
+
+## Test Suite
 
 ```sh
+# Data plane verification
 cd desktop && gofmt -l cmd/asura-store && go vet ./cmd/asura-store && go test ./cmd/asura-store
-sh system/helpers/pkg/pkg_test.sh        # the refusals, the pkexec hand-off and cancel (needs fakeroot)
+
+# UI logic verification
 node --test shell/store/lib/store.test.mjs
 ```

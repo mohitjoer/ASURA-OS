@@ -113,10 +113,15 @@ confirm.
 - [x] `installation/build-iso-void.sh` — Void Linux live ISO builder via `void-mklive`, package extraction from `system/packages-void.yaml`, user autologin (`agetty-tty1`), and user group membership (`_seatd`, `video`, `audio`, `input`)
 - [x] `installation/build-iso-void_test.sh` — validation suite asserting required packages, runit services, and postsetup hooks
 - [x] `installation/asura-installer.sh` — guided disk partitioner, rootfs installer, fstab generator, and GRUB EFI bootloader config
+- [x] Full-disk encryption (LUKS2 + argon2id) in `installation/asura-installer.sh` with dedicated `/boot` partition, dracut crypt module, and Plymouth password prompt integration
 - [x] `desktop/cmd/asura/install.go` and `session/applications/asura-installer.desktop` — CLI and desktop entry launcher for the installer
 - [x] `packaging/xbps/build-repo.sh` and `.github/workflows/xbps-repo.yml` — automated XBPS binary package creation via `xbps-create` and repository indexing via `xbps-rindex`
 - [x] CI automation in `.github/workflows/ci.yml` producing verified ISO artifacts and sha256 checksums
 - [x] Hybrid GPU management: `asura gpu`, `system/helpers/prime-run`, and `asura power` for NVIDIA RTX 3050 D3cold power management
+- [x] Daily-driver services ([`docs/system-services.md`](system-services.md)): clock sync (`chrony`), a default inbound firewall (`nftables`, `system/nftables/nftables.conf`), removable-media mounting (`udisks2`), firmware updates (`fwupd`) and printing (`cups`), installed and enabled on the live ISO and on installed systems
+- [ ] Installer end to end in CI (`installation/ci/installer-e2e.sh`, the `installer-e2e` job): install the freshly built ISO onto a disk image, boot the plain install to runit stage 2, unlock the encrypted one and check its crypttab, fstab and GRUB. Non-blocking until it has passed on `dev-unstable`; booting the encrypted install (passphrase over serial) is the next step
+- [ ] Hyprland version: the ISO ships prebuilt Hyprland 0.49.0 from `Makrennel/hyprland-void`, while the session configuration and the Hub's generator target 0.53.3. Build the Hyprland stack (`hyprutils`, `hyprlang`, `hyprcursor`, `hyprgraphics`, `aquamarine`, `hyprland`, `xdg-desktop-portal-hyprland`, `hypridle`, `hyprlock`) from `packaging/xbps/` and switch the ISO to it
+- [ ] Secure Boot — not supported yet; the ISO and installed systems boot only with Secure Boot disabled (see [`docs/system-services.md`](system-services.md#secure-boot))
 
 Exit criterion: an ASURA ISO boots on a clean machine into the live Wayland desktop session with functional display, audio, and network, and the guided installer can partition a drive and lay down a bootable system image.
 
@@ -165,8 +170,8 @@ Before any shell work, because it validates the base-layer bet.
 - [x] The screenshot toolchain in the manifest: `grim`, `slurp` and `hyprpicker`.
   The portal backend shells out to them, so without them it does not create the
   Screenshot portal at all and a screenshot keybinding produces nothing
-- [ ] Verified under screen sharing, screenshot, camera access, the GTK file
-  chooser and a secret round-trip — none of which can be done without a display
+- [x] Verified under a screenshot round trip — both the granted path (the dispatcher returns a real PNG) and the consent path (the GTK access dialog appears; Allow stores the permission, Deny is remembered silently in the permission store under app id "") — raw guest serial output in the Stage 4 verification run
+- [ ] Verified under screen sharing, camera access, the GTK file chooser and a secret round-trip — none of which can be done without a display
 
 M6 owns the shell. The `quickshell` runit service reads
 `/usr/share/asura/shell` with `quickshell -p`.
@@ -218,9 +223,10 @@ has a price: the bridges into the tree are a contract that nothing checks.*
   The keys adoption imports into — `wallpaper-path`, `wallpaper-path-dark`,
   `favorites`, `dock-position` — keep the names and types
   [adopting-asura.md](adopting-asura.md) already uses
+- [x] The ASURA "do everything" menu (`asura menu`, `SUPER ALT, Space`), built directly into the launcher as a native mode coordinating apps, keybindings cheatsheet, styling, settings deep-links, package management, updates, screenshots, and session controls. Documented in [`docs/menu.md`](menu.md).
 - [x] The bar, the dock, the launcher and the popover surfaces, taken from a
   vendored upstream component at a pinned commit and re-themed, rather than
-  written from nothing. Since the Ryoku port the running shell draws Ryoku's
+  written from nothing. Since the port the running shell draws ported
   components for these, adapted in place (see [`NOTICE.md`](../NOTICE.md))
 - [x] The widget catalogue, ASURA's own, driven by `org.asura.shell`
 - [x] The vendored tree itself, held byte-identical to its upstream commit.
@@ -284,7 +290,7 @@ has a price: the bridges into the tree are a contract that nothing checks.*
 
 *Status: the settings catalogue and the page registry exist, and the invariant
 between them is checked by `asura doctor` rather than asserted. The Hub's window
-is Ryoku's Hub, ported (a grouped rail, a global search and a page per area of the
+is a ported Hub (a grouped rail, a global search and a page per area of the
 desktop), drawn with the shell's own component kit, and the settings catalogue is its
 **ASURA** group; `asura-hubd` is its data plane for the compositor and the machine.*
 
@@ -332,17 +338,24 @@ is unsigned.*
   packages. Everything built so far ships in the one `asura` package, and `asura-shell`
   and `asura-hub` are a binary and a launcher inside it, not packages of their own
 - [ ] Published, and `asura update` verified against a machine that installed from it
+- [x] Release pipeline: pushing a `v*` tag runs `.github/workflows/release.yml`, which builds the ISO with the same steps as CI (`.github/actions/build-iso`), boot-tests it in QEMU (strict), writes `SHA256SUMS`, signs it with minisign when `MINISIGN_SECRET_KEY` is set, and publishes a GitHub Release (`-alpha`/`-beta`/`-rc` tags as pre-releases)
+- [ ] First tagged release (`v0.1.0-beta.1`) published, with the install steps in `README.md` checked end to end on real hardware
 
 The boundary check exists because a package that quietly gains a file another package owns is
 a fork of that package, and that cost arrives at the next rebase as a conflict nobody remembers
 the origin of.
 
 
-## M9 — Adoption
+## M9 — Adoption (Legacy — Ubuntu/APT design)
 
 *Status: the preflight is written and tested — all eleven checks, the three exit codes, and the
 never-write promises enforced as data rather than prose. `asura adopt` itself does not exist,
 and the preflight has never been run against a machine that was about to be switched.*
+
+**Note:** This milestone documents the Ubuntu/APT-based adoption design. A Void/XBPS-based
+adoption would follow the same principles but with different package manager commands and
+no GDM dependency (ASURA uses SDDM). The design in [`adopting-asura.md`](adopting-asura.md)
+is preserved for reference.
 
 Switching an existing GNOME desktop on the base layer over to the ASURA shell, in place,
 without reinstalling and without touching the user's data. Designed in
@@ -355,7 +368,7 @@ before they commit to installing it. That is worth more than a landing page.
   no root, and is safe to run as often as the user likes
 - [x] Eleven checks, each with its own fail condition: base release, desktop session, display
   manager, GNOME version, GPU and driver, composite support, portal availability, disk space,
-  APT health, third-party extensions, boot chain
+  XBPS health, third-party extensions, boot chain
 - [x] Blockers separated from report-only warnings, with three distinct exit codes so the same
   command is usable from a script
 - [x] `--json`, which is how `asura adopt` re-runs the preflight as its own step zero rather
@@ -441,7 +454,17 @@ it is the answer.
   the components through three overlay files at upstream's own paths, so the desktop
   looks like ASURA's without a vendored file being edited. The cost is stated
   rather than discovered: a re-vendor is a re-theme event, because the bridges are a
-  contract that no linter checks.
+  contract that no linter checks. Adoptions are one surface at a time, and the first
+  is the region selector's text recognition: a rectangle or a circle drawn on the
+  screen, the words inside it read with `tesseract-ocr` and copied to the clipboard,
+  on Super+Shift+T. Upstream's entry point registers an IPC handler and a shortcut
+  for each of its five actions; ASURA's overlay registers none of them and reaches
+  the one action through the shell's own IPC bridge, because a chord registered
+  inside a vendored file is a chord the keybinding catalogue does not know. The
+  selector's drawing options — what a selection snaps to, the aim lines, the stroke
+  and the padding — are schema keys behind a Hub page, and the actions ASURA does
+  not reach yet are not registered: an entry point for a missing command is a
+  control that runs nothing.
 - [x] **The monochrome re-theme.** Strict monochrome is now the whole desktop's rule
   and not only the shell's own surfaces. The vendored components are monochrome by
   configuration and not by exception: a token bridge answers upstream's Material
@@ -460,7 +483,7 @@ it is the answer.
   behave, and the shell reads a frame rather than interpreting a tool's output
   itself. `asura state` survives as a CLI of its own, so a terminal, a script and
   anything that is not Quickshell keep a way in; it probes its tools through
-  `desktop/internal/desktopstate`, which the daemon, a port of Ryoku's, does not use.
+  `desktop/internal/desktopstate`, which the daemon, a port of the prior project's, does not use.
 - [x] **Theming.** A wallpaper that recolours the desktop, with no matugen on the machine:
   `asura theme generate` makes the scheme and `asura theme render` fills the app
   templates, both in Go (`desktop/internal/theme`). The daemon runs them on every wallpaper

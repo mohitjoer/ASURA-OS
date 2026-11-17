@@ -20,9 +20,9 @@ essential:
     - runit-void
     - dbus
     - polkit
-    - elogind
     - seatd
     - libseat
+    - elogind
     - eudev
     - util-linux
     - coreutils
@@ -42,6 +42,13 @@ essential:
     - iptables
     - iproute2
     - btrfs-progs
+    - e2fsprogs
+    - dosfstools
+    - parted
+    - cryptsetup
+    - rsync
+    - grub
+    - grub-x86_64-efi
     - openssh
     - pciutils
     - usbutils
@@ -55,15 +62,23 @@ desktop:
   packages:
     # Wayland Compositor & helpers
     - hyprland
+    # Void's own package (0.3.2 at the time of writing), built with the Polkit,
+    # PAM, PipeWire, Hyprland and screencopy integrations the shell needs.
+    # ASURA does not build its own Quickshell.
     - quickshell
     - xdg-desktop-portal
     - xdg-desktop-portal-hyprland
     - xdg-desktop-portal-gtk
-    - xdg-desktop-portal-lxqt
     - wl-clipboard
     - wlr-randr
     - grim
     - slurp
+    # The region selector's text recognition: the engine and its English
+    # training data. Void renames the binary to tesseract-ocr because the
+    # plain name belongs to a game, and that is the name the selector's
+    # command builder calls.
+    - tesseract-ocr
+    - tesseract-ocr-eng
     - swaybg
     - xorg-server-xwayland
     # Qt6 & QML runtime for Quickshell
@@ -118,10 +133,10 @@ session:
   packages:
     - pam
     - turnstile
-    - greetd
+    - sddm
     - wlogout
-    - swayidle
-    - swaylock
+    - hypridle
+    - hyprlock
 
 applications:
   packages:
@@ -133,7 +148,6 @@ applications:
     - gvfs
     - tumbler
     - nano
-    - btop
     - xdg-user-dirs
 
 terminal-and-shell:
@@ -142,6 +156,17 @@ terminal-and-shell:
     - zsh
     - starship
     - fastfetch
+    - zoxide
+    - fzf
+    - zsh-autosuggestions
+    - zsh-history-substring-search
+    - zsh-syntax-highlighting
+    - atuin
+    - eza
+    - mise
+    - ripgrep
+    - fd
+    - bat
   exclude:
     - kitty: Kitty is strictly forbidden in Asura per agent rules
 
@@ -151,6 +176,9 @@ languages:
     - python3
     - python3-yaml
     - git
+    - make
+    - gcc
+    - cmake
 
 graphics-and-media:
   packages:
@@ -170,22 +198,34 @@ graphics-and-media:
 power-and-hardware-services:
   packages:
     - upower
-    - tlp
     - acpid
     - brightnessctl
+    # Device power saving (USB autosuspend, Wi-Fi, SATA, PCIe runtime PM).
+    # CPU governor, EPP and platform profile are excluded in system/tlp.d:
+    # asura-sysd owns those.
+    - tlp
     - bluez
     - NetworkManager
     - network-manager-applet
     - wpa_supplicant
-    - gamemode
     - zramen
-    - scx
-    - scx-loader
     - mimalloc
     - podman
+    - docker
+    - docker-compose
+    # Daily-driver basics: clock sync, inbound firewall, removable-media
+    # mounting, firmware updates and printing. Services are linked in
+    # installation/build-iso-void.sh and installation/asura-installer.sh.
+    - chrony
+    - nftables
+    - udisks2
+    - fwupd
+    - cups
+    - cups-filters
 
 fonts-and-icons:
   packages:
+    - font-inter
     - dejavu-fonts-ttf
     - font-awesome
     - font-awesome6

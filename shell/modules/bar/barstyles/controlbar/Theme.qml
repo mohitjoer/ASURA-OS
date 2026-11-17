@@ -355,10 +355,11 @@ Item {
     function _shippedLayout() {
         return {
             version: 1,
-            left: ["launcher", "workspaces", "status", "cpu", "volume", "memory", "ai"],
+            left: ["launcher", "workspaces"],
             center: ["clock"],
-            right: ["media", "quick", "network", "power", "battery", "brightness",
-                    "cputemp", "storage", "gpu", "bluetooth", "layout"]
+            right: ["media", "ai", "cpu", "cputemp", "memory", "storage", "gpu",
+                    "volume", "brightness", "network", "bluetooth", "battery",
+                    "power", "status", "quick", "layout"]
         }
     }
 
@@ -490,7 +491,7 @@ Item {
         _widgetsLoaded = false
         modStatus = true; modMemory = true; modCpu = true; modVolume = true
         modWeather = true; modNetwork = true; modBrightness = true; modMedia = true
-        modMpris = true; modQuick = true; modBattery = true; modLayout = true
+        modMpris = true; modQuick = false; modBattery = true; modLayout = false
         modCpuTemperature = true; modGpu = true; modStorage = true
         modClaude = false; modPower = false; modBluetooth = false
         _widgetsLoaded = wl
@@ -2137,7 +2138,7 @@ Item {
     property bool modVolume:     true
     property bool modWeather:    true
     property bool modNetwork:    true
-    property bool modLayout:     true
+    property bool modLayout:     false   // default off (moved to Quick Settings)
     property string networkMode: "none"   // mirrored from NetworkWidget: wifi/ethernet/none
     // Centralized status indicators. These live on Theme so BarSlot-per-monitor
     // widgets don't each spawn their own status poller.
@@ -2539,7 +2540,7 @@ Item {
     property bool modBluetooth:  false   // default off (toggle in ControlPanel)
     property bool modBrightness: true
     property bool modMedia:      true
-    property bool modQuick:      true    // G10 group pill (idle-inhibitor · media · theme)
+    property bool modQuick:      false   // G10 group pill (retired - moved to Quick Settings)
     property bool modMpris:      true    // G9 now-playing / mpris pill
     property string mprisBarStyle: "default" // "default" or "full"
     property bool modClaude:     false   // default off (toggle in ControlPanel)
@@ -2606,9 +2607,8 @@ Item {
     // hover anywhere along the edge (even over the gaps between islands).
     property bool barAutoHide: false
 
-    // Gaps hold the shell off each output edge. Default top 3 matches the
-    // reference's island offset.
-    property int barGapTop: 3
+    // Gaps hold the shell off each output edge. Edge-to-edge full bar docks flush.
+    property int barGapTop: 0
     property int barGapBottom: 0
     property int barGapLeft: 0
     property int barGapRight: 0
@@ -2626,7 +2626,7 @@ Item {
 
     // ── picker visual style (theme/wallpaper/screenshot/video pickers) ──
     property string pickerStyle: "tanzaku"   // "tanzaku", "hearthstone", "carousel"
-    property string launcherLogoMode: "text"     // "text" or "icon"
+    property string launcherLogoMode: "icon"     // "text" or "icon" (default "icon")
     property string launcherLogoText: "asura"    // "asura", "omarchy", "hyprland", "arch", or "omacom"
     property string launcherLogoIcon: "asura"    // see launcherLogoIconGlyph()
     // Legacy launcher-logo text values migrated to the current text mode.
@@ -3388,10 +3388,28 @@ Item {
     onMediaBrowserVisibleChanged: popupOpened("mediaBrowserVisible")
     property string mediaBrowserMode:    "screenshots"  // "screenshots" or "videos"
     // ── Idle inhibitor (Wayland idle-inhibit protocol) ──
-    property bool   idleInhibited:       false
+    property bool   idleInhibited:       Flags.keepAwake
+    Connections {
+        target: Flags
+        function onKeepAwakeChanged() {
+            theme.idleInhibited = Flags.keepAwake
+        }
+    }
+    onIdleInhibitedChanged: {
+        if (Flags.keepAwake !== theme.idleInhibited) {
+            Flags.keepAwake = theme.idleInhibited
+        }
+    }
     // ── Notification state ──
     property bool notifVisible: false
-    onNotifVisibleChanged: popupOpened("notifVisible")
+    onNotifVisibleChanged: {
+        if (notifVisible) {
+            notifVisible = false;
+            ShellState.requestSurfaceActive("notifications", undefined);
+        } else {
+            popupOpened("notifVisible");
+        }
+    }
     property int  notifCount:   0
     property real notifBarX:    0
 

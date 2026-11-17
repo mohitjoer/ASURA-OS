@@ -1,0 +1,84 @@
+# Build the ASURA live ISO, check its rootfs, and boot it in QEMU.
+#
+# Shared by the `iso` job in ci.yml and the release workflow, so the image a
+# release ships is built and tested by exactly the same steps as every CI run.
+# The caller checks out the repository first.
+
+name: Build ASURA ISO
+description: Build the live ISO with installation/build-iso-void.sh, verify the rootfs, and run the QEMU boot smoke test.
+
+inputs:
+  version:
+    description: Release version for the ISO file name and os-release IMAGE_VERSION (e.g. 0.1.0-beta.1). Empty keeps the default name.
+    required: false
+    default: ""
+  strict-boot:
+    description: '"true" fails the boot test even without /dev/kvm (software emulation).'
+    required: false
+    default: "false"
+
+outputs:
+  iso:
+    description: Path of the built ISO.
+    value: ${{ steps.locate.outputs.iso }}
+  boot-dir:
+    description: Directory with the QEMU serial log and boot screenshot.
+    value: ${{ steps.boot.outputs.dir }}
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-go@v6
+      with:
+        go-version-file: system/hardware/go.mod
+        cache-dependency-path: |
+          system/hardware/go.mod
+          desktop/go.mod
+
+    - name: Install ISO build and test tools
+      shell: bash
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -y --no-install-recommends \
+          squashfs-tools xorriso grub-pc-bin grub-efi-amd64-bin \
+          dosfstools mtools python3-yaml curl git tar xz-utils \
+          qemu-system-x86 netpbm
+
+    - name: Validate ISO builder
+      shell: bash
+      run: sh installation/build-iso-void_test.sh
+
+    - name: Build ISO
+      shell: bash
+      env:
+        ASURA_VERSION: ${{ inputs.version }}
+      run: sudo env "PATH=$PATH" ASURA_VERSION="$ASURA_VERSION" installation/build-iso-void.sh "$RUNNER_TEMP/asura-iso"
+
+    - name: Locate ISO
+      id: locate
+      shell: bash
+      run: |
+        set -eu
+        sudo chmod -R a+rwX "$RUNNER_TEMP/asura-iso"
+        iso="$(find "$RUNNER_TEMP/asura-iso" -maxdepth 1 -type f -name '*.iso' -print -quit)"
+        if [ -z "$iso" ] || [ ! -s "$iso" ]; then
+          echo "::error::void-mklive completed without producing an ISO"
+          ls -laR "$RUNNER_TEMP/asura-iso"
+          exit 1
+        fi
+        echo "ISO: $iso ($(du -h "$iso" | cut -f1))"
+        echo "iso=$iso" >>"$GITHUB_OUTPUT"
+
+    - name: Verify live rootfs shared libraries and binary integrity
+      shell: bash
+      run: sh installation/ci/verify-iso-rootfs.sh "${{ steps.locate.outputs.iso }}"
+
+    - name: Test ISO headless boot in QEMU
+      id: boot
+      shell: bash
+      env:
+        ASURA_BOOT_STRICT: ${{ inputs.strict-boot == 'true' && '1' || '0' }}
+      run: |
+        dir="$RUNNER_TEMP/qemu-test"
+        echo "dir=$dir" >>"$GITHUB_OUTPUT"
+        timeout 6m sh installation/ci/qemu-boot-test.sh "${{ steps.locate.outputs.iso }}" "$dir"

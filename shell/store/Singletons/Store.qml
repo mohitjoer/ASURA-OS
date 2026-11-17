@@ -34,6 +34,7 @@ Singleton {
     property var found: []
     property string _searchQuery: ""
     property string _searchOutput: ""
+    property string _checkOutput: ""
 
     function itemKey(item) {
         return item ? String(item.category || "") + ":" + String(item.id || "") : "";
@@ -59,7 +60,7 @@ Singleton {
     }
 
     // The archive is too large to carry in the catalogue, so a typed query is
-    // asked of apt directly. Debounced, and a new query replaces the last.
+    // asked of the package repository directly. Debounced, and a new query replaces the last.
     function search(query) {
         root._searchQuery = String(query || "").trim();
         searchProc.running = false;
@@ -71,12 +72,23 @@ Singleton {
         searchTimer.restart();
     }
 
+    // A lightweight upstream probe (catalogue only, no downloads): it lights
+    // the refresh dot when the catalogue has advanced past what the user last
+    // pulled, without touching the shown catalogue.
+    function check() {
+        if (checkProc.running)
+            return;
+        root._checkOutput = "";
+        checkProc.running = true;
+    }
+
     // Stop every child process before the window tears down, so no fetch is in
     // flight when the QML engine is destroyed -- a shutdown-crash guard.
     function shutdown() {
         catalogProc.running = false;
         installProc.running = false;
         searchProc.running = false;
+        checkProc.running = false;
     }
 
     function install(item, dither, components) {
@@ -96,7 +108,7 @@ Singleton {
         installProc.running = true;
     }
 
-    // The backend stops a download at once. Once dpkg has begun it finishes the
+    // The backend stops a download at once. Once package installation has begun it finishes the
     // transaction instead, because a package half-installed is worse than a wait;
     // either way the process exits and the catalogue is read again.
     function cancel() {
@@ -175,7 +187,10 @@ Singleton {
         Quickshell.execDetached(["asura-store", "settings", String(item.category), String(item.id)]);
     }
 
-    Component.onCompleted: refresh(false)
+    Component.onCompleted: {
+        refresh(false);
+        check();
+    }
 
     Process {
         id: catalogProc
@@ -273,6 +288,24 @@ Singleton {
                 root.found = JSON.parse(root._searchOutput).items || [];
             } catch (e) {
                 root.found = [];
+            }
+        }
+    }
+
+    Process {
+        id: checkProc
+        command: ["asura-store", "check"]
+        stdout: StdioCollector { onStreamFinished: root._checkOutput = text }
+        onExited: code => {
+            if (code !== 0)
+                return;
+            try {
+                const next = JSON.parse(root._checkOutput);
+                root.updateAvailable = next.updateAvailable === true;
+                if (next.revision)
+                    root.revision = String(next.revision);
+            } catch (e) {
+                // A failed probe just leaves the dot as it was.
             }
         }
     }

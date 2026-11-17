@@ -58,6 +58,23 @@ Singleton {
     readonly property bool dockAutohide: shell.dockAutohide ?? false
     readonly property var launcherApps: shell.launcherApps ?? []
     readonly property int launcherColumns: shell.launcherColumns ?? 0
+
+    // The region selector's drawing behaviour. The vendored surface reads
+    // these through the overlay at modules/common/Config.qml, which maps them
+    // onto upstream's option names; the defaults here are the schema's, which
+    // are the values upstream ships.
+    readonly property bool regionSelectorTargetWindows: shell.regionSelectorTargetWindows ?? true
+    readonly property bool regionSelectorTargetLayers: shell.regionSelectorTargetLayers ?? false
+    readonly property bool regionSelectorTargetLabels: shell.regionSelectorTargetLabels ?? false
+    readonly property bool regionSelectorAimLines: shell.regionSelectorAimLines ?? true
+    readonly property int regionSelectorSelectionPadding: shell.regionSelectorSelectionPadding ?? 5
+    readonly property int regionSelectorCircleStrokeWidth: shell.regionSelectorCircleStrokeWidth ?? 6
+    readonly property int regionSelectorCirclePadding: shell.regionSelectorCirclePadding ?? 10
+
+    // Rounded screen corners. The vendored module reads it through the
+    // overlay at modules/common/Config.qml as upstream's fakeScreenRounding.
+    readonly property bool screenCorners: shell.screenCorners ?? true
+
     readonly property string wallpaper: dark
         ? (shell.wallpaperPathDark ?? "")
         : (shell.wallpaperPath ?? "")
