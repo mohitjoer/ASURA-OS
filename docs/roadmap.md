@@ -453,7 +453,17 @@ it is the answer.
   the components through three overlay files at upstream's own paths, so the desktop
   looks like ASURA's without a vendored file being edited. The cost is stated
   rather than discovered: a re-vendor is a re-theme event, because the bridges are a
-  contract that no linter checks.
+  contract that no linter checks. Adoptions are one surface at a time, and the first
+  is the region selector's text recognition: a rectangle or a circle drawn on the
+  screen, the words inside it read with `tesseract-ocr` and copied to the clipboard,
+  on Super+Shift+T. Upstream's entry point registers an IPC handler and a shortcut
+  for each of its five actions; ASURA's overlay registers none of them and reaches
+  the one action through the shell's own IPC bridge, because a chord registered
+  inside a vendored file is a chord the keybinding catalogue does not know. The
+  selector's drawing options — what a selection snaps to, the aim lines, the stroke
+  and the padding — are schema keys behind a Hub page, and the actions ASURA does
+  not reach yet are not registered: an entry point for a missing command is a
+  control that runs nothing.
 - [x] **The monochrome re-theme.** Strict monochrome is now the whole desktop's rule
   and not only the shell's own surfaces. The vendored components are monochrome by
   configuration and not by exception: a token bridge answers upstream's Material

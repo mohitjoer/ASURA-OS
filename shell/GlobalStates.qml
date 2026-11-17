@@ -41,6 +41,12 @@ Singleton {
     property bool oskOpen: false
     property bool sessionOpen: false
 
+    // The region selector. It covers every screen while it is open, so it is
+    // not one of the panel flags above: there is no other surface it shares
+    // a screen with while it draws, and the selection ends it — the surface
+    // itself sets this false on dismiss.
+    property bool regionSelectorOpen: false
+
     // ------------------------------------------------------------------ lock
     //
     // Whether the session is locked. A locked screen hides the surfaces that

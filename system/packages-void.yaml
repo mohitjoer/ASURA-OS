@@ -73,6 +73,12 @@ desktop:
     - wlr-randr
     - grim
     - slurp
+    # The region selector's text recognition: the engine and its English
+    # training data. Void renames the binary to tesseract-ocr because the
+    # plain name belongs to a game, and that is the name the selector's
+    # command builder calls.
+    - tesseract-ocr
+    - tesseract-ocr-eng
     - swaybg
     - xorg-server-xwayland
     # Qt6 & QML runtime for Quickshell

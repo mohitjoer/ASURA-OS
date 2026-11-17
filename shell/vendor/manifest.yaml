@@ -117,8 +117,6 @@ components:
         blob: 37276378e5289df1ed758dcc5107a365ffac3d5a
       - path: modules/common/utils/MultiTurnProcess.qml
         blob: 9999b93ad84710b18cb8f2a0e7da99981d33de29
-      - path: modules/common/utils/ScreenshotAction.qml
-        blob: c4eae679fed63cba681e4d13a214fbbee60c1259
       - path: modules/common/utils/TempScreenshotProcess.qml
         blob: 40c40fb34f8ad450156d74fe30ff0a3eca6e56d3
       - path: modules/common/widgets/AddressBar.qml
@@ -519,6 +517,20 @@ components:
         blob: 42649b9a312173ea9bd048a4970b9cad1efaefa6
       - path: modules/ii/overview/SearchWidget.qml
         blob: c99b930c11a2cfb782677935bbfe0b6323500c08
+      - path: modules/ii/regionSelector/CircleSelectionDetails.qml
+        blob: c0f823fbe7031d15b29477595409df659730deb5
+      - path: modules/ii/regionSelector/CursorGuide.qml
+        blob: 0cbec12970828c2f6c4c73b6d83a94aafe489d17
+      - path: modules/ii/regionSelector/OptionsToolbar.qml
+        blob: 1c68886c8fea318b6ff6d38c1e285db04f6b4c89
+      - path: modules/ii/regionSelector/RectCornersSelectionDetails.qml
+        blob: 7bc7669d19b49645aca01befbba112fbcf5876e2
+      - path: modules/ii/regionSelector/RegionFunctions.qml
+        blob: ee1805d56b5e2be3c2f4b640bc98781d40314c5b
+      - path: modules/ii/regionSelector/RegionSelection.qml
+        blob: 19435a74c43cabc54d10b32517824663f8b73835
+      - path: modules/ii/regionSelector/TargetRegion.qml
+        blob: d3763e0abb30a5ee3da34de4e54fc1f5302e68db
       - path: modules/ii/sidebarRight/bluetoothDevices/BluetoothDeviceItem.qml
         blob: 570ab95a20cc8f73edbcb208cdfb13e368adef33
       - path: modules/ii/sidebarRight/bluetoothDevices/BluetoothDialog.qml

@@ -30,6 +30,13 @@ import "modules/notifications"
 import "modules/capture"
 import "modules/confirm"
 import qs.Ui.Singletons
+// The wrapper at the shell root is reached by its module name, because this
+// file also imports directories whose singletons include a `Config` of their
+// own (qs.Services', the shell.json one), and an unqualified `Config` here
+// resolves to the imported one — a write that the engine accepts and then
+// drops, with no error and no value anywhere. The overlay files reach it the
+// same way, as `Root.Config`.
+import qs as RootCfg
 
 /**
  * The single resident Asura shell instance.
@@ -66,6 +73,34 @@ ShellRoot {
     // providers as surfaces migrate) at load rather than on the first keybind.
     ServiceLoader {
         services: [ShellState, ScreenTime, Keypresses, KeyboardLayout]
+    }
+
+    // The settings reader: the schemas' current values, through the tool.
+    //
+    // A process inside a singleton is a process that never runs. That is the
+    // one thing about a singleton the engine does not make work, and it is
+    // silent: the shell carries on and the value never arrives. So the root
+    // reads, the way the homegrown shell's root read, and pushes the answer
+    // into the wrapper (Config) the GSettings-backed settings are bound
+    // through. A write lands here as an IPC call to reloadSettings and the
+    // read runs again; nothing polls, because a shell that re-reads its
+    // settings on a clock redraws on a clock rather than on a change.
+    Process {
+        id: settingsReader
+        command: ["asura", "config", "values"]
+        running: true
+
+        stdout: StdioCollector {
+            id: settingsOut
+            waitForEnd: true
+            onStreamFinished: {
+                try {
+                    RootCfg.Config.values = JSON.parse(settingsOut.text);
+                } catch (error) {
+                    console.warn("Config: the settings could not be read:", error);
+                }
+            }
+        }
     }
 
     // The dim scrim; hypridle owns the idle clock (session/hyprland/hypridle.conf).
@@ -832,10 +867,26 @@ ShellRoot {
         // the screenshot itself with the compositor's screencopy.
         function toggleScreenshot(): void { root.toggleSurface("screenshot"); }
 
+        // Super+Shift+T opens the region selector in its one action, text
+        // recognition: a rectangle or a circle drawn on the screen, read
+        // with tesseract-ocr, and the words land on the clipboard. The
+        // compositor's configuration and the keybinding catalogue both name
+        // this function, so it may not rename alone.
+        function ocr(): void {
+            if (regionSelector.item)
+                regionSelector.item.ocr();
+        }
+
         // A Hub write to the idle keys lands here: hypridle reads its timeouts
         // when it starts, so `asura-idle apply` restarts it only if they changed.
-        // Every other setting is read reactively by the shell itself.
-        function reloadSettings(): void { Quickshell.execDetached(["asura-idle", "apply"]); }
+        // Every other setting is read by the reader at the root, which runs
+        // again here — the surfaces bind to the values it pushes, so they move
+        // under it with no further work.
+        function reloadSettings(): void {
+            settingsReader.running = false;
+            settingsReader.running = true;
+            Quickshell.execDetached(["asura-idle", "apply"]);
+        }
     }
 
     function toggleCheatsheet() {
@@ -887,6 +938,18 @@ ShellRoot {
     Loader {
         id: asuraSwitcher
         source: "Switcher.qml"
+    }
+
+    // The region selector, the vendored OCR surface: draw a rectangle or a
+    // circle, and the text inside it is recognised onto the clipboard. It is
+    // opened through the IPC bridge — the compositor's configuration and the
+    // keybinding catalogue both say `ocr` — and it closes itself when the
+    // selection ends. The Loader confines it the same way it confines the
+    // sheet and the switcher: a selector that will not load is a selector
+    // that does not open, not a desktop that does not boot.
+    Loader {
+        id: regionSelector
+        source: "modules/ii/regionSelector/RegionSelector.qml"
     }
 
     PanelWindow {

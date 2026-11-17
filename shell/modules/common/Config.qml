@@ -12,8 +12,9 @@ import qs as Root
 // the one that wins would depend on which surface you asked.
 //
 // So this file exposes upstream's shape — `Config.options.bar.height`,
-// `Config.options.appearance.fonts.main` — and every value comes from
-// `asura config export`. It has no writer, because there is nothing here
+// `Config.options.appearance.fonts.main` — and every value comes from the
+// wrapper at the shell root, which the shell's own reader fills from
+// `asura config values`. It has no writer, because there is nothing here
 // that owns a setting: a vendored component that wants to change one asks the
 // desktop to, and the desktop writes GSettings.
 //
@@ -96,6 +97,70 @@ Singleton {
 
         property QtObject background: QtObject {
             property string wallpaperPath: Root.Config.wallpaper
+        }
+
+        // The region selector: the OCR surface. The seven live knobs are the
+        // schema's keys, read through the wrapper; the rest are constants,
+        // each for the reason beside it.
+        property QtObject regionSelector: QtObject {
+            property QtObject targetRegions: QtObject {
+                // What the selection snaps to while drawing. Windows on,
+                // because that is the common case; layer surfaces opt in.
+                property bool windows: Root.Config.regionSelectorTargetWindows
+                property bool layers: Root.Config.regionSelectorTargetLayers
+                property bool showLabel: Root.Config.regionSelectorTargetLabels
+                // Content regions come from a text detection that upstream
+                // runs through a Python virtualenv the vendored kit does not
+                // carry, so there is nothing here to switch on.
+                property bool content: false
+                // How visible a snap target is while drawing. Constants: the
+                // Hub has no control for a real number, and a setting the
+                // Hub cannot show is a setting a user cannot change.
+                property real opacity: 0.3
+                property real contentRegionOpacity: 0.8
+                // Padding past a snap target's edge, so the stroke drawn on
+                // it is not half cut off by the edge itself.
+                property int selectionPadding: Root.Config.regionSelectorSelectionPadding
+            }
+            property QtObject rect: QtObject {
+                property bool showAimLines: Root.Config.regionSelectorAimLines
+            }
+            property QtObject circle: QtObject {
+                property int strokeWidth: Root.Config.regionSelectorCircleStrokeWidth
+                property int padding: Root.Config.regionSelectorCirclePadding
+            }
+            property QtObject annotation: QtObject {
+                // Upstream annotates the crop by piping it into swappy or
+                // satty. Asura's selector reaches the text recognition only,
+                // and the desktop's annotate-after-capture belongs to the
+                // screenshot tool, so the branch is never taken here.
+                property bool useSatty: false
+            }
+        }
+
+        // Upstream's image search uploads the crop somewhere and opens it in
+        // an engine's lens. Asura's selector reaches the text recognition
+        // only, so the URL is never read — it is here because the command
+        // builder the recognition shares is whole, not half a file.
+        property QtObject search: QtObject {
+            property QtObject imageSearch: QtObject {
+                property string imageSearchEngineBaseUrl: ""
+            }
+        }
+
+        // Where upstream's copy action additionally saves the crop. Empty is
+        // upstream's clipboard-only behaviour, which is also what Asura's
+        // selector does: its one action reads the temporary screenshot in
+        // place and never touches a save directory.
+        property QtObject screenSnip: QtObject {
+            property string savePath: ""
+        }
+
+        // The kit's interface language, read by its Translation service — the
+        // selector's cursor guide phrases its hints through it. "auto"
+        // follows the locale.
+        property QtObject language: QtObject {
+            property string ui: "auto"
         }
 
         // Scrolling. These are read by the kit's own flickable, so they exist

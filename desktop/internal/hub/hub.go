@@ -68,6 +68,20 @@ var Pages = []Page{
 			"org.asura.shell.favorites",
 		},
 	},
+	{
+		Slug:    "region-selector",
+		Title:   "Region Selector",
+		Summary: "What the OCR selection snaps to and how it draws",
+		Keys: []string{
+			"org.asura.shell.region-selector-target-windows",
+			"org.asura.shell.region-selector-target-layers",
+			"org.asura.shell.region-selector-target-labels",
+			"org.asura.shell.region-selector-aim-lines",
+			"org.asura.shell.region-selector-selection-padding",
+			"org.asura.shell.region-selector-circle-stroke-width",
+			"org.asura.shell.region-selector-circle-padding",
+		},
+	},
 }
 
 // Unread lists the settings that have a command and no page, because nothing in

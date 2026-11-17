@@ -969,6 +969,25 @@ func checkUnusedWrapperProperties(env Env, files []string) []Finding {
 		}
 	}
 
+	// The overlays. They are Asura's files at upstream's paths — the files
+	// the vendored components read their settings through — and the tree
+	// they sit in is upstream's, so the own/vendored partition above classes
+	// them as upstream's and never asks them. A wrapper property whose only
+	// reader is an overlay is a setting the shell reads, and reporting it
+	// dead is a false positive; the overlays are declared in overlayFiles
+	// (vendor.go), the same list the vendor script's EXCLUDE_FILES mirrors.
+	for path := range overlayFiles {
+		body, err := source(env, path)
+		if err != nil {
+			continue
+		}
+		for _, match := range regexp.MustCompile(
+			`\bConfig\.([A-Za-z_][A-Za-z0-9_]*)`,
+		).FindAllStringSubmatch(body, -1) {
+			used[match[1]] = true
+		}
+	}
+
 	var findings []Finding
 	for name := range declared {
 		if used[name] || wrapperExempt[name] {

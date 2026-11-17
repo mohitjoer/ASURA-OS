@@ -637,7 +637,7 @@ func vendorScriptExcludes(script string) []string {
 // A list that grows is a tree that is less and less upstream's, and it
 // grows one file at a time.
 func TestTheOverlayListStaysSmall(t *testing.T) {
-	if len(overlayFiles) > 6 {
+	if len(overlayFiles) > 8 {
 		t.Errorf("there are %d declared overrides; the list is a short one "+
 			"of the paths Asura supplies rather than takes", len(overlayFiles))
 	}

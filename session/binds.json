@@ -653,6 +653,14 @@
       "action": "asura-cmd-color-picker"
     },
     {
+      "id": "ocr",
+      "category": "tools",
+      "label": "Recognize the text in a screen region",
+      "chord": "SUPER + SHIFT + T",
+      "kind": "shell",
+      "action": "ocr"
+    },
+    {
       "id": "volume-up",
       "category": "media",
       "label": "Raise the volume",

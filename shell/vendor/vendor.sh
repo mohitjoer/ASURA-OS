@@ -77,6 +77,7 @@ modules/ii/sidebarRight
 modules/ii/overview
 modules/ii/notificationPopup
 modules/ii/onScreenDisplay
+modules/ii/regionSelector
 modules/ii/mediaControls
 modules/ii/cheatsheet
 modules/ii/background
@@ -118,6 +119,20 @@ GlobalStates.qml
 #                   the Material Symbol names onto the Font Awesome 4.7
 #                   codepoints the archive's font has, so the vendored
 #                   components' icons resolve instead of rendering nothing.
+#   ScreenshotAction.qml
+#                   upstream's screenshot-command builder. The one difference
+#                   is the OCR binary's name: upstream calls `tesseract`, and
+#                   on Void that name belongs to a game — the OCR engine is
+#                   packaged as `tesseract-ocr`, which is what Asura's version
+#                   calls. Every other branch is upstream's, unchanged.
+#   regionSelector/RegionSelector.qml
+#                   upstream's region-selector entry point, which registers
+#                   one IPC handler and one global shortcut for each of its
+#                   five actions. Asura's version reaches one action — text
+#                   recognition — through the shell's own IPC bridge, because
+#                   the desktop's other halves of the other actions already
+#                   exist elsewhere and an entry point for a missing command
+#                   is a control that runs nothing.
 #
 # They are Asura's files, in Asura's tree, at upstream's paths. That is the
 # overlay: the vendored components are upstream's, the context they run in is
@@ -127,6 +142,8 @@ modules/common/Appearance.qml
 modules/common/Config.qml
 modules/common/widgets/AppIcon.qml
 modules/common/widgets/MaterialSymbol.qml
+modules/common/utils/ScreenshotAction.qml
+modules/ii/regionSelector/RegionSelector.qml
 GlobalStates.qml
 "
 

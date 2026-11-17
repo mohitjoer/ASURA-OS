@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  org.asura.shell — bar layout, dock, widgets, launcher.
+  org.asura.shell — bar layout, dock, widgets, launcher, region selector.
 
   The shell daemon and asura-hub are the only writers. Hand-editing dconf
   directly causes drift and `asura doctor` reports it, which is the whole reason
@@ -116,6 +116,58 @@
       <range min="0" max="12"/>
       <summary>Launcher grid columns</summary>
       <description>0 means choose from the launcher's own width.</description>
+    </key>
+
+    <!-- ====================================================== region selector
+         The OCR surface: draw a rectangle or a circle, and the text inside it
+         is recognised and copied to the clipboard. These keys are the drawing
+         behaviour the vendored selector reads through its configuration
+         overlay, and the defaults are the values upstream ships, so a selector
+         at its defaults behaves as its authors measured it.
+         The two region opacities are constants in the overlay rather than keys
+         here, because the Hub has no control for a real number, and a key no
+         page can show is a command-line-only setting. -->
+    <key name="region-selector-target-windows" type="b">
+      <default>true</default>
+      <summary>Snap the selection to windows while drawing</summary>
+    </key>
+
+    <key name="region-selector-target-layers" type="b">
+      <default>false</default>
+      <summary>Snap the selection to layer surfaces while drawing</summary>
+    </key>
+
+    <key name="region-selector-target-labels" type="b">
+      <default>false</default>
+      <summary>Label the regions the selection snaps to</summary>
+    </key>
+
+    <key name="region-selector-aim-lines" type="b">
+      <default>true</default>
+      <summary>Draw guide lines through the pointer in rectangle mode</summary>
+    </key>
+
+    <key name="region-selector-selection-padding" type="i">
+      <default>5</default>
+      <range min="0" max="50"/>
+      <summary>Padding around a snapped region, in pixels</summary>
+      <description>
+        The border of a snapped region is the window's own edge, and a stroke
+        drawn exactly on it is a border half cut off. The padding grows the
+        captured rectangle past the edge by this much.
+      </description>
+    </key>
+
+    <key name="region-selector-circle-stroke-width" type="i">
+      <default>6</default>
+      <range min="1" max="24"/>
+      <summary>Stroke width of a circle selection, in pixels</summary>
+    </key>
+
+    <key name="region-selector-circle-padding" type="i">
+      <default>10</default>
+      <range min="0" max="50"/>
+      <summary>Padding around a circle selection, in pixels</summary>
     </key>
 
   </schema>
