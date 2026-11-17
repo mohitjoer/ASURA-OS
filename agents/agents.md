@@ -202,7 +202,8 @@ rules.
 
 ## Rules
 
-- [2026-11-01] Zed is the default code editor for ASURA OS.
+- [2026-11-17] end-4's desktop (`shell-end4/`) is the default shell. It is vendored byte for byte; change it only through an overlay listed in `shell-end4/asura/vendor.sh`, and keep `sh shell-end4/asura/vendor.sh verify` passing. Keyboard shortcuts do not change: a new or changed `asura ipc call asura ...` binding must be answered by `shell-end4/asura/AsuraBridge.qml` as well as by ASURA's shell.
+- [2026-11-17] Zed is the default **graphical** editor (mimeapps, the launcher); Neovim is the **terminal** editor (`$EDITOR`/`$VISUAL`, and the editor with no graphical session). Ship both; do not remove Neovim to "keep Zed the default". (Replaces the 2026-11-01 rule "Zed is the default code editor".)
 - [2026-11-01] The user-facing name of the operating system is ASURA OS (or ASURA). All user-visible branding across bootloader, Plymouth, os-release, motd, issue, Welcome tour, Fastfetch, settings headers, and installer must use ASURA OS.
 - [2026-10-29] The OS must not mention anything about Void Linux/Void OS; completely hide all upstream base branding across boot sequences, motd, issue, os-release, hostnames, and greetings.
 - [2026-10-29] ASURA OS uses Void Linux x86_64 (glibc) as its base operating system.

@@ -13,6 +13,11 @@
 -->
 <schemalist>
 
+  <enum id="org.asura.shell.DesktopShell">
+    <value nick="asura" value="0"/>
+    <value nick="end4" value="1"/>
+  </enum>
+
   <enum id="org.asura.shell.Edge">
     <value nick="top" value="0"/>
     <value nick="bottom" value="1"/>
@@ -140,6 +145,18 @@
     <key name="region-selector-target-labels" type="b">
       <default>false</default>
       <summary>Label the regions the selection snaps to</summary>
+    </key>
+
+    <key name="desktop-shell" enum="org.asura.shell.DesktopShell">
+      <default>'end4'</default>
+      <summary>Which desktop shell runs</summary>
+      <description>
+        end4 runs end-4's illogical-impulse desktop (bar, sidebars, overview,
+        dock, notifications, OSD, lock screen) from /usr/share/asura/shell-end4;
+        asura runs ASURA's own shell from /usr/share/asura/shell. Both answer
+        the same keybindings. Takes effect at the next login, or after
+        `sv restart ~/.local/share/asura/runit/quickshell`.
+      </description>
     </key>
 
     <key name="screen-corners" type="b">

@@ -216,7 +216,9 @@ if grep -Fq 'greetd' "$MANIFEST"; then
 fi
 grep -Fq 'zoxide' "$MANIFEST"
 grep -Fq 'fzf' "$MANIFEST"
-# neovim is intentionally NOT shipped: Zed is the default editor (agent rule).
+# Neovim is the terminal editor ($EDITOR); Zed is the graphical one (agent rule).
+grep -Eq '^[[:space:]]+- neovim$' "$MANIFEST"
+grep -Fq 'nvim' "$REPO_ROOT/apps/zsh/asura.zsh"
 grep -Fq 'zsh-autosuggestions' "$MANIFEST"
 grep -Fq 'zsh-syntax-highlighting' "$MANIFEST"
 grep -Fq 'eza' "$MANIFEST"

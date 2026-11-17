@@ -91,6 +91,10 @@ desktop:
     - qt6-qt5compat
     - qt6-position
     - qt6-shadertools
+    # end-4's desktop (shell-end4): app icons through Kirigami, and the
+    # syntax highlighting its sidebar uses.
+    - kf6-kirigami
+    - kf6-syntax-highlighting
     # Core utilities
     - dconf
     - glib
@@ -156,6 +160,10 @@ terminal-and-shell:
     - zsh
     - starship
     - fastfetch
+    # The terminal editor: $EDITOR/$VISUAL for git, sudoedit, crontab and
+    # visudo, and the editor that works with no graphical session (TTY, SSH,
+    # recovery). Zed stays the graphical default through mimeapps.
+    - neovim
     - zoxide
     - fzf
     - zsh-autosuggestions

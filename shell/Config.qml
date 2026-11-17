@@ -75,6 +75,12 @@ Singleton {
     // overlay at modules/common/Config.qml as upstream's fakeScreenRounding.
     readonly property bool screenCorners: shell.screenCorners ?? true
 
+    // Which desktop shell the session starts: "end4" (end-4's desktop, from
+    // /usr/share/asura/shell-end4) or "asura" (this shell). Read by the
+    // quickshell and asurad services at login; exposed here so the Hub and
+    // this shell can say which one is configured.
+    readonly property string desktopShell: shell.desktopShell ?? "end4"
+
     readonly property string wallpaper: dark
         ? (shell.wallpaperPathDark ?? "")
         : (shell.wallpaperPath ?? "")

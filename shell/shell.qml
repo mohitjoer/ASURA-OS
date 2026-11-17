@@ -96,11 +96,27 @@ ShellRoot {
             onStreamFinished: {
                 try {
                     RootCfg.Config.values = JSON.parse(settingsOut.text);
+                    root.noteDesktopFallback();
                 } catch (error) {
                     console.warn("Config: the settings could not be read:", error);
                 }
             }
         }
+    }
+
+    // The configured desktop is end-4's, yet this shell is running: the
+    // quickshell service fell back to it because the end-4 desktop kept
+    // exiting at start (system/runit/user-services/quickshell/run). Say so
+    // once, so a different-looking desktop has an explanation and a way back.
+    property bool desktopFallbackNoted: false
+    function noteDesktopFallback() {
+        if (root.desktopFallbackNoted || RootCfg.Config.desktopShell !== "end4")
+            return;
+        root.desktopFallbackNoted = true;
+        Quickshell.execDetached(["notify-send", "-a", "ASURA",
+            "The end-4 desktop did not start",
+            "ASURA's own desktop is running instead. Details: ~/.local/state/asura/quickshell.log. "
+            + "To stay on this desktop: Hub > Desktop & Dock > Which desktop shell runs."]);
     }
 
     // The dim scrim; hypridle owns the idle clock (session/hyprland/hypridle.conf).

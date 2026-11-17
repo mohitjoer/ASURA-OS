@@ -42,10 +42,47 @@ LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/asura"
 mkdir -p "$LOG_DIR"
 exec >>"$LOG_DIR/quickshell.log" 2>&1
 
-SHELL_DIR="${ASURA_SHELL_DIR:-/usr/share/asura/shell}"
+# Which desktop shell: org.asura.shell desktop-shell picks ASURA's own shell
+# (asura) or end-4's illogical-impulse desktop (end4). ASURA_DESKTOP_SHELL
+# overrides it for a test run, and ASURA_SHELL_DIR overrides the directory.
+DESKTOP_SHELL="${ASURA_DESKTOP_SHELL:-$(gsettings get org.asura.shell desktop-shell 2>/dev/null | tr -d "'")}"
+DESKTOP_SHELL="${DESKTOP_SHELL:-end4}"
+
+# A desktop that dies at once would leave the user with no bar, no launcher and
+# no way to reach the Hub to switch back. If the end-4 shell exits within 15
+# seconds three times in a row, this session falls back to ASURA's shell; the
+# log says so, and the next login tries end-4 again.
+CRASHES="$LOG_DIR/end4-quick-exits"
+if [ "$DESKTOP_SHELL" = "end4" ]; then
+	now=$(date +%s)
+	last=$(cat "$LOG_DIR/end4-last-start" 2>/dev/null || echo 0)
+	count=$(cat "$CRASHES" 2>/dev/null || echo 0)
+	if [ "$last" -gt 0 ] && [ $((now - last)) -lt 15 ]; then
+		count=$((count + 1))
+	else
+		count=0
+	fi
+	echo "$count" >"$CRASHES"
+	echo "$now" >"$LOG_DIR/end4-last-start"
+	if [ "$count" -ge 3 ]; then
+		echo "quickshell: the end-4 desktop exited within 15s three times; using ASURA's shell for this session" >&2
+		DESKTOP_SHELL=asura
+	fi
+fi
+
+case "$DESKTOP_SHELL" in
+	end4) DEFAULT_DIR=/usr/share/asura/shell-end4 ;;
+	*) DEFAULT_DIR=/usr/share/asura/shell ;;
+esac
+SHELL_DIR="${ASURA_SHELL_DIR:-$DEFAULT_DIR}"
+if [ ! -d "$SHELL_DIR" ]; then
+	echo "quickshell: $SHELL_DIR is missing; using ASURA's shell" >&2
+	SHELL_DIR=/usr/share/asura/shell
+fi
 if [ ! -d "$SHELL_DIR" ] && [ -d "$HOME/code/Asura-OS/shell" ]; then
 	SHELL_DIR="$HOME/code/Asura-OS/shell"
 fi
+echo "quickshell: starting the $DESKTOP_SHELL desktop from $SHELL_DIR"
 
 if ! command -v quickshell >/dev/null 2>&1 && [ ! -x /usr/bin/quickshell ]; then
 	echo "quickshell: binary not found; desktop shell unavailable" >&2

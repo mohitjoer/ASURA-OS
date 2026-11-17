@@ -478,6 +478,13 @@ if [ -d "$REPO_ROOT/session/sddm" ]; then
 	cp -r "$REPO_ROOT/session/sddm" "$INCLUDE_DIR/usr/share/asura/session/" 2>/dev/null || true
 fi
 cp -r "$REPO_ROOT/shell"/* "$INCLUDE_DIR/usr/share/asura/shell/"
+# end-4's desktop, the default shell (org.asura.shell desktop-shell = end4).
+# Its own scripts (shell-end4/asura) are build tooling and stay out of the image.
+mkdir -p "$INCLUDE_DIR/usr/share/asura/shell-end4"
+cp -r "$REPO_ROOT/shell-end4"/* "$INCLUDE_DIR/usr/share/asura/shell-end4/"
+rm -f "$INCLUDE_DIR/usr/share/asura/shell-end4/asura/vendor.sh" \
+	"$INCLUDE_DIR/usr/share/asura/shell-end4/asura/hyprlang.py" \
+	"$INCLUDE_DIR/usr/share/asura/shell-end4/asura/manifest.txt"
 cp -r "$REPO_ROOT/system/runit/user-services"/* "$INCLUDE_DIR/usr/share/asura/runit/services/"
 
 # Ensure XBPS tools are available (if running on a non-Void host, fetch xbps-static)

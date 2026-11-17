@@ -19,19 +19,19 @@ if [[ -s "$NVM_DIR/nvm.sh" ]]; then
   }
 fi
 
-# Editor selection: use GUI zed --wait when available in a display session,
-# falling back cleanly to terminal editors (nano, vi) on TTY, SSH, or headless
-if [[ -n "$DISPLAY" || -n "$WAYLAND_DISPLAY" ]] && command -v zed >/dev/null 2>&1; then
-  export EDITOR="${EDITOR:-zed --wait}" VISUAL="${VISUAL:-zed --wait}"
-else
-  for _editor in nano vi; do
-    if command -v "$_editor" >/dev/null 2>&1; then
-      export EDITOR="${EDITOR:-$_editor}" VISUAL="${VISUAL:-$_editor}"
-      break
-    fi
-  done
-  export EDITOR="${EDITOR:-nano}" VISUAL="${VISUAL:-nano}"
-fi
+# Editor selection. $EDITOR and $VISUAL are what terminal tools open: git
+# commit, sudoedit, crontab -e, visudo. They get a terminal editor, Neovim
+# first, so the same editor answers in a Ghostty window, a TTY, an SSH login
+# or a recovery shell, where Zed cannot start. Zed is the graphical default:
+# files opened from the desktop reach it through mimeapps. An EDITOR or
+# VISUAL already set (in ~/.zshrc, or `export EDITOR="zed --wait"`) wins.
+for _editor in nvim nano vi; do
+  if command -v "$_editor" >/dev/null 2>&1; then
+    export EDITOR="${EDITOR:-$_editor}" VISUAL="${VISUAL:-$_editor}"
+    break
+  fi
+done
+unset _editor
 
 [[ -o interactive ]] || return
 

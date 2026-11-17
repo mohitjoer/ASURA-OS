@@ -67,6 +67,7 @@ var Pages = []Page{
 			"org.asura.shell.dock-autohide",
 			"org.asura.shell.favorites",
 			"org.asura.shell.screen-corners",
+			"org.asura.shell.desktop-shell",
 		},
 	},
 	{
