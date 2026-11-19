@@ -260,6 +260,9 @@ jobs:
       - name: apply-repo mirrors the ISO build
         run: |
           sh installation/apply-repo_test.sh
+      - name: Shellcheck migrations
+        run: |
+          shellcheck -S warning migrations/*/*.sh
 
   # ==========================================================================
   # PART 7: Contract tests

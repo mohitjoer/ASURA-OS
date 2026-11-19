@@ -486,6 +486,22 @@ rm -f "$INCLUDE_DIR/usr/share/asura/shell-end4/asura/vendor.sh" \
 	"$INCLUDE_DIR/usr/share/asura/shell-end4/asura/hyprlang.py" \
 	"$INCLUDE_DIR/usr/share/asura/shell-end4/asura/manifest.txt"
 cp -r "$REPO_ROOT/system/runit/user-services"/* "$INCLUDE_DIR/usr/share/asura/runit/services/"
+# Migrations: shipped one-time fixes start marked done on a fresh install.
+mkdir -p "$INCLUDE_DIR/usr/share/asura/migrations"
+cp -r "$REPO_ROOT/migrations"/* "$INCLUDE_DIR/usr/share/asura/migrations/"
+find "$INCLUDE_DIR/usr/share/asura/migrations" -type f -name '*.sh' -exec chmod 0755 {} +
+
+mkdir -p "$INCLUDE_DIR/var/lib/asura/migrations"
+for f in "$REPO_ROOT/migrations/system"/*.sh; do
+	[ -e "$f" ] || continue
+	printf 'marked done\n' >"$INCLUDE_DIR/var/lib/asura/migrations/$(basename "$f")"
+done
+
+mkdir -p "$INCLUDE_DIR/etc/skel/.local/state/asura/migrations"
+for f in "$REPO_ROOT/migrations/user"/*.sh; do
+	[ -e "$f" ] || continue
+	printf 'marked done\n' >"$INCLUDE_DIR/etc/skel/.local/state/asura/migrations/$(basename "$f")"
+done
 # The commit this image is built from: asura update compares it with the
 # branch, so a fresh install knows whether there is anything newer.
 git -c safe.directory='*' -C "$REPO_ROOT" rev-parse HEAD >"$INCLUDE_DIR/usr/share/asura/applied-commit" 2>/dev/null ||
@@ -1078,6 +1094,8 @@ cp -a "$ROOTFS/etc/skel/.config/fastfetch"/* "$ROOTFS/home/asura/.config/fastfet
 cp -a "$ROOTFS/etc/skel/.config/opencode" "$ROOTFS/home/asura/.config/" 2>/dev/null || true
 cp -a "$ROOTFS/etc/skel/.agents" "$ROOTFS/home/asura/" 2>/dev/null || true
 cp -a "$ROOTFS/etc/skel/.zshrc" "$ROOTFS/home/asura/.zshrc" 2>/dev/null || true
+mkdir -p "$ROOTFS/home/asura/.local/state/asura"
+cp -a "$INCLUDE_DIR/etc/skel/.local/state/asura/migrations" "$ROOTFS/home/asura/.local/state/asura/" 2>/dev/null || true
 chroot "$ROOTFS" su - asura -c "asura materialize" 2>/dev/null || true
 chroot "$ROOTFS" su - asura -c "xdg-user-dirs-update" 2>/dev/null || true
 chroot "$ROOTFS" chown -R asura:asura /home/asura 2>/dev/null || true

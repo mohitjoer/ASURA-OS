@@ -58,10 +58,12 @@ for f in \
 	usr/share/glib-2.0/schemas/org.asura.shell.gschema.xml \
 	usr/bin/asura-session \
 	usr/bin/asura-installer \
+	usr/share/asura/migrations/system/1795180000.sh \
 	etc/nftables.conf; do
 	[ -e "$T/root/$f" ] || { echo "apply-repo_test: $f was not installed" >&2; exit 1; }
 done
 # The end-4 build tooling stays out of the system.
 [ ! -e "$T/root/usr/share/asura/shell-end4/asura/vendor.sh" ] || { echo "apply-repo_test: vendor.sh was installed" >&2; exit 1; }
 [ -x "$T/root/usr/bin/asura-session" ] || { echo "apply-repo_test: asura-session is not executable" >&2; exit 1; }
+[ -x "$T/root/usr/share/asura/migrations/system/1795180000.sh" ] || { echo "apply-repo_test: migration script is not executable" >&2; exit 1; }
 echo "apply-repo_test: ok"

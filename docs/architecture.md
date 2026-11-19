@@ -316,6 +316,7 @@ rule is what makes rollback possible.
 | `asura rollback` | re-materialize the previous revision |
 | `asura materialize <path>` | re-lay the base file, clobbering shipped content |
 | `asura reset <path>` | drop one overlay file back to the base |
+| `asura migrate` | run one-time system and user migrations that have not run yet (`--pending`, `--list`, `--mark-done`) |
 | `asura doctor` | report drift between base and overlay |
 
 A user override always wins at its mirrored path, and `asura update` can never clobber it.
