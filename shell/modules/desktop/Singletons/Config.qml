@@ -119,6 +119,21 @@ Singleton {
     property alias notesColor2:   adapter.notesColor2
     property alias notesGradient: adapter.notesGradient
 
+    // battery widget ----------------------------------------------------------
+    property bool batteryEnabled: adapter.batteryEnabled
+    property string batteryDesign: adapter.batteryDesign   // default | minimal | compact
+    property real batteryScale:   adapter.batteryScale
+    property string batteryAnchor:  adapter.batteryAnchor   // top-left .. center .. bottom-right | free
+    property int batteryX:       adapter.batteryX        // free placement, monitor pixels
+    property int batteryY:       adapter.batteryY
+    property bool batteryLocked:  adapter.batteryLocked   // prevent drag/resize
+    property real batteryOpacity: adapter.batteryOpacity
+    property string batteryBg:      adapter.batteryBg        // none | card | glass
+    property int batteryRadius:  adapter.batteryRadius
+    property string batteryColor:    adapter.batteryColor
+    property string batteryColor2:   adapter.batteryColor2
+    property bool batteryGradient: adapter.batteryGradient
+
     // brand: the desktop's mark + name, user-overridable from Asura Settings ->
     // Shell -> Global. a small cross-cutting identity master (like theme.json).
     // markText is the glyph/short-text seal (default A); markImage an optional
@@ -275,6 +290,20 @@ Singleton {
             property string notesColor: ""
             property string notesColor2: ""
             property bool notesGradient: false
+            // battery widget --------------------------------------------------------
+            property bool batteryEnabled: true
+            property string batteryDesign: "default"
+            property real batteryScale: 1.0
+            property string batteryAnchor: "top-right"
+            property int batteryX: 80
+            property int batteryY: 80
+            property bool batteryLocked: false
+            property real batteryOpacity: 1.0
+            property string batteryBg: "none"
+            property int batteryRadius: 8
+            property string batteryColor: ""
+            property string batteryColor2: ""
+            property bool batteryGradient: false
         }
     }
 

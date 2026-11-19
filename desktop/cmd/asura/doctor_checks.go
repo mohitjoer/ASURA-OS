@@ -357,7 +357,7 @@ func reportCoreServices(root string, fix bool) int {
 
 // reportUserAudioServices checks that PipeWire and WirePlumber user services
 // are configured or running under turnstiled.
-func reportUserAudioServices(root string, fix bool) int {
+func reportUserAudioServices(root string, _ bool) int {
 	fmt.Println()
 	fmt.Println("Audio Services (PipeWire & WirePlumber)")
 	audioServices := []string{"pipewire", "wireplumber"}
@@ -683,4 +683,36 @@ func reportDesktopShell(root string, run runner.Func) int {
 		return exitFail
 	}
 	return exitOK
+}
+
+// reportMigrationState says whether this machine and user have one-time fixes
+// waiting or failed. Pending ones are not a failure (the next update runs
+// them); a failed one is.
+func reportMigrationState(root string) int {
+	fmt.Println()
+	fmt.Println("Migrations")
+	if root != "" {
+		fmt.Println("  not checked: they describe the running machine, not a --root tree")
+		return exitOK
+	}
+	code := exitOK
+	for _, kind := range []string{"system", "user"} {
+		pending, failed := pendingMigrations(kind)
+		switch {
+		case len(failed) > 0:
+			code = exitFail
+			fmt.Printf("  %-8s %d FAILED (%s); see %s\n", kind, len(failed), strings.Join(failed, ", "), migrationLog(kind))
+			fmt.Printf("  %-8s asura update (or asura migrate) runs them again\n", "")
+		case pending > 0:
+			fmt.Printf("  %-8s %d pending; the next asura update runs them\n", kind, pending)
+		default:
+			fmt.Printf("  %-8s all done\n", kind)
+		}
+	}
+	return code
+}
+
+func migrationLog(kind string) string {
+	_, state := migrationDirs(kind)
+	return filepath.Join(filepath.Dir(state), "migrate.log")
 }

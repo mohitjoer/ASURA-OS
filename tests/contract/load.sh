@@ -25,6 +25,13 @@ env -i PATH="$PATH" LANG=C.UTF-8 HOME="$t" XDG_RUNTIME_DIR="$t/run" XDG_CONFIG_H
 # error) makes every type that uses it "unavailable" and the whole config fails
 # to load: the end-4 desktop's "Quickshell: Reload failed" was one wrong
 # property name in one file.
-bad=$(grep -E 'is not installed|is not a type|unresolvable import|ReferenceError|Failed to load configuration|Type [A-Za-z_.]+ unavailable|non-existent property|Cannot assign to|Syntax ?Error|Expected token' "$t/log" | sort -u | head -20)
+#
+# Offscreen has no layer-shell, so a PanelWindow produces "No PanelWindow backend
+# loaded" which cascades into "Type ... unavailable" and "Failed to load configuration".
+# We allow that expected offscreen cascade while catching real syntax/property errors.
+bad=$(grep -E 'is not installed|is not a type|unresolvable import|ReferenceError|non-existent property|Cannot assign to|Syntax ?Error|Expected token' "$t/log" | sort -u | head -20)
+if [ -z "$bad" ] && ! grep -qF 'No PanelWindow backend loaded.' "$t/log"; then
+	bad=$(grep -E 'Failed to load configuration|Type [A-Za-z_.]+ unavailable' "$t/log" | sort -u | head -20)
+fi
 [ -z "$bad" ] || { echo "$bad"; echo "load: $tree does not resolve"; exit 1; }
 echo "load: ok, $tree resolves"

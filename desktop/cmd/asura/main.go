@@ -152,6 +152,7 @@ var helpText = map[string]string{
 	"plugin":      pluginUsageText,
 	"power":       powerUsage,
 	"refresh":     refreshUsage,
+	"migrate":     migrateUsage,
 	"reload":      reloadUsage,
 	"role":        roleUsage,
 	"wm":          wmUsage,

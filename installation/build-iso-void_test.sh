@@ -262,6 +262,11 @@ grep -Fq 'qemu64' "$REPO_ROOT/installation/ci/qemu-boot-test.sh"
 grep -Fq 'installation/ci/qemu-boot-test.sh' "$REPO_ROOT/.github/actions/build-iso/action.yml"
 grep -Fq './.github/actions/build-iso' "$REPO_ROOT/.github/workflows/ci.yml"
 
+# Migrations staging and fresh-install markers
+grep -Fq 'usr/share/asura/migrations' "$SCRIPT"
+grep -Fq 'var/lib/asura/migrations' "$SCRIPT"
+grep -Fq 'etc/skel/.local/state/asura/migrations' "$SCRIPT"
+
 echo "build-iso-void_test: ok"
 
 

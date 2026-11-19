@@ -64,7 +64,7 @@ func gateFixture(t *testing.T, states map[int]string) (clone string, commits []s
 	origin := t.TempDir()
 	git(t, origin, "init", "-q", "-b", "dev-unstable")
 	for i := 0; i < 3; i++ {
-		os.WriteFile(filepath.Join(origin, "f"), []byte(fmt.Sprint(i)), 0o644)
+		os.WriteFile(filepath.Join(origin, "f"), fmt.Append(nil, i), 0o644)
 		git(t, origin, "add", "f")
 		git(t, origin, "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", fmt.Sprint("c", i))
 		commits = append(commits, strings.TrimSpace(git(t, origin, "rev-parse", "HEAD")))

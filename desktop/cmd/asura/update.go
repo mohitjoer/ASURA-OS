@@ -125,6 +125,15 @@ func asuraUpdate(args []string) int {
 				asuraErr = err
 				fmt.Fprintf(os.Stderr, "asura update: ASURA was not updated: %v\n", err)
 			}
+			// The one-time fixes this machine has not had yet, run by the
+			// binary just applied, so a migration added in this update runs
+			// with the code that knows about it.
+			if *root == "" {
+				fmt.Println("==> Running one-time fixes (migrations)...")
+				if err := runUpdateMigrations(); err != nil && asuraErr == nil {
+					asuraErr = err
+				}
+			}
 			return nil
 		}
 	} else {
@@ -502,6 +511,20 @@ func gitOut(repoDir string, args ...string) string {
 func isUpdateCache(repoDir string) bool {
 	return strings.HasSuffix(repoDir, filepath.Join(".cache", "asura", "source")) ||
 		repoDir == "/var/cache/asura/source"
+}
+
+// runUpdateMigrations runs `asura migrate` from the installed binary: system
+// migrations as root (through sudo), then the user's (as SUDO_USER when the
+// update runs under sudo).
+func runUpdateMigrations() error {
+	bin := "/usr/bin/asura"
+	if _, err := os.Stat(bin); err != nil {
+		bin = selfPath()
+	}
+	if code := runSelf([]string{bin, "migrate"}); code != exitOK {
+		return fmt.Errorf("a migration failed (asura migrate --list shows which); it runs again on the next update")
+	}
+	return nil
 }
 
 // followBranch fetches branch and picks the commit to apply: the newest one
