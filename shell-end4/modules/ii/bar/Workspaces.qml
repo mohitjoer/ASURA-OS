@@ -70,6 +70,7 @@ ButtonMouseArea {
         // ASURA Logo Button
         Rectangle {
             id: asuraLogoBtn
+            readonly property bool hovered: logoMouse.containsMouse
             implicitWidth: root.workspaceButtonWidth + 2
             implicitHeight: root.workspaceButtonWidth
             radius: 4
@@ -105,6 +106,7 @@ ButtonMouseArea {
             }
 
             StyledToolTip {
+                extraVisibleCondition: logoMouse.containsMouse
                 text: Translation.tr("ASURA Menu (Super)")
             }
         }
@@ -166,6 +168,7 @@ ButtonMouseArea {
                 }
 
                 StyledToolTip {
+                    extraVisibleCondition: wsMouse.containsMouse
                     text: ws.mainWindow ? `${ws.modelData}: ${ws.mainWindow.title || ws.mainWindow.class}` : Translation.tr("Workspace %1").arg(ws.modelData)
                 }
             }
@@ -174,6 +177,7 @@ ButtonMouseArea {
         // Add tab (+) button
         Rectangle {
             id: addTabButton
+            readonly property bool hovered: addTabMouse.containsMouse
             implicitWidth: root.workspaceButtonWidth
             implicitHeight: root.workspaceButtonWidth
             radius: 4
@@ -205,6 +209,7 @@ ButtonMouseArea {
             }
 
             StyledToolTip {
+                extraVisibleCondition: addTabMouse.containsMouse
                 text: Translation.tr("New workspace")
             }
         }
