@@ -176,7 +176,7 @@ func asuraDoctor(args []string) int {
 // where nothing else has gone wrong, which is the machine where a silently
 // misread portal configuration or a registration pointing at nothing would go
 // unnoticed.
-func reportSessionChecks(root string, paths overlay.Paths, fix bool) int {
+func reportSessionChecks(root string, _ overlay.Paths, fix bool) int {
 	code := reportPortals(root)
 	if registrationCode := reportRegistrations(root); registrationCode != exitOK {
 		code = registrationCode

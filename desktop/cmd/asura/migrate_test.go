@@ -204,7 +204,7 @@ func TestFailingMigrationStopsAndRetries(t *testing.T) {
 	}
 
 	// Fix script 2
-	s2Fixed := fmt.Sprintf("#!/bin/sh\necho \"Step 2 repaired\"\nexit 0\n")
+	s2Fixed := "#!/bin/sh\necho \"Step 2 repaired\"\nexit 0\n"
 	os.WriteFile(f2, []byte(s2Fixed), 0o755)
 
 	out.Reset()
