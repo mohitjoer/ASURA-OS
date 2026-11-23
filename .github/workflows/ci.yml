@@ -42,8 +42,8 @@ jobs:
     timeout-minutes: 10
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-go@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: system/hardware/go.mod
           cache-dependency-path: system/hardware/go.mod
@@ -63,8 +63,8 @@ jobs:
     timeout-minutes: 10
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-go@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: desktop/go.mod
           cache-dependency-path: |
@@ -93,7 +93,7 @@ jobs:
     timeout-minutes: 5
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Both modules declare the same Go version
         run: |
           declared() { sed -n 's/^go[[:space:]][[:space:]]*\([0-9][0-9.]*\).*/\1/p' "$1"; }
@@ -112,8 +112,8 @@ jobs:
     timeout-minutes: 10
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-go@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: desktop/go.mod
           cache-dependency-path: |
@@ -141,7 +141,7 @@ jobs:
     timeout-minutes: 10
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: session/session_test.sh
         run: sh session/session_test.sh
       - name: session/greeter_test.sh
@@ -155,7 +155,7 @@ jobs:
     timeout-minutes: 10
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: shell/shell_test.sh
         run: sh shell/shell_test.sh
       - name: end-4 desktop is byte-identical to its pin (shell-end4)
@@ -219,7 +219,7 @@ jobs:
     timeout-minutes: 5
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Shell syntax check — release scripts
         run: |
           for f in session/*.sh session/**/*.sh installation/*.sh system/helpers/**/*.sh tests/**/*.sh; do
@@ -239,8 +239,8 @@ jobs:
     timeout-minutes: 15
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-go@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: desktop/go.mod
           cache-dependency-path: |
@@ -259,7 +259,7 @@ jobs:
     timeout-minutes: 60
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       # Build, rootfs check and QEMU boot test are shared with release.yml, so a
       # release is built and tested by exactly the steps every CI run uses.
       - name: Build, verify and boot-test the ISO
@@ -269,7 +269,7 @@ jobs:
         run: sha256sum "${{ steps.iso.outputs.iso }}" | tee "${{ steps.iso.outputs.iso }}.sha256"
       - name: Upload QEMU Boot Artifacts (Screenshot & Serial Log)
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: asura-boot-test-artifacts
           path: |
@@ -278,7 +278,7 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
       - name: Upload ISO artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: asura-os-iso
           path: |
@@ -309,7 +309,7 @@ jobs:
       matrix:
         mode: [plain, luks]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Enable KVM for the boot test
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -319,7 +319,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends qemu-system-x86 cryptsetup parted
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: asura-os-iso
           path: iso
@@ -329,7 +329,7 @@ jobs:
           sh installation/ci/installer-e2e.sh "$iso" "${{ matrix.mode }}" "$RUNNER_TEMP/installer-e2e"
       - name: Upload the install log and serial console
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: installer-e2e-${{ matrix.mode }}
           path: ${{ runner.temp }}/installer-e2e/

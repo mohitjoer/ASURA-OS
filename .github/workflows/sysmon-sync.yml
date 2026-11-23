@@ -40,12 +40,12 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Check out ASURA-OS
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 1
 
       - name: Check out standalone asura-sysmon
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: ASURA-OS/asura-sysmon
           ref: main
@@ -53,7 +53,7 @@ jobs:
           fetch-depth: 1
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v7
         with:
           go-version-file: desktop/go.mod
 
