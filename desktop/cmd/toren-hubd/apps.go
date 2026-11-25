@@ -1,11 +1,11 @@
 package main
 
 import (
-	"toren/desktop/cmd/toren-hubd/internal/wm"
 	"encoding/json"
 	"os"
 	"os/exec"
 	"strings"
+	"toren/desktop/cmd/toren-hubd/internal/wm"
 )
 
 // Default Apps: the swappable roles the Default Apps page offers, each with a

@@ -11,7 +11,6 @@ package main
 // error.
 
 import (
-	"toren/desktop/cmd/toren-hubd/internal/wm"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -20,6 +19,7 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"toren/desktop/cmd/toren-hubd/internal/wm"
 )
 
 // pendingWrite is one file apply will replace; confCheck marks hyprlang output that
