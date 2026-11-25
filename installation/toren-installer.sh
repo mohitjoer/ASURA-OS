@@ -353,6 +353,8 @@ if [ "$ENCRYPT_DISK" -eq 1 ]; then
 		LUKS_PASS="$CFG_LUKS_PASS"
 	elif [ -n "${CFG_LUKS_PASS_FILE:-}" ] && [ -f "$CFG_LUKS_PASS_FILE" ]; then
 		LUKS_PASS=$(head -n 1 "$CFG_LUKS_PASS_FILE" | tr -d '\r\n')
+	elif [ -n "${TOREN_LUKS_PASSPHRASE_FILE:-}" ] && [ -f "$TOREN_LUKS_PASSPHRASE_FILE" ]; then
+		LUKS_PASS=$(head -n 1 "$TOREN_LUKS_PASSPHRASE_FILE" | tr -d '\r\n')
 	elif [ -n "${ASURA_LUKS_PASSPHRASE_FILE:-}" ] && [ -f "$ASURA_LUKS_PASSPHRASE_FILE" ]; then
 		LUKS_PASS=$(head -n 1 "$ASURA_LUKS_PASSPHRASE_FILE" | tr -d '\r\n')
 	fi
@@ -639,7 +641,7 @@ if [ "$DRY_RUN" -eq 1 ]; then
 		printf "  2. Pre-flight verification: UEFI verified, BitLocker inactive, NTFS clean, ESP preserved at %s\n" "${PART_EFI:-${TARGET_DISK}p1}"
 		printf "  3. Allocate partition(s) into contiguous unallocated free space on %s\n" "$TARGET_DISK"
 		if [ "$ENCRYPT_DISK" -eq 1 ]; then
-			printf "     Format unencrypted /boot partition and root partition with LUKS2 (argon2id, label ASURA_CRYPT)\n"
+			printf "     Format unencrypted /boot partition and root partition with LUKS2 (argon2id, label TOREN_CRYPT)\n"
 			printf "     Open LUKS container as /dev/mapper/toren_root\n"
 		fi
 		printf "  4. Format root filesystem with %s (never wipe disk or existing partitions)\n" "$FS_DISPLAY"
@@ -657,7 +659,7 @@ if [ "$DRY_RUN" -eq 1 ]; then
 		else
 			printf "  1. Partition %s (MBR: 1GB unencrypted /boot with boot flag, LUKS2 root)\n" "$TARGET_DISK"
 		fi
-		printf "  2. Format root partition with LUKS2 (argon2id, label ASURA_CRYPT)\n"
+		printf "  2. Format root partition with LUKS2 (argon2id, label TOREN_CRYPT)\n"
 		printf "  3. Open LUKS container as /dev/mapper/toren_root\n"
 		printf "  4. Format /boot with ext4 and /dev/mapper/toren_root with %s\n" "$FS_DISPLAY"
 		if [ "$FS_CHOICE" != "2" ]; then
@@ -714,7 +716,7 @@ if [ "$DUAL_BOOT" -eq 1 ]; then
 
 	if [ "$ENCRYPT_DISK" -eq 1 ]; then
 		boot_end=$((slice_start + 1024))
-		parted -s "$TARGET_DISK" mkpart "ASURA_BOOT" ext4 "${slice_start}MiB" "${boot_end}MiB"
+		parted -s "$TARGET_DISK" mkpart "TOREN_BOOT" ext4 "${slice_start}MiB" "${boot_end}MiB"
 		parted -s "$TARGET_DISK" mkpart "TorenRoot" "${boot_end}MiB" "${slice_end}MiB"
 		# Find newly created partition names
 		new_parts=$(lsblk -l -n -o NAME,TYPE "$TARGET_DISK" 2>/dev/null | grep 'part' | awk '{print $1}' | tail -n2)
@@ -737,7 +739,7 @@ else
 			parted -s "$TARGET_DISK" mklabel gpt
 			parted -s "$TARGET_DISK" mkpart "ESP" fat32 1MiB 513MiB
 			parted -s "$TARGET_DISK" set 1 esp on
-			parted -s "$TARGET_DISK" mkpart "ASURA_BOOT" ext4 513MiB 1537MiB
+			parted -s "$TARGET_DISK" mkpart "TOREN_BOOT" ext4 513MiB 1537MiB
 			parted -s "$TARGET_DISK" mkpart "TorenRoot" 1537MiB 100%
 		else
 			parted -s "$TARGET_DISK" mklabel msdos
@@ -809,16 +811,16 @@ if [ "$IS_UEFI" -eq 1 ]; then
 	if [ "$DUAL_BOOT" -eq 1 ]; then
 		printf "  Dual-boot mode: preserving existing ESP at %s\n" "$PART_EFI"
 	else
-		mkfs.vfat -F 32 -n "ASURA_ESP" "$PART_EFI"
+		mkfs.vfat -F 32 -n "TOREN_ESP" "$PART_EFI"
 	fi
 fi
 
 if [ "$ENCRYPT_DISK" -eq 1 ]; then
 	printf "  Formatting separate /boot partition (%s) with ext4...\n" "$PART_BOOT"
-	mkfs.ext4 -F -L "ASURA_BOOT" "$PART_BOOT"
+	mkfs.ext4 -F -L "TOREN_BOOT" "$PART_BOOT"
 
 	printf "  Encrypting root partition (%s) with LUKS2 (argon2id)...\n" "$PART_ROOT_RAW"
-	printf '%s' "$LUKS_PASS" | cryptsetup luksFormat --type luks2 --pbkdf argon2id --label ASURA_CRYPT --batch-mode --key-file=- "$PART_ROOT_RAW"
+	printf '%s' "$LUKS_PASS" | cryptsetup luksFormat --type luks2 --pbkdf argon2id --label TOREN_CRYPT --batch-mode --key-file=- "$PART_ROOT_RAW"
 	printf '%s' "$LUKS_PASS" | cryptsetup open --key-file=- "$PART_ROOT_RAW" toren_root
 	PART_ROOT_FS="/dev/mapper/toren_root"
 else
@@ -829,7 +831,7 @@ mkdir -p "$TARGET_DIR"
 
 if [ "$FS_CHOICE" != "2" ] && command -v mkfs.btrfs >/dev/null 2>&1; then
 	printf "  Formatting root with Btrfs and creating subvolumes (@, @home, @snapshots)...\n"
-	mkfs.btrfs -f -L "ASURA_ROOT" "$PART_ROOT_FS"
+	mkfs.btrfs -f -L "TOREN_ROOT" "$PART_ROOT_FS"
 	FS_TYPE="btrfs"
 	BTRFS_BASE_OPTS="defaults,noatime,compress=zstd:1"
 	
@@ -850,7 +852,7 @@ if [ "$FS_CHOICE" != "2" ] && command -v mkfs.btrfs >/dev/null 2>&1; then
 	mount -t btrfs -o "$BTRFS_BASE_OPTS,subvol=@snapshots" "$PART_ROOT_FS" "$TARGET_DIR/.snapshots"
 else
 	printf "  Formatting root with ext4...\n"
-	mkfs.ext4 -F -L "ASURA_ROOT" "$PART_ROOT_FS"
+	mkfs.ext4 -F -L "TOREN_ROOT" "$PART_ROOT_FS"
 	FS_TYPE="ext4"
 	mount -t ext4 -o defaults,noatime "$PART_ROOT_FS" "$TARGET_DIR"
 fi
@@ -1010,6 +1012,13 @@ else
 	chroot "$TARGET_DIR" usermod -aG wheel,_seatd,video,audio,input,storage,network,toren-hw,docker "$USERNAME_INPUT"
 fi
 
+# Materialize toren configuration for newly created user
+chroot "$TARGET_DIR" su - "$USERNAME_INPUT" -c "toren materialize" 2>/dev/null || true
+if [ -f "$TARGET_DIR/etc/skel/.zshrc" ] && [ ! -f "$TARGET_DIR/home/$USERNAME_INPUT/.zshrc" ]; then
+	cp "$TARGET_DIR/etc/skel/.zshrc" "$TARGET_DIR/home/$USERNAME_INPUT/.zshrc" 2>/dev/null || true
+	chroot "$TARGET_DIR" chown -R "$USERNAME_INPUT:$USERNAME_INPUT" "/home/$USERNAME_INPUT" 2>/dev/null || true
+fi
+
 # Set password for primary user with explicit SHA512 encryption or pre-computed hash
 if [ -n "${USER_PASS_HASH:-}" ]; then
 	chroot "$TARGET_DIR" usermod -p "$USER_PASS_HASH" "$USERNAME_INPUT"
@@ -1116,8 +1125,8 @@ cat >"$TARGET_DIR/etc/sudoers.d/zz-toren-session" <<'SUDOERS'
 # granted because sudo resolves a bare name through secure_path, where
 # /usr/sbin precedes /usr/bin. The file name sorts after "wheel" because
 # sudo applies the last matching sudoers entry.
-Cmnd_Alias ASURA_SESSION_PLYMOUTH = /usr/bin/plymouth --quit, /usr/sbin/plymouth --quit, /usr/bin/killall -9 plymouthd, /usr/sbin/killall -9 plymouthd, /usr/bin/pkill -9 -x plymouthd, /usr/sbin/pkill -9 -x plymouthd
-%wheel ALL=(root) NOPASSWD: ASURA_SESSION_PLYMOUTH
+Cmnd_Alias TOREN_SESSION_PLYMOUTH = /usr/bin/plymouth --quit, /usr/sbin/plymouth --quit, /usr/bin/killall -9 plymouthd, /usr/sbin/killall -9 plymouthd, /usr/bin/pkill -9 -x plymouthd, /usr/sbin/pkill -9 -x plymouthd
+%wheel ALL=(root) NOPASSWD: TOREN_SESSION_PLYMOUTH
 SUDOERS
 chmod 0440 "$TARGET_DIR/etc/sudoers.d/zz-toren-session"
 

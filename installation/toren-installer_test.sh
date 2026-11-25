@@ -25,7 +25,7 @@ OUT_ENCRYPT="$TMP_DIR/out_encrypt.txt"
 PASS_FILE="$TMP_DIR/passphrase.txt"
 printf "testpassphrase123\n" > "$PASS_FILE"
 
-ASURA_LUKS_PASSPHRASE_FILE="$PASS_FILE" sh "$INSTALLER" --dry-run --encrypt /dev/sda <<'EOF' > "$OUT_ENCRYPT" 2>&1
+TOREN_LUKS_PASSPHRASE_FILE="$PASS_FILE" ASURA_LUKS_PASSPHRASE_FILE="$PASS_FILE" sh "$INSTALLER" --dry-run --encrypt /dev/sda <<'EOF' > "$OUT_ENCRYPT" 2>&1
 1
 test-host
 test-user
@@ -38,7 +38,7 @@ grep -Fq "LUKS2 (argon2id)" "$OUT_ENCRYPT" || {
 	echo "toren-installer_test: missing LUKS2 in specification summary" >&2
 	exit 1
 }
-grep -Fq "Format root partition with LUKS2 (argon2id, label ASURA_CRYPT)" "$OUT_ENCRYPT" || {
+grep -Fq "Format root partition with LUKS2 (argon2id, label TOREN_CRYPT)" "$OUT_ENCRYPT" || {
 	echo "toren-installer_test: missing LUKS2 formatting step in dry-run summary" >&2
 	exit 1
 }

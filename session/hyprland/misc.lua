@@ -8,6 +8,7 @@ hl.config({
         allow_session_lock_restore = true,
         animate_manual_resizes = true,
         disable_xdg_env_checks = true,
+        disable_hyprland_guiutils_check = true,
     },
     xwayland = {
         force_zero_scaling = true,

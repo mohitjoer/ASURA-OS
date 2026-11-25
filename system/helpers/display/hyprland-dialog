@@ -1,0 +1,9 @@
+#!/bin/sh
+# hyprland-dialog fallback for Toren Linux
+# Provides a graceful dialog interface when Hyprland requests an alert or ANR prompt
+if command -v zenity >/dev/null 2>&1; then
+	exec zenity --info --text="$*" 2>/dev/null
+elif command -v notify-send >/dev/null 2>&1; then
+	exec notify-send "Hyprland" "$*" 2>/dev/null
+fi
+exit 0

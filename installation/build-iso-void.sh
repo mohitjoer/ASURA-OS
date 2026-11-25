@@ -1,9 +1,9 @@
 #!/bin/sh
-# Build a bootable Asura live ISO using Void Linux x86_64 (glibc) base and void-mklive.
+# Build a bootable Toren live ISO using Void Linux x86_64 (glibc) base and void-mklive.
 #
 # Usage: installation/build-iso-void.sh [build-directory]
 #
-# ASURA_VERSION=0.1.0-beta.1 names the image toren-linux-0.1.0-beta.1-x86_64.iso
+# TOREN_VERSION=0.1.0-beta.1 names the image toren-linux-0.1.0-beta.1-x86_64.iso
 # and records IMAGE_VERSION in /etc/os-release. Unset, the image is
 # toren-linux-x86_64.iso. The file name never names the base layer.
 #
@@ -11,17 +11,17 @@ set -eu
 
 REPO_ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 BUILD_DIR=${1:-"$REPO_ROOT/build/iso-void"}
-ARCH=${ASURA_ARCH:-x86_64}
-MIRROR=${ASURA_MIRROR:-https://repo-fastly.voidlinux.org/current}
-ASURA_VERSION=${ASURA_VERSION:-}
-case "$ASURA_VERSION" in
+ARCH=${TOREN_ARCH:-${ASURA_ARCH:-x86_64}}
+MIRROR=${TOREN_MIRROR:-${ASURA_MIRROR:-https://repo-fastly.voidlinux.org/current}}
+TOREN_VERSION=${TOREN_VERSION:-${ASURA_VERSION:-}}
+case "$TOREN_VERSION" in
 	*[!0-9A-Za-z.+-]*)
-		echo "build-iso-void: ASURA_VERSION may contain only letters, digits, '.', '+' and '-'" >&2
+		echo "build-iso-void: TOREN_VERSION may contain only letters, digits, '.', '+' and '-'" >&2
 		exit 2
 		;;
 esac
-if [ -n "$ASURA_VERSION" ]; then
-	ISO_NAME="toren-linux-${ASURA_VERSION}-x86_64"
+if [ -n "$TOREN_VERSION" ]; then
+	ISO_NAME="toren-linux-${TOREN_VERSION}-x86_64"
 else
 	ISO_NAME=toren-linux-x86_64
 fi
@@ -164,8 +164,8 @@ HOME_URL="https://github.com/mohitjoer/Toren-Linux"
 SUPPORT_URL="https://github.com/mohitjoer/Toren-Linux/issues"
 BUG_REPORT_URL="https://github.com/mohitjoer/Toren-Linux/issues"
 EOF
-if [ -n "$ASURA_VERSION" ]; then
-	printf 'IMAGE_VERSION=%s\n' "$ASURA_VERSION" >>"$INCLUDE_DIR/etc/os-release"
+if [ -n "$TOREN_VERSION" ]; then
+	printf 'IMAGE_VERSION=%s\n' "$TOREN_VERSION" >>"$INCLUDE_DIR/etc/os-release"
 fi
 
 printf 'toren-linux\n' >"$INCLUDE_DIR/etc/hostname"
@@ -441,7 +441,7 @@ if [ -d "$REPO_ROOT/apps/mimeapps" ]; then
 	ln -sf toren-mimeapps.list "$INCLUDE_DIR/usr/share/applications/asura-mimeapps.list" 2>/dev/null || true
 fi
 
-# Copy Asura apps (ghostty, starship, zsh configurations)
+# Copy Toren apps (ghostty, starship, zsh configurations)
 if [ -d "$REPO_ROOT/apps" ]; then
 	mkdir -p "$INCLUDE_DIR/usr/share/toren/apps"
 	cp -r "$REPO_ROOT/apps"/* "$INCLUDE_DIR/usr/share/toren/apps/"
@@ -468,10 +468,10 @@ if [ -d "$REPO_ROOT/migrations" ]; then
 	done
 fi
 
-# The user manual (asura manual).
+# The user manual (toren manual).
 if [ -d "$REPO_ROOT/docs/manual" ]; then
-	mkdir -p "$INCLUDE_DIR/usr/share/doc/asura/manual"
-	cp "$REPO_ROOT/docs/manual"/*.md "$INCLUDE_DIR/usr/share/doc/asura/manual/"
+	mkdir -p "$INCLUDE_DIR/usr/share/doc/toren/manual"
+	cp "$REPO_ROOT/docs/manual"/*.md "$INCLUDE_DIR/usr/share/doc/toren/manual/"
 fi
 
 # Stage system-wide skills and pre-seed OpenCode / cross-agent skills
@@ -643,7 +643,7 @@ if [ -d "$REPO_ROOT/system/tlp.d" ]; then
 	mkdir -p "$INCLUDE_DIR/etc/tlp.d"
 	cp "$REPO_ROOT/system/tlp.d"/*.conf "$INCLUDE_DIR/etc/tlp.d/"
 fi
-cp "$REPO_ROOT/system/sysctl.d/99-toren-performance.conf" "$INCLUDE_DIR/etc/sysctl.d/99-asura-performance.conf"
+cp "$REPO_ROOT/system/sysctl.d/99-toren-performance.conf" "$INCLUDE_DIR/etc/sysctl.d/99-toren-performance.conf"
 cp "$REPO_ROOT/session/turnstile/turnstile.conf" "$INCLUDE_DIR/etc/turnstile/turnstile.conf"
 cp "$REPO_ROOT/system/xbps.d/toren.conf" "$INCLUDE_DIR/etc/xbps.d/toren.conf"
 # Default host firewall (block inbound, allow outbound), loaded by the nftables runit service
@@ -730,6 +730,7 @@ cp -a "$INCLUDE_DIR/usr/share/toren"/* "$INCLUDE_DIR/etc/skel/.config/toren/"
 # Pre-seed Ghostty terminal configuration in skeleton
 cat >"$INCLUDE_DIR/etc/skel/.config/ghostty/config" <<'EOF'
 config-file = ?~/.config/toren/apps/ghostty/config
+config-file = ?/usr/share/toren/apps/ghostty/config
 working-directory = home
 EOF
 
@@ -742,7 +743,24 @@ fi
 # Pre-seed zsh configuration in skeleton
 cat >"$INCLUDE_DIR/etc/skel/.zshrc" <<'EOF'
 # Toren Linux Zsh configuration
-[ -r "$HOME/.config/toren/apps/zsh/toren.zsh" ] && . "$HOME/.config/toren/apps/zsh/toren.zsh"
+if [ -r "$HOME/.config/toren/apps/zsh/toren.zsh" ]; then
+	. "$HOME/.config/toren/apps/zsh/toren.zsh"
+elif [ -r "/usr/share/toren/apps/zsh/toren.zsh" ]; then
+	. "/usr/share/toren/apps/zsh/toren.zsh"
+fi
+EOF
+
+# System-wide zsh configuration fallback for all interactive shells
+mkdir -p "$INCLUDE_DIR/etc/zsh"
+cat >"$INCLUDE_DIR/etc/zsh/zshrc" <<'EOF'
+# System-wide Toren Linux Zsh initialization
+if [ -z "$__TOREN_ZSH_LOADED" ] && [ -n "$PS1" ]; then
+	if [ -r "$HOME/.config/toren/apps/zsh/toren.zsh" ]; then
+		. "$HOME/.config/toren/apps/zsh/toren.zsh"
+	elif [ -r "/usr/share/toren/apps/zsh/toren.zsh" ]; then
+		. "/usr/share/toren/apps/zsh/toren.zsh"
+	fi
+fi
 EOF
 
 # Pre-seed fastfetch ASCII logo and configuration
@@ -925,7 +943,7 @@ fi
 
 # Clean up void-mklive bootstrap repository flags and force-include plymouth and VM drivers in initramfs
 if [ -f "$MKLIVE_DIR/mklive.sh" ]; then
-	sed -i 's/VOID_LIVE/ASURA_LIVE/g' "$MKLIVE_DIR/mklive.sh"
+	sed -i 's/VOID_LIVE/TOREN_LIVE/g' "$MKLIVE_DIR/mklive.sh"
 	sed -i 's/--force-add "vmklive autoinstaller"/--force-add "vmklive autoinstaller plymouth"/g' "$MKLIVE_DIR/mklive.sh"
 	sed -i 's/--add-drivers "ahci"/--add-drivers "ahci vboxvideo vmwgfx virtio_gpu bochs qxl simpledrm"/g' "$MKLIVE_DIR/mklive.sh"
 	sed -i 's|--repository=https://repo-default.voidlinux.org/current/musl||g' "$MKLIVE_DIR/mklive.sh"
@@ -983,13 +1001,13 @@ MENU COLOR tabmsg       * #66666666 #00000000 none
 LABEL linux
 MENU LABEL Toren Linux (Live Session)
 KERNEL /boot/vmlinuz
-APPEND initrd=/boot/initrd root=live:CDLABEL=ASURA_LIVE init=/sbin/init ro rd.luks=0 rd.md=0 rd.dm=0 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ locale.LANG=@@LOCALE@@ vga=current @@BOOT_CMDLINE@@
+APPEND initrd=/boot/initrd root=live:CDLABEL=TOREN_LIVE init=/sbin/init ro rd.luks=0 rd.md=0 rd.dm=0 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ locale.LANG=@@LOCALE@@ vga=current @@BOOT_CMDLINE@@
 
 LABEL linuxram
 MENU LABEL Toren Linux (Copy to RAM)
 
 KERNEL /boot/vmlinuz
-APPEND initrd=/boot/initrd root=live:CDLABEL=ASURA_LIVE init=/sbin/init ro rd.luks=0 rd.md=0 rd.dm=0 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ locale.LANG=@@LOCALE@@ vga=current @@BOOT_CMDLINE@@ rd.live.ram
+APPEND initrd=/boot/initrd root=live:CDLABEL=TOREN_LIVE init=/sbin/init ro rd.luks=0 rd.md=0 rd.dm=0 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ locale.LANG=@@LOCALE@@ vga=current @@BOOT_CMDLINE@@ rd.live.ram
 
 LABEL reboot
 MENU LABEL Reboot System
@@ -1015,7 +1033,8 @@ cat >"$POSTSETUP_SCRIPT" <<EOF
 #!/bin/sh
 ROOTFS="\$1"
 HYPR_CACHE="$HYPR_CACHE"
-ASURA_VERSION="$ASURA_VERSION"
+TOREN_VERSION="$TOREN_VERSION"
+ASURA_VERSION="$TOREN_VERSION"
 REPO_ROOT="$REPO_ROOT"
 INCLUDE_DIR="$INCLUDE_DIR"
 EOF
@@ -1339,8 +1358,8 @@ HOME_URL="https://github.com/mohitjoer/Toren-Linux"
 SUPPORT_URL="https://github.com/mohitjoer/Toren-Linux/issues"
 BUG_REPORT_URL="https://github.com/mohitjoer/Toren-Linux/issues"
 OSREL
-if [ -n "$ASURA_VERSION" ]; then
-	printf 'IMAGE_VERSION=%s\n' "$ASURA_VERSION" >>"$ROOTFS/etc/os-release"
+if [ -n "$TOREN_VERSION" ]; then
+	printf 'IMAGE_VERSION=%s\n' "$TOREN_VERSION" >>"$ROOTFS/etc/os-release"
 fi
 
 # Branding replacement: Change Welcome to Void! to Welcome to Asura OS! in the boot sequence

@@ -224,7 +224,7 @@ done
 
 # The desktop shell's half of the look. The desktop styles its frosted panels and
 # animations in the compositor, so while it is the shell its rules are sourced
-# (shell-desktop/toren/hyprland.conf and hyprland.lua); for ASURA's shell the file is empty.
+# (shell-desktop/toren/hyprland.conf and hyprland.lua); for Toren's shell the file is empty.
 # Rewritten every login, so switching shells takes effect at the next one.
 SHELL_LOOK=/usr/share/toren/shell-desktop/toren/hyprland.conf
 SHELL_LOOK_LUA=/usr/share/toren/shell-desktop/toren/hyprland.lua
@@ -252,7 +252,7 @@ if [ ! -e "$USER_WALLPAPER_LINK" ]; then
     ln -sf "$DEFAULT_WALLPAPER" "$USER_WALLPAPER_LINK"
 fi
 
-# Give every installed coding assistant (OpenCode ships with ASURA) the ASURA
+# Give every installed coding assistant (OpenCode ships with Toren) the Toren
 # skills, so it knows this desktop from the first question. Idempotent, and
 # assistants that are not installed get nothing.
 if command -v toren-agent >/dev/null 2>&1; then
@@ -293,6 +293,7 @@ animations:enabled = false
 misc:vfr = true
 misc:disable_hyprland_logo = true
 misc:disable_splash_rendering = true
+misc:disable_hyprland_guiutils_check = true
 cursor:no_hardware_cursors = true
 misc:allow_session_lock_restore = true
 env = LIBGL_ALWAYS_SOFTWARE,1
@@ -308,6 +309,7 @@ hl.config({
     misc = {
         disable_hyprland_logo = true,
         disable_splash_rendering = true,
+        disable_hyprland_guiutils_check = true,
         allow_session_lock_restore = true,
     },
     cursor = {
@@ -343,8 +345,8 @@ fi
 
 # Hyprland reads Lua configs from 0.57 and hyprlang (.conf) before that, and
 # each version refuses the other format: a Lua config on an older Hyprland is a
-# desktop that never starts. ASURA ships both, so pick by the Hyprland that is
-# actually installed, not by which file exists (a machine can receive ASURA's
+# desktop that never starts. Toren ships both, so pick by the Hyprland that is
+# actually installed, not by which file exists (a machine can receive Toren's
 # new files before its Hyprland package is updated).
 hyprland_reads_lua() {
     hv=$(Hyprland --version 2>/dev/null | sed -n '1s/^Hyprland \([0-9][0-9.]*\).*/\1/p')

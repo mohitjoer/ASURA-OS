@@ -70,19 +70,27 @@ if [[ "$_prompt_choice" == "oh-my-zsh" ]]; then
     source "$ZSH/oh-my-zsh.sh"
   elif command -v starship >/dev/null 2>&1; then
     _toren_cache_eval starship starship init zsh
+  else
+    autoload -Uz colors && colors 2>/dev/null || true
+    PROMPT='%F{red}toren%f %F{blue}%~%f %# '
   fi
 else
   # Starship prompt (default)
-  if [[ -z $STARSHIP_CONFIG ]]; then
-    if [[ -e $_toren_cfg/starship.toml ]]; then
-      export STARSHIP_CONFIG=$_toren_cfg/starship.toml
-    elif [[ -e $_toren_cfg/toren/apps/starship/starship.toml ]]; then
-      export STARSHIP_CONFIG=$_toren_cfg/toren/apps/starship/starship.toml
-    elif [[ -e /usr/share/toren/apps/starship/starship.toml ]]; then
-      export STARSHIP_CONFIG=/usr/share/toren/apps/starship/starship.toml
+  if command -v starship >/dev/null 2>&1; then
+    if [[ -z $STARSHIP_CONFIG ]]; then
+      if [[ -e $_toren_cfg/starship.toml ]]; then
+        export STARSHIP_CONFIG=$_toren_cfg/starship.toml
+      elif [[ -e $_toren_cfg/toren/apps/starship/starship.toml ]]; then
+        export STARSHIP_CONFIG=$_toren_cfg/toren/apps/starship/starship.toml
+      elif [[ -e /usr/share/toren/apps/starship/starship.toml ]]; then
+        export STARSHIP_CONFIG=/usr/share/toren/apps/starship/starship.toml
+      fi
     fi
+    _toren_cache_eval starship starship init zsh
+  else
+    autoload -Uz colors && colors 2>/dev/null || true
+    PROMPT='%F{red}toren%f %F{blue}%~%f %# '
   fi
-  _toren_cache_eval starship starship init zsh
 fi
 _toren_cache_eval zoxide zoxide init zsh --cmd cd
 _toren_cache_eval mise mise activate zsh

@@ -12,7 +12,7 @@ import (
 
 const (
 	bashLoader = `[ -r "$HOME/.config/bash/toren.bash" ] && . "$HOME/.config/bash/toren.bash"`
-	zshLoader  = `[ -r "$HOME/.config/zsh/toren.zsh" ] && . "$HOME/.config/zsh/toren.zsh"`
+	zshLoader  = `[ -r "$HOME/.config/toren/apps/zsh/toren.zsh" ] && . "$HOME/.config/toren/apps/zsh/toren.zsh" || [ -r "/usr/share/toren/apps/zsh/toren.zsh" ] && . "/usr/share/toren/apps/zsh/toren.zsh"`
 )
 
 var accountShells = map[string]string{
