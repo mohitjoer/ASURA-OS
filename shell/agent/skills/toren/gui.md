@@ -65,7 +65,7 @@ default desktop they are hidden: that desktop keeps its own settings.
 | `fastfetch`     | Fastfetch        | `FastfetchPage.qml`       | Terminal system splash logo and info                       |
 | `import`        | Import Config    | `ImportPage.qml`          | Migrate external dotfiles and configs                      |
 | `addons`        | Add-ons          | `AddonsPage.qml`          | *Toren shell.* Shell plugins catalogue and community extensions           |
-| `credits`       | Credits          | `CreditsPage.qml`         | Distribution credits and licenses                          |
+| `about`         | About            | `AboutPage.qml`           | Distribution overview, system specifications, and links     |
 
 ---
 

@@ -142,7 +142,7 @@ Rectangle {
             { key: "import", name: "Import config", adv: true, wired: true } ] },
         { name: "EXTEND", items: [
             { key: "addons", name: "Add-ons", needs: { shell: "toren" } } ] },
-        { name: "", items: [ { key: "credits", name: "Credits" } ] }
+        { name: "", items: [ { key: "about", name: "About" } ] }
     ]
 
     // Each section's terse kanji, paired with its Latin name in the rail. Latin
@@ -156,7 +156,7 @@ Rectangle {
         "widgets": "", "lockscreen": "", "animations": "",
         "addons": "", "windowrules": "", "appoverrides": "",
         "session": "", "performance": "",
-        "updates": "", "credits": "", "global": "", "import": "", "windowmanager": "", "desktop-shell": ""
+        "updates": "", "about": "", "global": "", "import": "", "windowmanager": "", "desktop-shell": ""
     })
 
     // Extra search vocabulary per section: the words a user actually types that
@@ -188,7 +188,7 @@ Rectangle {
         "performance": "performance battery power saving save lowpower potato lag cpu gpu ram memory idle freeze reduce motion fps",
         "updates": "update upgrade version channel commit behind check origin",
         "import": "import bring migrate dotfiles config existing kitty fish fastfetch drop folder git backup undo restore adopt",
-        "credits": "credits thanks acknowledgement gratitude contributor"
+        "about": "about toren os linux version hardware specs distribution system license thanks contributor"
     })
 
     // ── global search ────────────────────────────────────────────────────
@@ -508,7 +508,7 @@ Rectangle {
         return (prov && prov.length) ? base.concat(prov) : base;
     }
     function pageFile(s) {
-        var map = { "desktop-shell": "DesktopShellPage", "profile": "ProfilePage", "bar-studio": "BarStudioPage", "desktop": "DesktopPage", "session": "SessionPage", "windowrules": "WindowRulesPage", "appoverrides": "AppOverridesPage", "animations": "AnimationsPage", "input": "InputPage", "keybinds": "KeybindsPage", "displays": "DisplaysPage", "connections": "ConnectionsPage", "gpu": "GpuPage", "updates": "UpdatesPage", "recording": "RecordingPage", "performance": "PerformancePage", "launcher": "LauncherPage", "lockscreen": "LockscreenPage", "fastfetch": "FastfetchPage", "addons": "AddonsPage", "widgets": "WidgetsPage", "credits": "CreditsPage" };
+        var map = { "desktop-shell": "DesktopShellPage", "profile": "ProfilePage", "bar-studio": "BarStudioPage", "desktop": "DesktopPage", "session": "SessionPage", "windowrules": "WindowRulesPage", "appoverrides": "AppOverridesPage", "animations": "AnimationsPage", "input": "InputPage", "keybinds": "KeybindsPage", "displays": "DisplaysPage", "connections": "ConnectionsPage", "gpu": "GpuPage", "updates": "UpdatesPage", "recording": "RecordingPage", "performance": "PerformancePage", "launcher": "LauncherPage", "lockscreen": "LockscreenPage", "fastfetch": "FastfetchPage", "addons": "AddonsPage", "widgets": "WidgetsPage", "about": "AboutPage" };
         map.global = "GlobalPage";
         map["import"] = "ImportPage";
         map.windowmanager = "WindowManagerPage";

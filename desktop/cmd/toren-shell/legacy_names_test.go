@@ -65,7 +65,7 @@ func TestNoLegacyDesktopNames(t *testing.T) {
 		":!LICENSING.md",
 		":!README.md",
 		":!docs/architecture.md",
-		":!shell/hub/pages/CreditsPage.qml",
+		":!shell/hub/pages/AboutPage.qml",
 		":!desktop/internal/shell/vendor_test.go",
 		":!migrations/user/1795442300.sh",
 	)
