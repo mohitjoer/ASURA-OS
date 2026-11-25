@@ -7,7 +7,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
 
-// ASURA overlay (shell-desktop/toren/vendor.sh OVERLAYS): the desktop's dock as an
+// Toren overlay (shell-desktop/toren/vendor.sh OVERLAYS): the desktop's dock as an
 // island. It holds only the apps (the desktop's DockApps: pinned apps and running
 // windows, with their previews), in a compact pill that floats above the
 // bottom edge.
@@ -31,7 +31,7 @@ Scope {
     readonly property int islandRadius: 18
     readonly property int islandPadding: 6
     // The strip at the bottom edge that brings a hidden dock back.
-    readonly property int revealStrip: 3
+    readonly property int revealStrip: 8
     readonly property bool autoHide: !(Config.options?.dock.pinnedOnStartup ?? false)
 
     Variants {
@@ -44,8 +44,27 @@ Scope {
             screen: modelData
             visible: !GlobalStates.screenLocked
 
+            readonly property bool pointerHovered: islandHover.hovered || stripHover.hovered
+            property bool keepRevealed: false
+
+            Timer {
+                id: hideTimer
+                interval: 350
+                onTriggered: dockRoot.keepRevealed = false
+            }
+
+            onPointerHoveredChanged: {
+                if (pointerHovered) {
+                    hideTimer.stop();
+                    keepRevealed = true;
+                } else {
+                    hideTimer.restart();
+                }
+            }
+
             readonly property bool reveal: !root.autoHide
-                || islandHover.hovered || stripHover.hovered
+                || keepRevealed
+                || pointerHovered
                 || dockApps.requestDockShow
                 || !(ToplevelManager.activeToplevel?.activated ?? false)
 
@@ -65,19 +84,22 @@ Scope {
 
             implicitHeight: (Config.options?.dock.height ?? 70) + Appearance.sizes.elevationMargin + Appearance.sizes.hyprlandGapsOut + root.islandLift
 
-            // Input: the island while it is shown, only the strip at the edge
-            // while it is hidden; the rest is click-through.
+            // Input: the island while it is shown, and the strip at the edge;
+            // the rest is click-through to underlying windows.
             mask: Region {
-                item: dockRoot.reveal ? dockBackground : revealArea
+                item: revealArea
+                Region {
+                    item: dockRoot.reveal ? dockBackground : null
+                }
             }
 
             Item {
                 id: revealArea
                 anchors {
                     bottom: parent.bottom
-                    horizontalCenter: parent.horizontalCenter
+                    left: parent.left
+                    right: parent.right
                 }
-                width: dockBackground.implicitWidth
                 height: root.revealStrip
                 // Passive: hover is seen even over the buttons on top.
                 HoverHandler {
