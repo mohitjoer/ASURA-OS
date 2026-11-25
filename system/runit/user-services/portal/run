@@ -6,7 +6,7 @@ exec 2>&1
 # with a minimal environment, so the desktop identity is carried here rather
 # than hoping the session env reaches this process. Same values the session
 # script exports.
-export XDG_CURRENT_DESKTOP="${XDG_CURRENT_DESKTOP:-Asura}"
+export XDG_CURRENT_DESKTOP="${XDG_CURRENT_DESKTOP:-Toren}"
 
 # The runtime directory and the session bus, as the other user services set
 # them: the bounded wait below asks the session bus with gdbus, and the

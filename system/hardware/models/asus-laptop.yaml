@@ -25,7 +25,7 @@ files:
 services: []
 
 notes:
-  - "Thermal and fan profiles: asus-wmi exposes /sys/firmware/acpi/platform_profile (quiet, balanced, performance), controlled via 'asura power profile'."
+  - "Thermal and fan profiles: asus-wmi exposes /sys/firmware/acpi/platform_profile (quiet, balanced, performance), controlled via 'toren power profile'."
   - "Battery charge limit: /sys/class/power_supply/BAT0/charge_control_end_threshold persists at 80%."
   - "Keyboard backlight: asus::kbd_backlight brightness is mapped to Fn keys and /sys/class/leds/."
   - "Native kernel interfaces: uses standard kernel asus-wmi sysfs without requiring out-of-tree daemons."

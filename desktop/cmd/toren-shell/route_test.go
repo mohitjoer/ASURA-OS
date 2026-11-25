@@ -173,7 +173,7 @@ func TestDispatchFilePickerTools(t *testing.T) {
 
 // Every one of the 13 shell surfaces is reachable as a bare kebab verb equal to
 // its CustomShortcut id, each emitting the exact openSurface id the shell routes
-// to that surface. A niri keybind spawns `asura-shell <verb>` for all of these,
+// to that surface. A niri keybind spawns `toren-shell <verb>` for all of these,
 // so a missing or misspelled verb here is a dead keybind on niri.
 func TestDispatchSurfaceVerbs(t *testing.T) {
 	want := map[string]string{

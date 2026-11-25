@@ -13,13 +13,13 @@ import (
 	"time"
 )
 
-// `asura mirror` chooses the Void mirror XBPS downloads from.
+// `toren mirror` chooses the Void mirror XBPS downloads from.
 //
-// The choice is written to /etc/xbps.d/00-asura-mirror.conf. XBPS reads that
+// The choice is written to /etc/xbps.d/00-toren-mirror.conf. XBPS reads that
 // folder in name order and tries repositories in the order it reads them, so
 // this file, sorting first, puts the chosen mirror ahead of the defaults in
-// asura.conf, which stay as the fallback. It is a file of its own because
-// apply-repo.sh rewrites asura.conf and 00-repository-main.conf on every
+// toren.conf, which stay as the fallback. It is a file of its own because
+// apply-repo.sh rewrites toren.conf and 00-repository-main.conf on every
 // update; this one no update touches.
 
 type voidMirror struct {
@@ -42,13 +42,13 @@ var voidMirrors = []voidMirror{
 var mirrorRepos = []string{"current", "current/nonfree", "current/multilib", "current/multilib/nonfree"}
 
 var (
-	mirrorConf      = "/etc/xbps.d/00-asura-mirror.conf"
-	mirrorASURAConf = "/etc/xbps.d/asura.conf"
+	mirrorConf      = "/etc/xbps.d/00-toren-mirror.conf"
+	mirrorASURAConf = "/etc/xbps.d/toren.conf"
 	mirrorWrite     = writeFilePrivileged
 	mirrorProbe     = probeMirror
 )
 
-const mirrorUsage = `Usage: asura mirror [list | fastest | set NAME|URL | reset]
+const mirrorUsage = `Usage: toren mirror [list | fastest | set NAME|URL | reset]
 
 Chooses the Void mirror packages download from.
 
@@ -57,14 +57,14 @@ Chooses the Void mirror packages download from.
   set       use a mirror by name (see list) or by its https:// URL
   reset     back to ASURA's default (worldwide CDN)
 
-The choice is /etc/xbps.d/00-asura-mirror.conf; updates keep it.
+The choice is /etc/xbps.d/00-toren-mirror.conf; updates keep it.
 `
 
 func init() {
-	register("mirror", "choose the Void mirror packages download from", asuraMirror)
+	register("mirror", "choose the Void mirror packages download from", torenMirror)
 }
 
-func asuraMirror(args []string) int {
+func torenMirror(args []string) int {
 	if len(args) == 0 || args[0] == "list" {
 		return listMirrors()
 	}
@@ -74,7 +74,7 @@ func asuraMirror(args []string) int {
 		return exitOK
 	case "reset":
 		if err := mirrorWrite(mirrorConf, ""); err != nil {
-			fmt.Fprintln(os.Stderr, "asura mirror:", err)
+			fmt.Fprintln(os.Stderr, "toren mirror:", err)
 			return exitFail
 		}
 		fmt.Println("mirror: back to ASURA's default (worldwide CDN)")
@@ -86,7 +86,7 @@ func asuraMirror(args []string) int {
 		}
 		url, err := resolveMirror(args[1])
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "asura mirror:", err)
+			fmt.Fprintln(os.Stderr, "toren mirror:", err)
 			return exitUsage
 		}
 		return useMirror(url)
@@ -94,7 +94,7 @@ func asuraMirror(args []string) int {
 		fmt.Println("timing the mirrors...")
 		ranked := rankMirrors(voidMirrors, mirrorProbe)
 		if len(ranked) == 0 {
-			fmt.Fprintln(os.Stderr, "asura mirror: no mirror answered; nothing changed")
+			fmt.Fprintln(os.Stderr, "toren mirror: no mirror answered; nothing changed")
 			return exitFail
 		}
 		for _, r := range ranked {
@@ -115,25 +115,25 @@ func resolveMirror(arg string) (string, error) {
 	if strings.HasPrefix(arg, "https://") && !strings.ContainsAny(arg, " \t\n\"'") {
 		return strings.TrimRight(arg, "/"), nil
 	}
-	return "", fmt.Errorf("%q is not a known mirror (asura mirror list) or an https:// URL", arg)
+	return "", fmt.Errorf("%q is not a known mirror (toren mirror list) or an https:// URL", arg)
 }
 
 func useMirror(url string) int {
 	if err := mirrorWrite(mirrorConf, mirrorConfig(url, readLines(mirrorASURAConf))); err != nil {
-		fmt.Fprintln(os.Stderr, "asura mirror:", err)
+		fmt.Fprintln(os.Stderr, "toren mirror:", err)
 		return exitFail
 	}
 	fmt.Printf("mirror: %s (sudo xbps-install -S refreshes the package lists)\n", url)
 	return exitOK
 }
 
-// mirrorConfig is the 00-asura-mirror.conf for a mirror. The non-Void
-// repositories asura.conf names (the Hyprland one) come first, as they do
+// mirrorConfig is the 00-toren-mirror.conf for a mirror. The non-Void
+// repositories toren.conf names (the Hyprland one) come first, as they do
 // there, so the mirror never changes which repository a package comes from.
-func mirrorConfig(url string, asuraConf []string) string {
+func mirrorConfig(url string, torenConf []string) string {
 	var b strings.Builder
-	b.WriteString("# Written by `asura mirror`; `asura mirror reset` removes it.\n")
-	for _, line := range asuraConf {
+	b.WriteString("# Written by `toren mirror`; `toren mirror reset` removes it.\n")
+	for _, line := range torenConf {
 		line = strings.TrimSpace(line)
 		if v, ok := strings.CutPrefix(line, "repository="); ok && !strings.Contains(v, "voidlinux") {
 			b.WriteString(line + "\n")
@@ -146,7 +146,7 @@ func mirrorConfig(url string, asuraConf []string) string {
 }
 
 // currentMirror is the Void mirror the machine uses: the chosen one, else the
-// first in asura.conf.
+// first in toren.conf.
 func currentMirror() string {
 	for _, file := range []string{mirrorConf, mirrorASURAConf} {
 		for _, line := range readLines(file) {
@@ -172,7 +172,7 @@ func listMirrors() int {
 	if current != "" && !strings.Contains(strings.Join(mirrorURLs(), " "), current) {
 		fmt.Printf("* %-8s %-18s %s\n", "custom", "", current)
 	}
-	fmt.Println("\nasura mirror fastest picks the quickest; asura mirror set NAME picks one.")
+	fmt.Println("\ntoren mirror fastest picks the quickest; toren mirror set NAME picks one.")
 	return exitOK
 }
 
@@ -260,7 +260,7 @@ func writeFilePrivileged(path, content string) error {
 	if content == "" {
 		return runPrivileged("rm", "-f", path)
 	}
-	tmp, err := os.CreateTemp("", "asura-mirror-*")
+	tmp, err := os.CreateTemp("", "toren-mirror-*")
 	if err != nil {
 		return err
 	}

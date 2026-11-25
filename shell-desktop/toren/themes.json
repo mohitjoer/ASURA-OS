@@ -1,17 +1,91 @@
 {
-  "_about": "Named looks for the desktop (asura theme set NAME). Each is a wallpaper from /usr/share/asura/backgrounds, light or dark, a Material colour scheme, and optionally a fixed accent colour. matugen then colours the shell, the terminal, btop and GTK apps from it.",
+  "_about": "Named looks for the desktop (toren theme set NAME). Each is a wallpaper from /usr/share/toren/backgrounds, light or dark, a Material colour scheme, and optionally a fixed accent colour. matugen then colours the shell, the terminal, btop and GTK apps from it.",
   "themes": [
-    {"name": "berserk",    "title": "Berserk",    "wallpaper": "eva-berserk.jpg",        "mode": "dark",  "scheme": "scheme-expressive"},
-    {"name": "unit-01",    "title": "Unit-01",    "wallpaper": "FULLHD-EVA_01.png",      "mode": "dark",  "scheme": "scheme-fidelity"},
-    {"name": "ink",        "title": "Ink",        "wallpaper": "code-art.png",           "mode": "dark",  "scheme": "scheme-monochrome"},
-    {"name": "paper",      "title": "Paper",      "wallpaper": "lost.jpg",               "mode": "light", "scheme": "scheme-monochrome"},
-    {"name": "sakura",     "title": "Sakura",     "wallpaper": "sakura-gate.jpg",        "mode": "dark",  "scheme": "scheme-tonal-spot", "accent": "#f2a7c3"},
-    {"name": "garden",     "title": "Garden",     "wallpaper": "BotanicGardenJapan.png", "mode": "light", "scheme": "scheme-tonal-spot"},
-    {"name": "forest",     "title": "Forest",     "wallpaper": "forest.png",             "mode": "dark",  "scheme": "scheme-content"},
-    {"name": "cherry",     "title": "Cherry",     "wallpaper": "burning_cherry.jpeg",    "mode": "dark",  "scheme": "scheme-fidelity",   "accent": "#e0435a"},
-    {"name": "kaiju",      "title": "Kaiju",      "wallpaper": "kaiju.jpg",              "mode": "dark",  "scheme": "scheme-rainbow"},
-    {"name": "rain",       "title": "Rain",       "wallpaper": "rain-radio.png",         "mode": "dark",  "scheme": "scheme-neutral"},
-    {"name": "samurai",    "title": "Samurai",    "wallpaper": "samurai_strike.jpg",     "mode": "dark",  "scheme": "scheme-content"},
-    {"name": "kurzgesagt", "title": "Kurzgesagt", "wallpaper": "kurzgesagt.png",         "mode": "dark",  "scheme": "scheme-fruit-salad"}
+    {
+      "name": "berserk",
+      "title": "Berserk",
+      "wallpaper": "eva-berserk.jpg",
+      "mode": "dark",
+      "scheme": "scheme-expressive"
+    },
+    {
+      "name": "unit-01",
+      "title": "Unit-01",
+      "wallpaper": "FULLHD-EVA_01.png",
+      "mode": "dark",
+      "scheme": "scheme-fidelity"
+    },
+    {
+      "name": "ink",
+      "title": "Ink",
+      "wallpaper": "code-art.png",
+      "mode": "dark",
+      "scheme": "scheme-monochrome"
+    },
+    {
+      "name": "paper",
+      "title": "Paper",
+      "wallpaper": "lost.jpg",
+      "mode": "light",
+      "scheme": "scheme-monochrome"
+    },
+    {
+      "name": "sakura",
+      "title": "Sakura",
+      "wallpaper": "sakura-gate.jpg",
+      "mode": "dark",
+      "scheme": "scheme-tonal-spot",
+      "accent": "#f2a7c3"
+    },
+    {
+      "name": "garden",
+      "title": "Garden",
+      "wallpaper": "BotanicGardenJapan.png",
+      "mode": "light",
+      "scheme": "scheme-tonal-spot"
+    },
+    {
+      "name": "forest",
+      "title": "Forest",
+      "wallpaper": "forest.png",
+      "mode": "dark",
+      "scheme": "scheme-content"
+    },
+    {
+      "name": "cherry",
+      "title": "Cherry",
+      "wallpaper": "burning_cherry.jpeg",
+      "mode": "dark",
+      "scheme": "scheme-fidelity",
+      "accent": "#e0435a"
+    },
+    {
+      "name": "kaiju",
+      "title": "Kaiju",
+      "wallpaper": "kaiju.jpg",
+      "mode": "dark",
+      "scheme": "scheme-rainbow"
+    },
+    {
+      "name": "rain",
+      "title": "Rain",
+      "wallpaper": "rain-radio.png",
+      "mode": "dark",
+      "scheme": "scheme-neutral"
+    },
+    {
+      "name": "samurai",
+      "title": "Samurai",
+      "wallpaper": "samurai_strike.jpg",
+      "mode": "dark",
+      "scheme": "scheme-content"
+    },
+    {
+      "name": "kurzgesagt",
+      "title": "Kurzgesagt",
+      "wallpaper": "kurzgesagt.png",
+      "mode": "dark",
+      "scheme": "scheme-fruit-salad"
+    }
   ]
 }

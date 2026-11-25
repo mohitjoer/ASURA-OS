@@ -1,5 +1,5 @@
 #!/bin/sh
-# Start the Asura session, once the compositor is up.
+# Start the Toren session, once the compositor is up.
 #
 # Two things happen here, in this order, and the order is the point.
 #
@@ -43,9 +43,9 @@ if command -v dbus-update-activation-environment >/dev/null 2>&1; then
 fi
 
 # Start user runit supervision
-for cmd in /usr/share/asura/session/asura-user-services \
-	/usr/bin/asura-user-services \
-	"$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)/runit/asura-user-services"; do
+for cmd in /usr/share/toren/session/toren-user-services \
+	/usr/bin/toren-user-services \
+	"$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)/runit/toren-user-services"; do
 	if [ -x "$cmd" ]; then
 		exec "$cmd" start
 	fi

@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"asura/hardware/quirks"
+	"toren/hardware/quirks"
 )
 
 func resolveHardwareDirs() (modelsDir, componentsDir, repoRoot string) {

@@ -20,7 +20,7 @@ import (
 // silently does nothing. Resolving the live signature into this process fixes
 // every later fork.
 
-// ProviderHyprland is the one compositor Asura runs. It names the settings
+// ProviderHyprland is the one compositor Toren runs. It names the settings
 // domain (wm.hyprland.*) in desktop.json, so it is part of the on-disk contract.
 const ProviderHyprland = "hyprland"
 
@@ -150,7 +150,7 @@ func CheckConfigErrors() error {
 	return nil
 }
 
-// Detect names the compositor this user runs. Asura has one, so detection is
+// Detect names the compositor this user runs. Toren has one, so detection is
 // only about whether it is live right now.
 func Detect() Detection {
 	if live() {
@@ -162,7 +162,7 @@ func Detect() Detection {
 // Providers lists the compositors the backend can author config for.
 func Providers() []string { return []string{ProviderHyprland} }
 
-// ConfigDir is a provider's config directory name inside ~/.config/asura.
+// ConfigDir is a provider's config directory name inside ~/.config/toren.
 func ConfigDir(name string) string {
 	if name == ProviderHyprland {
 		return "hyprland"

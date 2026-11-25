@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"asura/hardware/probe"
-	"asura/hardware/quirks"
+	"toren/hardware/probe"
+	"toren/hardware/quirks"
 )
 
 func TestHardwareQuirks_LayeredMatching(t *testing.T) {
@@ -142,7 +142,7 @@ func TestGrubKernelParameters(t *testing.T) {
 
 	initial := `GRUB_DEFAULT=0
 GRUB_TIMEOUT=5
-GRUB_DISTRIBUTOR="Asura"
+GRUB_DISTRIBUTOR="Toren"
 GRUB_CMDLINE_LINUX_DEFAULT="loglevel=4 quiet"
 `
 	if err := os.WriteFile(grubPath, []byte(initial), 0644); err != nil {

@@ -49,7 +49,7 @@ Scope {
 
   FileView {
     id: shellFile
-    path: Quickshell.env("HOME") + "/.config/asura/shell.json"
+    path: Quickshell.env("HOME") + "/.config/toren/shell.json"
     watchChanges: true
     onFileChanged: reload()
     onLoaded: {
@@ -66,7 +66,7 @@ Scope {
       var x = Quickshell.env("XDG_STATE_HOME")
       return (x && x.length > 0) ? x : (Quickshell.env("HOME") + "/.local/state")
     }
-    path: _stateHome + "/asura/stage-walls.json"
+    path: _stateHome + "/toren/stage-walls.json"
     watchChanges: true
     onFileChanged: reload()
     onLoaded: {
@@ -98,7 +98,7 @@ Scope {
 
   function _applyItem(item, forcePicker) {
     if (item && item.kind === "theme") {
-      Quickshell.execDetached(["asura-shell", "theme", item.id])
+      Quickshell.execDetached(["toren-shell", "theme", item.id])
       wallpaperSelector.themesOpen = false
       _closeAfterApply()
       return
@@ -188,7 +188,7 @@ Scope {
 
   // The theme and rice strips are read from the shell's library on every open
   // and again whenever their folders change while the picker is up, so a scheme
-  // or rice installed from Asura Store appears without closing and reopening.
+  // or rice installed from Toren Store appears without closing and reopening.
   // FolderListModel watches the directory natively (no inotifywait dependency);
   // its count flips as entries land or leave, and the debounce lets an install
   // finish its stage-and-rename before the catalog is asked.
@@ -217,7 +217,7 @@ Scope {
   }
   FolderListModel {
     id: themeLibrary
-    folder: "file://" + wallpaperSelector._dataHome + "/asura/themes"
+    folder: "file://" + wallpaperSelector._dataHome + "/toren/themes"
     showFiles: false
     showDirs: true
     showDotAndDotDot: false
@@ -225,7 +225,7 @@ Scope {
   }
   FolderListModel {
     id: riceLibrary
-    folder: "file://" + wallpaperSelector._configHome + "/asura/rices"
+    folder: "file://" + wallpaperSelector._configHome + "/toren/rices"
     showFiles: false
     showDirs: true
     showDotAndDotDot: false
@@ -233,11 +233,11 @@ Scope {
   }
   Timer { id: _themeReload; interval: 600; onTriggered: wallpaperSelector._loadThemes() }
   function _captureRice(name) {
-    Quickshell.execDetached(["asura-hubd", "rice", "capture", name, "all"])
+    Quickshell.execDetached(["toren-hubd", "rice", "capture", name, "all"])
     _riceReload.restart()
   }
   function _deleteRice(slug) {
-    Quickshell.execDetached(["asura-hubd", "rice", "delete", slug])
+    Quickshell.execDetached(["toren-hubd", "rice", "delete", slug])
     _riceReload.restart()
   }
   Timer { id: _riceReload; interval: 1200; onTriggered: wallpaperSelector._reloadRices() }
@@ -245,7 +245,7 @@ Scope {
   property string _themeBuf: ""
   Process {
     id: _themeProc
-    command: ["asura-shell", "theme", "catalog"]
+    command: ["toren-shell", "theme", "catalog"]
     stdout: SplitParser {
       splitMarker: ""
       onRead: data => wallpaperSelector._themeBuf += data
@@ -283,7 +283,7 @@ Scope {
   property string _riceBuf: ""
   Process {
     id: _riceProc
-    command: ["asura-hubd", "rice", "list"]
+    command: ["toren-hubd", "rice", "list"]
     stdout: SplitParser {
       splitMarker: ""
       onRead: data => wallpaperSelector._riceBuf += data
@@ -753,7 +753,7 @@ Scope {
         Config.saveKey("matugen.mode", mode)
         DaemonClient.retheme(Config.matugenScheme, mode, Config.matugenColorIndex)
       }
-      onFollowToggled: Quickshell.execDetached(["asura-shell", "theme", "Wallpaper"])
+      onFollowToggled: Quickshell.execDetached(["toren-shell", "theme", "Wallpaper"])
       visible: !wallpaperSelector.browseOpen
       enabled: wallpaperSelector._filterBarShown
       opacity: (wallpaperSelector.browseOpen || !wallpaperSelector._filterBarShown) ? 0 : 1
@@ -2024,7 +2024,7 @@ Scope {
     // Momentary-detour header: entering themes/rices is not a sticky mode, so a
     // temporary banner announces the detour and one click walks it back to the
     // wallpaper carousel. In themes mode the focused theme's name (and creator,
-    // when the scheme came from Asura Store) rides just beneath it. Anchored over
+    // when the scheme came from Toren Store) rides just beneath it. Anchored over
     // the top of the carousel so it reads above the tiles.
     Column {
       id: detourHeader
@@ -2966,17 +2966,17 @@ Scope {
         open: true
         rice: wallpaperSelector._workshopRice
         onApplyRequested: function(slug) {
-          Quickshell.execDetached(["asura-hubd", "rice", "apply", slug, "all"])
+          Quickshell.execDetached(["toren-hubd", "rice", "apply", slug, "all"])
           wallpaperSelector._workshopOpen = false
           wallpaperSelector.ricesOpen = false
           _closeAfterApply()
         }
         onForkRequested: function(slug) {
-          Quickshell.execDetached(["asura-hubd", "rice", "fork", slug])
+          Quickshell.execDetached(["toren-hubd", "rice", "fork", slug])
           _riceReload.restart()
         }
         onRestoreRequested: {
-          Quickshell.execDetached(["asura-hubd", "rice", "restore"])
+          Quickshell.execDetached(["toren-hubd", "rice", "restore"])
           wallpaperSelector._workshopOpen = false
           wallpaperSelector.ricesOpen = false
         }
@@ -2990,10 +2990,10 @@ Scope {
           wallpaperSelector._capturePromptOpen = true
         }
         onExportRequested: function(slug, folder) {
-          Quickshell.execDetached(["asura-hubd", "rice", "export", slug, folder])
+          Quickshell.execDetached(["toren-hubd", "rice", "export", slug, folder])
         }
         onImportRequested: function(folder) {
-          Quickshell.execDetached(["asura-hubd", "rice", "import", folder])
+          Quickshell.execDetached(["toren-hubd", "rice", "import", folder])
           _riceReload.restart()
         }
         onCloseRequested: {

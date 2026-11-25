@@ -11,7 +11,7 @@ all it does.
 
 ## It is off until you turn it on
 
-The package ships the SDDM settings as `/usr/share/asura/session/sddm/asura.conf`
+The package ships the SDDM settings as `/usr/share/toren/session/sddm/toren.conf`
 and installs them nowhere. A login screen that does not come up leaves nobody able
 to log in, so the one file that turns Toren's on is copied by you, with sudo.
 
@@ -20,7 +20,7 @@ to log in, so the one file that turns Toren's on is copied by you, with sudo.
 2. `toren greeter test` draws the screen inside your session for a minute, with
    logging in switched off. Esc leaves.
 3. `toren greeter enable` checks that everything is installed and prints the
-   `sudo install` command that copies the file to `/etc/sddm.conf.d/10-asura.conf`.
+   `sudo install` command that copies the file to `/etc/sddm.conf.d/10-toren.conf`.
 4. Start the sddm service (`sudo sv enable sddm && sudo sv start sddm`) and reboot.
 
 `toren greeter disable` prints the command that removes the file again.
@@ -28,7 +28,7 @@ to log in, so the one file that turns Toren's on is copied by you, with sudo.
 ## If the login screen is broken
 
 Switch to a text console with Ctrl+Alt+F3, log in, and run
-`sudo rm /etc/sddm.conf.d/10-asura.conf`. SDDM's own default is an X11 greeter,
+`sudo rm /etc/sddm.conf.d/10-toren.conf`. SDDM's own default is an X11 greeter,
 and Toren carries no X server, so if SDDM still does not come up, stop the sddm runit
 service (`sudo sv stop sddm`) and start whichever display manager you had.
 

@@ -69,7 +69,7 @@ func TestPruningKeepsTheNewestOfEachKindAndNeverManualOnes(t *testing.T) {
 }
 
 func TestSnapshotCreateRejectsAnUnknownReason(t *testing.T) {
-	if code := asuraSnapshot([]string{"create", "--reason", "whenever"}); code != exitUsage {
+	if code := torenSnapshot([]string{"create", "--reason", "whenever"}); code != exitUsage {
 		t.Fatalf("code %d", code)
 	}
 }

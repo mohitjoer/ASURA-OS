@@ -1,21 +1,21 @@
 #!/bin/sh
-# Asura user-level process supervisor for Void Linux / runit.
+# Toren user-level process supervisor for Void Linux / runit.
 #
 # Supervises: pipewire, wireplumber, xdg-desktop-portal-hyprland,
-# xdg-desktop-portal, quickshell, asura-hubd, asura-wallpaper, hypridle.
+# xdg-desktop-portal, quickshell, toren-hubd, toren-wallpaper, hypridle.
 #
 # Usage:
-#   asura-user-services start    # starts user runsvdir or spawns services
-#   asura-user-services stop     # stops all user services
-#   asura-user-services status   # queries status
+#   toren-user-services start    # starts user runsvdir or spawns services
+#   toren-user-services stop     # stops all user services
+#   toren-user-services status   # queries status
 set -eu
 
 USER_SERVICE_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/service"
-STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/asura"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/toren"
 RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
-PID_FILE="$RUNTIME_DIR/asura-user-services.pid"
+PID_FILE="$RUNTIME_DIR/toren-user-services.pid"
 
-SYSTEM_SERVICES_SRC="/usr/share/asura/runit/services"
+SYSTEM_SERVICES_SRC="/usr/share/toren/runit/services"
 # Local fallback if testing in dev checkout
 if [ ! -d "$SYSTEM_SERVICES_SRC" ]; then
 	REPO_ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd 2>/dev/null || true)
@@ -88,24 +88,24 @@ start_services() {
 	# restarts services in a loop. Start one only when nothing supervises the
 	# directory yet.
 	if [ -f "$PID_FILE" ] && kill -0 "$(cat "$PID_FILE" 2>/dev/null)" 2>/dev/null; then
-		echo "asura-user-services: runsvdir already running (pid $(cat "$PID_FILE"))"
+		echo "toren-user-services: runsvdir already running (pid $(cat "$PID_FILE"))"
 		return 0
 	fi
 	if pgrep -u "$(id -u)" -f "runsvdir -P $USER_SERVICE_DIR" >/dev/null 2>&1; then
-		echo "asura-user-services: $USER_SERVICE_DIR is already supervised (turnstile)"
+		echo "toren-user-services: $USER_SERVICE_DIR is already supervised (turnstile)"
 		return 0
 	fi
 
 	# Method 1: If runsvdir is available, run it over ~/.config/service
 	if command -v runsvdir >/dev/null 2>&1; then
-		echo "asura-user-services: starting runsvdir over $USER_SERVICE_DIR"
+		echo "toren-user-services: starting runsvdir over $USER_SERVICE_DIR"
 		runsvdir -P "$USER_SERVICE_DIR" &
 		echo $! > "$PID_FILE"
 		return 0
 	fi
 
 	# Method 2: Resilient background spawner fallback if runsvdir is not installed
-	echo "asura-user-services: runsvdir not found; launching services directly"
+	echo "toren-user-services: runsvdir not found; launching services directly"
 	mkdir -p "$STATE_DIR"
 	for svc in pipewire wireplumber portal-hyprland portal torend quickshell toren-userd toren-wallpaper toren-idle toren-updates; do
 		run_script="$USER_SERVICE_DIR/$svc/run"
@@ -136,9 +136,9 @@ stop_services() {
 	fi
 
 	pkill -u "$(id -u)" -x quickshell 2>/dev/null || true
-	pkill -u "$(id -u)" -x asura-userd 2>/dev/null || true
-	pkill -u "$(id -u)" -x asura-wallpaper 2>/dev/null || true
-	pkill -u "$(id -u)" -x asura-hubd 2>/dev/null || true
+	pkill -u "$(id -u)" -x toren-userd 2>/dev/null || true
+	pkill -u "$(id -u)" -x toren-wallpaper 2>/dev/null || true
+	pkill -u "$(id -u)" -x toren-hubd 2>/dev/null || true
 	pkill -u "$(id -u)" -x xdg-desktop-portal-hyprland 2>/dev/null || true
 	pkill -u "$(id -u)" -x xdg-desktop-portal 2>/dev/null || true
 }
@@ -151,7 +151,7 @@ status_services() {
 		done
 	else
 		echo "User services running under $(id -un):"
-		pgrep -u "$(id -u)" -l -a -f 'quickshell|asura-|pipewire|wireplumber|xdg-desktop-portal' || echo "No active user desktop services found"
+		pgrep -u "$(id -u)" -l -a -f 'quickshell|toren-|pipewire|wireplumber|xdg-desktop-portal' || echo "No active user desktop services found"
 	fi
 }
 

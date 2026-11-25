@@ -4,7 +4,7 @@ import Quickshell.Io
 import qs.Ui.Singletons
 import "store"
 
-// The store window. A normal floating window, started by session/asura-store
+// The store window. A normal floating window, started by session/toren-store
 // with `quickshell -p` on this file: the file sits at the shell root because a
 // Quickshell configuration's root is the directory of its entry file, and the
 // kit under qs.Ui only resolves from there.

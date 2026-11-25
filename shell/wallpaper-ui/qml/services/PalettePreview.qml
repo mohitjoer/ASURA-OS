@@ -2,7 +2,7 @@ import QtQuick
 import Quickshell.Io
 
 // The candidate palette for a focused wallpaper, straight from the daemon's
-// `asura-shell matugen-preview` (the exact scheme, mode and achromatic
+// `toren-shell matugen-preview` (the exact scheme, mode and achromatic
 // neutralisation Set would write) plus the tonal ramps and the 8x8 L* map, so a
 // desktop mock and its cava specimen match the applied look. No wallpaper binary:
 // the daemon owns palette generation, same as the eventual sunset path.
@@ -32,7 +32,7 @@ Item {
         root.loading = true
         _buf = ""
         proc.running = false
-        proc.command = ["asura-shell", "matugen-preview", s]
+        proc.command = ["toren-shell", "matugen-preview", s]
         proc.running = true
     }
 

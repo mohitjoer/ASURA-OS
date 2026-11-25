@@ -6,16 +6,16 @@ import "../../modules"
 import qs.Ui
 import qs.Ui.Singletons
 
-// Community route : every bar plugin installed from outside Asura, kept
+// Community route : every bar plugin installed from outside Toren, kept
 // apart from the shipped set so a widget someone else wrote is never mixed in
-// with the built-ins, under a plain warning that Asura does not review it. The
+// with the built-ins, under a plain warning that Toren does not review it. The
 // same CcWidgetList sheet as Widgets, so a community widget is shown, tuned and
 // coloured exactly like a built-in; each row also names its author and can
-// EXPORT it (a Asura Store-shaped folder), SHARE it (the catalogue pull request)
+// EXPORT it (a Toren Store-shaped folder), SHARE it (the catalogue pull request)
 // or REMOVE it. Those run the plugin CLI here, with the result printed in a
 // console strip, so a bad URL or a missing preview is never silent. Below the
-// sheet, the two ways in: a git URL or a local folder handed to `asura plugin
-// add --bar`, and Asura Store's plugin shelf.
+// sheet, the two ways in: a git URL or a local folder handed to `toren plugin
+// add --bar`, and Toren Store's plugin shelf.
 Item {
     id: page
     property var root: null
@@ -39,7 +39,7 @@ Item {
 
     // ── the plugin CLI, run here so its result is visible ──
     // One job at a time; the console strip shows what is running, then the
-    // command's last lines. `asura plugin add` clones/copies, validates and
+    // command's last lines. `toren plugin add` clones/copies, validates and
     // installs without running anything from the plugin; --bar places it on the
     // bar, which re-derives on the plugins.json change.
     property string jobLabel: ""
@@ -82,13 +82,13 @@ Item {
         if (u === "") return
         // a folder typed the shell way: no shell runs here, so expand it
         if (u.indexOf("~/") === 0) u = Quickshell.env("HOME") + u.substring(1)
-        page.run(I18n.tr("Adding %1").arg(u), ["asura", "plugin", "add", u, "--bar", "--yes"])
+        page.run(I18n.tr("Adding %1").arg(u), ["toren", "plugin", "add", u, "--bar", "--yes"])
         gitField.text = ""
     }
-    function exportPlugin(id) { page.run(I18n.tr("Exporting %1").arg(id), ["asura", "plugin", "export", id]) }
-    function sharePlugin(id)  { page.run(I18n.tr("Sharing %1").arg(id), ["asura", "plugin", "share", id]) }
+    function exportPlugin(id) { page.run(I18n.tr("Exporting %1").arg(id), ["toren", "plugin", "export", id]) }
+    function sharePlugin(id)  { page.run(I18n.tr("Sharing %1").arg(id), ["toren", "plugin", "share", id]) }
     function removePlugin(id) {
-        page.run(I18n.tr("Removing %1").arg(id), ["asura", "plugin", "remove", id])
+        page.run(I18n.tr("Removing %1").arg(id), ["toren", "plugin", "remove", id])
         if (page.selId === id) page.selId = ""
     }
 
@@ -298,7 +298,7 @@ Item {
                                 id: gitField
                                 width: parent.width - addBtn.width - parent.spacing
                                 tabular: true
-                                placeholder: I18n.tr("https://github.com/someone/asura-widget  or  ~/my-widget")
+                                placeholder: I18n.tr("https://github.com/someone/toren-widget  or  ~/my-widget")
                                 onCommitted: (v) => page.addFrom(v)
                             }
                             Btn {
@@ -322,7 +322,7 @@ Item {
                             anchors.verticalCenter: parent.verticalCenter
                             text: I18n.tr("OPEN Toren Store")
                             onAct: {
-                                Quickshell.execDetached(["asura-store", "open", "plugins"])
+                                Quickshell.execDetached(["toren-store", "open", "plugins"])
                                 if (page.cc) page.cc.close()
                             }
                         }

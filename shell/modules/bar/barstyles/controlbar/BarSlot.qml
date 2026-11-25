@@ -1160,12 +1160,12 @@ PanelWindow {
                             || screenRecInd.recording
                             || voxInd.state === "recording"
                             || voxInd.state === "transcribing"
-                            || asuraUpdateInd.updateAvailable
+                            || torenUpdateInd.updateAvailable
                         IdleWidget               { id: idleInd;          root: barSlot.root; anchors.verticalCenter: parent.verticalCenter }
                         NotificationSilenceWidget{ id: dndInd;           root: barSlot.root; anchors.verticalCenter: parent.verticalCenter }
                         ScreenRecordWidget       { id: screenRecInd;     root: barSlot.root; anchors.verticalCenter: parent.verticalCenter }
                         VoxtypeWidget            { id: voxInd;           root: barSlot.root; anchors.verticalCenter: parent.verticalCenter }
-                        UpdateWidget             { id: asuraUpdateInd;   root: barSlot.root; anchors.verticalCenter: parent.verticalCenter }
+                        UpdateWidget             { id: torenUpdateInd;   root: barSlot.root; anchors.verticalCenter: parent.verticalCenter }
                     }
                 }
             }
@@ -1664,7 +1664,7 @@ PanelWindow {
                                 ? pluginHostRoot.entry.placement.settings : ({})
                             readonly property string pluginDir: pluginHostRoot.entry ? pluginHostRoot.entry.dir : ""
                             readonly property string stateDir: (Quickshell.env("XDG_STATE_HOME") || (Quickshell.env("HOME") + "/.local/state"))
-                                + "/asura/plugins/" + slot.pluginId
+                                + "/toren/plugins/" + slot.pluginId
                             readonly property bool panelOpen: barSlot.root.pluginPanelId === slot.pluginId
                             readonly property bool hasPanel: !!(pluginHostRoot.entry && pluginHostRoot.entry.manifest
                                 && pluginHostRoot.entry.manifest.entryPoints

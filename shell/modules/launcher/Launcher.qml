@@ -137,6 +137,6 @@ Scope {
     // Phase 10: the launcher's legacy daemon control channels are removed so this
     // instance stays self-contained. ShellState.launcherOpen (bound to `active`)
     // owns open/close now, replacing the IpcHandler (target "launcher") and the
-    // asura-launcher.sock SocketServer the old daemon drove for toggle/show/hide/
+    // toren-launcher.sock SocketServer the old daemon drove for toggle/show/hide/
     // state; the daemon-facing bridge is rebuilt on ShellState in Phase 10.
 }

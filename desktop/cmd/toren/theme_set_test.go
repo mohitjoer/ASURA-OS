@@ -74,9 +74,9 @@ func TestThemeSetRunsTheSwitcherAndRemembersTheLook(t *testing.T) {
 }
 
 func TestThemeSetRefusesOnASURAsOwnShellAndUnknownLooks(t *testing.T) {
-	calls := themeSandbox(t, "asura")
+	calls := themeSandbox(t, "toren")
 	if code := themeSet([]string{"forest"}); code != exitFail || len(*calls) != 0 {
-		t.Fatalf("on asura's shell: %d %v", code, *calls)
+		t.Fatalf("on toren's shell: %d %v", code, *calls)
 	}
 	themeSandbox(t, "desktop")
 	if code := themeSet([]string{"neon"}); code != exitUsage {

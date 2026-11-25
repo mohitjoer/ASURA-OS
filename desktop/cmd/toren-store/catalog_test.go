@@ -250,7 +250,7 @@ func TestCatalogJSONContract(t *testing.T) {
 		}},
 		Items: []Item{{
 			ID: "market", Category: "plugins", Name: "Market", Summary: "s", Description: "d",
-			Art: "a.png", Author: "me", Version: "1.2.3", Compatibility: "asura>=1",
+			Art: "a.png", Author: "me", Version: "1.2.3", Compatibility: "toren>=1",
 			Screenshots: []string{"s.png"}, Tags: []string{"tag"},
 			Installed: true, Active: true, Enabled: true,
 			InstalledCount: 1, TotalCount: 3, UpdateAvailable: true,

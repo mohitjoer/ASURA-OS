@@ -17,7 +17,7 @@ import (
 // matugen palette, and broadcast the applied event the picker listens for.
 
 // applyWallpaper handles static and video applies, dispatching on the
-// video_engine knob: "asura-wallpaper" (the C player + READY handshake, default) or
+// video_engine knob: "toren-wallpaper" (the C player + READY handshake, default) or
 // "in_shell" (the clip publishes as videoPath and the shell decodes it).
 func (d *daemon) applyWallpaper(wpType, path, mode string, outputs []string, mute map[string]bool, volume map[string]int) error {
 	if path == "" {
@@ -68,7 +68,7 @@ func (d *daemon) applyWallpaper(wpType, path, mode string, outputs []string, mut
 		d.setCurrent(name)
 		d.saveOutputs(outputs, wpType, path, mute, volume)
 		d.store.mutate(keyFor(d.store, name, key), func(e *Entry) { e.ApplyCount++ })
-		d.broadcast("asura-wallpaper.wall.applied", map[string]interface{}{
+		d.broadcast("toren-wallpaper.wall.applied", map[string]interface{}{
 			"type": wpType, "name": name, "path": path, "we_id": "", "key": key,
 		})
 		return nil
@@ -128,10 +128,10 @@ func (d *daemon) applyWallpaper(wpType, path, mode string, outputs []string, mut
 	d.saveOutputs(outputs, wpType, path, mute, volume)
 	key := strings.TrimSuffix(name, filepath.Ext(name))
 	d.store.mutate(keyFor(d.store, name, key), func(e *Entry) { e.ApplyCount++ })
-	// The palette follows through asura-shell: its asura-wallpaper bridge watches the
+	// The palette follows through toren-shell: its toren-wallpaper bridge watches the
 	// frame and drives the matugen pipeline (the enriched template context the
 	// deployed templates need), so the daemon never execs matugen itself.
-	d.broadcast("asura-wallpaper.wall.applied", map[string]interface{}{
+	d.broadcast("toren-wallpaper.wall.applied", map[string]interface{}{
 		"type": wpType, "name": name, "path": path, "we_id": "", "key": key,
 	})
 	if isDesktopShell() {
@@ -202,15 +202,15 @@ func frameAudio(outputs []string, mute map[string]bool, volume map[string]int) w
 	return wallAudio{mute: m, volume: vol}
 }
 
-// wallStatePath is the legacy ~/.local/state/asura-wallpaper file: the absolute
+// wallStatePath is the legacy ~/.local/state/toren-wallpaper file: the absolute
 // path of the current default (broadcast) wallpaper, newline-terminated.
 // the wallpaper daemon owns wallpaper apply now, but rice capture, the overview backdrop, the
 // Super+W on-air dot, and the shell's palette bridge still read this file to
 // learn what is on screen. The old Go/C backend wrote it on every apply; when
-// asura-wallpaper took the wallpaper over the write was dropped, so those readers saw a
+// toren-wallpaper took the wallpaper over the write was dropped, so those readers saw a
 // stale wallpaper (a saved rice and the overview showed the wrong wall). This
 // restores the write.
-func wallStatePath() string { return filepath.Join(stateHome(), "asura-wallpaper") }
+func wallStatePath() string { return filepath.Join(stateHome(), "toren-wallpaper") }
 
 // defaultWallpaperFrom picks the broadcast wallpaper from the persisted outputs
 // map: the "*" entry when present, else the first per-output entry by sorted key
@@ -241,12 +241,12 @@ func defaultWallpaperFrom(state map[string]map[string]interface{}) string {
 func syncWallState(state map[string]map[string]interface{}) {
 	dir := stateHome()
 	_ = os.MkdirAll(dir, 0o755)
-	_ = os.WriteFile(filepath.Join(dir, "asura-wallpaper"), []byte(defaultWallpaperFrom(state)+"\n"), 0o644)
+	_ = os.WriteFile(filepath.Join(dir, "toren-wallpaper"), []byte(defaultWallpaperFrom(state)+"\n"), 0o644)
 }
 
 // legacyWallStatePath: the shell's own choice from before the wallpaper daemon owned the
 // wallpaper. Nothing writes it now.
-func legacyWallStatePath() string { return filepath.Join(stateHome(), "asura-wallpaper.json") }
+func legacyWallStatePath() string { return filepath.Join(stateHome(), "toren-wallpaper.json") }
 
 // migrateLegacyOutputs seeds outputs.json from the pre-split state once,
 // only while no wallpaper is stored.
@@ -281,7 +281,7 @@ func (d *daemon) migrateLegacyOutputs() {
 	_ = os.MkdirAll(cacheDir, 0o755)
 	saveJSON(filepath.Join(cacheDir, "outputs.json"), state)
 	syncWallState(state)
-	fmt.Fprintln(os.Stderr, "asura-wallpaper: migrated the pre-split wallpaper choice into outputs.json")
+	fmt.Fprintln(os.Stderr, "toren-wallpaper: migrated the pre-split wallpaper choice into outputs.json")
 }
 
 // webpHealRev marks the catalog revision that stopped forcing every webp onto
@@ -336,7 +336,7 @@ func (d *daemon) healAnimatedWebp() {
 		syncWallState(outputs)
 	}
 	if healed > 0 || changed {
-		fmt.Fprintf(os.Stderr, "asura-wallpaper: reclassified %d static webp(s) off the video path\n", healed)
+		fmt.Fprintf(os.Stderr, "toren-wallpaper: reclassified %d static webp(s) off the video path\n", healed)
 	}
 	rev := webpHealRev
 	d.store.stateSet("webpHealRev", &rev)
@@ -440,7 +440,7 @@ func (d *daemon) restoreOutputs() (want, applied int) {
 	}
 	if restored != "" {
 		d.setCurrent(restored)
-		fmt.Fprintf(os.Stderr, "asura-wallpaper: auto-restored wallpaper: %s\n", restored)
+		fmt.Fprintf(os.Stderr, "toren-wallpaper: auto-restored wallpaper: %s\n", restored)
 	}
 	syncWallState(state)
 	return want, applied
@@ -486,7 +486,7 @@ var gsettingsGet = func(schema, key string) string {
 	return strings.TrimSpace(string(out))
 }
 
-// settingsWallpaper is the wallpaper Asura's settings name (wallpaper-path /
+// settingsWallpaper is the wallpaper Toren's settings name (wallpaper-path /
 // wallpaper-path-dark, by colour scheme): the one an adopted desktop imported,
 // or the package default. A fresh account starts on it, so the desktop does not
 // change under the user the day the daemon replaces the old background window.
@@ -496,11 +496,11 @@ func settingsWallpaper() string {
 		return ""
 	}
 	keys := []string{"wallpaper-path", "wallpaper-path-dark"}
-	if strings.Contains(gsettingsGet("org.asura.desktop", "color-scheme"), "dark") {
+	if strings.Contains(gsettingsGet("org.toren.desktop", "color-scheme"), "dark") {
 		keys = []string{"wallpaper-path-dark", "wallpaper-path"}
 	}
 	for _, k := range keys {
-		v := strings.Trim(gsettingsGet("org.asura.shell", k), "'\" ")
+		v := strings.Trim(gsettingsGet("org.toren.shell", k), "'\" ")
 		v = strings.TrimPrefix(v, "file://")
 		if p, err := url.PathUnescape(v); err == nil {
 			v = p
@@ -524,7 +524,7 @@ func (d *daemon) applyDefaultWallpaper() {
 		return
 	}
 	if err := d.applyWallpaper("static", pick, "init", nil, nil, nil); err != nil {
-		fmt.Fprintf(os.Stderr, "asura-wallpaper: default wallpaper %s: %v\n", pick, err)
+		fmt.Fprintf(os.Stderr, "toren-wallpaper: default wallpaper %s: %v\n", pick, err)
 	}
 }
 
@@ -609,7 +609,7 @@ func (d *daemon) deleteWallpaper(key string) error {
 			_ = os.Remove(t)
 		}
 	}
-	d.broadcast("asura-wallpaper.wall.file_removed", map[string]interface{}{"name": e.Name, "type": e.Type})
+	d.broadcast("toren-wallpaper.wall.file_removed", map[string]interface{}{"name": e.Name, "type": e.Type})
 	return nil
 }
 

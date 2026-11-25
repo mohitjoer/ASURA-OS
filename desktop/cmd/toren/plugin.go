@@ -13,25 +13,25 @@ import (
 	"strings"
 )
 
-// plugin.go is `asura plugin`: scaffold a shell plugin, audit one, install it
+// plugin.go is `toren plugin`: scaffold a shell plugin, audit one, install it
 // from a git repo or a folder, list what is installed, turn one on or off, and
 // remove it. Ported from upstream's plugin CLI (GPL-3.0). Install stages a copy,
 // validates the manifest (relative entry points, a known host set, no symlinks,
 // an id that is not a reserved built-in widget), audits it, and copies it into
-// ~/.local/share/asura/plugins/<id>. It never executes anything from the
+// ~/.local/share/toren/plugins/<id>. It never executes anything from the
 // plugin.
 //
-// upstream installs through its store's receipt transaction. Asura's plugin
+// upstream installs through its store's receipt transaction. Toren's plugin
 // folder is the install (the ownership table in agents/agents.md gives the
 // directory to "the plugin's own manifest"), so there is no receipt to write and
 // none for discover.sh to demand. Placement (on or off, which host, settings)
-// lives in ~/.config/asura/plugins.json, written only by asura-plugins-place.
+// lives in ~/.config/toren/plugins.json, written only by toren-plugins-place.
 
 func init() {
-	register("plugin", "shell plugins: new, audit, install, enable, remove", asuraPlugin)
+	register("plugin", "shell plugins: new, audit, install, enable, remove", torenPlugin)
 }
 
-const pluginUsageText = `Usage: asura plugin <command> [flags]
+const pluginUsageText = `Usage: toren plugin <command> [flags]
 
   new <id> [--bar|--desktop|--popout] [--name N] [--author "N <m>"] [--to DIR]
            [--dry-run]               scaffold a plugin folder and git-init it
@@ -67,7 +67,7 @@ var pluginSubcommands = map[string]pluginHandler{
 	"list":     pluginCmdList,
 }
 
-func asuraPlugin(args []string) int {
+func torenPlugin(args []string) int {
 	return pluginDispatch(args, pluginStdIO())
 }
 
@@ -83,7 +83,7 @@ func pluginDispatch(args []string, pio pluginIO) int {
 	}
 	handler, known := pluginSubcommands[args[0]]
 	if !known {
-		fmt.Fprintf(pio.err, "asura plugin: unknown command %q\n\n%s", args[0], pluginUsageText)
+		fmt.Fprintf(pio.err, "toren plugin: unknown command %q\n\n%s", args[0], pluginUsageText)
 		return exitUsage
 	}
 	return handler(args[1:], pio)
@@ -110,7 +110,7 @@ func pluginParse(set *flag.FlagSet, args []string) ([]string, int, bool) {
 }
 
 func pluginFail(pio pluginIO, verb string, err error) int {
-	fmt.Fprintf(pio.err, "asura plugin %s: %v\n", verb, err)
+	fmt.Fprintf(pio.err, "toren plugin %s: %v\n", verb, err)
 	return exitFail
 }
 
@@ -139,11 +139,11 @@ const pluginCatalogueRel = "modules/bar/barstyles/controlbar/core/widgets.json"
 // pluginCataloguePath is the bar's widget catalogue: the installed shell tree,
 // else a checkout found by walking up from the working directory.
 func pluginCataloguePath() string {
-	installed := filepath.Join("/usr/share/asura/shell", pluginCatalogueRel)
+	installed := filepath.Join("/usr/share/toren/shell", pluginCatalogueRel)
 	if pluginExists(installed) {
 		return installed
 	}
-	legacy := filepath.Join("/usr/share/asura/shell", "modules/bar/barstyles/qsbar/core/widgets.json")
+	legacy := filepath.Join("/usr/share/toren/shell", "modules/bar/barstyles/qsbar/core/widgets.json")
 	if pluginExists(legacy) {
 		return legacy
 	}
@@ -395,10 +395,10 @@ func pluginFindRow(id string) (pluginRow, bool) {
 	return pluginRow{}, false
 }
 
-const pluginListUsage = `Usage: asura plugin list [flags]
+const pluginListUsage = `Usage: toren plugin list [flags]
 
 Lists the plugins on this machine: the ones installed under
-~/.local/share/asura/plugins and any in ASURA_PLUGINS_DIR, with whether each
+~/.local/share/toren/plugins and any in ASURA_PLUGINS_DIR, with whether each
 is on and where.
 
   --json   machine-readable, with each plugin's declared capabilities
@@ -433,7 +433,7 @@ func pluginCmdList(args []string, pio pluginIO) int {
 // ---------------------------------------------------------------------------
 // audit
 
-const pluginAuditUsage = `Usage: asura plugin audit <dir> [flags]
+const pluginAuditUsage = `Usage: toren plugin audit <dir> [flags]
 
 Checks a plugin's manifest and runs the static security audit over its tree.
 Each finding prints as "rule  path:line  message". A blocking finding makes the
@@ -476,10 +476,10 @@ func pluginCmdAudit(args []string, pio pluginIO) int {
 // ---------------------------------------------------------------------------
 // install
 
-const pluginInstallUsage = `Usage: asura plugin install <git-url|dir> [flags]
+const pluginInstallUsage = `Usage: toren plugin install <git-url|dir> [flags]
 
 Fetches a plugin (clones a git URL, or copies a folder), checks its manifest,
-audits it, and installs it into ~/.local/share/asura/plugins/<id>. Nothing from
+audits it, and installs it into ~/.local/share/toren/plugins/<id>. Nothing from
 the plugin is executed.
 
 A plugin runs unsandboxed inside your shell with your permissions: install only
@@ -528,7 +528,7 @@ func pluginInstall(pio pluginIO, source string, bar, yes, allowFindings bool) er
 		return errors.New("aborted")
 	}
 
-	staging, err := os.MkdirTemp("", "asura-plugin-staging-")
+	staging, err := os.MkdirTemp("", "toren-plugin-staging-")
 	if err != nil {
 		return err
 	}
@@ -599,7 +599,7 @@ func pluginTurnOn(id, host string) error {
 // ---------------------------------------------------------------------------
 // enable, disable
 
-const pluginEnableUsage = `Usage: asura plugin enable <id> [flags]
+const pluginEnableUsage = `Usage: toren plugin enable <id> [flags]
 
 Turns an installed plugin on. Without a host flag it goes where its manifest
 defaults say.
@@ -622,12 +622,12 @@ func pluginCmdEnable(args []string, pio pluginIO) int {
 	}
 	host, err := pluginHostFlag(*bar, *desktop, *popout)
 	if err != nil {
-		fmt.Fprintf(pio.err, "asura plugin enable: %v\n", err)
+		fmt.Fprintf(pio.err, "toren plugin enable: %v\n", err)
 		return exitUsage
 	}
 	row, found := pluginFindRow(positional[0])
 	if !found {
-		return pluginFail(pio, "enable", fmt.Errorf("plugin %q is not installed (asura plugin list)", positional[0]))
+		return pluginFail(pio, "enable", fmt.Errorf("plugin %q is not installed (toren plugin list)", positional[0]))
 	}
 	if host != "" && !pluginContains(row.Hosts, host) {
 		return pluginFail(pio, "enable", fmt.Errorf("%s does not declare the %s host (it declares: %s)", row.ID, host, strings.Join(row.Hosts, ", ")))
@@ -662,7 +662,7 @@ func pluginHostFlag(bar, desktop, popout bool) (string, error) {
 	return host, nil
 }
 
-const pluginDisableUsage = `Usage: asura plugin disable <id>
+const pluginDisableUsage = `Usage: toren plugin disable <id>
 
 Turns a plugin off. Its placement and settings are kept, so enabling it again
 puts it back where it was.
@@ -681,7 +681,7 @@ func pluginCmdDisable(args []string, pio pluginIO) int {
 	id := positional[0]
 	_, installed := pluginFindRow(id)
 	if _, placed := pluginReadState()[id]; !installed && !placed {
-		return pluginFail(pio, "disable", fmt.Errorf("plugin %q is not installed or placed (asura plugin list)", id))
+		return pluginFail(pio, "disable", fmt.Errorf("plugin %q is not installed or placed (toren plugin list)", id))
 	}
 	if err := pluginPlace(id, "enabled", "false"); err != nil {
 		return pluginFail(pio, "disable", err)
@@ -693,9 +693,9 @@ func pluginCmdDisable(args []string, pio pluginIO) int {
 // ---------------------------------------------------------------------------
 // remove
 
-const pluginRemoveUsage = `Usage: asura plugin remove <id>
+const pluginRemoveUsage = `Usage: toren plugin remove <id>
 
-Uninstalls a plugin from ~/.local/share/asura/plugins and drops its placement,
+Uninstalls a plugin from ~/.local/share/toren/plugins and drops its placement,
 so the shell stops loading it. Its state and cache directories are left alone.
 `
 
@@ -730,7 +730,7 @@ func pluginCmdRemove(args []string, pio pluginIO) int {
 	}
 	// Drop its placement so the shell stops loading it (best-effort).
 	if err := pluginPlace(id, "forget"); err != nil {
-		fmt.Fprintf(pio.err, "asura plugin remove: its placement was not cleared: %v\n", err)
+		fmt.Fprintf(pio.err, "toren plugin remove: its placement was not cleared: %v\n", err)
 	}
 	fmt.Fprintf(pio.out, "%s %s\n", pio.green("removed"), id)
 	return exitOK

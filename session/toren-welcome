@@ -1,12 +1,12 @@
 #!/bin/sh
 # The first-run welcome tour.
 #
-# A wrapper for the same reason asura-hub is one: `quickshell -p` on the entry
+# A wrapper for the same reason toren-hub is one: `quickshell -p` on the entry
 # file is the whole program, and the entry file sits at the shell's root so the
 # `qs.*` imports resolve.
 #
-#	asura-welcome                  open the tour, any time
-#	asura-welcome --if-first-run   open it only if it was never finished; the
+#	toren-welcome                  open the tour, any time
+#	toren-welcome --if-first-run   open it only if it was never finished; the
 #	                                compositor's autostart runs this every login
 #
 # The marker is written after the window has closed, and only if it closed
@@ -16,10 +16,10 @@
 set -eu
 
 QUICKSHELL_BIN=${ASURA_QUICKSHELL:-/usr/bin/quickshell}
-ENTRY=/usr/share/asura/shell/welcome.qml
-MARKER="${XDG_STATE_HOME:-$HOME/.local/state}/asura/welcome-done"
-LOCK="${XDG_RUNTIME_DIR:-/tmp}/asura-welcome.lock"
-LIVE_FLAG=${ASURA_LIVE_FLAG:-/etc/asura-live}
+ENTRY=/usr/share/toren/shell/welcome.qml
+MARKER="${XDG_STATE_HOME:-$HOME/.local/state}/toren/welcome-done"
+LOCK="${XDG_RUNTIME_DIR:-/tmp}/toren-welcome.lock"
+LIVE_FLAG=${ASURA_LIVE_FLAG:-/etc/toren-live}
 
 
 if [ "${1:-}" = "--if-first-run" ]; then
@@ -27,14 +27,14 @@ if [ "${1:-}" = "--if-first-run" ]; then
         exit 0
     fi
     # Clean up any leftover installer shortcuts on an installed system
-    rm -f "$HOME/Desktop/asura-installer.desktop" "$HOME/Desktop/toren-installer.desktop" 2>/dev/null || true
-    rm -f "$HOME/.local/share/applications/asura-installer.desktop" "$HOME/.local/share/applications/toren-installer.desktop" 2>/dev/null || true
+    rm -f "$HOME/Desktop/toren-installer.desktop" "$HOME/Desktop/toren-installer.desktop" 2>/dev/null || true
+    rm -f "$HOME/.local/share/applications/toren-installer.desktop" "$HOME/.local/share/applications/toren-installer.desktop" 2>/dev/null || true
 fi
 
 
 if [ ! -x "$QUICKSHELL_BIN" ]; then
-    echo "asura-welcome: $QUICKSHELL_BIN is not installed." >&2
-    echo "asura-welcome: the tour is drawn by Quickshell, which Asura builds." >&2
+    echo "toren-welcome: $QUICKSHELL_BIN is not installed." >&2
+    echo "toren-welcome: the tour is drawn by Quickshell, which Toren builds." >&2
     exit 1
 fi
 
@@ -43,6 +43,6 @@ if flock -n -o "$LOCK" "$QUICKSHELL_BIN" -p "$ENTRY"; then
     mkdir -p "$(dirname "$MARKER")"
     : > "$MARKER"
 else
-    echo "asura-welcome: the tour did not finish (or is already open); it is offered again next login." >&2
+    echo "toren-welcome: the tour did not finish (or is already open); it is offered again next login." >&2
     exit 1
 fi

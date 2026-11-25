@@ -1,7 +1,7 @@
 .pragma library
 
 // LockscreenPage schema.
-// Configures session locking and inactivity timeouts backed by org.asura.desktop.
+// Configures session locking and inactivity timeouts backed by org.toren.desktop.
 var rows = [
     {
         "id": "lockscreen.now",
@@ -19,7 +19,7 @@ var rows = [
         "section": "lockscreen",
         "desc": "Inactivity duration before the screen automatically locks",
         "kind": "choice",
-        "src": "org.asura.desktop.idle-lock-seconds",
+        "src": "org.toren.desktop.idle-lock-seconds",
         "keywords": "lock idle timeout security password inactivity sleep"
     },
     {
@@ -29,7 +29,7 @@ var rows = [
         "section": "lockscreen",
         "desc": "Lowers display brightness before locking to reduce power consumption",
         "kind": "choice",
-        "src": "org.asura.desktop.idle-dim-seconds",
+        "src": "org.toren.desktop.idle-dim-seconds",
         "keywords": "dim backlight brightness screen idle battery"
     },
     {
@@ -39,7 +39,7 @@ var rows = [
         "section": "lockscreen",
         "desc": "Powers down displays via DPMS standby after prolonged inactivity",
         "kind": "choice",
-        "src": "org.asura.desktop.idle-blank-seconds",
+        "src": "org.toren.desktop.idle-blank-seconds",
         "keywords": "display screen off blank dpms standby monitor power"
     }
 ];

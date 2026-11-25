@@ -10,12 +10,12 @@ import (
 	"syscall"
 	"time"
 
-	"asura/desktop/internal/wm"
+	"toren/desktop/internal/wm"
 )
 
 // settings.go is the shell's typed configuration, owned by the daemon and served
-// to QML and Asura Hub over the "settings" state topic. It is the single writer
-// of ~/.config/asura/shell.json: readers subscribe for a live frame, and every
+// to QML and Toren Hub over the "settings" state topic. It is the single writer
+// of ~/.config/toren/shell.json: readers subscribe for a live frame, and every
 // change is a settings.patch call, so two writers can never race on the file (a
 // setting silently reverting was the hazard of the Hub and the daemon both
 // writing it directly).
@@ -23,7 +23,7 @@ import (
 // The daemon owns a typed schema for six top-level namespaces (general, theme,
 // bars, menus, notifications, wallpaper). Those are validated: enum membership
 // and integer ranges are rejected, the float strength/contrast/opacity values
-// clamp into range. Every other top-level key in the file (the Asura-native look
+// clamp into range. Every other top-level key in the file (the Toren-native look
 // knobs frameRadius, frameBars, weatherLocation, sidebar panes, language, and the
 // rest) is carried through verbatim as passthrough: echoed in the frame and
 // merged on patch, but not validated, because the daemon has no schema for them.
@@ -61,7 +61,7 @@ var (
 	menuExpansionValues   = []string{"AlwaysExpanded", "ExpandBothWays", "ExpandUp", "ExpandDown"}
 	tempUnitValues        = []string{"Metric", "Imperial"}
 	contentFitValues      = []string{"Contain", "Cover", "Fill", "ScaleDown", "Center", "Tile"}
-	videoEngineValues     = []string{"asura-wallpaper", "in_shell"}
+	videoEngineValues     = []string{"toren-wallpaper", "in_shell"}
 	quickSettingsIconVals = []string{"Arch", "Fedora", "Hyprland", "Nix"}
 	matugenPrefValues     = []string{"Darkness", "Lightness", "Saturation", "LessSaturation", "Value"}
 	matugenTypeValues     = []string{"Content", "Expressive", "Fidelity", "FruitSalad", "Monochrome", "Neutral", "Rainbow", "TonalSpot", "Vibrant"}
@@ -77,7 +77,7 @@ var (
 		"Reboot", "RecordingIndicator", "Screenshot", "Shutdown", "Tray", "VpnIndicator",
 		"Wallpaper",
 	}
-	// 17 menu widgets. AppLauncher is deliberately absent: Asura's launcher is its
+	// 17 menu widgets. AppLauncher is deliberately absent: Toren's launcher is its
 	// own standalone surface, not an in-frame menu widget, so it has no renderer
 	// here (user correction).
 	menuWidgetValues = []string{
@@ -98,7 +98,7 @@ var (
 )
 
 // settings mirrors the reference configuration schema (contract 14), minus the
-// keys Asura has no consumer for (see the slice report): the icon-theme group,
+// keys Toren has no consumer for (see the slice report): the icon-theme group,
 // the custom-CSS file, and the app-launcher menu.
 type settings struct {
 	General       generalSettings       `json:"general"`
@@ -140,7 +140,7 @@ type matugenSettings struct {
 	Contrast   float64 `json:"contrast"`
 }
 
-// motionConfig is the shell-UI animation timing, read live by asura/ui Tokens.
+// motionConfig is the shell-UI animation timing, read live by toren/ui Tokens.
 type motionConfig struct {
 	Scale  float64 `json:"scale"`  // 0.25..3.0 global speed (1 = shipped timing)
 	Reduce bool    `json:"reduce"` // collapse animations to instant (accessibility)
@@ -316,7 +316,7 @@ func defaultSettings() *settings {
 			RightMenuExpansionType: "AlwaysExpanded",
 		},
 		Notifications: notificationsSettings{NotificationPosition: "Right", PopupWindowMargins: 0},
-		Wallpaper:     wallpaperSettings{ContentFit: "Cover", TransitionPreset: "random", VideoEngine: "asura-wallpaper", VideoEnabled: true, VideoTranscodeFps: 24, VideoTranscodeWidth: 1920},
+		Wallpaper:     wallpaperSettings{ContentFit: "Cover", TransitionPreset: "random", VideoEngine: "toren-wallpaper", VideoEnabled: true, VideoTranscodeFps: 24, VideoTranscodeWidth: 1920},
 	}
 }
 
@@ -527,19 +527,19 @@ func (n *notificationsSettings) normalize(v *validator) {
 
 func (w *wallpaperSettings) normalize(v *validator) {
 	v.enum("wallpaper.content_fit", w.ContentFit, contentFitValues)
-	// video_engine: "asura-wallpaper" (C player, default) or "in_shell" (QtMultimedia).
+	// video_engine: "toren-wallpaper" (C player, default) or "in_shell" (QtMultimedia).
 	// An empty value reads as the default, so a shell.json with no key keeps
 	// the shipped engine.
 	if w.VideoEngine == "" {
-		w.VideoEngine = "asura-wallpaper"
+		w.VideoEngine = "toren-wallpaper"
 	}
 	v.enum("wallpaper.video_engine", w.VideoEngine, videoEngineValues)
 	// Clamp the transcode caps so a hand-edited value never runs unbounded.
 	v.rangeI("wallpaper.video_transcode_fps", &w.VideoTranscodeFps, 1, 120)
 	v.rangeI("wallpaper.video_transcode_width", &w.VideoTranscodeWidth, 640, 7680)
-	// wallpaper.transition_preset is asura-wallpaper now: it reads the key from
+	// wallpaper.transition_preset is toren-wallpaper now: it reads the key from
 	// shell.json per-apply and falls back to random on an unknown name, so
-	// asura-shell keeps the key but no longer duplicates the preset name list.
+	// toren-shell keeps the key but no longer duplicates the preset name list.
 }
 
 // splitPath breaks a dotted patch path into segments, rejecting an empty path or
@@ -904,7 +904,7 @@ func lockSettingsFile(path string) (func(), error) {
 	}, nil
 }
 
-const barStyleTransactionKey = "asuraStoreBarStyleTransaction"
+const barStyleTransactionKey = "torenStoreBarStyleTransaction"
 
 // patch sets one leaf. A schema path is validated and clamped; any other path is
 // passthrough (merged, not validated). The change is persisted before it is
@@ -1075,7 +1075,7 @@ func (s *settingsStore) watch(quit <-chan struct{}) {
 // the sole writer of shell.json, publishing the current file and re-publishing on
 // every patch, reset, or external edit.
 func (d *daemon) startSettings() {
-	store := newSettingsStore(filepath.Join(asuraConfigDir(), "shell.json"))
+	store := newSettingsStore(filepath.Join(torenConfigDir(), "shell.json"))
 	d.settings = store
 	t := d.registerTopic("settings")
 
@@ -1166,7 +1166,7 @@ func (d *daemon) windowRuleActions() []string {
 }
 
 // deadSettingKeys are the provider store leaves that some installed provider
-// models but the active one does not. Asura has one compositor provider, so
+// models but the active one does not. Toren has one compositor provider, so
 // there is no inactive provider whose leaves could go dead: always empty, but
 // present in the frame because the Hub reads it.
 func (d *daemon) deadSettingKeys() []string { return []string{} }

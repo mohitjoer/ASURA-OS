@@ -36,7 +36,7 @@ func TestScanShellInstancesFindsTheShell(t *testing.T) {
 	root := t.TempDir()
 
 	// The live shell: quickshell, started from a project path.
-	writeCmdline(t, root, "21420", "quickshell -p /home/mohit/code/Asura-OS/shell --no-color")
+	writeCmdline(t, root, "21420", "quickshell -p /home/mohit/code/Toren-OS/shell --no-color")
 	// A process whose argument mentions quickshell, which is not one.
 	writeCmdline(t, root, "12104", "journalctl --unit quickshell-shell.service --no-pager")
 	// A process the table has but whose command line it will not report;
@@ -56,7 +56,7 @@ func TestScanShellInstancesFindsTheShell(t *testing.T) {
 		t.Fatalf("the scan reports %d instance(s), %v, and the table says one",
 			len(got), got)
 	}
-	if want := "/home/mohit/code/Asura-OS/shell"; got[0] != want {
+	if want := "/home/mohit/code/Toren-OS/shell"; got[0] != want {
 		t.Errorf("the scan reports the instance running from %q, and its "+
 			"command line says %q", got[0], want)
 	}
@@ -89,9 +89,9 @@ func TestQuickshellPathArgSpellsThePath(t *testing.T) {
 }
 
 // TestPickShellInstance prefers the instance that is unambiguous and refuses
-// to guess when two asura trees are both running.
+// to guess when two toren trees are both running.
 func TestPickShellInstance(t *testing.T) {
-	installed := "/usr/share/asura/shell"
+	installed := "/usr/share/toren/shell"
 	scoped := []struct {
 		name    string
 		paths   []string
@@ -118,8 +118,8 @@ func TestPickShellInstance(t *testing.T) {
 			"refusing to guess",
 		},
 		{
-			"two asura trees",
-			[]string{installed, "/home/mohit/code/Asura-OS/shell"},
+			"two toren trees",
+			[]string{installed, "/home/mohit/code/Toren-OS/shell"},
 			"",
 			"refusing to guess",
 		},
@@ -144,7 +144,7 @@ func TestPickShellInstance(t *testing.T) {
 // TestPickShellInstanceIgnoresSecondaryWindows pins the fault that took every
 // keybind down while any window was open. The Hub, the screenshot tool and the
 // wallpaper picker are each their own quickshell, started on one entry file,
-// and used to be counted as extra shells: "several Asura trees are running".
+// and used to be counted as extra shells: "several Toren trees are running".
 // The shell is the instance started on the directory.
 //
 // It goes through a fake process table, so the command lines are the ones the
@@ -152,7 +152,7 @@ func TestPickShellInstance(t *testing.T) {
 // depend on besides: the shell alone still works, and with no shell at all the
 // answer is the plain "not running" error even when a window is open.
 func TestPickShellInstanceIgnoresSecondaryWindows(t *testing.T) {
-	const shell = "/usr/share/asura/shell"
+	const shell = "/usr/share/toren/shell"
 	cases := []struct {
 		name    string
 		running []string
@@ -206,16 +206,16 @@ func TestPickShellInstanceIgnoresSecondaryWindows(t *testing.T) {
 	}
 }
 
-// TestAsuraIpcRefusesABareCall checks that the command's own answer to a
+// TestTorenIpcRefusesABareCall checks that the command's own answer to a
 // call it cannot make is a usage exit, not a dispatch that goes nowhere.
-func TestAsuraIpcRefusesABareCall(t *testing.T) {
-	if code := asuraIpc(nil); code != exitUsage {
-		t.Errorf("asura ipc with no subcommand exits %d; want %d", code, exitUsage)
+func TestTorenIpcRefusesABareCall(t *testing.T) {
+	if code := torenIpc(nil); code != exitUsage {
+		t.Errorf("toren ipc with no subcommand exits %d; want %d", code, exitUsage)
 	}
-	if code := asuraIpc([]string{"inform"}); code != exitUsage {
-		t.Errorf("asura ipc with a subcommand it does not have exits %d; want %d", code, exitUsage)
+	if code := torenIpc([]string{"inform"}); code != exitUsage {
+		t.Errorf("toren ipc with a subcommand it does not have exits %d; want %d", code, exitUsage)
 	}
-	if code := asuraIpc([]string{"call", "asura"}); code != exitUsage {
-		t.Errorf("asura ipc call without a function exits %d; want %d", code, exitUsage)
+	if code := torenIpc([]string{"call", "toren"}); code != exitUsage {
+		t.Errorf("toren ipc call without a function exits %d; want %d", code, exitUsage)
 	}
 }

@@ -7,24 +7,24 @@ import (
 	"testing"
 )
 
-func TestIsAsuraRepo(t *testing.T) {
+func TestIsTorenRepo(t *testing.T) {
 	tmp := t.TempDir()
-	if isAsuraRepo(tmp) {
-		t.Fatal("expected empty directory to not be Asura repo")
+	if isTorenRepo(tmp) {
+		t.Fatal("expected empty directory to not be Toren repo")
 	}
 
 	if err := os.Mkdir(filepath.Join(tmp, ".git"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if isAsuraRepo(tmp) {
-		t.Fatal("expected .git without shell/hub to not be Asura repo")
+	if isTorenRepo(tmp) {
+		t.Fatal("expected .git without shell/hub to not be Toren repo")
 	}
 
 	if err := os.MkdirAll(filepath.Join(tmp, "shell", "hub"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if !isAsuraRepo(tmp) {
-		t.Fatal("expected directory with .git and shell/hub to be Asura repo")
+	if !isTorenRepo(tmp) {
+		t.Fatal("expected directory with .git and shell/hub to be Toren repo")
 	}
 }
 
@@ -47,37 +47,37 @@ func TestFindOrCloneRepoFromEnv(t *testing.T) {
 	}
 }
 
-func TestAsuraUpdateDryRunUnprivileged(t *testing.T) {
+func TestTorenUpdateDryRunUnprivileged(t *testing.T) {
 	tmp := t.TempDir()
 	// Set up fixture paths
-	configDir := filepath.Join(tmp, "home", ".config", "asura")
+	configDir := filepath.Join(tmp, "home", ".config", "toren")
 	if err := os.MkdirAll(configDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	baseDir := filepath.Join(tmp, "usr", "share", "asura")
+	baseDir := filepath.Join(tmp, "usr", "share", "toren")
 	if err := os.MkdirAll(baseDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
 
-	code := asuraUpdate([]string{"--root", tmp, "--dry-run", "--no-snapshot"})
+	code := torenUpdate([]string{"--root", tmp, "--dry-run", "--no-snapshot"})
 	if code != exitOK {
-		t.Fatalf("asura update unprivileged dry-run returned %d, want %d", code, exitOK)
+		t.Fatalf("toren update unprivileged dry-run returned %d, want %d", code, exitOK)
 	}
 }
 
 func TestApplyRepoArgs(t *testing.T) {
-	args := applyRepoArgs("/src/asura", "/")
-	want := filepath.Join("/src/asura", "installation", "apply-repo.sh")
+	args := applyRepoArgs("/src/toren", "/")
+	want := filepath.Join("/src/toren", "installation", "apply-repo.sh")
 	if os.Geteuid() != 0 {
 		if args[0] != "sudo" {
 			t.Fatalf("not root: want sudo first, got %v", args)
 		}
 		args = args[1:]
 	}
-	if len(args) != 3 || args[0] != "sh" || args[1] != want || args[2] != "/src/asura" {
+	if len(args) != 3 || args[0] != "sh" || args[1] != want || args[2] != "/src/toren" {
 		t.Fatalf("root /: got %v", args)
 	}
-	args = applyRepoArgs("/src/asura", "/mnt/target")
+	args = applyRepoArgs("/src/toren", "/mnt/target")
 	if args[len(args)-1] != "/mnt/target" {
 		t.Fatalf("a --root tree must be passed on: got %v", args)
 	}

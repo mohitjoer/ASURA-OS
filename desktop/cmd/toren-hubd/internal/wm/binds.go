@@ -11,7 +11,7 @@ import (
 )
 
 // The bind legend's vocabulary. The shipped catalogue is session/binds.json, the
-// one list the cheat sheet, `asura doctor` and this backend all read; upstream
+// one list the cheat sheet, `toren doctor` and this backend all read; upstream
 // compiled the same list into its seam, which here would be a second copy of a
 // file that already exists. What stays in code is the chord algebra: how a
 // catalogue chord is spelled, normalised, expanded into a family and shown.
@@ -22,7 +22,7 @@ type BindKind string
 
 const (
 	BindWM     BindKind = "wm"     // the window manager performs it
-	BindShell  BindKind = "shell"  // the Asura shell performs it
+	BindShell  BindKind = "shell"  // the Toren shell performs it
 	BindApp    BindKind = "app"    // it launches or focuses an app
 	BindCustom BindKind = "custom" // a bind outside the shipped catalogue
 )
@@ -135,14 +135,14 @@ func CataloguePath() string {
 		return p
 	}
 	for _, p := range []string{
-		filepath.Join(configHome(), "asura", "session", "binds.json"),
-		"/usr/share/asura/session/binds.json",
+		filepath.Join(configHome(), "toren", "session", "binds.json"),
+		"/usr/share/toren/session/binds.json",
 	} {
 		if _, err := os.Stat(p); err == nil {
 			return p
 		}
 	}
-	return "/usr/share/asura/session/binds.json"
+	return "/usr/share/toren/session/binds.json"
 }
 
 // LoadCatalogue reads the shipped catalogue from CataloguePath.

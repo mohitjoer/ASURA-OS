@@ -15,7 +15,7 @@ import (
 	"strings"
 	"time"
 
-	"asura/desktop/internal/wm"
+	"toren/desktop/internal/wm"
 )
 
 // matugen.go is the dynamic colour pipeline and the sole renderer of the
@@ -27,19 +27,19 @@ import (
 // app suite. Match wallpaper off, or a fixed named theme active, leaves the
 // pipeline idle so it never fights the static palette the theme daemon owns.
 //
-// One knob store, one renderer: ~/.config/asura/matugen.json holds mode,
+// One knob store, one renderer: ~/.config/toren/matugen.json holds mode,
 // contrast, prefer, the per-app roster and the app-suite toggle. The
 // Hub appearance page writes that file; the daemon reads it and watches it, so a
 // knob save retints exactly as a wallpaper change does. There is no second knob
 // source and no second renderer.
 //
 // upstream shells out to the matugen binary twice; matugen is not in Ubuntu's
-// archive, so both passes are `asura theme` here:
+// archive, so both passes are `toren theme` here:
 //
-//  1. Scheme generation: `asura theme generate --image <img> --mode <m>
+//  1. Scheme generation: `toren theme generate --image <img> --mode <m>
 //     --scheme <s> --json` prints a matugen-shaped Material 3 palette on stdout
 //     and touches nothing on disk (runPalette).
-//  2. Templating: the parsed palette is carried into `asura theme render
+//  2. Templating: the parsed palette is carried into `toren theme render
 //     --config <cfg> --palette <carrier>`, which renders the deployed templates
 //     (the terminal, the Hyprland border, btop, Qt, and, when app theming is on,
 //     the GTK / GUI-app suite) from that one palette.
@@ -50,7 +50,7 @@ import (
 // plane owns colors.json and matugen fans it out.
 
 // matugenKnobs are the scheme controls, read from the one knob store
-// (~/.config/asura/matugen.json). The token values are matugen's own CLI
+// (~/.config/toren/matugen.json). The token values are matugen's own CLI
 // vocabulary, so the constructed argv passes them straight through.
 type matugenKnobs struct {
 	Mode             string          // "dark" | "light" | "smart"
@@ -60,7 +60,7 @@ type matugenKnobs struct {
 	Prefer           string          // source-colour pick, e.g. "saturation"
 	SchemeType       string          // matugen -t variant; "" resolves to the default
 	SourceColorIndex int             // 0..4, most dominant first
-	ThemeAsuraApps   bool            // theme the GTK / GUI app suite (apps.toml)
+	ThemeTorenApps   bool            // theme the GTK / GUI app suite (apps.toml)
 	Templates        map[string]bool // per-app roster, keyed by group
 }
 
@@ -71,7 +71,7 @@ var matugenPrefers = map[string]bool{
 	"less-saturation": true, "value": true, "closest-to-fallback": true,
 }
 
-// The default scheme Asura generates with. The design system is strict
+// The default scheme Toren generates with. The design system is strict
 // monochrome: the wallpaper drives tone (dark or light, contrast) and no hue
 // unless a person picks a coloured scheme, which matugen.json schemeType (the
 // Hub's variant picker) does. docs/theming.md, "Where hue is allowed".
@@ -94,12 +94,12 @@ func defaultMatugenKnobs() matugenKnobs {
 		Contrast:       0,
 		Prefer:         "saturation",
 		SchemeType:     matugenSchemeType,
-		ThemeAsuraApps: true,
+		ThemeTorenApps: true,
 	}
 }
 
 // readMatugenKnobs reads the scheme controls from the one knob store
-// (~/.config/asura/matugen.json), falling back to the shipped defaults for any
+// (~/.config/toren/matugen.json), falling back to the shipped defaults for any
 // that are absent so a partial file still produces a valid run.
 func readMatugenKnobs() matugenKnobs {
 	k := defaultMatugenKnobs()
@@ -115,7 +115,7 @@ func readMatugenKnobs() matugenKnobs {
 		Prefer           *string         `json:"prefer"`
 		SchemeType       *string         `json:"schemeType"`
 		SourceColorIndex *int            `json:"sourceColorIndex"`
-		ThemeAsuraApps   *bool           `json:"themeAsuraApps"`
+		ThemeTorenApps   *bool           `json:"themeTorenApps"`
 		Templates        map[string]bool `json:"templates"`
 	}
 	if json.Unmarshal(b, &doc) != nil {
@@ -142,8 +142,8 @@ func readMatugenKnobs() matugenKnobs {
 	if doc.SourceColorIndex != nil {
 		k.SourceColorIndex = *doc.SourceColorIndex
 	}
-	if doc.ThemeAsuraApps != nil {
-		k.ThemeAsuraApps = *doc.ThemeAsuraApps
+	if doc.ThemeTorenApps != nil {
+		k.ThemeTorenApps = *doc.ThemeTorenApps
 	}
 	k.Templates = doc.Templates
 	return k
@@ -151,7 +151,7 @@ func readMatugenKnobs() matugenKnobs {
 
 // matugenArgs builds the scheme-generation argv for the knobs and the
 // already-resolved light/dark mode, or an error if a token is out of schema so a
-// bad knob fails loudly. `asura theme generate` takes the knobs under matugen's
+// bad knob fails loudly. `toren theme generate` takes the knobs under matugen's
 // own names; --prefer is accepted and ignored there, because the source colour
 // is always picked by index.
 func matugenArgs(img string, k matugenKnobs, mode string) ([]string, error) {
@@ -404,7 +404,7 @@ func ffmpegChroma(img string) (float64, bool) {
 // theme.theme is the master; this is its shadow. Other keys in the file
 // (themeApps) are preserved.
 func syncFollowWallpaper(themeName string) {
-	path := filepath.Join(asuraConfigDir(), "theme.json")
+	path := filepath.Join(torenConfigDir(), "theme.json")
 	doc := map[string]any{}
 	if b, err := os.ReadFile(path); err == nil {
 		_ = json.Unmarshal(b, &doc)
@@ -429,7 +429,7 @@ func syncFollowWallpaper(themeName string) {
 // chrome all read), defaulting ON to match the shell's own Config default: a
 // fresh box with no theme.json (or a file missing the key) follows the wallpaper.
 func matchWallpaperOn() bool {
-	b, err := os.ReadFile(filepath.Join(asuraConfigDir(), "theme.json"))
+	b, err := os.ReadFile(filepath.Join(torenConfigDir(), "theme.json"))
 	if err != nil {
 		return true
 	}
@@ -448,7 +448,7 @@ func matchWallpaperOn() bool {
 // palette actually lands, unlike stock Adwaita GTK3 which hardcodes its colours.
 // theme.json is the one control-plane file the daemon reads directly.
 func gtkThemeSetting() string {
-	b, err := os.ReadFile(filepath.Join(asuraConfigDir(), "theme.json"))
+	b, err := os.ReadFile(filepath.Join(torenConfigDir(), "theme.json"))
 	if err != nil {
 		return "adw"
 	}
@@ -467,7 +467,7 @@ func gtkThemeSetting() string {
 
 // resolveGtkTheme turns the gtkTheme knob and the resolved light/dark mode into
 // the gsettings gtk-theme name the daemon sets, or "" for "system" -- where the
-// user owns gtk-theme and Asura never writes it. The variant must match the mode
+// user owns gtk-theme and Toren never writes it. The variant must match the mode
 // so a light/dark flip lands on the right stylesheet (adw-gtk3 vs adw-gtk3-dark),
 // since the base carries the accent-derived rules the palette rides on.
 func resolveGtkTheme(mode string) string {
@@ -488,11 +488,11 @@ func resolveGtkTheme(mode string) string {
 	}
 }
 
-// gnomeAccentOn reports whether Asura tracks the palette onto GNOME's named
+// gnomeAccentOn reports whether Toren tracks the palette onto GNOME's named
 // accent (contract C3, default true). Off leaves org.gnome.desktop.interface
 // accent-color untouched so a user's own choice stands.
 func gnomeAccentOn() bool {
-	b, err := os.ReadFile(filepath.Join(asuraConfigDir(), "theme.json"))
+	b, err := os.ReadFile(filepath.Join(torenConfigDir(), "theme.json"))
 	if err != nil {
 		return true
 	}
@@ -510,7 +510,7 @@ func gnomeAccentOn() bool {
 // theme's palette is the catalog's (themePalettes), which the daemon fans into
 // both the shell rail and the app templates so the two share one master.
 func staticThemeName() string {
-	b, err := os.ReadFile(filepath.Join(asuraConfigDir(), "shell.json"))
+	b, err := os.ReadFile(filepath.Join(torenConfigDir(), "shell.json"))
 	if err != nil {
 		return ""
 	}
@@ -580,7 +580,7 @@ func (d *daemon) matugenApply(img string) error {
 	// reads the colors.json just written; a no-op unless the Material cursor is
 	// selected, and its own lock makes the post_hook's later run idempotent.
 	go func() {
-		if runCommand("asura-cursor-material-recolor") != nil {
+		if runCommand("toren-cursor-material-recolor") != nil {
 			return
 		}
 		// Recolored cursor images stay cached in the running compositor's
@@ -773,12 +773,12 @@ func hexLuma(hex string) (float64, bool) {
 // into the error so a failed scheme generation is diagnosable in the daemon log.
 // It is the one place the daemon asks for a scheme.
 func runPalette(args []string) ([]byte, error) {
-	cmd := exec.Command("asura", args...)
+	cmd := exec.Command("toren", args...)
 	var errBuf strings.Builder
 	cmd.Stderr = &errBuf
 	out, err := cmd.Output()
 	if err != nil {
-		return nil, fmt.Errorf("asura %s: %w: %s", strings.Join(args[:min(len(args), 2)], " "), err, strings.TrimSpace(errBuf.String()))
+		return nil, fmt.Errorf("toren %s: %w: %s", strings.Join(args[:min(len(args), 2)], " "), err, strings.TrimSpace(errBuf.String()))
 	}
 	return out, nil
 }
@@ -1145,7 +1145,7 @@ func filterMatugenConfig(toml string, enabled func(group string) bool) string {
 // to stock.
 func matugenRenderTemplates(shell map[string]string, k matugenKnobs) {
 	dir := matugenTemplateDir()
-	carrierPath := filepath.Join(matugenCacheHome(), "asura", "matugen-carrier.json")
+	carrierPath := filepath.Join(matugenCacheHome(), "toren", "matugen-carrier.json")
 	if err := writeJSONFile(carrierPath, matugenCarrier(shell)); err != nil {
 		fmt.Fprintf(os.Stderr, "matugen carrier: %v\n", err)
 		return
@@ -1162,11 +1162,11 @@ func matugenRenderTemplates(shell map[string]string, k matugenKnobs) {
 	}
 	matugenRenderFiltered(filepath.Join(dir, "config.toml"), carrierPath, enabled)
 	// Two switches gate the app suite and both have to agree: the appearance
-	// page's per-group roster (themeAsuraApps) and the master "Theme apps" in
+	// page's per-group roster (themeTorenApps) and the master "Theme apps" in
 	// theme.json. The Hub blanks the stylesheets when the master goes off, so
 	// honouring the roster alone here re-rendered them on the next repaint and
 	// silently undid it.
-	if k.ThemeAsuraApps && themeAppsEnabled() {
+	if k.ThemeTorenApps && themeAppsEnabled() {
 		matugenRenderFiltered(filepath.Join(dir, "apps.toml"), carrierPath, enabled)
 		// matugen wrote the shared snippet target; poke each vault's symlink so
 		// Obsidian's watcher, which never sees the out-of-vault target change,
@@ -1187,7 +1187,7 @@ func matugenRenderTemplates(shell map[string]string, k matugenKnobs) {
 // Obsidian never learns the target changed. A symlink recreated atomically
 // (temp name then rename) fires IN_MOVED_* inside the vault, which the watcher
 // does see, and leaves a symlink so the doctor's snippet check stays satisfied.
-// Only a vault whose asura.css is already a symlink is touched; a regular file
+// Only a vault whose toren.css is already a symlink is touched; a regular file
 // there is the user's own and left alone. Best-effort throughout: a missing
 // registry or a link that will not recreate is skipped, never surfaced, so a
 // palette apply never fails on Obsidian's account.
@@ -1210,12 +1210,12 @@ func nudgeObsidian() {
 		if vault == "" {
 			continue
 		}
-		link := filepath.Join(vault, ".obsidian", "snippets", "asura.css")
+		link := filepath.Join(vault, ".obsidian", "snippets", "toren.css")
 		fi, err := os.Lstat(link)
 		if err != nil || fi.Mode()&os.ModeSymlink == 0 {
 			continue // no link yet (doctor not run) or a user's own file
 		}
-		tmp := link + ".asura-tmp"
+		tmp := link + ".toren-tmp"
 		_ = os.Remove(tmp)
 		if os.Symlink(generated, tmp) != nil {
 			continue
@@ -1234,7 +1234,7 @@ func matugenRenderFiltered(config, carrier string, enabled func(group string) bo
 	if err != nil {
 		return
 	}
-	active := filepath.Join(matugenCacheHome(), "asura", "active-"+filepath.Base(config))
+	active := filepath.Join(matugenCacheHome(), "toren", "active-"+filepath.Base(config))
 	if err := os.WriteFile(active, []byte(filterMatugenConfig(string(b), enabled)), 0o644); err != nil {
 		return
 	}
@@ -1247,7 +1247,7 @@ func matugenRender(config, carrier string) {
 	if _, err := os.Stat(config); err != nil {
 		return
 	}
-	if out, err := exec.Command("asura", "theme", "render", "--config", config, "--palette", carrier).CombinedOutput(); err != nil {
+	if out, err := exec.Command("toren", "theme", "render", "--config", config, "--palette", carrier).CombinedOutput(); err != nil {
 		fmt.Fprintf(os.Stderr, "theme render %s: %v: %s\n", filepath.Base(config), err, strings.TrimSpace(string(out)))
 	}
 }
@@ -1288,7 +1288,7 @@ func matugenReload(mode string) {
 	applyGnomeAccent()
 	applyKdeColors()
 
-	// gtkTheme "system" (name == "") means the user owns gtk-theme, so Asura
+	// gtkTheme "system" (name == "") means the user owns gtk-theme, so Toren
 	// leaves it entirely alone. Otherwise land the variant for this mode.
 	if name := resolveGtkTheme(mode); name != "" {
 		matugenNudgeGtk(name)
@@ -1362,7 +1362,7 @@ func matugenNudgeGtk(want string) {
 // applyGnomeAccent tracks the palette's primary onto GNOME's nine named accents
 // (org.gnome.desktop.interface accent-color), so Flatpaks and apps that read the
 // setting rather than our CSS follow the wallpaper. The primary comes from the
-// palette the pipeline just authored (~/.cache/asura/colors.json, the one file
+// palette the pipeline just authored (~/.cache/toren/colors.json, the one file
 // every colours reader shares); an unreadable palette or a non-hex primary skips
 // the write rather than guessing. Gated off (gnomeAccent false) leaves the
 // user's own accent alone.
@@ -1394,7 +1394,7 @@ func kdeglobalsPath() string {
 
 // matugenKdeColorsPath is the rendered colour groups waiting to be merged.
 func matugenKdeColorsPath() string {
-	return filepath.Join(matugenCacheHome(), "asura", "kdeglobals-colors.conf")
+	return filepath.Join(matugenCacheHome(), "toren", "kdeglobals-colors.conf")
 }
 
 // kdeOwnedGroup reports whether a kdeglobals group is one the palette replaces.
@@ -1431,7 +1431,7 @@ func applyKdeColors() {
 			continue
 		}
 		if group.name == "General" {
-			group.rows = setIniRow(group.rows, "ColorScheme", "Asura")
+			group.rows = setIniRow(group.rows, "ColorScheme", "Toren")
 		}
 		out = append(out, renderIniGroup(group))
 	}
@@ -1767,10 +1767,10 @@ func matugenDataHome() string {
 
 // matugenTemplateDir is where config.toml and apps.toml are read from: the
 // materialised copy, where a user edit wins, and the packaged one until
-// `asura materialize` has run. `asura theme render` resolves the templates the
+// `toren materialize` has run. `toren theme render` resolves the templates the
 // configs name by the same rule.
 func matugenTemplateDir() string {
-	if dir := asuraConfigDir(); dir != "" {
+	if dir := torenConfigDir(); dir != "" {
 		materialised := filepath.Join(dir, "shell", "matugen")
 		if _, err := os.Stat(filepath.Join(materialised, "config.toml")); err == nil {
 			return materialised
@@ -1782,20 +1782,20 @@ func matugenTemplateDir() string {
 // matugenKnobsPath is the one knob store the Hub appearance page and the daemon
 // share.
 func matugenKnobsPath() string {
-	return filepath.Join(asuraConfigDir(), "matugen.json")
+	return filepath.Join(torenConfigDir(), "matugen.json")
 }
 
 // matugenColorsPath is the shell palette every Quickshell singleton watches. It
-// lives under the asura cache dir; a single reader convention serves the matugen
+// lives under the toren cache dir; a single reader convention serves the matugen
 // palette source the shell singletons watch.
 func matugenColorsPath() string {
-	return filepath.Join(matugenCacheHome(), "asura", "colors.json")
+	return filepath.Join(matugenCacheHome(), "toren", "colors.json")
 }
 
 // matugenTonesPath is the tonal-ramp file beside it, for the surfaces that must
 // choose a tone rather than consume one. Absent under a fixed named theme.
 func matugenTonesPath() string {
-	return filepath.Join(matugenCacheHome(), "asura", "tones.json")
+	return filepath.Join(matugenCacheHome(), "toren", "tones.json")
 }
 
 // writeJSONFile writes v as indented JSON atomically (temp file then rename), so

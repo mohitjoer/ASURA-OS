@@ -2,10 +2,10 @@
 Name=Install Toren Linux
 GenericName=System Installer
 Comment=Install Toren Linux permanently to your laptop or desktop drive
-Exec=ghostty --title="Install Toren Linux" -e asura install
-Icon=asura-installer
+Exec=ghostty --title="Install Toren Linux" -e toren install
+Icon=toren-installer
 Terminal=false
 Type=Application
 Categories=System;
-Keywords=install;installer;setup;drive;disk;boot;partition;toren;asura;
+Keywords=install;installer;setup;drive;disk;boot;partition;toren;toren;
 StartupNotify=true

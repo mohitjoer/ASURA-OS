@@ -38,7 +38,7 @@ RippleButton {
                     color: lightDarkButtonRoot.toggled ? Appearance.m3colors.m3primary : (lightDarkButtonRoot.dark ? "#26262a" : "#d8d6ce")
                 }
 
-                // Mini Asura Top Bar
+                // Mini Toren Top Bar
                 Rectangle {
                     id: miniBar
                     anchors.top: parent.top
@@ -55,7 +55,7 @@ RippleButton {
                         anchors.verticalCenter: parent.verticalCenter
                         spacing: 5
 
-                        // Signature Asura Mark //
+                        // Signature Toren Mark //
                         Text {
                             text: "//"
                             color: "#e2342a"
@@ -125,7 +125,7 @@ RippleButton {
                     }
                 }
 
-                // Mini Desktop Area with Floating Asura Window
+                // Mini Desktop Area with Floating Toren Window
                 Item {
                     anchors.top: miniBar.bottom
                     anchors.left: parent.left
@@ -164,7 +164,7 @@ RippleButton {
 
                             Text {
                                 anchors.centerIn: parent
-                                text: "asura ~ terminal"
+                                text: "toren ~ terminal"
                                 color: lightDarkButtonRoot.dark ? "#7a7a85" : "#888880"
                                 font.pixelSize: 8
                                 font.family: Appearance.font.family.main
@@ -188,7 +188,7 @@ RippleButton {
                                     font.weight: Font.Bold
                                 }
                                 Text {
-                                    text: "asura status"
+                                    text: "toren status"
                                     color: lightDarkButtonRoot.dark ? "#ffffff" : "#111111"
                                     font.pixelSize: 8
                                     font.family: Appearance.font.family.main

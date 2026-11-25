@@ -16,29 +16,29 @@ func configHome() string {
 	return base
 }
 
-func asuraConfigDir() string { return filepath.Join(configHome(), "asura") }
+func torenConfigDir() string { return filepath.Join(configHome(), "toren") }
 
 // DesktopStorePath is the neutral settings store the Hub writes and this package
 // reads.
-func DesktopStorePath() string { return filepath.Join(asuraConfigDir(), "desktop.json") }
+func DesktopStorePath() string { return filepath.Join(torenConfigDir(), "desktop.json") }
 
 // HyprConfigDir is where the generated hyprlang lives: beside the hyprland.conf
 // the session loads, so the overlay files can be sourced by a bare relative name.
-func HyprConfigDir() string { return filepath.Join(asuraConfigDir(), "hyprland") }
+func HyprConfigDir() string { return filepath.Join(torenConfigDir(), "hyprland") }
 
 // userEditsHyprDir is the hyprland slice of the user overlay tree. The generated
-// files live here too so a `asura materialize` that re-lays the packaged seed
+// files live here too so a `toren materialize` that re-lays the packaged seed
 // files cannot replace them; writeOverlay reflects the same bytes into the live
 // directory so a reload picks them up at once.
-func userEditsHyprDir() string { return filepath.Join(asuraConfigDir(), "user_edits", "hyprland") }
+func userEditsHyprDir() string { return filepath.Join(torenConfigDir(), "user_edits", "hyprland") }
 
 // UserEditsHyprDir is the overlay copy of HyprConfigDir.
 func UserEditsHyprDir() string { return userEditsHyprDir() }
 
-func shellStorePath() string { return filepath.Join(asuraConfigDir(), "shell.json") }
+func shellStorePath() string { return filepath.Join(torenConfigDir(), "shell.json") }
 
 // SessionEnvPath is the path to user session environment variables.
-func SessionEnvPath() string { return filepath.Join(asuraConfigDir(), "session", "asura-session.env") }
+func SessionEnvPath() string { return filepath.Join(torenConfigDir(), "session", "toren-session.env") }
 
 func fileExists(p string) bool {
 	_, err := os.Stat(p)
@@ -119,6 +119,6 @@ func parseWxH(s string) (int, int) {
 	return a, b
 }
 
-func themeStatePath() string { return filepath.Join(asuraConfigDir(), "theme.json") }
+func themeStatePath() string { return filepath.Join(torenConfigDir(), "theme.json") }
 
 func getenv(k string) string { return os.Getenv(k) }

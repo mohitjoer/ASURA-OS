@@ -1,4 +1,4 @@
-// ASURA overlay (shell-desktop/asura/vendor.sh OVERLAYS): the bar's groups with a
+// ASURA overlay (shell-desktop/toren/vendor.sh OVERLAYS): the bar's groups with a
 // small fixed radius instead of end-4's rounding.small.
 import qs.modules.common
 import QtQuick

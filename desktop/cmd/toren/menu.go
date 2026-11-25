@@ -5,19 +5,19 @@ import (
 	"os"
 )
 
-const menuUsage = `Usage: asura menu
+const menuUsage = `Usage: toren menu
 
 Opens the ASURA "do everything" menu in the desktop shell over IPC.
 `
 
 func init() {
-	register("menu", "open the ASURA \"do everything\" menu", asuraMenu)
+	register("menu", "open the ASURA \"do everything\" menu", torenMenu)
 }
 
-func asuraMenu(args []string) int {
+func torenMenu(args []string) int {
 	if len(args) > 0 && (args[0] == "-h" || args[0] == "--help" || args[0] == "help") {
 		fmt.Fprint(os.Stdout, menuUsage)
 		return exitOK
 	}
-	return asuraIpc([]string{"call", "asura", "togglePopover", "menu"})
+	return torenIpc([]string{"call", "toren", "togglePopover", "menu"})
 }

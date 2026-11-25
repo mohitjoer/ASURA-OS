@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"testing"
 
-	"asura/desktop/internal/runner"
-	"asura/desktop/internal/runner/runnertest"
+	"toren/desktop/internal/runner"
+	"toren/desktop/internal/runner/runnertest"
 )
 
 // pkgArgv is the table the verbs stand on, so the tests are the table: every
@@ -40,8 +40,8 @@ func TestPkgArgvXbps(t *testing.T) {
 		{"hold", "hold", []string{"hyprland"}, "", []string{"xbps-pkgdb", "-m", "hold", "hyprland"}},
 		{"unhold", "unhold", []string{"hyprland"}, "", []string{"xbps-pkgdb", "-m", "unhold", "hyprland"}},
 		{"the repository rides first", "install", []string{"cpu"},
-			"https://asuraos.dev/xbps/unstable",
-			[]string{"xbps-install", "-R", "https://asuraos.dev/xbps/unstable", "-S", "-y", "cpu"}},
+			"https://torenos.dev/xbps/unstable",
+			[]string{"xbps-install", "-R", "https://torenos.dev/xbps/unstable", "-S", "-y", "cpu"}},
 	}
 	for _, c := range cases {
 		got, ok := pkgArgv("xbps", c.verb, c.packages, c.repo)

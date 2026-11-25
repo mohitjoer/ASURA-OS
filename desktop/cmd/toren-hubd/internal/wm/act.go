@@ -55,7 +55,7 @@ func hyprlandCaps() Caps {
 		SettingDomains: []string{"desktop", "wm." + ProviderHyprland},
 		// The user's own file is the escape hatch for anything the Hub has no
 		// control for; it is sourced last and wins.
-		ConfigFiles:       []string{"asura/hyprland/user.conf"},
+		ConfigFiles:       []string{"toren/hyprland/user.conf"},
 		GeneratedFiles:    GeneratedFiles(),
 		PortalBackend:     "hyprland",
 		WindowRuleActions: windowRuleActions,

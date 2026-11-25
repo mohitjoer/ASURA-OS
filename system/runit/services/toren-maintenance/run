@@ -1,7 +1,7 @@
 #!/bin/sh
 exec 2>&1
 # Scheduled maintenance without a cron daemon: weekly fstrim, monthly btrfs scrub.
-STATE_DIR="/var/lib/asura/maintenance"
+STATE_DIR="/var/lib/toren/maintenance"
 mkdir -p "$STATE_DIR"
 
 WEEK=604800

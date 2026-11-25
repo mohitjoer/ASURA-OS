@@ -336,7 +336,7 @@ Item {
         }
     }
 
-    // corner button: opens the music app (default asura-tunes / YouTube Music, or
+    // corner button: opens the music app (default toren-tunes / YouTube Music, or
     // whatever the user picked in Desktop Widgets). Above the sheet, so it works
     // whether or not a track is playing.
     Item {
@@ -370,7 +370,7 @@ Item {
         TapHandler {
             id: tapOpen
             onTapped: {
-                const cmd = (root.musicApp && root.musicApp.length > 0) ? root.musicApp : "asura-tunes";
+                const cmd = (root.musicApp && root.musicApp.length > 0) ? root.musicApp : "toren-tunes";
                 Quickshell.execDetached(["sh", "-c", cmd]);
             }
         }

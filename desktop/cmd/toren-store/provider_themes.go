@@ -142,14 +142,14 @@ func (themeProvider) Remove(ctx context.Context, id string) error {
 }
 
 // getCurrentTheme reads the active theme name. The shell's theme engine writes
-// and watches <current>/theme.name; the older bare ~/.config/asura/theme.name
+// and watches <current>/theme.name; the older bare ~/.config/toren/theme.name
 // is honoured as a fallback for checkouts that still carry it. The value is
 // trimmed: a trailing newline must not leave every theme inactive.
 func getCurrentTheme() string {
 	home, _ := os.UserHomeDir()
 	for _, path := range []string{
 		filepath.Join(currentThemeDir(), "theme.name"),
-		filepath.Join(home, ".config", "asura", "theme.name"),
+		filepath.Join(home, ".config", "toren", "theme.name"),
 	} {
 		if b, err := os.ReadFile(path); err == nil {
 			if name := strings.TrimSpace(string(b)); name != "" {
@@ -163,9 +163,9 @@ func getCurrentTheme() string {
 func currentThemeDir() string {
 	home, _ := os.UserHomeDir()
 	if b := os.Getenv("XDG_CONFIG_HOME"); b != "" {
-		return filepath.Join(b, "asura", "current")
+		return filepath.Join(b, "toren", "current")
 	}
-	return filepath.Join(home, ".config", "asura", "current")
+	return filepath.Join(home, ".config", "toren", "current")
 }
 
 // themeInstallDirs are the directories a theme copy can live in, in the order
@@ -173,14 +173,14 @@ func currentThemeDir() string {
 func themeInstallDirs(home string) []string {
 	var dirs []string
 	if b := os.Getenv("XDG_DATA_HOME"); b != "" {
-		dirs = append(dirs, filepath.Join(b, "asura", "themes"))
+		dirs = append(dirs, filepath.Join(b, "toren", "themes"))
 	} else {
-		dirs = append(dirs, filepath.Join(home, ".local", "share", "asura", "themes"))
+		dirs = append(dirs, filepath.Join(home, ".local", "share", "toren", "themes"))
 	}
 	if b := os.Getenv("XDG_CONFIG_HOME"); b != "" {
-		dirs = append(dirs, filepath.Join(b, "asura", "themes"))
+		dirs = append(dirs, filepath.Join(b, "toren", "themes"))
 	} else {
-		dirs = append(dirs, filepath.Join(home, ".config", "asura", "themes"))
+		dirs = append(dirs, filepath.Join(home, ".config", "toren", "themes"))
 	}
 	return dirs
 }

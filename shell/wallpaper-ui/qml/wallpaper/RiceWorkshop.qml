@@ -55,7 +55,7 @@ FocusScope {
     touchModel.clear()
     if (root._slug === "") return
     root._touchBuf = ""
-    _filesProc.command = ["asura-hubd", "rice", "files", root._slug]
+    _filesProc.command = ["toren-hubd", "rice", "files", root._slug]
     _filesProc.running = true
   }
 

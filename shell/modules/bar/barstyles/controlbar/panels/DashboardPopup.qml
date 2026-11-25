@@ -18,7 +18,7 @@ PanelWindow {
     anchors { top: true; bottom: true; left: true; right: true }
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.namespace: "asura-dashboard"
+    WlrLayershell.namespace: "toren-dashboard"
 
     readonly property int barBottom: root.v2BarHeight
     readonly property int gap: 6

@@ -55,14 +55,14 @@ hl.window_rule({
     center = true,
 })
 hl.window_rule({
-    match = { title = "^(asura-vm)$" },
+    match = { title = "^(toren-vm)$" },
     float = true,
     size = "61% 70%",
     center = true,
     no_anim = true,
 })
 hl.window_rule({
-    match = { class = "asura-store" },
+    match = { class = "toren-store" },
     float = true,
     size = "47% 56%",
     center = true,

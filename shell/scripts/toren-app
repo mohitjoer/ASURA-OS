@@ -1,12 +1,12 @@
 #!/bin/bash
-# asura-app: launch the user's chosen app for a role, or the Asura default.
+# toren-app: launch the user's chosen app for a role, or the Toren default.
 #
-#	asura-app terminal              open the terminal
-#	asura-app terminal -- btop      run btop inside it
-#	asura-app --which browser       print what the role would launch, and exit
+#	toren-app terminal              open the terminal
+#	toren-app terminal -- btop      run btop inside it
+#	toren-app --which browser       print what the role would launch, and exit
 #
-# The choice lives in the Hub's store (~/.config/asura/desktop.json,
-# "desktop.apps"); the Default Apps page (Asura Settings) writes it. Reading it
+# The choice lives in the Hub's store (~/.config/toren/desktop.json,
+# "desktop.apps"); the Default Apps page (Toren Settings) writes it. Reading it
 # here means a swap takes effect on the next launch with no reload. The fallbacks
 # match the shipped binds, so an unconfigured system behaves exactly as before:
 # ghostty and nautilus are the shipped terminal and file manager, and where one
@@ -31,8 +31,8 @@ case "$PWD" in
 esac
 
 usage() {
-	echo "usage: asura-app <role> [-- <program> [arg...]]" >&2
-	echo "       asura-app --which <role>" >&2
+	echo "usage: toren-app <role> [-- <program> [arg...]]" >&2
+	echo "       toren-app --which <role>" >&2
 	echo "roles: terminal files browser editor notes (or any role the Hub stores)" >&2
 }
 
@@ -50,10 +50,10 @@ inner=()
 if [ "${1:-}" = "--" ]; then
 	shift
 	inner=("$@")
-	[ ${#inner[@]} -gt 0 ] || { echo "asura-app: -- needs a program to run" >&2; exit 2; }
+	[ ${#inner[@]} -gt 0 ] || { echo "toren-app: -- needs a program to run" >&2; exit 2; }
 fi
 
-conf="${XDG_CONFIG_HOME:-$HOME/.config}/asura"
+conf="${XDG_CONFIG_HOME:-$HOME/.config}/toren"
 # The Hub writes the role under desktop.json's desktop.apps.
 store="$conf/desktop.json"
 # The retired store is still honoured so a box the doctor has not migrated yet
@@ -159,8 +159,8 @@ cmd="$(read_role "$role")"
 
 if [ -z "$cmd" ]; then
 	msg="No app is installed for \"$role\". Pick one in Settings > Default Apps."
-	have notify-send && notify-send -a Asura "Asura" "$msg" 2>/dev/null || true
-	echo "asura-app: $msg" >&2
+	have notify-send && notify-send -a Toren "Toren" "$msg" 2>/dev/null || true
+	echo "toren-app: $msg" >&2
 	exit 127
 fi
 
@@ -177,7 +177,7 @@ fi
 # itself (a file for the editor). The stored command may already carry its own
 # terminal wrapper (`ghostty -e nvim`), so adding another -e here would be wrong.
 if [ "$role" != terminal ]; then
-	exec sh -c "$cmd \"\$@\"" asura-app "${inner[@]}"
+	exec sh -c "$cmd \"\$@\"" toren-app "${inner[@]}"
 fi
 
 # Handing a program over is per-emulator: kitty and foot take trailing argv, and

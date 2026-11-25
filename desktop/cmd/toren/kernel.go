@@ -7,9 +7,9 @@ import (
 	"strings"
 )
 
-const kernelUsage = `Usage: asura kernel [list | set NAME | remove NAME]
+const kernelUsage = `Usage: toren kernel [list | set NAME | remove NAME]
 
-Manages Void Linux kernel series on Asura OS.
+Manages Void Linux kernel series on Toren OS.
 
 Commands:
   list              list installed, running, and available Void kernel series
@@ -43,31 +43,31 @@ var (
 )
 
 func init() {
-	register("kernel", "manage Void Linux kernel series (list, set, remove)", asuraKernel)
+	register("kernel", "manage Void Linux kernel series (list, set, remove)", torenKernel)
 	helpText["kernel"] = kernelUsage
 }
 
-func asuraKernel(args []string) int {
+func torenKernel(args []string) int {
 	if len(args) == 0 || args[0] == "list" {
 		return kernelList()
 	}
 	switch args[0] {
 	case "set":
 		if len(args) < 2 {
-			fmt.Fprintln(os.Stderr, "asura kernel set: missing kernel name")
+			fmt.Fprintln(os.Stderr, "toren kernel set: missing kernel name")
 			fmt.Fprint(os.Stderr, kernelUsage)
 			return exitUsage
 		}
 		return kernelSet(args[1])
 	case "remove", "rm":
 		if len(args) < 2 {
-			fmt.Fprintln(os.Stderr, "asura kernel remove: missing kernel name")
+			fmt.Fprintln(os.Stderr, "toren kernel remove: missing kernel name")
 			fmt.Fprint(os.Stderr, kernelUsage)
 			return exitUsage
 		}
 		return kernelRemove(args[1])
 	default:
-		fmt.Fprintf(os.Stderr, "asura kernel: unknown subcommand %q\n\n", args[0])
+		fmt.Fprintf(os.Stderr, "toren kernel: unknown subcommand %q\n\n", args[0])
 		fmt.Fprint(os.Stderr, kernelUsage)
 		return exitUsage
 	}
@@ -126,35 +126,35 @@ func hasNvidiaDriver() bool {
 func kernelSet(name string) int {
 	name = strings.TrimSpace(name)
 	if !supportedKernelSeries[name] && !strings.HasPrefix(name, "linux") {
-		fmt.Fprintf(os.Stderr, "asura kernel set: unsupported kernel series %q (expected linux, linux-lts, or linux-mainline)\n", name)
+		fmt.Fprintf(os.Stderr, "toren kernel set: unsupported kernel series %q (expected linux, linux-lts, or linux-mainline)\n", name)
 		return exitFail
 	}
 
 	pkgs := []string{name}
 	if hasNvidiaDriver() {
 		headersPkg := name + "-headers"
-		fmt.Printf("asura kernel set: NVIDIA driver detected, verifying matching headers package %s...\n", headersPkg)
+		fmt.Printf("toren kernel set: NVIDIA driver detected, verifying matching headers package %s...\n", headersPkg)
 		if err := exec.Command("xbps-query", "-R", headersPkg).Run(); err != nil {
-			fmt.Fprintf(os.Stderr, "asura kernel set: matching kernel headers %s not found in repositories. Refusing to switch kernel to prevent NVIDIA build failure.\n", headersPkg)
+			fmt.Fprintf(os.Stderr, "toren kernel set: matching kernel headers %s not found in repositories. Refusing to switch kernel to prevent NVIDIA build failure.\n", headersPkg)
 			return exitFail
 		}
 		pkgs = append(pkgs, headersPkg)
 	}
 
-	fmt.Printf("asura kernel set: installing %s...\n", strings.Join(pkgs, ", "))
+	fmt.Printf("toren kernel set: installing %s...\n", strings.Join(pkgs, ", "))
 	installArgs := append([]string{"xbps-install", "-Sy"}, pkgs...)
 	if err := kernelPrivileged(installArgs...); err != nil {
-		fmt.Fprintf(os.Stderr, "asura kernel set: xbps-install failed: %v\n", err)
+		fmt.Fprintf(os.Stderr, "toren kernel set: xbps-install failed: %v\n", err)
 		return exitFail
 	}
 
 	if err := setGrubDefaultKernel(name); err != nil {
-		fmt.Fprintf(os.Stderr, "asura kernel set: warning: configuring GRUB default: %v\n", err)
+		fmt.Fprintf(os.Stderr, "toren kernel set: warning: configuring GRUB default: %v\n", err)
 	}
 
-	fmt.Println("asura kernel set: regenerating GRUB configuration...")
+	fmt.Println("toren kernel set: regenerating GRUB configuration...")
 	if err := kernelPrivileged("grub-mkconfig", "-o", "/boot/grub/grub.cfg"); err != nil {
-		fmt.Fprintf(os.Stderr, "asura kernel set: grub-mkconfig failed: %v\n", err)
+		fmt.Fprintf(os.Stderr, "toren kernel set: grub-mkconfig failed: %v\n", err)
 		return exitFail
 	}
 
@@ -182,13 +182,13 @@ func kernelRemove(name string) int {
 	running, _ := kernelUnameR()
 
 	if running != "" && (name == running || strings.Contains(running, strings.TrimPrefix(name, "linux-"))) {
-		fmt.Fprintf(os.Stderr, "asura kernel remove: cannot remove running kernel %q (%s). Reboot into another kernel first.\n", name, running)
+		fmt.Fprintf(os.Stderr, "toren kernel remove: cannot remove running kernel %q (%s). Reboot into another kernel first.\n", name, running)
 		return exitFail
 	}
 
 	installed := getInstalledKernels(kernelBootDir)
 	if len(installed) <= 1 {
-		fmt.Fprintf(os.Stderr, "asura kernel remove: cannot remove %q: it is the only installed kernel on this machine.\n", name)
+		fmt.Fprintf(os.Stderr, "toren kernel remove: cannot remove %q: it is the only installed kernel on this machine.\n", name)
 		return exitFail
 	}
 
@@ -197,16 +197,16 @@ func kernelRemove(name string) int {
 		pkgs = append(pkgs, name+"-headers")
 	}
 
-	fmt.Printf("asura kernel remove: removing %s...\n", strings.Join(pkgs, ", "))
+	fmt.Printf("toren kernel remove: removing %s...\n", strings.Join(pkgs, ", "))
 	removeArgs := append([]string{"xbps-remove", "-Ry"}, pkgs...)
 	if err := kernelPrivileged(removeArgs...); err != nil {
-		fmt.Fprintf(os.Stderr, "asura kernel remove: xbps-remove failed: %v\n", err)
+		fmt.Fprintf(os.Stderr, "toren kernel remove: xbps-remove failed: %v\n", err)
 		return exitFail
 	}
 
-	fmt.Println("asura kernel remove: regenerating GRUB configuration...")
+	fmt.Println("toren kernel remove: regenerating GRUB configuration...")
 	if err := kernelPrivileged("grub-mkconfig", "-o", "/boot/grub/grub.cfg"); err != nil {
-		fmt.Fprintf(os.Stderr, "asura kernel remove: grub-mkconfig failed: %v\n", err)
+		fmt.Fprintf(os.Stderr, "toren kernel remove: grub-mkconfig failed: %v\n", err)
 		return exitFail
 	}
 

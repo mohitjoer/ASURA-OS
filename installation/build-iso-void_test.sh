@@ -41,13 +41,13 @@ grep -Fq 'void-mklive' "$SCRIPT"
 grep -Fq 'toren-user-services' "$SCRIPT"
 grep -Fq 'toren-sysd' "$SCRIPT"
 grep -Fq 'toren-userd' "$SCRIPT"
-grep -Fq 'etc/sv/asura-sysd' "$SCRIPT"
+grep -Fq 'etc/sv/toren-sysd' "$SCRIPT"
 ! grep -Fq 'NVreg_DynamicPowerManagement=0x02' "$SCRIPT"
-grep -Fq '99-asura-power.rules' "$SCRIPT"
+grep -Fq '99-toren-power.rules' "$SCRIPT"
 grep -Fq '99-toren-performance.conf' "$SCRIPT"
 grep -Fq 'turnstile.conf' "$SCRIPT"
 grep -Fq 'pam_elogind.so' "$SCRIPT"
-grep -Fq '90-asura-powerkey.conf' "$SCRIPT"
+grep -Fq '90-toren-powerkey.conf' "$SCRIPT"
 grep -Fq 'system/xbps.d/toren.conf' "$SCRIPT"
 grep -Fq 'boot-splash.png' "$SCRIPT"
 grep -Fq 'Welcome to Toren Linux!' "$SCRIPT"
@@ -57,9 +57,9 @@ grep -Fq 'etc/issue' "$SCRIPT"
 grep -Fq 'etc/motd' "$SCRIPT"
 grep -Fq 'DejaVuSans.ttf' "$SCRIPT"
 grep -Fq 'plymouth --quit' "$SCRIPT"
-grep -Fq 'asura-store' "$SCRIPT"
+grep -Fq 'toren-store' "$SCRIPT"
 grep -Fq 'toren-store.desktop' "$SCRIPT"
-grep -Fq 'asura-store' "$REPO_ROOT/shell/Services/Dock.qml"
+grep -Fq 'toren-store' "$REPO_ROOT/shell/Services/Dock.qml"
 test -s "$REPO_ROOT/session/applications/toren-store.desktop"
 
 # Verify boot splash asset exists
@@ -97,7 +97,7 @@ grep -Eq '^[[:space:]]+- tlp$' "$MANIFEST"
 for f in "$SCRIPT" "$REPO_ROOT/installation/toren-installer.sh"; do
 	grep -E '^for svc in ' "$f" | grep -Fqw tlp || { echo "build-iso-void_test: tlp not enabled in $f" >&2; exit 1; }
 done
-# asura-sysd owns governor, EPP and platform profile: tlp must leave all three alone in every profile
+# toren-sysd owns governor, EPP and platform profile: tlp must leave all three alone in every profile
 for param in CPU_SCALING_GOVERNOR CPU_ENERGY_PERF_POLICY PLATFORM_PROFILE; do
 	for prof in AC BAT SAV; do
 		grep -Fqx "${param}_ON_${prof}=\"\"" "$REPO_ROOT/system/tlp.d/01-toren-cpu.conf" || { echo "build-iso-void_test: tlp.d does not disable ${param}_ON_${prof}" >&2; exit 1; }
@@ -164,13 +164,13 @@ grep -Fq 'bfq' "$REPO_ROOT/system/udev/60-io-schedulers.rules"
 # STAGE 1: Security Verifications
 test -s "$REPO_ROOT/installation/binary-checksums.txt"
 grep -Fq 'verify_checksum' "$SCRIPT"
-grep -Fq 'asura-hw' "$REPO_ROOT/system/udev/70-pwm-fan.rules"
+grep -Fq 'toren-hw' "$REPO_ROOT/system/udev/70-pwm-fan.rules"
 if grep -Fq '0666' "$REPO_ROOT/system/udev/70-pwm-fan.rules"; then
 	echo "build-iso-void_test: 0666 found in 70-pwm-fan.rules" >&2
 	exit 1
 fi
-grep -Fq 'asura-hw' "$SCRIPT"
-grep -Fq 'asura-hw' "$REPO_ROOT/installation/toren-installer.sh"
+grep -Fq 'toren-hw' "$SCRIPT"
+grep -Fq 'toren-hw' "$REPO_ROOT/installation/toren-installer.sh"
 grep -Fq 'chpasswd' "$REPO_ROOT/installation/toren-installer.sh"
 grep -Fq '%wheel ALL=(ALL:ALL) ALL' "$REPO_ROOT/installation/toren-installer.sh"
 
@@ -253,7 +253,7 @@ if grep -Fq '"name": "git"' "$REPO_ROOT/system/ananicy/00-toren-rules.rules" || 
 fi
 grep -Fq '"nice": 10' "$REPO_ROOT/system/ananicy/00-toren-types.types"
 grep -Fq 'compinit -C' "$REPO_ROOT/apps/zsh/toren.zsh"
-grep -Fq '_asura_cache_eval' "$REPO_ROOT/apps/zsh/toren.zsh"
+grep -Fq '_toren_cache_eval' "$REPO_ROOT/apps/zsh/toren.zsh"
 
 # STAGE 6: Kernel and CI Verifications
 grep -Fq 'grub-reboot' "$REPO_ROOT/system/runit/services/toren-boot-guard/run"

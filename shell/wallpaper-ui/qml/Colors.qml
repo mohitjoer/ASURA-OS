@@ -3,16 +3,16 @@ import Quickshell
 import Quickshell.Io
 import "services"
 
-// The wall-ui's colour source, retuned to Asura's paper-and-ink resolution
-// (see asura/ui/Singletons/Tokens.qml). Reads the SAME palette the Hub and
-// shell use (~/.cache/asura/colors.json), so the picker retints with the whole
+// The wall-ui's colour source, retuned to Toren's paper-and-ink resolution
+// (see toren/ui/Singletons/Tokens.qml). Reads the SAME palette the Hub and
+// shell use (~/.cache/toren/colors.json), so the picker retints with the whole
 // desktop on any wallpaper or theme change. skwd's Material role names are kept
-// so every component keeps reading one source; they now collapse onto Asura's
+// so every component keeps reading one source; they now collapse onto Toren's
 // monochrome surface + one live sun accent, instead of a full colour palette.
 QtObject {
     id: colors
 
-    property string colorFilePath: Quickshell.env("HOME") + "/.cache/asura/colors.json"
+    property string colorFilePath: Quickshell.env("HOME") + "/.cache/toren/colors.json"
 
     property var colorFileView: FileView {
         path: BootstrapService.ready ? colors.colorFilePath : ""
@@ -28,7 +28,7 @@ QtObject {
         if (!text) return
         try {
             var d = JSON.parse(text)
-            // Asura resolution: paper = surface, ink = onSurface, lift =
+            // Toren resolution: paper = surface, ink = onSurface, lift =
             // surfaceContainerLow, bone = inverseSurface, sun = primary.
             // Everything else collapses onto these, so the picker reads
             // paper-and-ink with one live accent.
@@ -75,7 +75,7 @@ QtObject {
             colors.inverseSurface = boneC
             colors.inverseSurfaceText = onBone
             colors.inversePrimary = sun
-            console.log("Colors: applied Asura paper-and-ink palette")
+            console.log("Colors: applied Toren paper-and-ink palette")
         } catch (e) {
             console.log("Colors: Error parsing colors.json:", e)
         }

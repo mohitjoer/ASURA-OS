@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # The reload cover's launcher and handshake.
 #
-#   asura-reload-cover begin            raise the cover; prints its token
-#   asura-reload-cover finish TOKEN     the shell is back: open the cover
-#   asura-reload-cover fail   TOKEN     the reload failed: say so, then open
+#   toren-reload-cover begin            raise the cover; prints its token
+#   toren-reload-cover finish TOKEN     the shell is back: open the cover
+#   toren-reload-cover fail   TOKEN     the reload failed: say so, then open
 #
 # The cover is a black curtain that hides the shell restarting. The order of
 # events is the whole design:
 #
-#   1. Whoever is about to restart the shell (`asura-shell reload`) runs
+#   1. Whoever is about to restart the shell (`toren-shell reload`) runs
 #      `begin` first. It starts the cover, waits until every output is covered,
 #      and only then returns, so the restart never runs in front of the user.
 #   2. The shell restarts. The new shell reads the token from the state file
@@ -18,11 +18,11 @@
 #      and a half seconds and shows that the reload failed.
 #
 # The cover is its own Quickshell instance, started on `reload-cover.qml` at the
-# shell's root for the reason `session/asura-hub` gives: a configuration's root
+# shell's root for the reason `session/toren-hub` gives: a configuration's root
 # is the directory of the file it is started on, and the `qs.*` imports resolve
 # only from the shell's root. The entry is found from this script's own
 # location, so the same file works from a checkout and from the package, where
-# `session/asura-reload-cover` is the name it is reached by.
+# `session/toren-reload-cover` is the name it is reached by.
 #
 # The state file belongs to the cover that wrote it. Its pid is stored with the
 # process's start time, because a pid alone is a number the kernel hands to the
@@ -31,15 +31,15 @@
 set -euo pipefail
 
 runtime="${XDG_RUNTIME_DIR:-/tmp}"
-state="$runtime/asura-reload-cover.json"
-lock="$runtime/asura-reload-cover.lock"
-errlog="$runtime/asura-reload-cover.log"
+state="$runtime/toren-reload-cover.json"
+lock="$runtime/toren-reload-cover.lock"
+errlog="$runtime/toren-reload-cover.log"
 
 here="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
 root="${ASURA_SHELL_DIR:-$(dirname "$here")}"
 # A copy of this script outside the shell's tree (in /usr/bin, say) has no
 # tree beside it; the packaged one is where the entry is then.
-[[ -f $root/reload-cover.qml ]] || root=/usr/share/asura/shell
+[[ -f $root/reload-cover.qml ]] || root=/usr/share/toren/shell
 entry="$root/reload-cover.qml"
 qs_bin="${ASURA_QUICKSHELL:-quickshell}"
 
@@ -47,7 +47,7 @@ qs_bin="${ASURA_QUICKSHELL:-quickshell}"
 # iris to close; short enough that a broken cover cannot hold a reload for long.
 begin_seconds=4
 
-say() { printf 'asura-reload-cover: %s\n' "$*" >&2; }
+say() { printf 'toren-reload-cover: %s\n' "$*" >&2; }
 
 # Quickshell finds the instance an IPC call is for by the display it is running
 # on, and a service that was started before the compositor's environment was
@@ -275,7 +275,7 @@ case "${1:-}" in
     finish) finish "${2:-}" ;;
     fail)   fail "${2:-}" ;;
     *)
-        printf 'usage: asura-reload-cover begin | finish <token> | fail <token>\n' >&2
+        printf 'usage: toren-reload-cover begin | finish <token> | fail <token>\n' >&2
         exit 2
         ;;
 esac

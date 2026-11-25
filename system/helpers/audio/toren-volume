@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cfg="${XDG_CONFIG_HOME:-$HOME/.config}/asura/shell.json"
+cfg="${XDG_CONFIG_HOME:-$HOME/.config}/toren/shell.json"
 lim=1
 if jq -e '.qsbar.audioBoost == true' "$cfg" >/dev/null 2>&1; then
 	lim=1.5
@@ -31,7 +31,7 @@ down)
 	fi
 	;;
 *)
-	echo "usage: asura-volume {up|down}" >&2
+	echo "usage: toren-volume {up|down}" >&2
 	exit 1
 	;;
 esac

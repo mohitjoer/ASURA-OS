@@ -13,11 +13,11 @@ It was originally ported from another project's shell daemon. What differs on th
 ```
 runit user supervisor
   ├─ torend              toren-shell daemon     socket $XDG_RUNTIME_DIR/toren-shell.sock
-  └─ quickshell          quickshell -p /usr/share/asura/shell
+  └─ quickshell          quickshell -p /usr/share/toren/shell
 ```
 
 runit starts and restarts both; the daemon does not start or supervise Quickshell. It reaches the
-running shell with `quickshell ipc -p /usr/share/asura/shell call ...`, and `toren-shell reload` is
+running shell with `quickshell ipc -p /usr/share/toren/shell call ...`, and `toren-shell reload` is
 `sv reload quickshell`. The unit has no `WAYLAND_DISPLAY` condition: nothing the daemon
 probes is a Wayland client. It conflicts with `hyprpolkitagent` because only one agent can hold
 the session's polkit slot.
@@ -27,19 +27,19 @@ socket. `toren wm` uses the same package.
 
 ## What each part talks to
 
-| Part | Talks to | Without it |
-|---|---|---|
-| tray | StatusNotifier on the session bus | empty tray |
-| network | NetworkManager (system bus); DNS edits through `asura-dns` | no Wi-Fi controls |
-| power profiles | `net.hadess.PowerProfiles` (power-profiles-daemon) | control hidden |
-| clipboard | `wl-paste --watch`, `wl-copy` | empty history |
-| night light | `asura-cmd-nightlight`, backend `gammastep` | control hidden |
-| lock, sleep | `hyprlock`; logind delay inhibitors and `PrepareForSleep` | `lock` says hyprlock is missing |
-| palette | `toren theme generate` / `render` | the desktop keeps its last palette |
-| updates | `toren status --json` | no update glyph |
-| polkit, keyring | polkitd, `polkit-agent-helper-1`; gnome-keyring's prompter | no auth dialog |
-| key presses | `/dev/input/event*` | the topic says it cannot read them |
-| weather, holidays | open-meteo; ipwho.is only for the location `auto`; nager.at; nothing while no location is set | quiet "set a location" state |
+| Part              | Talks to                                                                                      | Without it                         |
+| ----------------- | --------------------------------------------------------------------------------------------- | ---------------------------------- |
+| tray              | StatusNotifier on the session bus                                                             | empty tray                         |
+| network           | NetworkManager (system bus); DNS edits through `toren-dns`                                    | no Wi-Fi controls                  |
+| power profiles    | `net.hadess.PowerProfiles` (power-profiles-daemon)                                            | control hidden                     |
+| clipboard         | `wl-paste --watch`, `wl-copy`                                                                 | empty history                      |
+| night light       | `toren-cmd-nightlight`, backend `gammastep`                                                   | control hidden                     |
+| lock, sleep       | `hyprlock`; logind delay inhibitors and `PrepareForSleep`                                     | `lock` says hyprlock is missing    |
+| palette           | `toren theme generate` / `render`                                                             | the desktop keeps its last palette |
+| updates           | `toren status --json`                                                                         | no update glyph                    |
+| polkit, keyring   | polkitd, `polkit-agent-helper-1`; gnome-keyring's prompter                                    | no auth dialog                     |
+| key presses       | `/dev/input/event*`                                                                           | the topic says it cannot read them |
+| weather, holidays | open-meteo; ipwho.is only for the location `auto`; nager.at; nothing while no location is set | quiet "set a location" state       |
 
 A missing tool is detected and reported in the topic or the reply; the daemon never fails to start
 over one.
@@ -55,5 +55,5 @@ XDG_RUNTIME_DIR=$T/run HOME=$T/home dbus-run-session -- \
     go run ./cmd/toren-shell daemon
 ```
 
-`go test ./cmd/toren-shell/ ./internal/wm/` is hermetic. `ASURA_BIN=<built asura>` also runs the
+`go test ./cmd/toren-shell/ ./internal/wm/` is hermetic. `ASURA_BIN=<built toren>` also runs the
 palette round trip against the real generator and renderer.

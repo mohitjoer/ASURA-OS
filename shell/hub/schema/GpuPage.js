@@ -26,7 +26,7 @@ var rows = [
         "label": "Editing profile",
         "desc": "Which profile you're editing, not the live one.",
         "ctl": "seg",
-        "src": "asura-hubd cpu active (asura-power)",
+        "src": "toren-hubd cpu active (toren-power)",
         "opts": [
             "power-saver",
             "balanced",
@@ -40,7 +40,7 @@ var rows = [
         "label": "Governor",
         "desc": "CPU scaling governor for the edited profile.",
         "ctl": "seg",
-        "src": "asura-power profiles (scaling_governor, power.json)",
+        "src": "toren-power profiles (scaling_governor, power.json)",
         "opts": [
             "performance",
             "powersave"
@@ -53,7 +53,7 @@ var rows = [
         "label": "Energy preference",
         "desc": "Energy or performance hint",
         "ctl": "seg",
-        "src": "asura-power profiles (energy_performance_preference, power.json)",
+        "src": "toren-power profiles (energy_performance_preference, power.json)",
         "opts": [
             "default",
             "performance",
@@ -69,7 +69,7 @@ var rows = [
         "label": "Max frequency",
         "desc": "Ceiling for the CPU clock, in percent",
         "ctl": "slid",
-        "src": "asura-power profiles (scaling_max_freq, power.json)"
+        "src": "toren-power profiles (scaling_max_freq, power.json)"
     },
     {
         "tab": "",
@@ -78,7 +78,7 @@ var rows = [
         "label": "Thermal profile",
         "desc": "Fan and power envelope for the edited profile.",
         "ctl": "seg",
-        "src": "asura-power profiles (platform_profile, power.json)",
+        "src": "toren-power profiles (platform_profile, power.json)",
         "opts": [
             "quiet",
             "balanced",
@@ -101,7 +101,7 @@ var rows = [
         "label": "Power limit / TDP",
         "desc": "GPU power budget in watts, live for this session.",
         "ctl": "slid",
-        "src": "asura-hubd gpu tune (runtime, resets on reboot)"
+        "src": "toren-hubd gpu tune (runtime, resets on reboot)"
     },
     {
         "tab": "",
@@ -110,7 +110,7 @@ var rows = [
         "label": "Performance level",
         "desc": "AMD performance level: auto, low, or high.",
         "ctl": "seg",
-        "src": "asura-hubd gpu tune (runtime, resets on reboot)"
+        "src": "toren-hubd gpu tune (runtime, resets on reboot)"
     },
     {
         "tab": "",
@@ -119,7 +119,7 @@ var rows = [
         "label": "Persistence mode",
         "desc": "Keeps the NVIDIA driver loaded",
         "ctl": "sw",
-        "src": "asura-hubd gpu tune (runtime, resets on reboot)"
+        "src": "toren-hubd gpu tune (runtime, resets on reboot)"
     },
     {
         "tab": "",
@@ -128,7 +128,7 @@ var rows = [
         "label": "Overclock, undervolt and fan control",
         "desc": "GPU clock and fan control; resets on reboot",
         "ctl": "slid",
-        "src": "asura-hubd gpu tune (runtime, resets on reboot)"
+        "src": "toren-hubd gpu tune (runtime, resets on reboot)"
     },
     {
         "tab": "",
@@ -137,7 +137,7 @@ var rows = [
         "label": "Tuning presets",
         "desc": "Save and apply named tuning bundles.",
         "ctl": "action",
-        "src": "~/.config/asura/gpu-presets.json"
+        "src": "~/.config/toren/gpu-presets.json"
     },
     {
         "tab": "",
@@ -146,7 +146,7 @@ var rows = [
         "label": "Charge limit",
         "desc": "Stop charging here to preserve battery health.",
         "ctl": "slid",
-        "src": "asura-power charge-limit (charge_control_end_threshold, power.json)"
+        "src": "toren-power charge-limit (charge_control_end_threshold, power.json)"
     },
     {
         "tab": "",
@@ -155,7 +155,7 @@ var rows = [
         "label": "PCIe ASPM",
         "desc": "PCIe power policy: trade idle power for latency.",
         "ctl": "seg",
-        "src": "asura-power aspm (pcie_aspm/parameters/policy, power.json)",
+        "src": "toren-power aspm (pcie_aspm/parameters/policy, power.json)",
         "opts": [
             "default",
             "performance",
@@ -233,7 +233,7 @@ var rows = [
         "label": "Passthrough status",
         "desc": "",
         "ctl": "readout",
-        "src": "`asura-hubd gpu caps` -> caps.verdict"
+        "src": "`toren-hubd gpu caps` -> caps.verdict"
     },
     {
         "tab": "",
@@ -269,7 +269,7 @@ var rows = [
         "label": "Idle timeouts",
         "desc": "Dim, lock, blank and suspend the machine when it sits idle.",
         "ctl": "sw",
-        "src": "asura-hubd cpu set idle enabled (power.json, asura-idle apply)"
+        "src": "toren-hubd cpu set idle enabled (power.json, toren-idle apply)"
     },
     {
         "tab": "",
@@ -278,7 +278,7 @@ var rows = [
         "label": "Also on desktops",
         "desc": "Run these timeouts on this desktop too, not only on laptops.",
         "ctl": "sw",
-        "src": "asura-hubd cpu set idle onDesktops (power.json, asura-idle apply)"
+        "src": "toren-hubd cpu set idle onDesktops (power.json, toren-idle apply)"
     },
     {
         "tab": "",
@@ -287,7 +287,7 @@ var rows = [
         "label": "Dim",
         "desc": "Minutes idle on battery before the backlight dims; 0 never dims.",
         "ctl": "step",
-        "src": "asura-hubd cpu set idle battery.dimSec (power.json, minutes)",
+        "src": "toren-hubd cpu set idle battery.dimSec (power.json, minutes)",
         "unit": "min",
         "lo": 0,
         "hi": 60
@@ -299,7 +299,7 @@ var rows = [
         "label": "Lock",
         "desc": "Minutes idle on battery before the session locks; 0 never locks.",
         "ctl": "step",
-        "src": "asura-hubd cpu set idle battery.lockSec (power.json, minutes)",
+        "src": "toren-hubd cpu set idle battery.lockSec (power.json, minutes)",
         "unit": "min",
         "lo": 0,
         "hi": 120
@@ -311,7 +311,7 @@ var rows = [
         "label": "Screen off",
         "desc": "Minutes idle on battery before the screen powers off; 0 keeps it on.",
         "ctl": "step",
-        "src": "asura-hubd cpu set idle battery.screenOffSec (power.json, minutes)",
+        "src": "toren-hubd cpu set idle battery.screenOffSec (power.json, minutes)",
         "unit": "min",
         "lo": 0,
         "hi": 120
@@ -323,7 +323,7 @@ var rows = [
         "label": "Suspend",
         "desc": "Minutes idle on battery before the machine suspends; 0 never suspends.",
         "ctl": "step",
-        "src": "asura-hubd cpu set idle battery.suspendSec (power.json, minutes)",
+        "src": "toren-hubd cpu set idle battery.suspendSec (power.json, minutes)",
         "unit": "min",
         "lo": 0,
         "hi": 240
@@ -335,7 +335,7 @@ var rows = [
         "label": "Dim",
         "desc": "Minutes idle on AC before the backlight dims; 0 never dims.",
         "ctl": "step",
-        "src": "asura-hubd cpu set idle ac.dimSec (power.json, minutes)",
+        "src": "toren-hubd cpu set idle ac.dimSec (power.json, minutes)",
         "unit": "min",
         "lo": 0,
         "hi": 60
@@ -347,7 +347,7 @@ var rows = [
         "label": "Lock",
         "desc": "Minutes idle on AC before the session locks; 0 never locks.",
         "ctl": "step",
-        "src": "asura-hubd cpu set idle ac.lockSec (power.json, minutes)",
+        "src": "toren-hubd cpu set idle ac.lockSec (power.json, minutes)",
         "unit": "min",
         "lo": 0,
         "hi": 120
@@ -359,7 +359,7 @@ var rows = [
         "label": "Screen off",
         "desc": "Minutes idle on AC before the screen powers off; 0 keeps it on.",
         "ctl": "step",
-        "src": "asura-hubd cpu set idle ac.screenOffSec (power.json, minutes)",
+        "src": "toren-hubd cpu set idle ac.screenOffSec (power.json, minutes)",
         "unit": "min",
         "lo": 0,
         "hi": 120
@@ -371,7 +371,7 @@ var rows = [
         "label": "Suspend",
         "desc": "Minutes idle on AC before the machine suspends; 0 never suspends.",
         "ctl": "step",
-        "src": "asura-hubd cpu set idle ac.suspendSec (power.json, minutes)",
+        "src": "toren-hubd cpu set idle ac.suspendSec (power.json, minutes)",
         "unit": "min",
         "lo": 0,
         "hi": 240

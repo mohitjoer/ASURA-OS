@@ -1,11 +1,11 @@
-// Package wm is the seam between the Asura desktop and the compositor under
+// Package wm is the seam between the Toren desktop and the compositor under
 // it. A provider implements four verbs (caps, act, state, watch) and nothing
 // else needs to know which compositor is running.
 //
-// Asura ships one provider, Hyprland, and it runs in-process: the daemon and
+// Toren ships one provider, Hyprland, and it runs in-process: the daemon and
 // the CLI import this package rather than fork a helper per question. The
 // Client keeps the shape upstream's out-of-process one had, including its
-// executable-provider path (a `asura-wm-<name>` on PATH, selected with
+// executable-provider path (a `toren-wm-<name>` on PATH, selected with
 // ASURA_WM), so a second compositor is a new provider and not a rewrite of
 // every caller, and so the caching and cancellation rules are tested against a
 // provider that really is another process.

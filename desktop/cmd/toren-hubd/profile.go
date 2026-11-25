@@ -3,9 +3,9 @@ package main
 // The Profile page's share backend. profile.json (user-owned, hand-editable, a
 // preference like decor.json) stays the source of truth; a custom hero image
 // lives beside it in profile/. "export" packs both into one self-contained,
-// portable .asuraprofile envelope (the hero base64-embedded so there is no archive
+// portable .torenprofile envelope (the hero base64-embedded so there is no archive
 // tooling), and "import" validates that envelope and unpacks it back, applying
-// nothing when the file is not a valid .asuraprofile.
+// nothing when the file is not a valid .torenprofile.
 
 import (
 	"encoding/base64"
@@ -20,7 +20,7 @@ func profileDir() string {
 	if base == "" {
 		base = filepath.Join(os.Getenv("HOME"), ".config")
 	}
-	return filepath.Join(base, "asura")
+	return filepath.Join(base, "toren")
 }
 
 func profileConfigPath() string { return filepath.Join(profileDir(), "profile.json") }
@@ -37,23 +37,23 @@ type profileModel struct {
 	} `json:"hero"`
 }
 
-// asuraHero is the embedded custom hero image inside an envelope: the bare file
+// torenHero is the embedded custom hero image inside an envelope: the bare file
 // name plus the base64 of its raw bytes.
-type asuraHero struct {
+type torenHero struct {
 	Name string `json:"name"`
 	B64  string `json:"b64"`
 }
 
-// asuraEnvelope is the .asuraprofile file: a version tag, the profile.json object
+// torenEnvelope is the .torenprofile file: a version tag, the profile.json object
 // verbatim, and (only for a custom hero) the packed image, else null.
-type asuraEnvelope struct {
-	Asuraprofile int             `json:"asuraprofile"`
+type torenEnvelope struct {
+	Torenprofile int             `json:"torenprofile"`
 	Profile      json.RawMessage `json:"profile"`
-	Hero         *asuraHero      `json:"hero"`
+	Hero         *torenHero      `json:"hero"`
 }
 
 // exportProfile packs profile.json (and a custom hero image, if any) into a
-// single .asuraprofile envelope at dstPath. A missing profile.json is treated as
+// single .torenprofile envelope at dstPath. A missing profile.json is treated as
 // an empty object.
 func exportProfile(dstPath string) error {
 	raw, err := os.ReadFile(profileConfigPath())
@@ -67,11 +67,11 @@ func exportProfile(dstPath string) error {
 	if err := json.Unmarshal(raw, &m); err != nil {
 		return fmt.Errorf("profile.json is not valid JSON: %w", err)
 	}
-	env := asuraEnvelope{Asuraprofile: 1, Profile: json.RawMessage(raw)}
+	env := torenEnvelope{Torenprofile: 1, Profile: json.RawMessage(raw)}
 	if m.Hero.Kind == "custom" && m.Hero.Source != "" {
 		name := filepath.Base(m.Hero.Source)
 		if img, err := os.ReadFile(filepath.Join(profileHeroDir(), name)); err == nil {
-			env.Hero = &asuraHero{Name: name, B64: base64.StdEncoding.EncodeToString(img)}
+			env.Hero = &torenHero{Name: name, B64: base64.StdEncoding.EncodeToString(img)}
 		}
 	}
 	out, err := json.Marshal(env)
@@ -81,7 +81,7 @@ func exportProfile(dstPath string) error {
 	return atomicWrite(dstPath, out, 0o644)
 }
 
-// importProfile validates a .asuraprofile at srcPath and unpacks it: the embedded
+// importProfile validates a .torenprofile at srcPath and unpacks it: the embedded
 // hero image into profile/, then the settings into profile.json. Everything is
 // decoded and validated before any write, so a parse/validation failure leaves
 // the existing profile untouched.
@@ -90,21 +90,21 @@ func importProfile(srcPath string) error {
 	if err != nil {
 		return err
 	}
-	var env asuraEnvelope
+	var env torenEnvelope
 	if err := json.Unmarshal(raw, &env); err != nil {
-		return fmt.Errorf("not a valid .asuraprofile file: %w", err)
+		return fmt.Errorf("not a valid .torenprofile file: %w", err)
 	}
-	if env.Asuraprofile != 1 {
-		return fmt.Errorf("not a .asuraprofile file (asuraprofile != 1)")
+	if env.Torenprofile != 1 {
+		return fmt.Errorf("not a .torenprofile file (torenprofile != 1)")
 	}
 	var heroBytes []byte
 	if env.Hero != nil {
 		if env.Hero.Name == "" {
-			return fmt.Errorf(".asuraprofile hero is missing a name")
+			return fmt.Errorf(".torenprofile hero is missing a name")
 		}
 		heroBytes, err = base64.StdEncoding.DecodeString(env.Hero.B64)
 		if err != nil {
-			return fmt.Errorf(".asuraprofile hero image is not valid base64: %w", err)
+			return fmt.Errorf(".torenprofile hero image is not valid base64: %w", err)
 		}
 	}
 	profile := env.Profile

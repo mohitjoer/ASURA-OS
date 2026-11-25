@@ -1,7 +1,7 @@
 import QtQuick
 import qs.Ui.Singletons
 
-// Editorial kicker above a Fraunces heading: a hairline tick, the Asura mark, then
+// Editorial kicker above a Fraunces heading: a hairline tick, the Toren mark, then
 // a tracked Space Grotesk label. All ink.
 Row {
     id: eye

@@ -28,11 +28,11 @@ func installedTree(t *testing.T) RegistrationEnv {
 
 	// Each unit points at its own binary, so the check has to read each rather
 	// than find the same target in both. The binaries are the base layer's, not
-	// Asura's, and they are absent from this tree: the check saying so is the
+	// Toren's, and they are absent from this tree: the check saying so is the
 	// point.
-	mkdirAll(t, filepath.Join(root, "/usr/share/asura/shell"))
-	mkdirAll(t, filepath.Join(root, "/usr/share/asura/shell-desktop"))
-	mkdirAll(t, filepath.Join(root, "/usr/share/asura/portal"))
+	mkdirAll(t, filepath.Join(root, "/usr/share/toren/shell"))
+	mkdirAll(t, filepath.Join(root, "/usr/share/toren/shell-desktop"))
+	mkdirAll(t, filepath.Join(root, "/usr/share/toren/portal"))
 
 	return RegistrationEnv{Root: root}
 }
@@ -44,7 +44,7 @@ Description=test
 
 [Service]
 Type=exec
-ExecStart=/usr/share/asura/shell/asura-shell
+ExecStart=/usr/share/toren/shell/toren-shell
 `
 
 func writeFile(t *testing.T, path, body string) {
@@ -70,9 +70,9 @@ func mkdirAll(t *testing.T, path string) {
 func TestEveryRegistrationIsSanctioned(t *testing.T) {
 	allowed := map[string]bool{
 		"/usr/share/wayland-sessions/toren.desktop":                 true,
-		"/usr/share/xdg-desktop-portal/asura-portals.conf":          true,
-		"/usr/share/glib-2.0/schemas/org.asura.shell.gschema.xml":   true,
-		"/usr/share/glib-2.0/schemas/org.asura.desktop.gschema.xml": true,
+		"/usr/share/xdg-desktop-portal/toren-portals.conf":          true,
+		"/usr/share/glib-2.0/schemas/org.toren.shell.gschema.xml":   true,
+		"/usr/share/glib-2.0/schemas/org.toren.desktop.gschema.xml": true,
 	}
 
 	for _, registration := range registrations {
@@ -84,12 +84,12 @@ func TestEveryRegistrationIsSanctioned(t *testing.T) {
 				registration.Path)
 		}
 		// An empty target is a registration whose content is not written yet.
-		// When there is one, it still has to live under /usr/share/asura/ —
+		// When there is one, it still has to live under /usr/share/toren/ —
 		// a registration is a pointer and its content belongs there.
 		if registration.Target != "" &&
-			!strings.HasPrefix(registration.Target, "/usr/share/asura/") {
+			!strings.HasPrefix(registration.Target, "/usr/share/toren/") {
 			t.Errorf("%s points at %s; a registration is a pointer and its content "+
-				"belongs under /usr/share/asura/",
+				"belongs under /usr/share/toren/",
 				registration.Path, registration.Target)
 		}
 	}
@@ -130,14 +130,14 @@ func TestMissingRegistrationIsNamed(t *testing.T) {
 func TestRegistrationWithMissingTargetIsNamed(t *testing.T) {
 	env := installedTree(t)
 	if err := os.RemoveAll(filepath.Join(env.Root,
-		"/usr/share/asura/session/asura-portals.conf")); err != nil {
+		"/usr/share/toren/session/toren-portals.conf")); err != nil {
 		t.Fatal(err)
 	}
 
 	findings := CheckRegistrations(env)
 	found := false
 	for _, finding := range findings {
-		if finding.Path == "/usr/share/xdg-desktop-portal/asura-portals.conf" {
+		if finding.Path == "/usr/share/xdg-desktop-portal/toren-portals.conf" {
 			found = true
 			if !finding.Installed {
 				t.Error("a registration whose target is missing was reported as " +
@@ -155,13 +155,13 @@ func TestExecStartTargetIsExtracted(t *testing.T) {
 	dir := t.TempDir()
 	unit := filepath.Join(dir, "x.service")
 	body := "[Unit]\nDescription=x\n\n[Service]\nType=exec\n" +
-		"ExecStart=/usr/share/asura/shell/asura-shell\nRestart=on-failure\n"
+		"ExecStart=/usr/share/toren/shell/toren-shell\nRestart=on-failure\n"
 	if err := os.WriteFile(unit, []byte(body), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
 	target, ok := ExecStartTarget("", unit)
-	if !ok || target != "/usr/share/asura/shell/asura-shell" {
+	if !ok || target != "/usr/share/toren/shell/toren-shell" {
 		t.Errorf("ExecStartTarget = %q, %v", target, ok)
 	}
 
@@ -182,9 +182,9 @@ func TestExecStartTargetIsExtracted(t *testing.T) {
 // the binary it runs was never installed. Nothing warns about it at build time.
 func TestUnitPointingAtNothingIsFound(t *testing.T) {
 	env := installedTree(t)
-	mkdirAll(t, filepath.Join(env.Root, "/usr/share/asura/units"))
-	writeFile(t, filepath.Join(env.Root, "/usr/share/asura/units/asura-extra.service"),
-		"[Service]\nExecStart=/usr/bin/asura-extra\n")
+	mkdirAll(t, filepath.Join(env.Root, "/usr/share/toren/units"))
+	writeFile(t, filepath.Join(env.Root, "/usr/share/toren/units/toren-extra.service"),
+		"[Service]\nExecStart=/usr/bin/toren-extra\n")
 	findings := CheckUnits(env)
 
 	if len(findings) == 0 {
@@ -224,30 +224,30 @@ func TestUnitsPassWhenTheirBinariesExist(t *testing.T) {
 // systemd allows in front of the path is not part of the path.
 func TestShippedUnitsBeyondTheClosedListAreChecked(t *testing.T) {
 	env := installedTree(t)
-	mkdirAll(t, filepath.Join(env.Root, "/usr/share/asura/units"))
-	writeFile(t, filepath.Join(env.Root, "/usr/share/asura/units/asurad.service"),
-		"[Service]\nExecStart=-/usr/bin/asura-shell daemon\n")
+	mkdirAll(t, filepath.Join(env.Root, "/usr/share/toren/units"))
+	writeFile(t, filepath.Join(env.Root, "/usr/share/toren/units/torend.service"),
+		"[Service]\nExecStart=-/usr/bin/toren-shell daemon\n")
 
 	reasons := map[string]string{}
 	for _, finding := range append(CheckRegistrations(env), CheckUnits(env)...) {
 		reasons[finding.Name] += finding.Reason + ";"
 	}
-	got := reasons["asurad.service"]
-	if !strings.Contains(got, "not installed") || !strings.Contains(got, "/usr/bin/asura-shell, which does not exist") {
+	got := reasons["torend.service"]
+	if !strings.Contains(got, "not installed") || !strings.Contains(got, "/usr/bin/toren-shell, which does not exist") {
 		t.Fatalf("the new unit was not checked in both ways: %q", got)
 	}
 
 	mkdirAll(t, filepath.Join(env.Root, "/usr/lib/systemd/user"))
-	writeFile(t, filepath.Join(env.Root, "/usr/lib/systemd/user/asurad.service"), "[Unit]\n")
+	writeFile(t, filepath.Join(env.Root, "/usr/lib/systemd/user/torend.service"), "[Unit]\n")
 	mkdirAll(t, filepath.Join(env.Root, "/usr/bin"))
-	writeFile(t, filepath.Join(env.Root, "/usr/bin/asura-shell"), "#!/bin/sh\n")
+	writeFile(t, filepath.Join(env.Root, "/usr/bin/toren-shell"), "#!/bin/sh\n")
 	for _, finding := range CheckRegistrations(env) {
-		if finding.Name == "asurad.service" {
+		if finding.Name == "torend.service" {
 			t.Errorf("a registered unit is still reported: %+v", finding)
 		}
 	}
 	for _, finding := range CheckUnits(env) {
-		if finding.Name == "asurad.service" {
+		if finding.Name == "torend.service" {
 			t.Errorf("a unit whose binary exists is still reported: %+v", finding)
 		}
 	}

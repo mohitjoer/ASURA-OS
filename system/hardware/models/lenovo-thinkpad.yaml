@@ -29,6 +29,6 @@ files:
 services: []
 
 notes:
-  - "ACPI platform_profile: quiet, balanced, and performance thermal modes exposed by thinkpad_acpi ('asura power profile')."
+  - "ACPI platform_profile: quiet, balanced, and performance thermal modes exposed by thinkpad_acpi ('toren power profile')."
   - "Battery conservation: charge thresholds set on /sys/class/power_supply/BAT*/charge_stop_threshold."
   - "TrackPoint & Keyboard backlight: configured natively through sysfs platform thinkpad_acpi."

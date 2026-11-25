@@ -14,7 +14,7 @@ import "../stage/Singletons" as StageCfg
 //     reload)
 //   right-click a widget     = its menu (cycle design, toggle date, lock, snap
 //     to a compass zone, hide) + the same globals
-// Every action writes the same widgets Config the drag and Asura Settings do.
+// Every action writes the same widgets Config the drag and Toren Settings do.
 Item {
     id: menu
 
@@ -113,11 +113,11 @@ Item {
         }
     }
     function openSettings() {
-        Spawn.run(["sh", "-c", "asura-hub config set section widgets; flock -n -o /tmp/asura-hub.lock qs -c hub"]);
+        Spawn.run(["sh", "-c", "toren-hub config set section widgets; flock -n -o /tmp/toren-hub.lock qs -c hub"]);
         menu.close();
     }
     function refreshShell() {
-        Quickshell.execDetached(["asura-shell", "reload"]);
+        Quickshell.execDetached(["toren-shell", "reload"]);
         menu.close();
     }
     function videoLabel(v) { return v === "canvas" ? "Spotify Canvas" : v === "custom" ? "Custom" : "Off"; }
@@ -256,7 +256,7 @@ Item {
         }
 
         // Size + Opacity: discoverable equivalents of the corner-drag resize and
-        // Asura Settings' opacity, targeting whichever widget the menu is open
+        // Toren Settings' opacity, targeting whichever widget the menu is open
         // for. Both scrub live and persist on release.
         MenuSection { visible: menu.isWidget; label: I18n.tr("Adjust"); gloss: "" }
         MenuSlider {

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Game mode = one reversible toggle. competitive-play tune on start, back
 # to normal on stop. the compositor via hyprctl (no root). the system knobs
-# that need root go through asura-game-tune and the wifi radio through
-# asura-wifi-powersave, both pre-authorised by polkit so the toggle stays one
+# that need root go through toren-game-tune and the wifi radio through
+# toren-wifi-powersave, both pre-authorised by polkit so the toggle stays one
 # click. dnd is the shell's job (Flags.dnd) and bridges in here, same as
-# asura-cmd-caffeine.
+# toren-cmd-caffeine.
 #
 #   status   exit 0 = on
 #   start    apply, persist (idempotent, safe to re-run)
@@ -13,7 +13,7 @@
 #
 # revert = exact. compositor changes are runtime overrides hyprctl applies; a
 # reload rereads the config and clears them, so nothing to track. the wifi helper
-# saves + restores the prior power-save state, asura-game-tune saves + restores
+# saves + restores the prior power-save state, toren-game-tune saves + restores
 # every knob it touches, and the prior power profile is written down here.
 # `start` is safe to re-run after a relogin (the compositor comes back fresh,
 # request is still on disk).
@@ -26,22 +26,22 @@
 # be read, reads as AC, so an odd machine is permitted rather than locked out.
 set -u
 
-state_dir="${ASURA_STATE_PATH:-${XDG_STATE_HOME:-$HOME/.local/state}/asura}"
+state_dir="${ASURA_STATE_PATH:-${XDG_STATE_HOME:-$HOME/.local/state}/toren}"
 state_file="${ASURA_GAMEMODE_STATE_FILE:-$state_dir/game-mode.enabled}"
 profile_file="${ASURA_GAMEMODE_PROFILE_FILE:-$state_dir/game-mode.profile}"
 
 # Helpers are resolved once, through an explicit seam. `command -v` alone would
 # find a deployed copy in /usr/bin even when a caller means "pretend this is
 # absent", which is exactly the case a test needs to cover.
-wifi_helper="${ASURA_WIFI_POWERSAVE_BIN-$(command -v asura-wifi-powersave || true)}"
-tune_helper="${ASURA_GAME_TUNE_BIN-$(command -v asura-game-tune || true)}"
+wifi_helper="${ASURA_WIFI_POWERSAVE_BIN-$(command -v toren-wifi-powersave || true)}"
+tune_helper="${ASURA_GAME_TUNE_BIN-$(command -v toren-game-tune || true)}"
 
 stripped=0
 
 is_on() { [[ -f $state_file ]]; }
 
 notify() {
-  command -v notify-send >/dev/null 2>&1 && notify-send -a Asura "$1" "$2" || true
+  command -v notify-send >/dev/null 2>&1 && notify-send -a Toren "$1" "$2" || true
 }
 
 # ── power source ──────────────────────────────────────────────────────────────
@@ -79,7 +79,7 @@ deco_restore() {
 # power-profiles-daemon owns the governor, EPP and platform_profile as a set, so
 # asking it for `performance` is the whole CPU story and needs no root: the
 # session's own D-Bus call is already authorised. Doing it here rather than in
-# asura-game-tune keeps the privileged helper to knobs that genuinely need
+# toren-game-tune keeps the privileged helper to knobs that genuinely need
 # privilege.
 #
 # The prior profile is written down before switching so `stop` can put back what
@@ -105,7 +105,7 @@ profile_restore() {
 # ── system knobs (root, via polkit) ───────────────────────────────────────────
 # Deep idle states, the NMI watchdog, split/bus-lock mitigation and three VM
 # knobs. The helper saves every prior value and restores it exactly; see
-# system/hardware/power/asura-game-tune for why each one is there and why the
+# system/hardware/power/toren-game-tune for why each one is there and why the
 # firmware-governed knobs are not.
 tune() {  # apply | restore
   [[ -n $tune_helper && -x $tune_helper ]] || return 0
@@ -166,7 +166,7 @@ case "${1:-toggle}" in
   off | stop) stop ;;
   toggle)     if is_on; then stop; else start; fi ;;
   *)
-    echo "usage: asura-cmd-game-mode [status | start | stop | toggle]" >&2
+    echo "usage: toren-cmd-game-mode [status | start | stop | toggle]" >&2
     exit 1
     ;;
 esac

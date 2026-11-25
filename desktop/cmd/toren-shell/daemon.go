@@ -16,17 +16,17 @@ import (
 	"syscall"
 	"time"
 
-	"asura/desktop/internal/wm"
+	"toren/desktop/internal/wm"
 )
 
 func reloadCoverPath() string {
 	if shellDir != "" {
-		return filepath.Join(shellDir, "scripts", "asura-reload-cover")
+		return filepath.Join(shellDir, "scripts", "toren-reload-cover")
 	}
 	if exe, err := os.Executable(); err == nil {
-		return filepath.Join(filepath.Dir(exe), "asura-reload-cover")
+		return filepath.Join(filepath.Dir(exe), "toren-reload-cover")
 	}
-	return "asura-reload-cover"
+	return "toren-reload-cover"
 }
 
 var reloadCoverOutput = func(ctx context.Context) ([]byte, error) {
@@ -86,7 +86,7 @@ type daemon struct {
 	clip         *clipState             // clipboard history state (nil until started)
 	tray         *trayState             // system tray watcher/host state (nil until started)
 	wallMu       sync.Mutex             // guards wall
-	wall         wallpaperFrame         // last wallpaper frame seen from asura-wallpaper; feeds the stage worker
+	wall         wallpaperFrame         // last wallpaper frame seen from toren-wallpaper; feeds the stage worker
 	polkit       *polkitAgent           // PolicyKit1 authentication agent (nil when unavailable)
 	settings     *settingsStore         // shell.json store (nil until startSettings)
 	pp           *powerProfilesState    // power-profiles-daemon bus state
@@ -322,7 +322,7 @@ func quitStaleDaemon(path string) {
 // served over the settings topic), the clipboard history and its selection
 // watcher, the tray host, the keyring prompter, the theme workers, the in-shell
 // wallpaper surface and the first wallpaper. Quickshell itself is systemd's:
-// asura-shell.service starts and restarts it, the daemon only talks to it.
+// toren-shell.service starts and restarts it, the daemon only talks to it.
 func (d *daemon) bootstrap() {
 	d.startSettings()
 	d.startKeypress()
@@ -369,7 +369,7 @@ func holdDaemonLock(path string) (*os.File, error) {
 		}
 		if time.Now().After(deadline) {
 			f.Close()
-			return nil, fmt.Errorf("another asura-shell daemon holds %s", path)
+			return nil, fmt.Errorf("another toren-shell daemon holds %s", path)
 		}
 		time.Sleep(100 * time.Millisecond)
 	}
@@ -429,7 +429,7 @@ func (d *daemon) handle(conn net.Conn) {
 
 var surfaceCommands = map[string]string{
 	// One bare kebab verb per shell surface, spelled to match its CustomShortcut
-	// id, so a compositor keybind reaches any surface as `asura-shell <id>` where
+	// id, so a compositor keybind reaches any surface as `toren-shell <id>` where
 	// no global-shortcuts protocol exists. Flag surfaces land on ShellState
 	// through the surface bus's style-independent consumer; frame-menu surfaces
 	// land on the per-monitor FrameMenuManager. Both are the same transition a
@@ -500,7 +500,7 @@ func (d *daemon) dispatch(line string) string {
 	}
 	cmd, args := fields[0], fields[1:]
 	if why, ok := unavailable[cmd]; ok {
-		return "err " + cmd + ": not available on Asura: " + why
+		return "err " + cmd + ": not available on Toren: " + why
 	}
 	routeCmd := cmd
 	switch cmd {
@@ -714,7 +714,7 @@ func (d *daemon) dispatch(line string) string {
 		}
 		if args[0] == "remove" && len(args) >= 2 {
 			// `theme remove <id>` uninstalls a downloaded scheme. Reset the
-			// applied scheme to the Asura default first when it is the one being
+			// applied scheme to the Toren default first when it is the one being
 			// removed, so the desktop never keeps a scheme whose files are gone;
 			// the settings store drives the retheme off that write.
 			id := strings.Join(args[1:], " ")
@@ -782,7 +782,7 @@ func (d *daemon) dispatch(line string) string {
 		}
 		return "err plugins: unknown action"
 	case "sound":
-		// an event cue from a config outside the daemon (asura-shot fires the
+		// an event cue from a config outside the daemon (toren-shot fires the
 		// shutter on capture). The daemon owns the assets and playback; it only
 		// accepts a known event name.
 		if len(args) != 1 || !knownSound(args[0]) {
@@ -861,7 +861,7 @@ func (d *daemon) reload() string {
 	return "err reload: the shell did not come back; see journalctl --user -u " + shellUnit
 }
 
-const shellUnit = "asura-shell.service"
+const shellUnit = "toren-shell.service"
 
 // shellMainPID is the unit's main process, "" when systemd cannot say.
 func shellMainPID() string {

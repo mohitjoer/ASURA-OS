@@ -7,7 +7,7 @@
 set -euo pipefail
 
 app="OCR"
-prog="asura-cmd-ocr"
+prog="toren-cmd-ocr"
 # A missing tool is a notification, because the shell runs this with nowhere to
 # print, plus exit 127 (the shell's "command not found") with the apt package
 # named. notify-send is checked first and on its own: it is the one tool whose
@@ -42,7 +42,7 @@ tmp="$input_file"
 if [[ -z $tmp ]]; then
   need grim
   need slurp
-  shot="$(mktemp "${XDG_RUNTIME_DIR:-/tmp}/asura-ocr.XXXXXX.png")"
+  shot="$(mktemp "${XDG_RUNTIME_DIR:-/tmp}/toren-ocr.XXXXXX.png")"
   tmp="$shot"
 fi
 
@@ -60,7 +60,7 @@ fi
 # looking at the screenshot instead of at the package.
 lang_args=()
 [[ -z ${ASURA_OCR_LANG:-} ]] || lang_args=(-l "$ASURA_OCR_LANG")
-err="$(mktemp "${XDG_RUNTIME_DIR:-/tmp}/asura-ocr-err.XXXXXX")"
+err="$(mktemp "${XDG_RUNTIME_DIR:-/tmp}/toren-ocr-err.XXXXXX")"
 # Command substitution trims trailing newlines.
 if ! text="$(tesseract "$tmp" - "${lang_args[@]}" 2>"$err")"; then
   if grep -qiE 'failed loading language|error opening data file|tessdata' "$err"; then
@@ -78,10 +78,10 @@ fi
 
 # Prefer the daemon: it owns the selection and ingests the entry into clipboard
 # history, which a bare wl-copy never reaches.
-if command -v asura-shell >/dev/null 2>&1 && asura-shell ping >/dev/null 2>&1; then
-  out="$(mktemp "${XDG_RUNTIME_DIR:-/tmp}/asura-ocr-text.XXXXXX")"
+if command -v toren-shell >/dev/null 2>&1 && toren-shell ping >/dev/null 2>&1; then
+  out="$(mktemp "${XDG_RUNTIME_DIR:-/tmp}/toren-ocr-text.XXXXXX")"
   printf '%s' "$text" > "$out"
-  asura-shell clip-copy text/plain "$out"
+  toren-shell clip-copy text/plain "$out"
   rm -f "$out"
 else
   printf '%s' "$text" | wl-copy

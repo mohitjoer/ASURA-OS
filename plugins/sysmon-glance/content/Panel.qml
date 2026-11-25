@@ -133,7 +133,7 @@ Item {
                 id: openArea
                 anchors.fill: parent
                 onClicked: {
-                    Quickshell.execDetached(["asura-sysmon", "ui"]);
+                    Quickshell.execDetached(["toren-sysmon", "ui"]);
                     if (root.pluginApi)
                         root.pluginApi.closePanel();
                 }

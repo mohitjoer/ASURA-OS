@@ -36,8 +36,8 @@ Singleton {
     // settings. The root owns the reading; the wrapper owns the vocabulary.
     property var values: ({})
 
-    readonly property var shell: values["org.asura.shell"] || ({})
-    readonly property var desktop: values["org.asura.desktop"] || ({})
+    readonly property var shell: values["org.toren.shell"] || ({})
+    readonly property var desktop: values["org.toren.desktop"] || ({})
 
     readonly property int colorScheme: desktop.colorScheme ?? 0
     readonly property int idleDimSeconds: desktop.idleDimSeconds ?? 0
@@ -76,8 +76,8 @@ Singleton {
     readonly property bool screenCorners: shell.screenCorners ?? true
 
     // Which desktop shell the session starts: "desktop" (from
-    // /usr/share/asura/shell-desktop) or "asura" (this shell). Read by the
-    // quickshell and asurad services at login; exposed here so the Hub and
+    // /usr/share/toren/shell-desktop) or "toren" (this shell). Read by the
+    // quickshell and torend services at login; exposed here so the Hub and
     // this shell can say which one is configured.
     readonly property string desktopShell: shell.desktopShell ?? "desktop"
 
@@ -97,8 +97,8 @@ Singleton {
     //
     // Writes go through here rather than being spread across the surfaces that
     // want them, for two reasons. It keeps Config.qml the only file that knows
-    // which schema owns which key — org.asura.desktop owns color-scheme and
-    // org.asura.shell owns dock-autohide, and a surface that guessed wrong
+    // which schema owns which key — org.toren.desktop owns color-scheme and
+    // org.toren.shell owns dock-autohide, and a surface that guessed wrong
     // would write the right key to the wrong schema, which is a setting that
     // appears to work.
     //
@@ -106,7 +106,7 @@ Singleton {
     // ("setDockAutohide"), not how.
     //
     // The shell daemon is one of the two permitted writers of these schemas —
-    // the other is asura-hub — so a write from here is not a rule violation.
+    // the other is toren-hub — so a write from here is not a rule violation.
     // What would be is a surface reaching past this wrapper.
 
     //
@@ -116,14 +116,14 @@ Singleton {
     // does not hear about is a write that the surfaces do not show.
     function setDockAutohide(value) {
         Quickshell.execDetached([
-            "asura", "config", "set", "org.asura.shell", "dock-autohide",
+            "toren", "config", "set", "org.toren.shell", "dock-autohide",
             value ? "true" : "false"
         ]);
     }
 
     function setColorScheme(value) {
         Quickshell.execDetached([
-            "asura", "config", "set", "org.asura.desktop", "color-scheme",
+            "toren", "config", "set", "org.toren.desktop", "color-scheme",
             "" + value
         ]);
     }

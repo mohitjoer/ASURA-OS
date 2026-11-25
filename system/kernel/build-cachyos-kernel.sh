@@ -1,5 +1,5 @@
 #!/bin/sh
-# Build Asura Linux Kernel with CachyOS / BORE patchset, 1000Hz, and Full Preempt
+# Build Toren Linux Kernel with CachyOS / BORE patchset, 1000Hz, and Full Preempt
 set -eu
 
 REPO_ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)

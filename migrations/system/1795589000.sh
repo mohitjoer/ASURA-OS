@@ -2,7 +2,7 @@
 echo "Point xbps and git update remotes at mohitjoer/Toren-Linux"
 
 ROOT="${ROOT:-}"
-OLD_REPO="repository=https://mohitjoer.github.io/ASURA-OS/current"
+OLD_REPO="repository=https://mohitjoer.github.io/TOREN-OS/current"
 NEW_REPO="repository=https://mohitjoer.github.io/Toren-Linux/current"
 
 for xbps_dir in "$ROOT/etc/xbps.d" "$ROOT/usr/share/xbps.d"; do
@@ -22,21 +22,21 @@ rewrite_git_remote() {
 	command -v git >/dev/null 2>&1 || return 0
 	url=$(git -C "$dir" remote get-url origin 2>/dev/null || true)
 	case "$url" in
-		https://github.com/mohitjoer/ASURA-OS|https://github.com/mohitjoer/ASURA-OS.git|https://github.com/mohitjoer/Asura-OS|https://github.com/mohitjoer/Asura-OS.git)
+		https://github.com/mohitjoer/TOREN-OS|https://github.com/mohitjoer/TOREN-OS.git|https://github.com/mohitjoer/Toren-OS|https://github.com/mohitjoer/Toren-OS.git)
 			git -C "$dir" remote set-url origin https://github.com/mohitjoer/Toren-Linux.git 2>/dev/null || true
 			;;
-		git@github.com:mohitjoer/ASURA-OS.git|git@github.com:mohitjoer/Asura-OS.git)
+		git@github.com:mohitjoer/TOREN-OS.git|git@github.com:mohitjoer/Toren-OS.git)
 			git -C "$dir" remote set-url origin git@github.com:mohitjoer/Toren-Linux.git 2>/dev/null || true
 			;;
 	esac
 }
 
-for d in "$ROOT/var/cache/asura/source" "$ROOT/usr/src/asura" "$ROOT/usr/share/asura" "$ROOT"/home/*/.cache/asura/source; do
+for d in "$ROOT/var/cache/toren/source" "$ROOT/usr/src/toren" "$ROOT/usr/share/toren" "$ROOT"/home/*/.cache/toren/source; do
 	rewrite_git_remote "$d"
 done
 
-if [ -f "$ROOT/usr/share/asura/applied-source" ]; then
-	recorded=$(head -n 1 "$ROOT/usr/share/asura/applied-source" 2>/dev/null || true)
+if [ -f "$ROOT/usr/share/toren/applied-source" ]; then
+	recorded=$(head -n 1 "$ROOT/usr/share/toren/applied-source" 2>/dev/null || true)
 	if [ -n "$recorded" ]; then
 		case "$recorded" in
 			/*) rewrite_git_remote "$ROOT$recorded" ;;

@@ -52,7 +52,7 @@ Item {
     readonly property bool forceFallback: CaptureBackend.shouldUseGrim(
         Quickshell.env("ASURA_SHOT_FORCE_FALLBACK"))
     property bool fallbackActive: false
-    readonly property string fallbackPath: "/tmp/asura-shot-fallback-" + scrName + ".png"
+    readonly property string fallbackPath: "/tmp/toren-shot-fallback-" + scrName + ".png"
 
     function selectionBox() {
         if (selectedIndex === null || !model
@@ -117,7 +117,7 @@ Item {
                         overlay.ready = true;
                         overlay.frozen();
                     } else if (status === Image.Error) {
-                        console.error("asura-shot: grim fallback failed to load for " + overlay.scrName);
+                        console.error("toren-shot: grim fallback failed to load for " + overlay.scrName);
                         overlay.giveUp();
                     }
                 }
@@ -153,7 +153,7 @@ Item {
     function giveUp() {
         if (overlay.noFrame) return;
         overlay.noFrame = true;
-        Quickshell.execDetached(["notify-send", "-a", "asura", I18n.tr("Screenshots need grim"),
+        Quickshell.execDetached(["notify-send", "-a", "toren", I18n.tr("Screenshots need grim"),
             I18n.tr("Install it with: sudo apt install grim")]);
         giveUpTimer.start();
     }
@@ -166,7 +166,7 @@ Item {
         onExited: (code) => {
             ran = true;
             if (code !== 0) {
-                console.error("asura-shot: grim fallback exited " + code + " for " + overlay.scrName);
+                console.error("toren-shot: grim fallback exited " + code + " for " + overlay.scrName);
                 overlay.giveUp();
                 return;
             }
@@ -181,8 +181,8 @@ Item {
     function startFallback() {
         if (overlay.fallbackActive || grimProc.running) return;
         console.log(overlay.forceFallback
-            ? "asura-shot: using grim capture for " + overlay.scrName
-            : "asura-shot: no screencopy frame for " + overlay.scrName + ", falling back to grim");
+            ? "toren-shot: using grim capture for " + overlay.scrName
+            : "toren-shot: no screencopy frame for " + overlay.scrName + ", falling back to grim");
         grimProc.running = true;
     }
 
@@ -398,19 +398,19 @@ Item {
         id: pickProc
         stdout: StdioCollector { id: pickOut }
         function read() {
-            command = ["magick", "/tmp/asura-shot-pick.png", "-alpha", "off", "-format", "#%[hex:p{0,0}]", "info:"];
+            command = ["magick", "/tmp/toren-shot-pick.png", "-alpha", "off", "-format", "#%[hex:p{0,0}]", "info:"];
             running = true;
         }
         onExited: (code) => {
             var hex = pickOut.text.trim();
             if (code === 0 && /^#[0-9A-Fa-f]{6}$/.test(hex)) overlay.sampled(hex);
-            else console.log("asura-shot: colour sample failed, exit " + code + " value " + JSON.stringify(hex));
+            else console.log("toren-shot: colour sample failed, exit " + code + " value " + JSON.stringify(hex));
         }
     }
 
     function sampleAt(lx, ly) {
         plateClip.rect = { x: Math.max(0, lx - 0.5), y: Math.max(0, ly - 0.5), w: 1, h: 1 };
-        plateClip.grab("/tmp/asura-shot-pick.png", function (ok) {
+        plateClip.grab("/tmp/toren-shot-pick.png", function (ok) {
             if (ok) pickProc.read();
         }, Qt.size(1, 1));
     }

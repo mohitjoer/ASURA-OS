@@ -24,7 +24,7 @@ import (
 // resolution cover image the track's own metadata can reach, and its
 // synchronized lyrics. QML owns the player pick (services/Media.qml) and pushes
 // the bare track on "music.track"; the daemon resolves art and lyrics, caches
-// both under ~/.cache/asura/music, and streams the result on the "music" state
+// both under ~/.cache/toren/music, and streams the result on the "music" state
 // topic, so no QML surface makes an HTTP request itself (docs/conventions.md).
 //
 // Providers are keyless and public: LRCLIB for lyrics, Deezer then iTunes for a
@@ -43,7 +43,7 @@ const (
 	// A cover under this size is a placeholder or an error page, not art.
 	musMinArtBytes = 2048
 	musMaxArtBytes = 12 << 20
-	musUserAgent   = "asura-shell (https://github.com/mohitjoer/Toren-Linux)"
+	musUserAgent   = "toren-shell (https://github.com/mohitjoer/Toren-Linux)"
 )
 
 // Track sources, resolved from the player's bus name and page URL. The frame
@@ -139,7 +139,7 @@ func musicCacheDir() string {
 	if base == "" {
 		base = filepath.Join(os.Getenv("HOME"), ".cache")
 	}
-	return filepath.Join(base, "asura", "music")
+	return filepath.Join(base, "toren", "music")
 }
 
 // setTrack adopts a new track: an unchanged key is a no-op (every shell surface
@@ -256,7 +256,7 @@ func (s *musicState) setArt(gen int, path, status string) {
 }
 
 // resolveCanvas matches the track's Spotify id to a local backdrop the user
-// keeps in ~/.config/asura/canvas/<id>.<ext> (a downloaded Canvas clip, or any
+// keeps in ~/.config/toren/canvas/<id>.<ext> (a downloaded Canvas clip, or any
 // loop): the "canvas" backdrop mode plays it per song. No id, or no file,
 // leaves the field empty and the surface falls back to the cover.
 func (s *musicState) resolveCanvas(gen int, t musicTrack) {
@@ -294,13 +294,13 @@ func (s *musicState) setCanvas(gen int, url string) {
 	s.publish()
 }
 
-// canvasDir is the user's Canvas library, beside the other asura config.
+// canvasDir is the user's Canvas library, beside the other toren config.
 func canvasDir() string {
 	base := os.Getenv("XDG_CONFIG_HOME")
 	if base == "" {
 		base = filepath.Join(os.Getenv("HOME"), ".config")
 	}
-	return filepath.Join(base, "asura", "canvas")
+	return filepath.Join(base, "toren", "canvas")
 }
 
 // spotifyTrackID pulls the base62 id out of the track's page URL or MPRIS uri

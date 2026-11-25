@@ -13,9 +13,9 @@
 set -euo pipefail
 
 runtime_dir="${XDG_RUNTIME_DIR:-/tmp}"
-state_file="${ASURA_RADIO_STATE_FILE:-$runtime_dir/asura-radio.json}"
-aside_file="${ASURA_RADIO_ASIDE_FILE:-$runtime_dir/asura-radio-aside.json}"
-lock_file="${ASURA_RADIO_LOCK_FILE:-$runtime_dir/asura-radio.lock}"
+state_file="${ASURA_RADIO_STATE_FILE:-$runtime_dir/toren-radio.json}"
+aside_file="${ASURA_RADIO_ASIDE_FILE:-$runtime_dir/toren-radio-aside.json}"
+lock_file="${ASURA_RADIO_LOCK_FILE:-$runtime_dir/toren-radio.lock}"
 mpv_bin="${ASURA_RADIO_MPV:-mpv}"
 ytdlp_bin="${ASURA_RADIO_YTDLP:-yt-dlp}"
 resolve_timeout="${ASURA_RADIO_RESOLVE_TIMEOUT:-25}"
@@ -42,12 +42,12 @@ station_field() { # $1 id, $2 field no
 usage() {
 	cat <<'EOF'
 Usage:
-  asura-cmd-radio stations          # known stations, one JSON row each
-  asura-cmd-radio status            # {"on":…,"station":…,"label":…,"live":…,"fellBack":…,"aside":…}
-  asura-cmd-radio start [id]        # tune in (default: lofi); replaces any current station
-  asura-cmd-radio stop [--aside]    # tune out; --aside remembers the station for resume
-  asura-cmd-radio resume            # restart the station stop --aside remembered
-  asura-cmd-radio toggle [id]
+  toren-cmd-radio stations          # known stations, one JSON row each
+  toren-cmd-radio status            # {"on":…,"station":…,"label":…,"live":…,"fellBack":…,"aside":…}
+  toren-cmd-radio start [id]        # tune in (default: lofi); replaces any current station
+  toren-cmd-radio stop [--aside]    # tune out; --aside remembers the station for resume
+  toren-cmd-radio resume            # restart the station stop --aside remembered
+  toren-cmd-radio toggle [id]
 EOF
 }
 
@@ -135,9 +135,9 @@ do_stop() { # [--aside]
 do_start() { # [id]
 	local id="${1:-lofi}" label token
 	label="$(station_field "$id" 2)"
-	[ -n "$label" ] || { echo "asura-cmd-radio: unknown station: $id" >&2; exit 2; }
+	[ -n "$label" ] || { echo "toren-cmd-radio: unknown station: $id" >&2; exit 2; }
 	command -v "$mpv_bin" >/dev/null 2>&1 || {
-		echo "asura-cmd-radio: mpv is not installed (sudo apt install mpv mpv-mpris)" >&2
+		echo "toren-cmd-radio: mpv is not installed (sudo apt install mpv mpv-mpris)" >&2
 		notify-send "Radio" "mpv is not installed (sudo apt install mpv mpv-mpris)" 2>/dev/null || true
 		exit 127
 	}
@@ -236,5 +236,5 @@ case "${1:-}" in
 	toggle)     with_lock do_toggle "${2:-}" ;;
 	_supervise) cmd_supervise "${2:?station required}" "${3:?token required}" ;;
 	--help | -h | "") usage ;;
-	*) echo "asura-cmd-radio: unknown action: $1" >&2; usage >&2; exit 2 ;;
+	*) echo "toren-cmd-radio: unknown action: $1" >&2; usage >&2; exit 2 ;;
 esac

@@ -31,7 +31,7 @@ import "../Singletons"
 // un-toggling lowPowerMode restores the user's own choices intact.
 //
 // Blur, shadows and low-power are the only keys the compositor itself needs, and
-// Hyprland's configuration cannot read JSON, so `asura-perf-apply` (run by the
+// Hyprland's configuration cannot read JSON, so `toren-perf-apply` (run by the
 // session's hyprland.conf with `exec`, which runs on every reload) turns them into
 // `hyprctl keyword` calls. They are offered only where the compositor evaluates its
 // config live (the liveConfigEval capability) and dropped elsewhere rather than
@@ -173,7 +173,7 @@ Item {
     // when it is absent, so downstream consumers always have a file to read.
     FileView {
         id: cfg
-        path: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/asura/performance.json"
+        path: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/toren/performance.json"
         blockLoading: true
         watchChanges: true
         printErrors: false
@@ -295,7 +295,7 @@ Item {
             Image {
                 width: 12; height: 12
                 anchors.verticalCenter: parent.verticalCenter
-                source: Qt.resolvedUrl("../../assets/asura-logo-on-dark.svg")
+                source: Qt.resolvedUrl("../../assets/toren-logo-on-dark.svg")
                 sourceSize.width: 24; sourceSize.height: 24
                 fillMode: Image.PreserveAspectFit
                 smooth: true

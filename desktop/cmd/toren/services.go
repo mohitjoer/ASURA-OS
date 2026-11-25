@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-// `asura enable NAME` and `asura disable NAME` switch optional system
+// `toren enable NAME` and `toren disable NAME` switch optional system
 // services on and off: the package is installed if it is missing, the runit
 // service is linked into /var/service, and the user joins the group the
 // service needs. They are off by default because most machines do not need
@@ -42,7 +42,7 @@ var (
 	svInstalled   = func(pkg string) bool { return exec.Command("xbps-query", pkg).Run() == nil }
 )
 
-const enableUsage = `Usage: asura enable NAME | asura disable NAME | asura enable --list
+const enableUsage = `Usage: toren enable NAME | toren disable NAME | toren enable --list
 
 Switches an optional system service on or off. Enabling installs its package
 if it is missing, starts it (and at every boot), and adds you to its group;
@@ -51,8 +51,8 @@ disabling stops it and keeps the package.
 `
 
 func init() {
-	register("enable", "switch an optional service on (docker, bluetooth, ssh, ...)", asuraEnable)
-	register("disable", "switch an optional service off", asuraDisable)
+	register("enable", "switch an optional service on (docker, bluetooth, ssh, ...)", torenEnable)
+	register("disable", "switch an optional service off", torenDisable)
 }
 
 func serviceNames() []string {
@@ -93,13 +93,13 @@ func lookupService(cmd string, args []string) (string, optionalService, int) {
 	}
 	s, ok := switchableServices[args[0]]
 	if !ok || len(args) > 1 {
-		fmt.Fprintf(os.Stderr, "asura %s: unknown service %q; one of: %s\n", cmd, strings.Join(args, " "), strings.Join(serviceNames(), ", "))
+		fmt.Fprintf(os.Stderr, "toren %s: unknown service %q; one of: %s\n", cmd, strings.Join(args, " "), strings.Join(serviceNames(), ", "))
 		return "", optionalService{}, exitUsage
 	}
 	return args[0], s, -1
 }
 
-func asuraEnable(args []string) int {
+func torenEnable(args []string) int {
 	name, s, code := lookupService("enable", args)
 	if code >= 0 {
 		return code
@@ -110,14 +110,14 @@ func asuraEnable(args []string) int {
 	if !svInstalled(s.Package) {
 		fmt.Printf("installing %s...\n", s.Package)
 		if err := svPrivileged("xbps-install", "-Sy", s.Package); err != nil {
-			fmt.Fprintf(os.Stderr, "asura enable: installing %s: %v\n", s.Package, err)
+			fmt.Fprintf(os.Stderr, "toren enable: installing %s: %v\n", s.Package, err)
 			return exitFail
 		}
 	}
 	for _, svc := range s.Services {
 		def := filepath.Join(svDefinitions, svc)
 		if _, err := os.Stat(def); err != nil {
-			fmt.Fprintf(os.Stderr, "asura enable: %s has no runit service (%s)\n", s.Package, def)
+			fmt.Fprintf(os.Stderr, "toren enable: %s has no runit service (%s)\n", s.Package, def)
 			return exitFail
 		}
 		link := filepath.Join(svEnabled, svc)
@@ -125,14 +125,14 @@ func asuraEnable(args []string) int {
 			continue
 		}
 		if err := svPrivileged("ln", "-s", def, link); err != nil {
-			fmt.Fprintf(os.Stderr, "asura enable: %v\n", err)
+			fmt.Fprintf(os.Stderr, "toren enable: %v\n", err)
 			return exitFail
 		}
 	}
 	if s.Group != "" {
 		if who := invokingUser(); who != "" && !inGroup(who, s.Group) {
 			if err := svPrivileged("usermod", "-aG", s.Group, who); err != nil {
-				fmt.Fprintf(os.Stderr, "asura enable: adding %s to %s: %v\n", who, s.Group, err)
+				fmt.Fprintf(os.Stderr, "toren enable: adding %s to %s: %v\n", who, s.Group, err)
 				return exitFail
 			}
 			fmt.Printf("added %s to the %s group; log out and back in for it to apply\n", who, s.Group)
@@ -142,7 +142,7 @@ func asuraEnable(args []string) int {
 	return exitOK
 }
 
-func asuraDisable(args []string) int {
+func torenDisable(args []string) int {
 	name, s, code := lookupService("disable", args)
 	if code >= 0 {
 		return code
@@ -156,7 +156,7 @@ func asuraDisable(args []string) int {
 			continue
 		}
 		if err := svPrivileged("rm", "-f", link); err != nil {
-			fmt.Fprintf(os.Stderr, "asura disable: %v\n", err)
+			fmt.Fprintf(os.Stderr, "toren disable: %v\n", err)
 			return exitFail
 		}
 	}

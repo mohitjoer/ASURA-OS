@@ -9,8 +9,8 @@
   "license": "GPL-3.0",
   "kind": "bar",
   "verificationStatus": "verified",
-  "tags": ["media", "audio", "mpris2", "playerctl", "asura-native"],
-  "upstream": "https://github.com/ASURA-OS/plugin-media-hud",
+  "tags": ["media", "audio", "mpris2", "playerctl", "toren-native"],
+  "upstream": "https://github.com/TOREN-OS/plugin-media-hud",
   "metadata": {
     "hosts": ["topbarGlyph", "desktopWidget"],
     "verified": true,

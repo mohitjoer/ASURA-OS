@@ -9,7 +9,7 @@ import (
 var storeSections = map[string]struct{}{
 	"discover": {}, "library": {}, "apps": {}, "rices": {}, "lockscreens": {},
 	"barstyles": {}, "fastfetch": {}, "plugins": {}, "bundles": {}, "decors": {},
-	"launcher-images": {}, "fastfetch-emblems": {}, "asura-tunes-skins": {},
+	"launcher-images": {}, "fastfetch-emblems": {}, "toren-tunes-skins": {},
 	"themes": {}, "colorschemes": {},
 }
 
@@ -43,9 +43,9 @@ func hasSettingsSection(category string) bool {
 // storeEntry is the window's entry file and storeWrapper the script that starts
 // it; the wrapper holds the single-instance lock. The wrapper is a variable only
 // so the test can point it at a stand-in.
-const storeEntry = "/usr/share/asura/shell/store.qml"
+const storeEntry = "/usr/share/toren/shell/store.qml"
 
-var storeWrapper = "/usr/share/asura/session/asura-store"
+var storeWrapper = "/usr/share/toren/session/toren-store"
 
 func runOpen(args []string) error {
 	if len(args) != 1 || !storeSection(args[0]) {
@@ -70,7 +70,7 @@ func runOpen(args []string) error {
 	return fmt.Errorf("open section %q: %w", args[0], last)
 }
 
-// runSettings opens Asura Settings on the page that manages a category. The
+// runSettings opens Toren Settings on the page that manages a category. The
 // daemon owns the Hub window, so this asks it instead of starting one.
 func runSettings(args []string) error {
 	if len(args) < 1 || len(args) > 2 {
@@ -80,5 +80,5 @@ func runSettings(args []string) error {
 	if !ok {
 		return fmt.Errorf("unknown settings category %q", args[0])
 	}
-	return exec.Command("asura-shell", "hub", "open", section).Run()
+	return exec.Command("toren-shell", "hub", "open", section).Run()
 }

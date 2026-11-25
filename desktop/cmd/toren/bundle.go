@@ -8,10 +8,10 @@ import (
 	"strings"
 )
 
-// `asura bundle` installs a curated set of apps in one go: a gaming setup, a
+// `toren bundle` installs a curated set of apps in one go: a gaming setup, a
 // development environment, editors, everyday apps. Each bundle is Void
 // packages (XBPS) plus Flathub apps for what Void does not package, and may
-// switch on services (asura enable). Installing takes a system snapshot first.
+// switch on services (toren enable). Installing takes a system snapshot first.
 //
 // Package names are checked against the repositories before anything is
 // installed: one unknown name would make XBPS refuse the whole transaction,
@@ -22,7 +22,7 @@ type bundle struct {
 	Packages []string            // XBPS packages
 	GPU      map[string][]string // extra XBPS packages per GPU vendor (amd, intel, nvidia)
 	Flatpaks []string            // Flathub app ids
-	Services []string            // asura enable names
+	Services []string            // toren enable names
 	Note     string              // shown after installing
 }
 
@@ -85,21 +85,21 @@ var (
 	}
 	bundleHasFlatpak = func() bool { _, err := exec.LookPath("flatpak"); return err == nil }
 	bundleHasXbps    = func() bool { _, err := exec.LookPath("xbps-install"); return err == nil }
-	bundleEnable     = func(name string) int { return asuraEnable([]string{name}) }
+	bundleEnable     = func(name string) int { return torenEnable([]string{name}) }
 )
 
-const bundleUsage = `Usage: asura bundle [list | show NAME | install NAME...]
+const bundleUsage = `Usage: toren bundle [list | show NAME | install NAME...]
 
 Installs a curated set of apps in one go.
 
   list            every bundle (the default)
   show NAME       what a bundle installs
   install NAME    install one or more bundles; a system snapshot is taken
-                  first, so sudo asura rollback --system can undo it
+                  first, so sudo toren rollback --system can undo it
 `
 
 func init() {
-	register("bundle", "install a curated set of apps: gaming, dev, editors, apps, creative, office", asuraBundle)
+	register("bundle", "install a curated set of apps: gaming, dev, editors, apps, creative, office", torenBundle)
 }
 
 func bundleNames() []string {
@@ -111,7 +111,7 @@ func bundleNames() []string {
 	return names
 }
 
-func asuraBundle(args []string) int {
+func torenBundle(args []string) int {
 	if len(args) == 0 || args[0] == "list" {
 		fmt.Print(bundleUsage + "\n")
 		for _, n := range bundleNames() {
@@ -162,7 +162,7 @@ func asuraBundle(args []string) int {
 }
 
 func unknownBundle(name string) int {
-	fmt.Fprintf(os.Stderr, "asura bundle: no bundle %q; one of: %s\n", name, strings.Join(bundleNames(), ", "))
+	fmt.Fprintf(os.Stderr, "toren bundle: no bundle %q; one of: %s\n", name, strings.Join(bundleNames(), ", "))
 	return exitUsage
 }
 
@@ -222,12 +222,12 @@ func planBundles(names []string) bundlePlan {
 
 func installBundles(names []string) int {
 	if !bundleHasXbps() {
-		fmt.Fprintln(os.Stderr, "asura bundle: xbps-install is not installed")
+		fmt.Fprintln(os.Stderr, "toren bundle: xbps-install is not installed")
 		return exitFail
 	}
 	fmt.Println("==> Refreshing the package lists")
 	if err := bundleRoot("xbps-install", "-S"); err != nil {
-		fmt.Fprintln(os.Stderr, "asura bundle: refreshing the package lists:", err)
+		fmt.Fprintln(os.Stderr, "toren bundle: refreshing the package lists:", err)
 		return exitFail
 	}
 	plan := planBundles(names)
@@ -238,7 +238,7 @@ func installBundles(names []string) int {
 		_ = bundleRoot(selfPath(), "snapshot", "create", "--reason", "install")
 		fmt.Printf("==> Installing %d package(s): %s\n", len(plan.Packages), strings.Join(plan.Packages, " "))
 		if err := bundleRoot(append([]string{"xbps-install", "-y"}, plan.Packages...)...); err != nil {
-			fmt.Fprintln(os.Stderr, "asura bundle: installing packages:", err)
+			fmt.Fprintln(os.Stderr, "toren bundle: installing packages:", err)
 			return exitFail
 		}
 	} else {
@@ -251,7 +251,7 @@ func installBundles(names []string) int {
 			fmt.Printf("==> Installing from Flathub: %s\n", strings.Join(plan.Flatpaks, " "))
 			_ = bundleUser("flatpak", "remote-add", "--user", "--if-not-exists", "flathub", "https://dl.flathub.org/repo/flathub.flatpakrepo")
 			if err := bundleUser(append([]string{"flatpak", "install", "--user", "-y", "--noninteractive", "flathub"}, plan.Flatpaks...)...); err != nil {
-				fmt.Fprintln(os.Stderr, "asura bundle: installing from Flathub:", err)
+				fmt.Fprintln(os.Stderr, "toren bundle: installing from Flathub:", err)
 				return exitFail
 			}
 		}

@@ -13,7 +13,7 @@ import qs.Services
 //
 // Openness is owned by FrameMenuManager (menuOpen), never a private boolean, so
 // a busy anchor's content is replaced by flipping which record is active. The
-// Asura-own surfaces (power/voice/keyring/stash/system) are NOT menus; they are
+// Toren-own surfaces (power/voice/keyring/stash/system) are NOT menus; they are
 // hosted by FrameSurface (still a Popout blob this pass), delegated below.
 Item {
     id: root
@@ -36,7 +36,7 @@ Item {
     property real triggerAlong: -1
     property real s: 1
     property bool active: true
-    // Forwarded to FrameSurface for the Asura-own surface popouts.
+    // Forwarded to FrameSurface for the Toren-own surface popouts.
     property var group: null
     property real frameThickness: 0
     property real radius: 8
@@ -234,7 +234,7 @@ Item {
         }
     }
 
-    // ---- Asura-own surface path: still a Popout blob this pass (FrameSurface).
+    // ---- Toren-own surface path: still a Popout blob this pass (FrameSurface).
     Loader {
         id: surfaceHost
         anchors.fill: parent

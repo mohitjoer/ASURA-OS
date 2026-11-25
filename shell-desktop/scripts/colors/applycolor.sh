@@ -20,8 +20,8 @@ if [ ! -s "$STATE_DIR/user/generated/material_colors.scss" ]; then
   json_src=""
   if [ -s "$STATE_DIR/user/generated/colors.json" ]; then
     json_src="$STATE_DIR/user/generated/colors.json"
-  elif [ -s "$XDG_CACHE_HOME/asura/colors.json" ]; then
-    json_src="$XDG_CACHE_HOME/asura/colors.json"
+  elif [ -s "$XDG_CACHE_HOME/toren/colors.json" ]; then
+    json_src="$XDG_CACHE_HOME/toren/colors.json"
   fi
   if [ -n "$json_src" ] && command -v jq >/dev/null 2>&1; then
     jq -r 'to_entries | .[] | "$\(.key): \(.value);"' "$json_src" > "$STATE_DIR/user/generated/material_colors.scss" 2>/dev/null || true
@@ -45,15 +45,15 @@ apply_ghostty() {
   local json_file=""
   if [ -s "$STATE_DIR/user/generated/colors.json" ]; then
     json_file="$STATE_DIR/user/generated/colors.json"
-  elif [ -s "$XDG_CACHE_HOME/asura/colors.json" ]; then
-    json_file="$XDG_CACHE_HOME/asura/colors.json"
+  elif [ -s "$XDG_CACHE_HOME/toren/colors.json" ]; then
+    json_file="$XDG_CACHE_HOME/toren/colors.json"
   fi
 
   [ -z "$json_file" ] && return 0
   command -v jq >/dev/null 2>&1 || return 0
 
-  # Sync to ~/.cache/asura/colors.json with Material roles + Scheme.qml aliases + camelCase aliases
-  mkdir -p "$XDG_CACHE_HOME/asura"
+  # Sync to ~/.cache/toren/colors.json with Material roles + Scheme.qml aliases + camelCase aliases
+  mkdir -p "$XDG_CACHE_HOME/toren"
   jq '. + {
     "color1": (.error // "#f7768e"),
     "color2": (.primary // "#9ece6a"),
@@ -77,7 +77,7 @@ apply_ghostty() {
     "tertiaryContainer": (.tertiary_container // .tertiaryContainer),
     "errorContainer": (.error_container // .errorContainer),
     "outlineVariant": (.outline_variant // .outlineVariant)
-  }' "$json_file" > "$XDG_CACHE_HOME/asura/colors.json.tmp" 2>/dev/null && mv "$XDG_CACHE_HOME/asura/colors.json.tmp" "$XDG_CACHE_HOME/asura/colors.json"
+  }' "$json_file" > "$XDG_CACHE_HOME/toren/colors.json.tmp" 2>/dev/null && mv "$XDG_CACHE_HOME/toren/colors.json.tmp" "$XDG_CACHE_HOME/toren/colors.json"
 
   local bg fg cursor cur_text sel_bg sel_fg p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 p12 p13 p14 p15
   bg=$(jq -r '.background // "#0f0c07"' "$json_file")
@@ -104,9 +104,9 @@ apply_ghostty() {
   p14=$(jq -r '.outline // "#90909a"' "$json_file")
   p15=$(jq -r '.on_surface // "#e2e2e9"' "$json_file")
 
-  mkdir -p "$XDG_CONFIG_HOME/asura/apps/ghostty" "$XDG_CONFIG_HOME/ghostty"
-  cat >"$XDG_CONFIG_HOME/asura/apps/ghostty/colors" <<EOF
-# Asura palette -> ghostty. Rendered by asura theme; do not edit.
+  mkdir -p "$XDG_CONFIG_HOME/toren/apps/ghostty" "$XDG_CONFIG_HOME/ghostty"
+  cat >"$XDG_CONFIG_HOME/toren/apps/ghostty/colors" <<EOF
+# Toren palette -> ghostty. Rendered by toren theme; do not edit.
 background = $bg
 foreground = $fg
 cursor-color = $cursor
@@ -131,7 +131,7 @@ palette = 14=$p14
 palette = 15=$p15
 EOF
 
-  cp "$XDG_CONFIG_HOME/asura/apps/ghostty/colors" "$XDG_CONFIG_HOME/ghostty/colors" 2>/dev/null || true
+  cp "$XDG_CONFIG_HOME/toren/apps/ghostty/colors" "$XDG_CONFIG_HOME/ghostty/colors" 2>/dev/null || true
 
   # Broadcast live OSC sequences to active PTYs so open terminals retint immediately
   local osc_seq=""

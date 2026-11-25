@@ -170,7 +170,7 @@ func TestUnavailableVerbsSayWhy(t *testing.T) {
 	d := &daemon{}
 	for _, verb := range []string{"unlock-prepare", "lock-quiesce", "state launcher 1"} {
 		got := d.dispatch(verb)
-		if !strings.HasPrefix(got, "err "+strings.Fields(verb)[0]+": not available on Asura: ") {
+		if !strings.HasPrefix(got, "err "+strings.Fields(verb)[0]+": not available on Toren: ") {
 			t.Errorf("dispatch(%q) = %q", verb, got)
 		}
 	}

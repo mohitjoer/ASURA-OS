@@ -17,7 +17,7 @@
 # would mean it starts at login whether or not anyone is going to look at it.
 set -eu
 
-PREFIX=/usr/share/asura
+PREFIX=/usr/share/toren
 QUICKSHELL_BIN=${ASURA_QUICKSHELL:-/usr/bin/quickshell}
 HUB_ENTRY="$PREFIX/shell/hub.qml"
 
@@ -31,9 +31,9 @@ fi
 # build's problem and is stated, rather than being a shell error about an
 # undefined variable.
 if [ ! -x "$QUICKSHELL_BIN" ]; then
-    echo "asura-hub: $QUICKSHELL_BIN is not installed." >&2
-    echo "asura-hub: the Hub is drawn by Quickshell, which Asura builds; see" >&2
-    echo "asura-hub: the shell group in system/packages.yaml." >&2
+    echo "toren-hub: $QUICKSHELL_BIN is not installed." >&2
+    echo "toren-hub: the Hub is drawn by Quickshell, which Toren builds; see" >&2
+    echo "toren-hub: the shell group in system/packages.yaml." >&2
     exit 1
 fi
 
@@ -41,14 +41,14 @@ fi
 # that a Hub started before an upgrade, or with a stale schema directory, gets
 # today's data — and so that the schemas named are the ones the window will draw.
 # GLib's directory, not a directory under $PREFIX: that is where the package
-# installs org.asura.*.gschema.xml and where `asura config` reads them from,
+# installs org.toren.*.gschema.xml and where `toren config` reads them from,
 # and the two are the same setting. The default here pointed at
 # $PREFIX/schemas, a directory nothing creates, so the override the wrapper
 # exists to set was an override onto a path that does not resolve.
 # Keep this equal to settingsDir in desktop/cmd/toren/config.go.
 export ASURA_SCHEMA_DIR="${ASURA_SCHEMA_DIR:-/usr/share/glib-2.0/schemas}"
 
-# `asura-hub PAGE` opens on that page. The window reads it from the environment
+# `toren-hub PAGE` opens on that page. The window reads it from the environment
 # (hub.qml), because Quickshell takes no arguments of its own for a configuration.
 if [ -n "${1:-}" ]; then
     export ASURA_HUB_PAGE="$1"

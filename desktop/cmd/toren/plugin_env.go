@@ -91,17 +91,17 @@ func pluginXDG(env, fallback string) string {
 	return filepath.Join(pluginHome(), fallback)
 }
 
-// pluginDataRoot is where `install` puts a plugin: ~/.local/share/asura/plugins,
+// pluginDataRoot is where `install` puts a plugin: ~/.local/share/toren/plugins,
 // the directory the ownership table in agents/agents.md gives to "the plugin".
 func pluginDataRoot() string {
-	return filepath.Join(pluginXDG("XDG_DATA_HOME", ".local/share"), "asura", "plugins")
+	return filepath.Join(pluginXDG("XDG_DATA_HOME", ".local/share"), "toren", "plugins")
 }
 
 // pluginConfigFile is the placement file: which plugins are on, where, and with
-// what settings. The shell watches it and retunes live. Only asura-plugins-place
+// what settings. The shell watches it and retunes live. Only toren-plugins-place
 // writes it.
 func pluginConfigFile() string {
-	return filepath.Join(pluginXDG("XDG_CONFIG_HOME", ".config"), "asura", "plugins.json")
+	return filepath.Join(pluginXDG("XDG_CONFIG_HOME", ".config"), "toren", "plugins.json")
 }
 
 // pluginDevDirs are the directories in ASURA_PLUGINS_DIR, colon-separated: a
@@ -213,7 +213,7 @@ func pluginFirstSymlink(dir string) (string, error) {
 	return found, err
 }
 
-// pluginPlaceTool finds asura-plugins-place, the one writer of plugins.json.
+// pluginPlaceTool finds toren-plugins-place, the one writer of plugins.json.
 // The CLI goes through it for the same reason the shell does: two writers of a
 // file the shell watches is how a placement gets lost.
 //
@@ -226,17 +226,17 @@ func pluginPlaceTool() (string, error) {
 		return path, nil
 	}
 	if dir := os.Getenv("ASURA_SHELL_DIR"); dir != "" {
-		if path := filepath.Join(dir, "scripts", "asura-plugins-place"); pluginExists(path) {
+		if path := filepath.Join(dir, "scripts", "toren-plugins-place"); pluginExists(path) {
 			return path, nil
 		}
 	}
-	if path, err := exec.LookPath("asura-plugins-place"); err == nil {
+	if path, err := exec.LookPath("toren-plugins-place"); err == nil {
 		return path, nil
 	}
-	if path := "/usr/share/asura/shell/scripts/asura-plugins-place"; pluginExists(path) {
+	if path := "/usr/share/toren/shell/scripts/toren-plugins-place"; pluginExists(path) {
 		return path, nil
 	}
-	return "", errors.New("asura-plugins-place is not installed; it ships with the asura package")
+	return "", errors.New("toren-plugins-place is not installed; it ships with the toren package")
 }
 
 // pluginPlace runs the placement tool and returns its complaint, not its
@@ -250,7 +250,7 @@ func pluginPlace(args ...string) error {
 	command := exec.Command(tool, args...)
 	command.Stdout, command.Stderr = &output, &output
 	if err := command.Run(); err != nil {
-		return fmt.Errorf("asura-plugins-place %s: %s", strings.Join(args, " "), pluginTail(output.String(), err))
+		return fmt.Errorf("toren-plugins-place %s: %s", strings.Join(args, " "), pluginTail(output.String(), err))
 	}
 	return nil
 }
@@ -297,7 +297,7 @@ func pluginSplitAuthor(author string) (string, string) {
 		name = strings.TrimSpace(name[:i])
 	}
 	if name == "" {
-		name = "asura"
+		name = "toren"
 	}
 	if mail == "" {
 		mail = strings.ToLower(strings.ReplaceAll(name, " ", "-")) + "@users.noreply.github.com"

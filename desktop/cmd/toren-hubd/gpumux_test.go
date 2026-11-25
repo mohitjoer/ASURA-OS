@@ -22,7 +22,7 @@ func TestGpuMuxSetRequiresMode(t *testing.T) {
 
 func TestGpuMuxMockGet(t *testing.T) {
 	tmp := t.TempDir()
-	bin := filepath.Join(tmp, "asura-gpu")
+	bin := filepath.Join(tmp, "toren-gpu")
 	script := `#!/bin/sh
 if [ "$1" = "mux" ] && [ "$2" = "get" ]; then
     echo '{"capable":true,"mode":"hybrid","reboot_pending":false}'

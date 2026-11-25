@@ -10,14 +10,14 @@ import ".."
 
 // Snippets + quicklinks provider. Snippets expand dynamic placeholders ({date},
 // {clipboard}, {selection}, {cursor}) and copy to the clipboard; quicklinks open
-// a URL with {query} substituted. Both are read from JSON under ~/.config/asura,
+// a URL with {query} substituted. Both are read from JSON under ~/.config/toren,
 // fuzzy-matched by keyword/name. Default-ranked below apps.
 Provider {
     id: snippets
 
     providerId: "snippets"
 
-    readonly property string dir: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/asura"
+    readonly property string dir: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/toren"
     property var snippetList: []
     property var quicklinkList: []
     onSnippetListChanged: Dispatcher.notifyAsync()

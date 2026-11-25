@@ -7,20 +7,20 @@ import (
 	"path/filepath"
 	"strings"
 
-	"asura/desktop/internal/theme"
+	"toren/desktop/internal/theme"
 )
 
-const themeUsage = `asura theme — take the desktop's colours from one image
+const themeUsage = `toren theme — take the desktop's colours from one image
 
 Usage:
-  asura theme set [NAME]       switch the desktop to a named look (wallpaper,
+  toren theme set [NAME]       switch the desktop to a named look (wallpaper,
                                light or dark, colours); no NAME lists them
-  asura theme generate [flags] IMAGE   write the shell's palette from IMAGE
-  asura theme render --config CONFIG --palette CARRIER
+  toren theme generate [flags] IMAGE   write the shell's palette from IMAGE
+  toren theme render --config CONFIG --palette CARRIER
                                 fill the templates CONFIG names from CARRIER
-  asura theme current          print the palette in use
-  asura theme list IMAGEDIR    what each image in a directory would produce
-  asura theme check            assert the palette in use is readable
+  toren theme current          print the palette in use
+  toren theme list IMAGEDIR    what each image in a directory would produce
+  toren theme check            assert the palette in use is readable
 
 generate flags (matugen's names; the daemon passes them):
   --image PATH             the image, instead of the argument
@@ -34,13 +34,13 @@ generate flags (matugen's names; the daemon passes them):
   --prefer, --dry-run      accepted and ignored: an explicit index wins, as in
                            matugen, and --json already writes nothing
 
-The palette is written to $XDG_CACHE_HOME/asura/colors.json, with the tonal
+The palette is written to $XDG_CACHE_HOME/toren/colors.json, with the tonal
 ramps beside it in tones.json. The shell reads those files rather than deriving
 colours itself, so picking a wallpaper repaints the system and nothing has to
 restart. docs/theming.md has the keys and who writes them.
 `
 
-const renderUsage = `Usage: asura theme render --config CONFIG --palette CARRIER
+const renderUsage = `Usage: toren theme render --config CONFIG --palette CARRIER
 
 Fills every [templates.NAME] block in CONFIG (matugen's file format) from the
 colours in CARRIER, a JSON file shaped {"colors": {NAME: {"default": {"hex":
@@ -49,7 +49,7 @@ A file that is not ours, or that has a user edit, is reported and left alone.
 matugen's own spelling, -c CONFIG [json] CARRIER, is accepted too.
 `
 
-func asuraTheme(args []string) int {
+func torenTheme(args []string) int {
 	if len(args) == 0 {
 		fmt.Fprint(os.Stderr, themeUsage)
 		return exitUsage
@@ -69,7 +69,7 @@ func asuraTheme(args []string) int {
 	case "check":
 		return themeCheck()
 	default:
-		fmt.Fprintf(os.Stderr, "asura theme: unknown subcommand %q\n", args[0])
+		fmt.Fprintf(os.Stderr, "toren theme: unknown subcommand %q\n", args[0])
 		return exitUsage
 	}
 }
@@ -81,13 +81,13 @@ func asuraTheme(args []string) int {
 // way to find out why.
 func themeOutputPath() string {
 	if dir := os.Getenv("XDG_CACHE_HOME"); dir != "" {
-		return filepath.Join(dir, "asura", "colors.json")
+		return filepath.Join(dir, "toren", "colors.json")
 	}
 	home, err := os.UserHomeDir()
 	if err != nil {
-		return filepath.Join(os.TempDir(), "asura-colors.json")
+		return filepath.Join(os.TempDir(), "toren-colors.json")
 	}
-	return filepath.Join(home, ".cache", "asura", "colors.json")
+	return filepath.Join(home, ".cache", "toren", "colors.json")
 }
 
 func themeGenerate(args []string) int {
@@ -113,13 +113,13 @@ func themeGenerate(args []string) int {
 		path, positional = positional[0], nil
 	}
 	if path == "" || len(positional) > 0 {
-		fmt.Fprintln(os.Stderr, "asura theme generate: needs one image")
+		fmt.Fprintln(os.Stderr, "toren theme generate: needs one image")
 		return exitUsage
 	}
 
 	palette, err := theme.Extract(path)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura theme:", err)
+		fmt.Fprintln(os.Stderr, "toren theme:", err)
 		return exitFail
 	}
 	var dark bool
@@ -129,7 +129,7 @@ func themeGenerate(args []string) int {
 	case "smart":
 		dark = palette.Dark()
 	default:
-		fmt.Fprintf(os.Stderr, "asura theme generate: --mode is dark, light or smart, not %q\n", *mode)
+		fmt.Fprintf(os.Stderr, "toren theme generate: --mode is dark, light or smart, not %q\n", *mode)
 		return exitUsage
 	}
 
@@ -138,14 +138,14 @@ func themeGenerate(args []string) int {
 		Scheme: *scheme, Contrast: *contrast, LightnessDark: *lightDark, LightnessLight: *lightLight,
 	})
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura theme generate:", err)
+		fmt.Fprintln(os.Stderr, "toren theme generate:", err)
 		return exitUsage
 	}
 
 	if *asJSON {
 		body, err := json.MarshalIndent(generated.Matugen(dark), "", "  ")
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "asura theme:", err)
+			fmt.Fprintln(os.Stderr, "toren theme:", err)
 			return exitFail
 		}
 		fmt.Println(string(body))
@@ -154,11 +154,11 @@ func themeGenerate(args []string) int {
 
 	out := themeOutputPath()
 	if err := theme.Write(out, theme.ShellColors(generated.Flat(dark))); err != nil {
-		fmt.Fprintln(os.Stderr, "asura theme:", err)
+		fmt.Fprintln(os.Stderr, "toren theme:", err)
 		return exitFail
 	}
 	if err := theme.Write(filepath.Join(filepath.Dir(out), "tones.json"), generated.Tones()); err != nil {
-		fmt.Fprintln(os.Stderr, "asura theme:", err)
+		fmt.Fprintln(os.Stderr, "toren theme:", err)
 		return exitFail
 	}
 
@@ -200,12 +200,12 @@ func themeRender(args []string) int {
 
 	body, err := os.ReadFile(carrierPath)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura theme render:", err)
+		fmt.Fprintln(os.Stderr, "toren theme render:", err)
 		return exitFail
 	}
 	var carrier map[string]any
 	if err := json.Unmarshal(body, &carrier); err != nil {
-		fmt.Fprintf(os.Stderr, "asura theme render: %s: %v\n", carrierPath, err)
+		fmt.Fprintf(os.Stderr, "toren theme render: %s: %v\n", carrierPath, err)
 		return exitFail
 	}
 
@@ -214,7 +214,7 @@ func themeRender(args []string) int {
 		fmt.Printf("%-14s %-22s %s\n", r.Block, r.Status, r.Dest)
 	}
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura theme render:", err)
+		fmt.Fprintln(os.Stderr, "toren theme render:", err)
 		return exitFail
 	}
 	return exitOK
@@ -224,9 +224,9 @@ func themeCurrent() int {
 	path := themeOutputPath()
 	roles, err := theme.Load(path)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura theme current:", err)
+		fmt.Fprintln(os.Stderr, "toren theme current:", err)
 		fmt.Fprintf(os.Stderr,
-			"  no palette has been generated yet; run `asura theme generate IMAGE`\n")
+			"  no palette has been generated yet; run `toren theme generate IMAGE`\n")
 		return exitFail
 	}
 	printRoles(roles)
@@ -239,12 +239,12 @@ func themeCheck() int {
 	path := themeOutputPath()
 	roles, err := theme.Load(path)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura theme check:", err)
+		fmt.Fprintln(os.Stderr, "toren theme check:", err)
 		return exitFail
 	}
 
 	if problems := theme.CheckRoles(roles); len(problems) != 0 {
-		fmt.Fprintf(os.Stderr, "asura theme check: %d problem(s):\n", len(problems))
+		fmt.Fprintf(os.Stderr, "toren theme check: %d problem(s):\n", len(problems))
 		for _, problem := range problems {
 			fmt.Fprintf(os.Stderr, "  %s\n", problem)
 		}
@@ -266,13 +266,13 @@ func themeList(args []string) int {
 		dir = args[0]
 	}
 	if len(args) > 1 {
-		fmt.Fprintln(os.Stderr, "asura theme list: takes at most one directory")
+		fmt.Fprintln(os.Stderr, "toren theme list: takes at most one directory")
 		return exitUsage
 	}
 
 	entries, err := os.ReadDir(dir)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura theme list:", err)
+		fmt.Fprintln(os.Stderr, "toren theme list:", err)
 		return exitFail
 	}
 
@@ -305,7 +305,7 @@ func themeList(args []string) int {
 	}
 
 	if found == 0 {
-		fmt.Fprintf(os.Stderr, "asura theme list: no images in %s\n", dir)
+		fmt.Fprintf(os.Stderr, "toren theme list: no images in %s\n", dir)
 		return exitFail
 	}
 	return exitOK

@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	bashLoader = `[ -r "$HOME/.config/bash/asura.bash" ] && . "$HOME/.config/bash/asura.bash"`
-	zshLoader  = `[ -r "$HOME/.config/zsh/asura.zsh" ] && . "$HOME/.config/zsh/asura.zsh"`
+	bashLoader = `[ -r "$HOME/.config/bash/toren.bash" ] && . "$HOME/.config/bash/toren.bash"`
+	zshLoader  = `[ -r "$HOME/.config/zsh/toren.zsh" ] && . "$HOME/.config/zsh/toren.zsh"`
 )
 
 var accountShells = map[string]string{
@@ -111,7 +111,7 @@ func ensureLoaderLast(path, line string) (bool, error) {
 	if string(next) == string(old) {
 		return false, nil
 	}
-	tmp := path + ".asura-tmp"
+	tmp := path + ".toren-tmp"
 	if err := os.WriteFile(tmp, next, mode); err != nil {
 		return false, err
 	}
@@ -132,7 +132,7 @@ func shellKey(path string) string {
 }
 
 func zshPromptPath(home string) string {
-	return filepath.Join(home, ".config", "zsh", "asura-prompt")
+	return filepath.Join(home, ".config", "zsh", "toren-prompt")
 }
 
 func zshPrompt(home string) (string, error) {
@@ -158,7 +158,7 @@ func setZshPrompt(home, prompt string) error {
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err
 	}
-	tmp := path + ".asura-tmp"
+	tmp := path + ".toren-tmp"
 	if err := os.WriteFile(tmp, []byte(prompt+"\n"), 0o644); err != nil {
 		return err
 	}
@@ -260,7 +260,7 @@ func syncSessionShell(path string) {
 	// env config and a reload makes newly spawned processes read it.
 	persistShellEnv(path)
 	_ = applyDesktop()
-	_ = runSessionCommand("asura", "reload")
+	_ = runSessionCommand("toren", "reload")
 }
 
 // persistShellEnv upserts SHELL into desktop.env under the store lock.

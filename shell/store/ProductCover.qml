@@ -74,7 +74,7 @@ Item {
 
     // The app's own icon.
     Image {
-        objectName: "asura-store-cover-icon"
+        objectName: "toren-store-cover-icon"
         visible: cover.appIcon !== ""
         source: cover.appIcon
         width: cover.glyphSize
@@ -171,7 +171,7 @@ Item {
     }
 
     Column {
-        objectName: "asura-store-cover-metadata"
+        objectName: "toren-store-cover-metadata"
         visible: cover.tile && cover.hasIdentity
         x: Tokens.s3
         width: parent.width - Tokens.s3 * 2

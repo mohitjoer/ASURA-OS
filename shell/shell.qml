@@ -39,7 +39,7 @@ import qs.Ui.Singletons
 import qs as RootCfg
 
 /**
- * The single resident Asura shell instance.
+ * The single resident Toren shell instance.
  *
  * One ShellRoot for the whole desktop. It brings the shared service singletons
  * online, holds the per-monitor ShellState every surface binds its visibility
@@ -48,9 +48,9 @@ import qs as RootCfg
  * surface is instantiated once inside it and binds its screen and its visibility
  * to the slice, so a keybind that flips a flag on the active monitor reveals or
  * hides exactly this monitor's copy in-process, where the old shell spawned a
- * asura-shell client per press across separate surface processes.
+ * toren-shell client per press across separate surface processes.
  *
- * The asura-shell daemon launches this instance as `qs -c shell`, the live
+ * The toren-shell daemon launches this instance as `qs -c shell`, the live
  * desktop. Where the compositor offers a global-shortcuts protocol its binds
  * dispatch straight to the shortcuts registered here.
  *
@@ -87,7 +87,7 @@ ShellRoot {
     // settings on a clock redraws on a clock rather than on a change.
     Process {
         id: settingsReader
-        command: ["asura", "config", "values"]
+        command: ["toren", "config", "values"]
         running: true
 
         stdout: StdioCollector {
@@ -115,17 +115,17 @@ ShellRoot {
         root.desktopFallbackNoted = true;
         Quickshell.execDetached(["notify-send", "-a", "ASURA",
             "The desktop did not start",
-            "ASURA's own desktop is running instead. Details: ~/.local/state/asura/quickshell.log. "
+            "ASURA's own desktop is running instead. Details: ~/.local/state/toren/quickshell.log. "
             + "To stay on this desktop: Hub > Desktop & Dock > Which desktop shell runs."]);
     }
 
     // The dim scrim; hypridle owns the idle clock (session/hyprland/hypridle.conf).
     Idle {}
 
-    readonly property string reloadStatePath: (Quickshell.env("XDG_RUNTIME_DIR") || "/tmp") + "/asura-reload-cover.json"
+    readonly property string reloadStatePath: (Quickshell.env("XDG_RUNTIME_DIR") || "/tmp") + "/toren-reload-cover.json"
     readonly property string reloadCoverBin: Quickshell.env("ASURA_SHELL_DIR")
-        ? Quickshell.env("ASURA_SHELL_DIR") + "/scripts/asura-reload-cover"
-        : "asura-reload-cover"
+        ? Quickshell.env("ASURA_SHELL_DIR") + "/scripts/toren-reload-cover"
+        : "toren-reload-cover"
     property string reloadToken: ""
     property bool reloadFinishSent: false
     property bool reloadReleaseArmed: false
@@ -191,7 +191,7 @@ ShellRoot {
     // (login already parsed the right value); only a later profile change reloads.
     FileView {
         id: hyprPerf
-        path: (Quickshell.env("XDG_CACHE_HOME") || (Quickshell.env("HOME") + "/.cache")) + "/asura/hypr-perf.json"
+        path: (Quickshell.env("XDG_CACHE_HOME") || (Quickshell.env("HOME") + "/.cache")) + "/toren/hypr-perf.json"
         printErrors: false
         property bool armed: false
         onSaved: if (hyprPerf.armed) Wm.reloadConfig("")
@@ -465,7 +465,7 @@ ShellRoot {
                 property bool open: ShellState.sessionAction !== ""
                 activeAsync: open || confirmHold.running
                 onOpenChanged: if (!open && active) confirmHold.restart()
-                AsuraConfirmationDialog {
+                TorenConfirmationDialog {
                     modelData: perScreen.modelData
                     action: ShellState.sessionActionMonitor === perScreen.modelData.name ? ShellState.sessionAction : ""
                     message: ShellState.sessionMessage
@@ -483,7 +483,7 @@ ShellRoot {
     // transition here: a per-monitor ShellState flip, a global config toggle, or
     // a request onto the frame menu bus. Both routes to a surface end in this one
     // call -- a CustomShortcut press where the compositor bridges global
-    // shortcuts, and the surfaceRequested bus a `asura-shell <id>` spawn drives
+    // shortcuts, and the surfaceRequested bus a `toren-shell <id>` spawn drives
     // where that protocol is absent (niri) -- so a toggle is defined once.
     function toggleSurface(id) {
         const st = ShellState.forActive();
@@ -551,7 +551,7 @@ ShellRoot {
     }
 
     // The style-independent half of the surface bus. With no global-shortcuts
-    // protocol a keybind reaches a surface only by spawning `asura-shell <id>`,
+    // protocol a keybind reaches a surface only by spawning `toren-shell <id>`,
     // which arrives here as a surfaceRequested. Frame-menu surfaces are opened by
     // the per-monitor FrameMenuManager (Frame.qml), which maps in every bar
     // style; the shell-wide flag surfaces have no such host, so this routes them
@@ -571,7 +571,7 @@ ShellRoot {
     }
 
     // In-process global shortcuts. Each dispatches to the one toggleSurface
-    // mapping above, so the compositor's global-shortcut bind and a `asura-shell`
+    // mapping above, so the compositor's global-shortcut bind and a `toren-shell`
     // spawn drive the identical transition. Names match the compositor binds.
     CustomShortcut {
         name: "barToggle"
@@ -604,11 +604,11 @@ ShellRoot {
     }
 
     // Keep-Awake's durable inhibitor lives outside the shell so it survives a
-    // reload/restart: asura-cmd-caffeine runs systemd-inhibit independent of our
+    // reload/restart: toren-cmd-caffeine runs systemd-inhibit independent of our
     // lifetime, while the Wayland IdleInhibitor below only gives compositor-level
     // effect. Every surface toggle just flips Flags.keepAwake. (pill 246-257)
     function syncCaffeine(action) {
-        Quickshell.execDetached(["asura-cmd-caffeine", action]);
+        Quickshell.execDetached(["toren-cmd-caffeine", action]);
     }
     Connections {
         target: Flags
@@ -618,7 +618,7 @@ ShellRoot {
     }
 
     // Game mode's compositor and WiFi tuning lives outside the shell, same shape
-    // as Keep-Awake: asura-cmd-game-mode (on PATH) drives it so the tuning
+    // as Keep-Awake: toren-cmd-game-mode (on PATH) drives it so the tuning
     // survives a reload. The deck toggle just flips Flags.gameMode. It is
     // compositor tuning though (Hyprland live config eval), so it only fires
     // where the window manager can run it -- the deck tile and the launcher
@@ -627,7 +627,7 @@ ShellRoot {
     function syncGameMode(action) {
         if (Wm.caps.liveConfigEval !== true)
             return;
-        Quickshell.execDetached(["asura-cmd-game-mode", action]);
+        Quickshell.execDetached(["toren-cmd-game-mode", action]);
     }
     Connections {
         target: Flags
@@ -655,7 +655,7 @@ ShellRoot {
         color: "transparent"
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Background
-        WlrLayershell.namespace: "asura-frame-inhibit"
+        WlrLayershell.namespace: "toren-frame-inhibit"
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
         anchors { top: true; left: true }
         IdleInhibitor { window: inhibitWin; enabled: Flags.keepAwake }
@@ -682,7 +682,7 @@ ShellRoot {
         color: "transparent"
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Overlay
-        WlrLayershell.namespace: "asura-frame-kbfocus"
+        WlrLayershell.namespace: "toren-frame-kbfocus"
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
         anchors { top: true; left: true }
     }
@@ -777,7 +777,7 @@ ShellRoot {
     }
     // Menu global shortcuts: open a bar surface on the focused monitor. Each
     // dispatches to the one toggleSurface mapping so the compositor bind and the
-    // `asura-shell <id>` spawn open the identical surface.
+    // `toren-shell <id>` spawn open the identical surface.
     CustomShortcut {
         name: "quicksettings"
         description: I18n.tr("Open quick settings on the active monitor")
@@ -819,12 +819,12 @@ ShellRoot {
         onPressed: root.toggleSurface("install")
     }
 
-    // --- Asura keybind bridge --------------------------------------------
+    // --- Toren keybind bridge --------------------------------------------
     // The compositor's configuration (session/hyprland/hyprland.conf) still
-    // speaks the homegrown contract -- target "asura" and the functions the
+    // speaks the homegrown contract -- target "toren" and the functions the
     // `kind: "shell"` entries of session/binds.json name -- because the
     // catalogue and the configuration are one list written down twice, and
-    // `asura doctor` (internal/shell/binds.go) compares them in both
+    // `toren doctor` (internal/shell/binds.go) compares them in both
     // directions. Neither side may rename alone, so this root hosts the old
     // IpcHandler. Every function is a one-line route onto a surface the
     // ported shell already owns, ending in the same toggleSurface mapping
@@ -835,12 +835,12 @@ ShellRoot {
     // here are left in place but cannot double-fire the same chord: the
     // shipped hyprland.conf declares no `global,` dispatch binds at all, and
     // the quickshell bridge module CustomShortcut loads
-    // (Asura.Wm.Hyprland GlobalShortcutBridge) was not carried over by the
+    // (Toren.Wm.Hyprland GlobalShortcutBridge) was not carried over by the
     // port, so nothing in this file registers those chords with the
     // global-shortcut protocol. The exec binds are the dispatcher for these
     // surface -keybinds, exactly as the conf's own comments say.
     IpcHandler {
-        target: "asura"
+        target: "toren"
 
         function togglePopover(name: string): void {
             switch (name) {
@@ -860,7 +860,7 @@ ShellRoot {
                 root.toggleSurface("stash");
                 break;
             case "cheatsheet":
-                root.showCheatsheet(asuraSheetWindow.visible !== true);
+                root.showCheatsheet(torenSheetWindow.visible !== true);
                 break;
             }
         }
@@ -905,40 +905,40 @@ ShellRoot {
         }
 
         // A Hub write to the idle keys lands here: hypridle reads its timeouts
-        // when it starts, so `asura-idle apply` restarts it only if they changed.
+        // when it starts, so `toren-idle apply` restarts it only if they changed.
         // Every other setting is read by the reader at the root, which runs
         // again here — the surfaces bind to the values it pushes, so they move
         // under it with no further work.
         function reloadSettings(): void {
             settingsReader.running = false;
             settingsReader.running = true;
-            Quickshell.execDetached(["asura-idle", "apply"]);
+            Quickshell.execDetached(["toren-idle", "apply"]);
         }
     }
 
     function toggleCheatsheet() {
-        root.showCheatsheet(asuraSheetWindow.visible !== true);
+        root.showCheatsheet(torenSheetWindow.visible !== true);
     }
 
     function showCheatsheet(on) {
         if (on)
-            asuraSheetLoader.active = true; // the sheet builds on first open
-        asuraSheetWindow.visible = on;
+            torenSheetLoader.active = true; // the sheet builds on first open
+        torenSheetWindow.visible = on;
     }
 
     function advanceSwitcher() {
-        if (asuraSwitcher.item)
-            asuraSwitcher.item.advance();
+        if (torenSwitcher.item)
+            torenSwitcher.item.advance();
     }
 
     function closeSwitcher() {
-        if (asuraSwitcher.item)
-            asuraSwitcher.item.close();
+        if (torenSwitcher.item)
+            torenSwitcher.item.close();
     }
 
     function reverseSwitcher() {
-        if (asuraSwitcher.item)
-            asuraSwitcher.item.reverse();
+        if (torenSwitcher.item)
+            torenSwitcher.item.reverse();
     }
 
     // Super+Alt+Tab: step the desktop strip of an open overview, or open the
@@ -955,7 +955,7 @@ ShellRoot {
         }
     }
 
-    // The switcher and the cheat sheet are Asura's own parked surfaces from
+    // The switcher and the cheat sheet are Toren's own parked surfaces from
     // the homegrown shell (Switcher.qml, Shell.qml), hosted here so the conf's
     // exec binds drive them in-process. The Loader confines a component that
     // fails to load to a log line: a sheet that will not load is a sheet that
@@ -963,7 +963,7 @@ ShellRoot {
     // resident (its window is born hidden), the sheet builds on first open
     // like the port's own toggle surfaces.
     Loader {
-        id: asuraSwitcher
+        id: torenSwitcher
         source: "Switcher.qml"
     }
 
@@ -1003,7 +1003,7 @@ ShellRoot {
     }
 
     PanelWindow {
-        id: asuraSheetWindow
+        id: torenSheetWindow
         visible: false
         color: "transparent"
         exclusionMode: ExclusionMode.Ignore
@@ -1018,7 +1018,7 @@ ShellRoot {
         Shortcut { sequence: "Escape"; onActivated: root.showCheatsheet(false) }
 
         Loader {
-            id: asuraSheetLoader
+            id: torenSheetLoader
             active: false
             anchors.centerIn: parent
             source: "Shell.qml"

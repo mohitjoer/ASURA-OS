@@ -29,4 +29,4 @@ services: []
 notes:
   - "Knowledge source: Linux kernel Documentation/gpu/amdgpu/thermal.rst and power management guide."
   - "Enables runtime D3 power management for Radeon discrete graphics when hybrid switching is active."
-  - "Offload render commands with 'DRI_PRIME=1' or 'asura gpu run <cmd>'."
+  - "Offload render commands with 'DRI_PRIME=1' or 'toren gpu run <cmd>'."

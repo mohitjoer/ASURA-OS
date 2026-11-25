@@ -9,12 +9,12 @@ import (
 	"strings"
 	"time"
 
-	"asura/desktop/internal/overlay"
+	"toren/desktop/internal/overlay"
 )
 
-// asuraRollback reverts configuration overlay (--config) or restores Btrfs
+// torenRollback reverts configuration overlay (--config) or restores Btrfs
 // root snapshots (--system).
-func asuraRollback(args []string) int {
+func torenRollback(args []string) int {
 	set := newFlags("rollback", rollbackUsage)
 	var (
 		root       = set.String("root", "", "operate on a tree under this directory")
@@ -30,7 +30,7 @@ func asuraRollback(args []string) int {
 
 	paths, err := overlayPaths(*root)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura rollback:", err)
+		fmt.Fprintln(os.Stderr, "toren rollback:", err)
 		return exitFail
 	}
 
@@ -63,7 +63,7 @@ func asuraRollback(args []string) int {
 func rollbackConfig(paths overlay.Paths) int {
 	restored, err := overlay.Rollback(paths)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura rollback:", err)
+		fmt.Fprintln(os.Stderr, "toren rollback:", err)
 		return exitFail
 	}
 	fmt.Printf("rolled back to revision %s (recorded %s)\n",
@@ -77,7 +77,7 @@ func rollbackSystem(target string) int {
 		fmt.Println("Btrfs System Snapshots:")
 		snaps, err := listBtrfsSnapshots()
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "asura rollback:", err)
+			fmt.Fprintln(os.Stderr, "toren rollback:", err)
 			return exitFail
 		}
 		if len(snaps) == 0 {
@@ -88,7 +88,7 @@ func rollbackSystem(target string) int {
 			fmt.Println("  " + describeSnapshot("/.snapshots", s))
 		}
 		fmt.Println("\nTo restore a system snapshot, run:")
-		fmt.Println("  sudo asura rollback --system <snapshot-name>")
+		fmt.Println("  sudo toren rollback --system <snapshot-name>")
 		return exitOK
 	}
 
@@ -99,7 +99,7 @@ func rollbackSystem(target string) int {
 
 	info, err := os.Stat(snapPath)
 	if err != nil || !info.IsDir() {
-		fmt.Fprintf(os.Stderr, "asura rollback: snapshot not found: %s\n", snapPath)
+		fmt.Fprintf(os.Stderr, "toren rollback: snapshot not found: %s\n", snapPath)
 		return exitFail
 	}
 
@@ -111,7 +111,7 @@ func rollbackSystem(target string) int {
 	// update would boot that kernel with no modules for it.
 	if kernel := runningKernel(); kernel != "" && !rollbackForce {
 		if _, err := os.Stat(filepath.Join(snapPath, "usr", "lib", "modules", kernel)); err != nil {
-			fmt.Fprintf(os.Stderr, "asura rollback: %s has no modules for the installed kernel %s (/boot is not rolled back),\n"+
+			fmt.Fprintf(os.Stderr, "toren rollback: %s has no modules for the installed kernel %s (/boot is not rolled back),\n"+
 				"so the restored system would boot without them. Install a kernel the snapshot has, or pass --force.\n", name, kernel)
 			return exitFail
 		}
@@ -119,12 +119,12 @@ func rollbackSystem(target string) int {
 
 	device, err := rootDevice()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura rollback:", err)
+		fmt.Fprintln(os.Stderr, "toren rollback:", err)
 		return exitFail
 	}
-	top, err := os.MkdirTemp("", "asura-rollback-")
+	top, err := os.MkdirTemp("", "toren-rollback-")
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura rollback:", err)
+		fmt.Fprintln(os.Stderr, "toren rollback:", err)
 		return exitFail
 	}
 	defer os.Remove(top)
@@ -133,17 +133,17 @@ func rollbackSystem(target string) int {
 	steps, aside := systemRollbackPlan(device, top, name, stamp)
 	for i, step := range steps {
 		if err := runPrivileged(step...); err != nil {
-			fmt.Fprintf(os.Stderr, "asura rollback: %s: %v\n", strings.Join(step, " "), err)
+			fmt.Fprintf(os.Stderr, "toren rollback: %s: %v\n", strings.Join(step, " "), err)
 			if i == 4 {
 				// @ was moved aside and no new @ was made: put it back, or
 				// the next boot finds no root.
-				fmt.Fprintln(os.Stderr, "asura rollback: putting the current root back as @")
+				fmt.Fprintln(os.Stderr, "toren rollback: putting the current root back as @")
 				_ = runPrivileged("mv", filepath.Join(top, aside), filepath.Join(top, "@"))
 			}
 			if i >= 2 && i < 5 { // the top-level volume is mounted
 				_ = runPrivileged("umount", top)
 			}
-			fmt.Fprintln(os.Stderr, "asura rollback: nothing was changed")
+			fmt.Fprintln(os.Stderr, "toren rollback: nothing was changed")
 			return exitFail
 		}
 	}

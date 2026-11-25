@@ -96,7 +96,7 @@ Item {
 
     function write(value) {
         inFlight = value
-        Asura.set(key, value)
+        Toren.set(key, value)
     }
 
     // The write reported back.
@@ -122,7 +122,7 @@ Item {
     }
 
     Connections {
-        target: Asura
+        target: Toren
         function onSettled(qualified, value, failed, message) {
             if (qualified !== editor.qualified) return
             editor.settled(value, failed, message)

@@ -42,8 +42,8 @@ func runLook(args []string) error {
 
 func listLooks() error {
 	candidates := []string{
-		"/usr/share/asura/shell-desktop/toren/themes.json",
-		filepath.Join(os.Getenv("HOME"), "code/asura/Toren-Linux/shell-desktop/toren/themes.json"),
+		"/usr/share/toren/shell-desktop/toren/themes.json",
+		filepath.Join(os.Getenv("HOME"), "code/toren/Toren-Linux/shell-desktop/toren/themes.json"),
 	}
 	var catPath string
 	for _, c := range candidates {
@@ -75,7 +75,7 @@ func listLooks() error {
 }
 
 func currentThemeName() string {
-	stateFile := filepath.Join(os.Getenv("HOME"), ".local", "state", "asura", "theme")
+	stateFile := filepath.Join(os.Getenv("HOME"), ".local", "state", "toren", "theme")
 	if b, err := os.ReadFile(stateFile); err == nil {
 		return strings.TrimSpace(string(b))
 	}
@@ -83,7 +83,7 @@ func currentThemeName() string {
 }
 
 func currentMode() string {
-	stateFile := filepath.Join(os.Getenv("HOME"), ".local", "state", "asura", "theme-mode")
+	stateFile := filepath.Join(os.Getenv("HOME"), ".local", "state", "toren", "theme-mode")
 	if b, err := os.ReadFile(stateFile); err == nil {
 		return strings.TrimSpace(string(b))
 	}
@@ -91,10 +91,10 @@ func currentMode() string {
 }
 
 func setLook(name string) error {
-	cmd := exec.Command("asura", "theme", "set", name)
+	cmd := exec.Command("toren", "theme", "set", name)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("asura theme set %s failed: %v: %s", name, err, strings.TrimSpace(string(out)))
+		return fmt.Errorf("toren theme set %s failed: %v: %s", name, err, strings.TrimSpace(string(out)))
 	}
 	return printJSON(map[string]any{
 		"status": "applied",
@@ -113,7 +113,7 @@ func setMode(mode string) error {
 	if mode != "dark" && mode != "light" {
 		return fmt.Errorf("mode must be 'dark' or 'light'")
 	}
-	stateDir := filepath.Join(os.Getenv("HOME"), ".local", "state", "asura")
+	stateDir := filepath.Join(os.Getenv("HOME"), ".local", "state", "toren")
 	_ = os.MkdirAll(stateDir, 0o755)
 	if err := os.WriteFile(filepath.Join(stateDir, "theme-mode"), []byte(mode+"\n"), 0o644); err != nil {
 		return err
@@ -127,7 +127,7 @@ func setMode(mode string) error {
 func listWallpapers() error {
 	var walls []string
 	searchDirs := []string{
-		"/usr/share/asura/backgrounds",
+		"/usr/share/toren/backgrounds",
 		filepath.Join(os.Getenv("HOME"), "Pictures", "Wallpapers"),
 	}
 	for _, dir := range searchDirs {

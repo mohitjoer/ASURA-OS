@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"asura/desktop/cmd/toren-hubd/internal/wm"
+	"toren/desktop/cmd/toren-hubd/internal/wm"
 )
 
 func TestAutostartAddAndRemove(t *testing.T) {

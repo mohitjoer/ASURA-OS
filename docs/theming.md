@@ -8,10 +8,10 @@ the scheme matugen would and fills the templates itself.
 
 ```
 wallpaper
-  -> asura theme generate --json      the roles, in the JSON shape matugen prints
+  -> toren theme generate --json      the roles, in the JSON shape matugen prints
   -> the daemon writes colors.json     what the shell draws with
                        tones.json      what Ink.qml picks tones from
-  -> the daemon writes a carrier and runs  asura theme render --config CONFIG --palette CARRIER
+  -> the daemon writes a carrier and runs  toren theme render --config CONFIG --palette CARRIER
                                          what the apps get
 ```
 
@@ -21,12 +21,12 @@ The daemon (`toren-shell`) runs this on every wallpaper change, in matugen's ord
 
 ## The on-disk contract
 
-| File | Keys | Written by | Read by |
-|---|---|---|---|
-| `~/.cache/asura/colors.json` | one flat map of `#rrggbb` strings: `background`, `foreground`, `cursor`, `color0` to `color15`, and 32 camelCase Material roles (`surface`, `onSurface`, `primaryContainer`, `outlineVariant`, `shadow`, `scrim`, ...) | the daemon; `toren theme generate IMAGE` by hand | `Services/Scheme.qml`, `Ui/Singletons/Tokens.qml`, `hub/Singletons/Scheme.qml` |
-| `~/.cache/asura/tones.json` | `{ramp: {tone: hex}}` for `primary`, `secondary`, `tertiary`, `neutral`, `neutralVariant`, `error`; tones 0 to 100 in 18 steps | the same | `Ui/Singletons/Ink.qml` |
-| `~/.config/asura/theme.json` | `followWallpaper` (default true), `themeApps` | the Hub | the singletons above; the daemon |
-| `~/.config/asura/shell.json` | `themePalette`, the fixed named scheme that outranks the wallpaper | the daemon | the singletons above |
+| File                         | Keys                                                                                                                                                                                                                   | Written by                                       | Read by                                                                        |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------ |
+| `~/.cache/toren/colors.json` | one flat map of `#rrggbb` strings: `background`, `foreground`, `cursor`, `color0` to `color15`, and 32 camelCase Material roles (`surface`, `onSurface`, `primaryContainer`, `outlineVariant`, `shadow`, `scrim`, ...) | the daemon; `toren theme generate IMAGE` by hand | `Services/Scheme.qml`, `Ui/Singletons/Tokens.qml`, `hub/Singletons/Scheme.qml` |
+| `~/.cache/toren/tones.json`  | `{ramp: {tone: hex}}` for `primary`, `secondary`, `tertiary`, `neutral`, `neutralVariant`, `error`; tones 0 to 100 in 18 steps                                                                                         | the same                                         | `Ui/Singletons/Ink.qml`                                                        |
+| `~/.config/toren/theme.json` | `followWallpaper` (default true), `themeApps`                                                                                                                                                                          | the Hub                                          | the singletons above; the daemon                                               |
+| `~/.config/toren/shell.json` | `themePalette`, the fixed named scheme that outranks the wallpaper                                                                                                                                                     | the daemon                                       | the singletons above                                                           |
 
 `colors.json` is a flat string map on purpose: the shell parses it from raw text and the daemon's
 tests unmarshal it into `map[string]string`. Nothing else goes in it. The old Toren shape
@@ -51,7 +51,7 @@ shipped `schemeType` is `scheme-monochrome`; the upstream default is `scheme-ton
 ## Generating
 
 ```
-asura theme generate [--image PATH | IMAGE] [--mode dark|light|smart] [--scheme NAME]
+toren theme generate [--image PATH | IMAGE] [--mode dark|light|smart] [--scheme NAME]
     [--contrast N] [--lightness-dark N] [--lightness-light N] [--source-color-index N] [--json]
 ```
 
@@ -64,7 +64,7 @@ With `--json` the output is `{"colors": {ROLE: {"dark", "light", "default": {"co
 plus `source_color`, and the six ramps. `default` is the requested mode. The same image and flags
 give the same bytes.
 
-This is not matugen's arithmetic. Roles are built in CIE LCh instead of CAM16, and a tone is L*, so
+This is not matugen's arithmetic. Roles are built in CIE LCh instead of CAM16, and a tone is L\*, so
 the tone distance between a role and its surface, which is what fixes the contrast, is Material's
 own. Hues and chromas land close to matugen's, not on them. The seed is the existing extractor's
 accent (a 5-bit histogram scored by saturation and mid-tone), one candidate per hue, and
@@ -83,28 +83,28 @@ template fills `{{ colors.NAME.BUCKET.FIELD }}` from the carrier, the JSON the d
 filter, `| replace: "#", ""`. A colour that does not resolve fails that template and the others
 still render; the exit code is 1 if any failed.
 
-Templates are read from `~/.config/asura/shell/matugen/` (the materialised copy, where a user edit
-wins) and from `/usr/share/asura/shell/matugen/` before `toren materialize` has run.
+Templates are read from `~/.config/toren/shell/matugen/` (the materialised copy, where a user edit
+wins) and from `/usr/share/toren/shell/matugen/` before `toren materialize` has run.
 
 A render writes only into an app's own per-user directory, and never over something that is not
 its own:
 
-- Under `~/.config/asura`, a file with a mirror under `user_edits/` is left alone.
-- Under `~/.cache/asura`, the file is replaced.
+- Under `~/.config/toren`, a file with a mirror under `user_edits/` is left alone.
+- Under `~/.cache/toren`, the file is replaced.
 - Anywhere else, an existing file is replaced only if its first 512 bytes still carry
-  `Rendered by asura theme`; a symlink is never written through. Every shipped template has the
+  `Rendered by toren theme`; a symlink is never written through. Every shipped template has the
   line, so keep it in one you edit.
 
 Each block prints `wrote`, `unchanged`, `left alone: <why>` or `error: <why>`.
 
 ## The templates
 
-| Block | File | Reads it |
-|---|---|---|
-| `ghostty` | `~/.config/asura/apps/ghostty/colors` | `apps/ghostty/config`, with `config-file = colors` |
-| `btop` | `~/.config/btop/themes/asura.theme` | btop, with `color_theme = "asura"` |
-| `qt6ct` | `~/.config/qt6ct/colors/asura.conf` | qt6ct, with `color_scheme_path` set to this file |
-| `gtk3`, `gtk4` | `~/.config/gtk-3.0/gtk.css`, `~/.config/gtk-4.0/gtk.css` | GTK apps, while "Theme apps" is on |
+| Block          | File                                                     | Reads it                                           |
+| -------------- | -------------------------------------------------------- | -------------------------------------------------- |
+| `ghostty`      | `~/.config/toren/apps/ghostty/colors`                    | `apps/ghostty/config`, with `config-file = colors` |
+| `btop`         | `~/.config/btop/themes/toren.theme`                      | btop, with `color_theme = "toren"`                 |
+| `qt6ct`        | `~/.config/qt6ct/colors/toren.conf`                      | qt6ct, with `color_scheme_path` set to this file   |
+| `gtk3`, `gtk4` | `~/.config/gtk-3.0/gtk.css`, `~/.config/gtk-4.0/gtk.css` | GTK apps, while "Theme apps" is on                 |
 
 `config.toml` holds the first three and always renders; `apps.toml` holds the GTK pair and the
 daemon filters it by the roster. The shipped `apps/ghostty/colors` is a static default; a render
@@ -112,7 +112,7 @@ replaces it, and `toren materialize` puts the static one back until the next ren
 
 Dropped, because Toren does not ship the app: kitty, fish, yazi, KDE, cava, zathura, tmux, micro,
 alacritty, OBS, Zed, Discord (vesktop, equibop), Steam, Telegram, Heroic, Obsidian, Sidra and
-asura-tunes. Papirus folders are gone too (the package is excluded, `papirus-folders` is not in the
+toren-tunes. Papirus folders are gone too (the package is excluded, `papirus-folders` is not in the
 archive). Two more blocks of the upstream set have no reader here: the Hyprland border file (the daemon recolours the
 live border from `colors.json`) and the screen-share picker's stylesheet (no picker in the archive).
 The Hub's roster keys for the dropped apps now do nothing.

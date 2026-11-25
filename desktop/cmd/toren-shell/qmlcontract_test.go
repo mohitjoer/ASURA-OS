@@ -13,7 +13,7 @@ import (
 // notices when one half asks for something the other never learned. This walks
 // the real shell tree beside the daemon and checks the three things QML names
 // literally: the topics it subscribes to, the control calls it makes, and the
-// asura-shell verbs it spawns.
+// toren-shell verbs it spawns.
 
 const shellTree = "../../../shell"
 
@@ -80,7 +80,7 @@ func TestQMLTopicsAndCallsExistInTheDaemon(t *testing.T) {
 	}
 	daemon := goSource(t, prod...)
 
-	// "wallpaper" and the playlist.* calls belong to asura-wallpaper's own socket.
+	// "wallpaper" and the playlist.* calls belong to toren-wallpaper's own socket.
 	for topic, from := range findAll(regexp.MustCompile(`subscribe ([a-z]+)\\n`), srcs) {
 		if topic == "wallpaper" || topic == "to" {
 			continue
@@ -95,7 +95,7 @@ func TestQMLTopicsAndCallsExistInTheDaemon(t *testing.T) {
 	calls := regexp.MustCompile(`call ((?:clipboard|network|nightlight|powerprofiles|settings|tray|weather|music|calendar|updates|keypress|polkit|wm)\.[A-Za-z]+)|(?:_call|\.call|send)\("((?:clipboard|network|nightlight|powerprofiles|settings|tray|weather|music|calendar|updates|keypress|polkit|wm)\.[A-Za-z]+)"`)
 	for call, from := range findAll(calls, srcs) {
 		if strings.Contains(from, "/wallpaper-ui/") {
-			continue // the picker's DaemonClient speaks to asura-wallpaper's socket
+			continue // the picker's DaemonClient speaks to toren-wallpaper's socket
 		}
 		if !strings.Contains(daemon, `registerCall("`+call+`"`) {
 			t.Errorf("%s calls %q, which the daemon never registers", from, call)
@@ -106,12 +106,12 @@ func TestQMLTopicsAndCallsExistInTheDaemon(t *testing.T) {
 func TestQMLShellVerbsAreKnown(t *testing.T) {
 	srcs := qmlSources(t)
 	known := goSource(t, "daemon.go", "main.go", "actions.go")
-	verbs := regexp.MustCompile(`"asura-shell",\s*"([a-z-]+)"|"asura-shell ([a-z-]+)[ "]`)
+	verbs := regexp.MustCompile(`"toren-shell",\s*"([a-z-]+)"|"toren-shell ([a-z-]+)[ "]`)
 	for path, src := range srcs {
 		for _, m := range verbs.FindAllStringSubmatch(src, -1) {
 			verb := m[1] + m[2]
 			if !strings.Contains(known, `"`+verb) {
-				t.Errorf("%s runs `asura-shell %s`, which the daemon does not know", path, verb)
+				t.Errorf("%s runs `toren-shell %s`, which the daemon does not know", path, verb)
 			}
 		}
 	}

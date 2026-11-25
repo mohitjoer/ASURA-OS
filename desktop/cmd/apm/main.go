@@ -1,4 +1,4 @@
-// apm forwards to `asura pkg`, which is where the verbs live.
+// apm forwards to `toren pkg`, which is where the verbs live.
 //
 // The package layer's name was asked for before the control tool's verbs
 // were, and starting TWO tools with two argv grammars for one package layer
@@ -18,11 +18,11 @@ import (
 	"os/exec"
 )
 
-// forward runs `asura pkg ...` against the found control tool and pipes it
+// forward runs `toren pkg ...` against the found control tool and pipes it
 // through: stdout and stderr for output, stdin for the password prompts, and
 // the managers' exit statuses for the callers (scripts alike) that read them.
-func forward(asuraPath string, argv []string) int {
-	command := exec.Command(asuraPath, append([]string{"pkg"}, argv...)...)
+func forward(torenPath string, argv []string) int {
+	command := exec.Command(torenPath, append([]string{"pkg"}, argv...)...)
 	command.Stdout, command.Stderr, command.Stdin = os.Stdout, os.Stderr, os.Stdin
 	if err := command.Run(); err != nil {
 		var exited *exec.ExitError
@@ -40,13 +40,13 @@ func forward(asuraPath string, argv []string) int {
 
 func main() {
 	if len(os.Args) == 2 && (os.Args[1] == "-h" || os.Args[1] == "--help") {
-		fmt.Print("Usage: apm [-flatpak] [-repo URL] install|remove|search|update|upgrade [package...]\n\napm is `asura pkg`: the same verbs and flags, shorter to type.\n")
+		fmt.Print("Usage: apm [-flatpak] [-repo URL] install|remove|search|update|upgrade [package...]\n\napm is `toren pkg`: the same verbs and flags, shorter to type.\n")
 		return
 	}
-	asuraPath, err := exec.LookPath("asura")
+	torenPath, err := exec.LookPath("toren")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "apm: the asura control tool is not installed: %v\n", err)
+		fmt.Fprintf(os.Stderr, "apm: the toren control tool is not installed: %v\n", err)
 		os.Exit(1)
 	}
-	os.Exit(forward(asuraPath, os.Args[1:]))
+	os.Exit(forward(torenPath, os.Args[1:]))
 }

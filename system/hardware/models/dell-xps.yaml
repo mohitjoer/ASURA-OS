@@ -28,5 +28,5 @@ services: []
 
 notes:
   - "Sleep fix: sets mem_sleep_default=deep to avoid modern standby battery drain in bags."
-  - "Thermal management: quiet, cool, balanced, and performance profiles via dell-wmi platform_profile ('asura power profile')."
+  - "Thermal management: quiet, cool, balanced, and performance profiles via dell-wmi platform_profile ('toren power profile')."
   - "Keyboard backlight permissions for ambient sensor and manual keys."

@@ -7,8 +7,8 @@ export XDG_RUNTIME_DIR="$RUNTIME_DIR"
 # prompt, so the daemon registers when that shell runs; the desktop has
 # its own agent and prompt (modules/ii/polkit), so the daemon stays out of its
 # way. Read the same setting the shell service reads.
-case "${ASURA_DESKTOP_SHELL:-$(gsettings get org.asura.shell desktop-shell 2>/dev/null | tr -d "'")}" in
-	asura) export ASURA_POLKIT_AGENT=1 ;;
+case "${ASURA_DESKTOP_SHELL:-$(gsettings get org.toren.shell desktop-shell 2>/dev/null | tr -d "'")}" in
+	toren) export ASURA_POLKIT_AGENT=1 ;;
 	*) export ASURA_POLKIT_AGENT=0 ;;
 esac
 
@@ -34,8 +34,8 @@ if [ -z "${HYPRLAND_INSTANCE_SIGNATURE:-}" ] && [ -d "$RUNTIME_DIR/hypr" ]; then
 	done
 fi
 
-LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/asura"
+LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/toren"
 mkdir -p "$LOG_DIR"
-exec >>"$LOG_DIR/asurad.log" 2>&1
+exec >>"$LOG_DIR/torend.log" 2>&1
 
-exec /usr/bin/asura-shell daemon
+exec /usr/bin/toren-shell daemon

@@ -13,8 +13,8 @@
 # so the blur and shadow settings the user chose in Settings > Window Manager are
 # the ones in force.
 #
-#   asura-perf-apply            apply what the files say
-#   asura-perf-apply --dry-run  print the hyprctl calls instead of making them
+#   toren-perf-apply            apply what the files say
+#   toren-perf-apply --dry-run  print the hyprctl calls instead of making them
 set -eu
 
 dry=0
@@ -26,13 +26,13 @@ case "${1:-}" in
 	exit 0
 	;;
 *)
-	echo "asura-perf-apply: unknown argument: $1" >&2
+	echo "toren-perf-apply: unknown argument: $1" >&2
 	exit 2
 	;;
 esac
 
-config="${XDG_CONFIG_HOME:-$HOME/.config}/asura/performance.json"
-saver="${XDG_CACHE_HOME:-$HOME/.cache}/asura/hypr-perf.json"
+config="${XDG_CONFIG_HOME:-$HOME/.config}/toren/performance.json"
+saver="${XDG_CACHE_HOME:-$HOME/.cache}/toren/hypr-perf.json"
 
 # flag KEY FILE: whether the flat JSON file has KEY set to true. The files are
 # written by Quickshell's JsonAdapter, one level deep, so a pattern match is as
@@ -59,13 +59,13 @@ flag disableShadows "$config" && no_shadow=1
 
 if [ "$dry" = 0 ]; then
 	if ! command -v hyprctl >/dev/null 2>&1; then
-		echo "asura-perf-apply: hyprctl is not installed" >&2
+		echo "toren-perf-apply: hyprctl is not installed" >&2
 		exit 127
 	fi
 	# A session that is not Hyprland has nothing to apply to. Say so and stop
 	# rather than let hyprctl print its own complaint for each call.
 	if [ -z "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; then
-		echo "asura-perf-apply: not running under Hyprland" >&2
+		echo "toren-perf-apply: not running under Hyprland" >&2
 		exit 0
 	fi
 fi

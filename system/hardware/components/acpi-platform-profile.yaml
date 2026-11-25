@@ -18,4 +18,4 @@ services: []
 notes:
   - "Knowledge source: Linux kernel Documentation/userspace-api/sysfs-platform_profile.rst."
   - "Unified thermal interface across ASUS, Dell, HP, Lenovo, Framework, and Acer modern laptops."
-  - "Controllable via 'asura power profile [quiet | balanced | performance]'."
+  - "Controllable via 'toren power profile [quiet | balanced | performance]'."

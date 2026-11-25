@@ -9,17 +9,17 @@ import (
 	"strings"
 	"sync"
 
-	"asura/desktop/internal/overlay"
+	"toren/desktop/internal/overlay"
 )
 
-// doctorSection is one check in `asura doctor --json`.
+// doctorSection is one check in `toren doctor --json`.
 type doctorSection struct {
 	Section string   `json:"section"`
 	OK      bool     `json:"ok"`
 	Lines   []string `json:"lines"`
 }
 
-// doctorReport is the whole of `asura doctor --json`.
+// doctorReport is the whole of `toren doctor --json`.
 type doctorReport struct {
 	OK       bool            `json:"ok"`
 	Sections []doctorSection `json:"sections"`
@@ -116,7 +116,7 @@ func doctorJSON(root string, fix bool, out io.Writer) int {
 	enc := json.NewEncoder(out)
 	enc.SetIndent("", "  ")
 	if err := enc.Encode(report); err != nil {
-		fmt.Fprintln(os.Stderr, "asura doctor:", err)
+		fmt.Fprintln(os.Stderr, "toren doctor:", err)
 		return exitFail
 	}
 	return code

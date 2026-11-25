@@ -8,16 +8,16 @@ import qs.Ui
 import qs.Ui.Singletons
 import "../Singletons"
 
-// System > Updates (DESIGN.md section 8, SYSTEM). Asura's update channel as a
+// System > Updates (DESIGN.md section 8, SYSTEM). Toren's update channel as a
 // paper-and-ink instrument: the packages the archive is holding for this box, the
-// release line it runs, and a one-click update that runs `asura update` in a
+// release line it runs, and a one-click update that runs `toren update` in a
 // terminal and mirrors its progress here when the run publishes any.
 //
 // This is a full-bleed page -- the shell hides its side panel and global action
 // bar and keeps the rail -- so it draws its own head, content and action bar.
 // The data is the Updates singleton (the daemon's apt-backed `updates` topic), the
-// run-state file `asura update` may publish, and `asura rollback`. `asura
-// update` fetches Asura's own packages and re-materializes the base; the rest of
+// run-state file `toren update` may publish, and `toren rollback`. `toren
+// update` fetches Toren's own packages and re-materializes the base; the rest of
 // the archive is apt's, and this page says so rather than pretending to move it.
 // Ink on black, inversion for emphasis, the shared progress spec (a hairline
 // track + a square ink fill) for advancement and the 600ms heartbeat dot for the
@@ -65,13 +65,13 @@ Item {
         if (pg.interval === k)
             return;
         pg.interval = k;
-        saveInterval.command = ["asura-hubd", "config", "set", "update_interval", k];
+        saveInterval.command = ["toren-hubd", "config", "set", "update_interval", k];
         saveInterval.running = true;
     }
 
     Process {
         id: loadInterval
-        command: ["asura-hubd", "config", "get", "update_interval"]
+        command: ["toren-hubd", "config", "get", "update_interval"]
         running: true
         stdout: StdioCollector {
             onStreamFinished: {
@@ -87,7 +87,7 @@ Item {
     property var snapshots: []
     Process {
         id: loadSnapshots
-        command: ["asura-hubd", "updates", "snapshots"]
+        command: ["toren-hubd", "updates", "snapshots"]
         running: true
         stdout: StdioCollector {
             onStreamFinished: {
@@ -120,7 +120,7 @@ Item {
         onTriggered: Updates.check()
     }
 
-    // ── live run state (published by `asura update`) ────────────────────────
+    // ── live run state (published by `toren update`) ────────────────────────
     property string phase: "idle"   // idle | running | prompt | done | error
     property real progress: 0
     property string label: ""
@@ -131,10 +131,10 @@ Item {
     property string promptTitle: ""
     property string promptDetail: ""
     property var promptOptions: []
-    readonly property string statePath: (Quickshell.env("XDG_RUNTIME_DIR") || "/tmp") + "/asura-update.json"
-    readonly property string answerPath: (Quickshell.env("XDG_RUNTIME_DIR") || "/tmp") + "/asura-update-answer"
+    readonly property string statePath: (Quickshell.env("XDG_RUNTIME_DIR") || "/tmp") + "/toren-update.json"
+    readonly property string answerPath: (Quickshell.env("XDG_RUNTIME_DIR") || "/tmp") + "/toren-update-answer"
 
-    // the fill fraction for the shared progress track. `asura update` may report
+    // the fill fraction for the shared progress track. `toren update` may report
     // an explicit progress, but even when it only advances the stage list we can
     // read completion off the stages, so the track never sits dead at 0 while
     // work is plainly happening. done pins it full.
@@ -217,7 +217,7 @@ Item {
         pg.checkOwner();
     }
 
-    // answer a prompt phase: write the choice to the back-channel `asura update`
+    // answer a prompt phase: write the choice to the back-channel `toren update`
     // is polling (positional args, so a quote in the label can't break out),
     // then optimistically resume the running view so the buttons clear.
     function answer(choice) {
@@ -226,26 +226,26 @@ Item {
     }
 
     // Runs a command in the user's terminal and holds the window after it exits.
-    // asura-app owns which terminal that is; the hold is there because nothing
+    // toren-app owns which terminal that is; the hold is there because nothing
     // else tells the user whether the command worked, and a window that closes
     // with the answer in it is a window that hid the answer.
     function inTerminal(script) {
-        Spawn.run(["asura-app", "terminal", "--", "sh", "-c",
+        Spawn.run(["toren-app", "terminal", "--", "sh", "-c",
             script + "; printf '\\npress enter to close '; read -r _"]);
     }
 
-    // `asura rollback` re-materializes the previous revision of the base and
+    // `toren rollback` re-materializes the previous revision of the base and
     // keeps the user's edits. It prints what it restored, so it runs where that
     // can be read. A failed run is cleared afterwards: the rollback is the answer
     // to it.
     function rollback() {
-        pg.inTerminal("asura rollback");
+        pg.inTerminal("toren rollback");
         if (pg.phase === "error")
             pg.dismiss();
     }
 
-    // The base system packages use XBPS: `asura update` moves the
-    // Asura packages only. xbps asks for root password and confirmation in terminal.
+    // The base system packages use XBPS: `toren update` moves the
+    // Toren packages only. xbps asks for root password and confirmation in terminal.
     function upgradeSystem() {
         pg.inTerminal("sudo xbps-install -Syu");
     }
@@ -259,10 +259,10 @@ Item {
     }
 
     function startUpdate() {
-        pg.inTerminal("asura update");
+        pg.inTerminal("toren update");
     }
 
-    // idle list: Asura's own change list when the channel publishes one (incoming
+    // idle list: Toren's own change list when the channel publishes one (incoming
     // when behind, else the recent history the installed version contains). The
     // apt packages have a section of their own below, so a box whose channel
     // publishes no change list shows only that.
@@ -290,7 +290,7 @@ Item {
             Image {
                 width: 12; height: 12
                 anchors.verticalCenter: parent.verticalCenter
-                source: Qt.resolvedUrl("../../assets/asura-logo-on-dark.svg")
+                source: Qt.resolvedUrl("../../assets/toren-logo-on-dark.svg")
                 sourceSize.width: 24; sourceSize.height: 24
                 fillMode: Image.PreserveAspectFit
                 smooth: true
@@ -452,7 +452,7 @@ Item {
                 }
             }
 
-            // ── Asura's change list, when the channel publishes one ──
+            // ── Toren's change list, when the channel publishes one ──
             Column {
                 width: idleCol.width
                 spacing: 0
@@ -634,12 +634,12 @@ Item {
                     }
                 }
 
-                // Most of these come from Ubuntu's archive, not from Asura:
-                // `asura update` fetches Asura's packages and nothing else, so
+                // Most of these come from Ubuntu's archive, not from Toren:
+                // `toren update` fetches Toren's packages and nothing else, so
                 // the section has to name what moves the rest.
                 Text {
                     width: idleCol.width
-                    text: I18n.tr("From the base archive, kernel included. `asura update` moves Toren's own packages; take the rest with:  sudo xbps-install -Syu")
+                    text: I18n.tr("From the base archive, kernel included. `toren update` moves Toren's own packages; take the rest with:  sudo xbps-install -Syu")
                     color: Tokens.inkFaint
                     font.family: Tokens.ui; font.pixelSize: Tokens.fTiny
                     wrapMode: Text.WordWrap
@@ -803,7 +803,7 @@ Item {
                             anchors.right: parent.right; anchors.rightMargin: Tokens.s4
                             anchors.verticalCenter: parent.verticalCenter
                             text: I18n.tr("RESTORE")
-                            onAct: pg.inTerminal("asura rollback --system " + (srow.modelData.id || ""))
+                            onAct: pg.inTerminal("toren rollback --system " + (srow.modelData.id || ""))
                         }
                         HoverHandler { id: snapHover }
                     }
@@ -1038,8 +1038,8 @@ Item {
         }
     }
 
-    // ── prompt: the editorial question `asura update` is blocked on -- an ink
-    // rule + title + detail, with the option stamps `asura update` offers. ──
+    // ── prompt: the editorial question `toren update` is blocked on -- an ink
+    // rule + title + detail, with the option stamps `toren update` offers. ──
     Item {
         visible: pg.phase === "prompt"
         anchors {

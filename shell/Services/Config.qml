@@ -5,9 +5,9 @@ import Quickshell.Io
 import qs.FrameBars
 import qs.Ui.Singletons
 
-// live shell appearance config. one source of truth for the look knobs Asura
+// live shell appearance config. one source of truth for the look knobs Toren
 // Settings' Shell section edits, plus the shipped defaults the shell falls back
-// to. JSON at ~/.config/asura/shell.json, watched, so a save in Settings
+// to. JSON at ~/.config/toren/shell.json, watched, so a save in Settings
 // retunes the running shell on the next file event. no reload. defaults here
 // are canonical; Settings mirrors them for reset-to-default and seeds nothing
 // of its own.
@@ -153,12 +153,12 @@ Singleton {
         themePalette = pal;
     }
 
-    // brand: the desktop's mark + name, user-overridable from Asura Settings ->
+    // brand: the desktop's mark + name, user-overridable from Toren Settings ->
     // Shell -> Global. a small cross-cutting identity master (like theme.json).
     // markText is the glyph/short-text seal (default A); markImage an optional
     // image path that wins over the text; markTint recolours a single-colour
-    // image to the accent; name is the wordmark ("Asura") shown in chrome copy.
-    // Asura's own apps (the Hub, related apps) never read this and keep the Asura brand.
+    // image to the accent; name is the wordmark ("Toren") shown in chrome copy.
+    // Toren's own apps (the Hub, related apps) never read this and keep the Toren brand.
     property alias markText:  brandAdapter.markText
     property alias markImage: brandAdapter.markImage
     property alias markTint:  brandAdapter.markTint
@@ -166,7 +166,7 @@ Singleton {
 
     FileView {
         id: file
-        path: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/asura/shell.json"
+        path: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/toren/shell.json"
         blockLoading: true
         watchChanges: true
         printErrors: false
@@ -223,7 +223,7 @@ Singleton {
     // window borders and shell chrome all read it). true = follow the wallpaper.
     FileView {
         id: themeFile
-        path: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/asura/theme.json"
+        path: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/toren/theme.json"
         blockLoading: true
         watchChanges: true
         printErrors: false
@@ -235,7 +235,7 @@ Singleton {
     // Hub's Shell -> Global editor. seeded once on first run below.
     FileView {
         id: brandFile
-        path: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/asura/brand.json"
+        path: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/toren/brand.json"
         blockLoading: true
         watchChanges: true
         printErrors: false
@@ -254,7 +254,7 @@ Singleton {
     // it and serialises every writer), so a persisted write goes through it.
     Socket {
         id: shaderCtl
-        path: (Quickshell.env("XDG_RUNTIME_DIR") || "/tmp") + "/asura-shell.sock"
+        path: (Quickshell.env("XDG_RUNTIME_DIR") || "/tmp") + "/toren-shell.sock"
         property string queued: ""
         function flushQueued() {
             if (queued.length === 0)

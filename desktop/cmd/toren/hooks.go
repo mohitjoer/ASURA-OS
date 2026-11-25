@@ -11,14 +11,14 @@ import (
 	"time"
 )
 
-const hookUsage = `Usage: asura hook run EVENT [KEY=VAL ...] | asura hook list [EVENT]
+const hookUsage = `Usage: toren hook run EVENT [KEY=VAL ...] | toren hook list [EVENT]
 
-Runs user hook scripts from ~/.config/asura/hooks/<event>/ in name order.
+Runs user hook scripts from ~/.config/toren/hooks/<event>/ in name order.
 
 Supported Events:
-  pre-update      runs before asura update begins updating packages
-  post-update     runs after asura update completes successfully
-  post-theme      runs after asura theme applies a new wallpaper or colours
+  pre-update      runs before toren update begins updating packages
+  post-update     runs after toren update completes successfully
+  post-theme      runs after toren theme applies a new wallpaper or colours
   post-login      runs upon graphical desktop session login
 
 Environment Variables passed to hooks:
@@ -26,12 +26,12 @@ Environment Variables passed to hooks:
   ASURA_HOOK_DIR  the directory holding the executed hooks
   ASURA_USER      the desktop user name
 
-Hooks are executed with a 30s timeout and logged to ~/.local/state/asura/hooks.log.
-A failing hook is reported and never aborts Asura's internal workflows.
+Hooks are executed with a 30s timeout and logged to ~/.local/state/toren/hooks.log.
+A failing hook is reported and never aborts Toren's internal workflows.
 `
 
 func init() {
-	register("hook", "run or list user extension hooks", asuraHook)
+	register("hook", "run or list user extension hooks", torenHook)
 	helpText["hook"] = hookUsage
 }
 
@@ -42,7 +42,7 @@ var validHookEvents = map[string]bool{
 	"post-login":  true,
 }
 
-func asuraHook(args []string) int {
+func torenHook(args []string) int {
 	if len(args) == 0 {
 		fmt.Fprint(os.Stderr, hookUsage)
 		return exitUsage
@@ -56,7 +56,7 @@ func asuraHook(args []string) int {
 		return hookList(event)
 	case "run":
 		if len(args) < 2 {
-			fmt.Fprintln(os.Stderr, "asura hook run: missing event name")
+			fmt.Fprintln(os.Stderr, "toren hook run: missing event name")
 			fmt.Fprint(os.Stderr, hookUsage)
 			return exitUsage
 		}
@@ -71,7 +71,7 @@ func asuraHook(args []string) int {
 		runUserHooks(event, extraEnv)
 		return exitOK
 	default:
-		fmt.Fprintf(os.Stderr, "asura hook: unknown subcommand %q\n\n", args[0])
+		fmt.Fprintf(os.Stderr, "toren hook: unknown subcommand %q\n\n", args[0])
 		fmt.Fprint(os.Stderr, hookUsage)
 		return exitUsage
 	}
@@ -82,7 +82,7 @@ func hooksBaseDir() string {
 	if base == "" {
 		base = filepath.Join(homeDir(), ".config")
 	}
-	return filepath.Join(base, "asura", "hooks")
+	return filepath.Join(base, "toren", "hooks")
 }
 
 func hooksLogPath() string {
@@ -90,7 +90,7 @@ func hooksLogPath() string {
 	if base == "" {
 		base = filepath.Join(homeDir(), ".local", "state")
 	}
-	return filepath.Join(base, "asura", "hooks.log")
+	return filepath.Join(base, "toren", "hooks.log")
 }
 
 func hookList(filterEvent string) int {
@@ -98,7 +98,7 @@ func hookList(filterEvent string) int {
 	events := []string{"pre-update", "post-update", "post-theme", "post-login"}
 	if filterEvent != "" {
 		if !validHookEvents[filterEvent] {
-			fmt.Fprintf(os.Stderr, "asura hook list: unknown event %q\n", filterEvent)
+			fmt.Fprintf(os.Stderr, "toren hook list: unknown event %q\n", filterEvent)
 			return exitFail
 		}
 		events = []string{filterEvent}
@@ -133,7 +133,7 @@ func hookList(filterEvent string) int {
 
 func runUserHooks(event string, extraEnv map[string]string) {
 	if !validHookEvents[event] {
-		fmt.Fprintf(os.Stderr, "asura hook: unsupported event %q\n", event)
+		fmt.Fprintf(os.Stderr, "toren hook: unsupported event %q\n", event)
 		return
 	}
 
@@ -196,7 +196,7 @@ func runUserHooks(event string, extraEnv map[string]string) {
 		statusStr := "SUCCESS"
 		if err != nil {
 			statusStr = fmt.Sprintf("FAILED (%v)", err)
-			fmt.Fprintf(os.Stderr, "asura hook [%s]: %s failed: %v\n", event, name, err)
+			fmt.Fprintf(os.Stderr, "toren hook [%s]: %s failed: %v\n", event, name, err)
 		}
 
 		logLine := fmt.Sprintf("[%s] [%s] %s -> %s\n", ts, event, name, statusStr)

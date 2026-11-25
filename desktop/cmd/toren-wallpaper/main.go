@@ -19,12 +19,12 @@ func unmarshalStrict(body string, into interface{}) error {
 func main() {
 	args := os.Args[1:]
 	if len(args) == 1 && (args[0] == "-h" || args[0] == "--help") {
-		fmt.Println("usage: asura-wallpaper [daemon | wallpaper <mode> ... | depth <set|clear> ...]")
+		fmt.Println("usage: toren-wallpaper [daemon | wallpaper <mode> ... | depth <set|clear> ...]")
 		return
 	}
 	if len(args) == 0 || args[0] == "daemon" {
 		if err := runDaemon(); err != nil {
-			fmt.Fprintln(os.Stderr, "asura-wallpaper:", err)
+			fmt.Fprintln(os.Stderr, "toren-wallpaper:", err)
 			os.Exit(1)
 		}
 		return
@@ -37,18 +37,18 @@ func main() {
 		line := strings.Join(args, " ")
 		reply, err := sendLine(line)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "asura-wallpaper:", err)
+			fmt.Fprintln(os.Stderr, "toren-wallpaper:", err)
 			os.Exit(1)
 		}
 		if strings.HasPrefix(reply, "err") {
-			fmt.Fprintln(os.Stderr, "asura-wallpaper:", strings.TrimPrefix(reply, "err "))
+			fmt.Fprintln(os.Stderr, "toren-wallpaper:", strings.TrimPrefix(reply, "err "))
 			os.Exit(1)
 		}
 		if reply != "" && reply != "ok" {
 			fmt.Println(reply)
 		}
 	default:
-		fmt.Fprintln(os.Stderr, "usage: asura-wallpaper [daemon | wallpaper <mode> ... | depth <set|clear> ...]")
+		fmt.Fprintln(os.Stderr, "usage: toren-wallpaper [daemon | wallpaper <mode> ... | depth <set|clear> ...]")
 		os.Exit(2)
 	}
 }
@@ -56,7 +56,7 @@ func main() {
 func sendLine(line string) (string, error) {
 	conn, err := net.DialTimeout("unix", socketPath(), 2*time.Second)
 	if err != nil {
-		return "", fmt.Errorf("daemon not reachable at %s (is `asura-wallpaper` running?)", socketPath())
+		return "", fmt.Errorf("daemon not reachable at %s (is `toren-wallpaper` running?)", socketPath())
 	}
 	defer conn.Close()
 	_ = conn.SetDeadline(time.Now().Add(30 * time.Second))

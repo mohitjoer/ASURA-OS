@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Desktop-relative workspace navigation, and the single source of truth for the
-# "desktop" concept the Asura overview shows.
+# "desktop" concept the Toren overview shows.
 #
 # A desktop is a block of PER workspace ids: desktop d owns ids
 # [d*PER+1 .. d*PER+PER]. The current desktop is DERIVED from the focused
@@ -12,13 +12,13 @@
 # It is the one design constant; the live desktop is computed, never stored, so
 # it can never drift.
 #
-#   asura-workspace desktop          print the current desktop index (0-based)
-#   asura-workspace focus <1..PER>   focus the Nth workspace of the current desktop
-#   asura-workspace move  <1..PER>   move the active window there (and follow it)
-#   asura-workspace movesilent <1..PER>  move it there without following
-#   asura-workspace hide             stash the focused window in the scratchpad,
+#   toren-workspace desktop          print the current desktop index (0-based)
+#   toren-workspace focus <1..PER>   focus the Nth workspace of the current desktop
+#   toren-workspace move  <1..PER>   move the active window there (and follow it)
+#   toren-workspace movesilent <1..PER>  move it there without following
+#   toren-workspace hide             stash the focused window in the scratchpad,
 #                                     or pull it back out if it is already there
-#   asura-workspace scratch          show the scratchpad, or hide it and hand
+#   toren-workspace scratch          show the scratchpad, or hide it and hand
 #                                     keyboard focus back to what is on screen
 set -euo pipefail
 
@@ -113,7 +113,7 @@ case "$cmd" in
     fi
     ;;
   *)
-    echo "usage: asura-workspace {desktop|focus <1..$PER>|move <1..$PER>|movesilent <1..$PER>|hide|scratch}" >&2
+    echo "usage: toren-workspace {desktop|focus <1..$PER>|move <1..$PER>|movesilent <1..$PER>|hide|scratch}" >&2
     exit 2
     ;;
 esac

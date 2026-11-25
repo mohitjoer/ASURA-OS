@@ -5,11 +5,11 @@ set -euo pipefail
 usage() {
   cat <<'USAGE'
 Usage:
-  asura-cmd-screenrecord [--fullscreen|--region|--monitor <NAME>] [--geometry <WxH+X+Y>] [--with-desktop-audio] [--with-microphone-audio]
-  asura-cmd-screenrecord -r|-s|-sr
-  asura-cmd-screenrecord --stop|--pause|--status
+  toren-cmd-screenrecord [--fullscreen|--region|--monitor <NAME>] [--geometry <WxH+X+Y>] [--with-desktop-audio] [--with-microphone-audio]
+  toren-cmd-screenrecord -r|-s|-sr
+  toren-cmd-screenrecord --stop|--pause|--status
 
-Starts, stops, or pauses Asura's shell recorder.
+Starts, stops, or pauses Toren's shell recorder.
 
 By default it records the focused monitor with gpu-screen-recorder's KMS capture
 (-w <output>, falling back to -w screen when the focused output can't be named).
@@ -32,28 +32,28 @@ USAGE
 
 notify() {
   if command -v notify-send >/dev/null 2>&1; then
-    notify-send -a asura-cli "$@" >/dev/null 2>&1 || true
+    notify-send -a toren-cli "$@" >/dev/null 2>&1 || true
   fi
 }
 
 # The window manager is reached only through the seam, asked by capability and
 # never by name.
-asura_bin="${ASURA_BIN-$(command -v asura || true)}"
+toren_bin="${ASURA_BIN-$(command -v toren || true)}"
 
 wm_can() {  # capability -> 0 when the live compositor honours it
-  [[ -n $asura_bin && -x $asura_bin ]] || return 1
-  case ",$("$asura_bin" wm status 2>/dev/null | sed -n 's/^Capabilities: //p' | tr -d '[:space:]')," in
+  [[ -n $toren_bin && -x $toren_bin ]] || return 1
+  case ",$("$toren_bin" wm status 2>/dev/null | sed -n 's/^Capabilities: //p' | tr -d '[:space:]')," in
     *",$1,"*) return 0 ;;
   esac
   return 1
 }
 
-# Hub-owned recording settings (~/.config/asura/recording.json), written by the
+# Hub-owned recording settings (~/.config/toren/recording.json), written by the
 # Recording page. env vars still override, then this file, then the built-in
 # default. only video encode knobs live here (fps, quality, codec, framerate
 # mode, encoder, cursor); capture mode and audio are per-recording flags.
 recording_config_file() {
-  printf '%s/asura/recording.json' "${XDG_CONFIG_HOME:-$HOME/.config}"
+  printf '%s/toren/recording.json' "${XDG_CONFIG_HOME:-$HOME/.config}"
 }
 
 cfg_get() {
@@ -79,7 +79,7 @@ require_command() {
 
   if ! command -v "$command_name" >/dev/null 2>&1; then
     notify -u critical "Screen recording failed" "$label is not installed${3:+ (sudo apt install $3)}"
-    echo "asura-cmd-screenrecord: missing command: $command_name" >&2
+    echo "toren-cmd-screenrecord: missing command: $command_name" >&2
     exit 127
   fi
 }
@@ -124,12 +124,12 @@ recorder_running() {
   [[ -n "$(recording_gsr_pids)" ]] || proc_running "$wf_pattern"
 }
 
-# A live (video) wallpaper plays through the C player (asura-wallpaper-live) on
+# A live (video) wallpaper plays through the C player (toren-wallpaper-live) on
 # a background layer that is not on the KMS scanout gsr captures, so switch to
 # wf-recorder, which grabs the composited output (the live wallpaper included).
 live_wallpaper_active() {
   command -v pgrep >/dev/null 2>&1 || return 1
-  pgrep -x asura-wallpaper-live >/dev/null 2>&1
+  pgrep -x toren-wallpaper-live >/dev/null 2>&1
 }
 
 # which backend owns the live recording right now, if any.
@@ -149,7 +149,7 @@ signal_recorder() {
   pkill "$signal" -f "$pattern" >/dev/null 2>&1 || true
 }
 
-# must match Asura.Ui.Singletons.Paths.recordingsDir, which the deck's recordings
+# must match Toren.Ui.Singletons.Paths.recordingsDir, which the deck's recordings
 # list and the Hub's Recording page both read: the env override, then the Hub's
 # `directory` setting, then ${XDG_VIDEOS_DIR:-$HOME/Videos}/Recordings. the list
 # watches that one dir, so any other resolution (e.g. `xdg-user-dir VIDEOS`,
@@ -233,7 +233,7 @@ gpu_topology_signature() {
 }
 
 backend_cache_file() {
-  printf '%s/screenrecord-backend' "${ASURA_STATE_PATH:-$HOME/.local/state/asura}"
+  printf '%s/screenrecord-backend' "${ASURA_STATE_PATH:-$HOME/.local/state/toren}"
 }
 
 # persist the chosen backend for the current GPU/monitor topology so the next
@@ -302,7 +302,7 @@ select_backend() {
 # slurp geometry as "WxH+X+Y" for gpu-screen-recorder. empty = cancelled.
 region_geometry_gsr() {
   local slurp_cmd="${ASURA_SCREENRECORD_SLURP:-slurp}"
-  local region_pick="${ASURA_STATE_PATH:-$HOME/.local/state/asura}/region-pick"
+  local region_pick="${ASURA_STATE_PATH:-$HOME/.local/state/toren}/region-pick"
   local geometry pos size x y
 
   # geometry sources in order: an explicit --geometry, the box the island's region
@@ -330,7 +330,7 @@ region_geometry_gsr() {
 
   if [[ ! $geometry =~ ^[0-9]+x[0-9]+[+-][0-9]+[+-][0-9]+$ ]]; then
     notify -u critical "Screen recording failed" "Invalid region: $geometry"
-    echo "asura-cmd-screenrecord: invalid region: $geometry" >&2
+    echo "toren-cmd-screenrecord: invalid region: $geometry" >&2
     exit 1
   fi
 
@@ -340,7 +340,7 @@ region_geometry_gsr() {
 # slurp's native "X,Y WxH" for wf-recorder -g. empty = cancelled.
 region_geometry_wf() {
   local slurp_cmd="${ASURA_SCREENRECORD_SLURP:-slurp}"
-  local region_pick="${ASURA_STATE_PATH:-$HOME/.local/state/asura}/region-pick"
+  local region_pick="${ASURA_STATE_PATH:-$HOME/.local/state/toren}/region-pick"
   local geometry gsr_geom
 
   # island-provided region (WxH+X+Y, via --geometry or the picker file) ->
@@ -364,9 +364,9 @@ region_geometry_wf() {
 # when it cannot be resolved (wf-recorder then records the only/default output),
 # which is also the honest result on a compositor whose outputs we cannot read.
 focused_output() {
-  command -v asura-hubd >/dev/null 2>&1 || return 0
+  command -v toren-hubd >/dev/null 2>&1 || return 0
   command -v jq >/dev/null 2>&1 || return 0
-  asura-hubd outputs 2>/dev/null \
+  toren-hubd outputs 2>/dev/null \
     | jq -r 'first(.[] | select(.focused)) // .[0] // {} | .name // empty' 2>/dev/null
 }
 
@@ -377,7 +377,7 @@ validate_monitor_name() {
   local name="$1"
   if [[ -z $name || ! $name =~ ^[A-Za-z0-9._-]+$ ]]; then
     notify -u critical "Screen recording failed" "Invalid monitor: $name"
-    echo "asura-cmd-screenrecord: invalid monitor: $name" >&2
+    echo "toren-cmd-screenrecord: invalid monitor: $name" >&2
     exit 1
   fi
 }
@@ -395,7 +395,7 @@ default_source_name() {
 }
 
 # render node (/dev/dri/renderD*) sharing a PCI addr with the given card
-# device (a real card or a asura-gpu-* symlink).
+# device (a real card or a toren-gpu-* symlink).
 render_node_for_card() {
   local ref="$1"
   local card name pci node
@@ -414,7 +414,7 @@ render_node_for_card() {
 }
 
 # pick the render node for wf-recorder's VAAPI encoder: explicit override, the
-# primary GPU pinned by asura-gpu (AQ_DRM_DEVICES), else the card that actually
+# primary GPU pinned by toren-gpu (AQ_DRM_DEVICES), else the card that actually
 # drives a connected display, else the first render node.
 #
 # The display-owning card matters on a hybrid laptop: the compositor scans out
@@ -487,7 +487,7 @@ stop_recording() {
   # a config reload triggers one. A compositor that cannot reload its config live
   # is unaffected and needs none.
   if wm_can configReload; then
-    "$asura_bin" wm act config.reload >/dev/null 2>&1 || true
+    "$toren_bin" wm act config.reload >/dev/null 2>&1 || true
   fi
 }
 
@@ -558,13 +558,13 @@ info_recording() {
 }
 
 # absolute path to the post-save hook gpu-screen-recorder runs via -sc (a sibling
-# script, resolved the way asura-cmd-studiorecord resolves this one). empty when
+# script, resolved the way toren-cmd-studiorecord resolves this one). empty when
 # the helper is missing or not executable, so we never hand gsr a -sc it can't
 # run and never call a phantom helper on the wf path.
 recording_saved_hook() {
   local here hook
   here="$(dirname "$(readlink -f "$0")")"
-  hook="$here/asura-cmd-recording-saved"
+  hook="$here/toren-cmd-recording-saved"
   [[ -x $hook ]] && printf '%s' "$hook"
 }
 
@@ -629,10 +629,10 @@ start_gsr() {
   output_dir="$(recordings_dir)"
   mkdir -p "$output_dir"
   output_path="$(next_recording_path "$output_dir")"
-  # record the output path so the studio flow (asura-cmd-studiorecord) can find
+  # record the output path so the studio flow (toren-cmd-studiorecord) can find
   # the finished clip to write its cursor sidecar and hand to the editor.
-  mkdir -p "${ASURA_STATE_PATH:-$HOME/.local/state/asura}" 2>/dev/null || true
-  printf '%s\n' "$output_path" >"${ASURA_STATE_PATH:-$HOME/.local/state/asura}/last-recording" 2>/dev/null || true
+  mkdir -p "${ASURA_STATE_PATH:-$HOME/.local/state/toren}" 2>/dev/null || true
+  printf '%s\n' "$output_path" >"${ASURA_STATE_PATH:-$HOME/.local/state/toren}/last-recording" 2>/dev/null || true
 
   # -fm cfr: a steady framerate every player and editor reads correctly (vfr
   # often imports as ~30fps and looks choppy). -q/-k/-encoder come from the
@@ -693,8 +693,8 @@ start_portal() {
   output_dir="$(recordings_dir)"
   mkdir -p "$output_dir"
   output_path="$(next_recording_path "$output_dir")"
-  mkdir -p "${ASURA_STATE_PATH:-$HOME/.local/state/asura}" 2>/dev/null || true
-  printf '%s\n' "$output_path" >"${ASURA_STATE_PATH:-$HOME/.local/state/asura}/last-recording" 2>/dev/null || true
+  mkdir -p "${ASURA_STATE_PATH:-$HOME/.local/state/toren}" 2>/dev/null || true
+  printf '%s\n' "$output_path" >"${ASURA_STATE_PATH:-$HOME/.local/state/toren}/last-recording" 2>/dev/null || true
 
   token="${XDG_CONFIG_HOME:-$HOME/.config}/gpu-screen-recorder/restore_token"
   args=("$recorder_cmd" -w portal)
@@ -739,7 +739,7 @@ start_portal() {
   for ((i = 0; i < 20; i++)); do kill -0 "$pid" 2>/dev/null || break; sleep 0.1; done
   rm -f "$output_path"
   output_path="$(next_recording_path "$output_dir")"
-  printf '%s\n' "$output_path" >"${ASURA_STATE_PATH:-$HOME/.local/state/asura}/last-recording" 2>/dev/null || true
+  printf '%s\n' "$output_path" >"${ASURA_STATE_PATH:-$HOME/.local/state/toren}/last-recording" 2>/dev/null || true
   start_wf "$mode" "$desktop_audio" "$microphone_audio"
 }
 
@@ -787,8 +787,8 @@ start_wf() {
   output_dir="$(recordings_dir)"
   mkdir -p "$output_dir"
   output_path="$(next_recording_path "$output_dir")"
-  mkdir -p "${ASURA_STATE_PATH:-$HOME/.local/state/asura}" 2>/dev/null || true
-  printf '%s\n' "$output_path" >"${ASURA_STATE_PATH:-$HOME/.local/state/asura}/last-recording" 2>/dev/null || true
+  mkdir -p "${ASURA_STATE_PATH:-$HOME/.local/state/toren}" 2>/dev/null || true
+  printf '%s\n' "$output_path" >"${ASURA_STATE_PATH:-$HOME/.local/state/toren}/last-recording" 2>/dev/null || true
 
   # quality preset -> VAAPI qp / x264 crf (lower = crisper).
   case "$quality" in
@@ -829,7 +829,7 @@ start_wf() {
     fi
     rm -f "$output_path"
     output_path="$(next_recording_path "$output_dir")"
-    printf '%s\n' "$output_path" >"${ASURA_STATE_PATH:-$HOME/.local/state/asura}/last-recording" 2>/dev/null || true
+    printf '%s\n' "$output_path" >"${ASURA_STATE_PATH:-$HOME/.local/state/toren}/last-recording" 2>/dev/null || true
   fi
 
   "$wf_cmd" -r "$fps" "${target_args[@]}" "${audio_args[@]}" \
@@ -951,7 +951,7 @@ while (($# > 0)); do
     action="start"
     ;;
   *)
-    echo "asura-cmd-screenrecord: unknown argument: $1" >&2
+    echo "toren-cmd-screenrecord: unknown argument: $1" >&2
     usage >&2
     exit 2
     ;;

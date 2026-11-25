@@ -1,7 +1,7 @@
 #!/bin/sh
 echo "Migrate user Hyprland configs to Lua format"
 
-HYPR_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/asura/hyprland"
+HYPR_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/toren/hyprland"
 [ -d "$HYPR_DIR" ] || exit 0
 
 convert_file() {

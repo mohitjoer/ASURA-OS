@@ -202,18 +202,18 @@ func (d *daemon) dispatchRequest(req *request) response {
 
 	case "wall.toggle":
 		if d.ui.ensure() {
-			d.broadcast("asura-wallpaper.wall.toggle", map[string]interface{}{})
+			d.broadcast("toren-wallpaper.wall.toggle", map[string]interface{}{})
 		}
 		return ok(req.ID, map[string]interface{}{"toggled": true})
 
 	case "wall.show":
 		if d.ui.ensure() {
-			d.broadcast("asura-wallpaper.wall.show", map[string]interface{}{})
+			d.broadcast("toren-wallpaper.wall.show", map[string]interface{}{})
 		}
 		return ok(req.ID, map[string]interface{}{"ok": true})
 
 	case "wall.hide":
-		d.broadcast("asura-wallpaper.wall.hide", map[string]interface{}{})
+		d.broadcast("toren-wallpaper.wall.hide", map[string]interface{}{})
 		return ok(req.ID, map[string]interface{}{"ok": true})
 
 	case "wall.random_start":
@@ -221,14 +221,14 @@ func (d *daemon) dispatchRequest(req *request) response {
 		types := strsParam(p, "types")
 		favOnly := boolParam(p, "favourites_only", false)
 		d.random.start(interval, types, favOnly, func() { d.randomPick(types, favOnly) })
-		d.broadcast("asura-wallpaper.wall.random_started", map[string]interface{}{
+		d.broadcast("toren-wallpaper.wall.random_started", map[string]interface{}{
 			"interval": interval, "types": types, "favourites_only": favOnly,
 		})
 		return ok(req.ID, map[string]interface{}{"started": true})
 
 	case "wall.random_stop":
 		d.random.stop()
-		d.broadcast("asura-wallpaper.wall.random_stopped", map[string]interface{}{})
+		d.broadcast("toren-wallpaper.wall.random_stopped", map[string]interface{}{})
 		return ok(req.ID, map[string]interface{}{"stopped": true})
 
 	case "wall.random_status":
@@ -241,14 +241,14 @@ func (d *daemon) dispatchRequest(req *request) response {
 	case "wall.daynight_start":
 		cfg := dayNightFromWall()
 		d.daynight.start(cfg, d.dayNightTick, nil)
-		d.broadcast("asura-wallpaper.wall.daynight_started", map[string]interface{}{
+		d.broadcast("toren-wallpaper.wall.daynight_started", map[string]interface{}{
 			"interval": cfg.Interval, "day_dir": cfg.DayDir, "night_dir": cfg.NightDir,
 		})
 		return ok(req.ID, map[string]interface{}{"started": true})
 
 	case "wall.daynight_stop":
 		d.daynight.stop()
-		d.broadcast("asura-wallpaper.wall.daynight_stopped", map[string]interface{}{})
+		d.broadcast("toren-wallpaper.wall.daynight_stopped", map[string]interface{}{})
 		return ok(req.ID, map[string]interface{}{"stopped": true})
 
 	case "wall.daynight_status":
@@ -272,7 +272,7 @@ func (d *daemon) dispatchRequest(req *request) response {
 		d.random.stop()
 		d.daynight.stop()
 		d.playlists.stopAll()
-		d.broadcast("asura-wallpaper.wall.random_stopped", map[string]interface{}{})
+		d.broadcast("toren-wallpaper.wall.random_stopped", map[string]interface{}{})
 		return ok(req.ID, map[string]interface{}{"stopped": true})
 
 	// Palette frame: which second of a video clip the still (and so the matugen
@@ -289,7 +289,7 @@ func (d *daemon) dispatchRequest(req *request) response {
 			persistVideoFrame(sec)
 			d.reloadConfig()
 			d.restoreOutputs()
-			d.broadcast("asura-wallpaper.wall.palette_frame", map[string]interface{}{"frame": sec})
+			d.broadcast("toren-wallpaper.wall.palette_frame", map[string]interface{}{"frame": sec})
 			return ok(req.ID, map[string]interface{}{"frame": sec})
 		}
 		return ok(req.ID, map[string]interface{}{"frame": d.config().videoFrame()})
@@ -303,19 +303,19 @@ func (d *daemon) dispatchRequest(req *request) response {
 			return errResp(req.ID, 1, "missing 'name' parameter")
 		}
 		id := d.playlists.create(name)
-		d.broadcast("asura-wallpaper.playlist.changed", map[string]interface{}{})
+		d.broadcast("toren-wallpaper.playlist.changed", map[string]interface{}{})
 		return ok(req.ID, map[string]interface{}{"id": id})
 
 	case "playlist.update":
 		if !d.playlists.update(intParam(p, "id", 0), strParam(p, "field", ""), strParam(p, "value", "")) {
 			return errResp(req.ID, 2, "unknown playlist or field")
 		}
-		d.broadcast("asura-wallpaper.playlist.changed", map[string]interface{}{})
+		d.broadcast("toren-wallpaper.playlist.changed", map[string]interface{}{})
 		return ok(req.ID, map[string]interface{}{"ok": true})
 
 	case "playlist.delete":
 		d.playlists.delete(intParam(p, "id", 0))
-		d.broadcast("asura-wallpaper.playlist.changed", map[string]interface{}{})
+		d.broadcast("toren-wallpaper.playlist.changed", map[string]interface{}{})
 		return ok(req.ID, map[string]interface{}{"ok": true})
 
 	case "playlist.members", "pl.contents":
@@ -328,34 +328,34 @@ func (d *daemon) dispatchRequest(req *request) response {
 		if !d.playlists.addMember(intParam(p, "id", 0), strParam(p, "key", "")) {
 			return errResp(req.ID, 2, "unknown playlist")
 		}
-		d.broadcast("asura-wallpaper.playlist.changed", map[string]interface{}{})
+		d.broadcast("toren-wallpaper.playlist.changed", map[string]interface{}{})
 		return ok(req.ID, map[string]interface{}{"ok": true})
 
 	case "playlist.remove":
 		d.playlists.removeMember(intParam(p, "id", 0), strParam(p, "key", ""))
-		d.broadcast("asura-wallpaper.playlist.changed", map[string]interface{}{})
+		d.broadcast("toren-wallpaper.playlist.changed", map[string]interface{}{})
 		return ok(req.ID, map[string]interface{}{"ok": true})
 
 	case "playlist.move":
 		d.playlists.moveMember(intParam(p, "id", 0), strParam(p, "key", ""), intParam(p, "delta", 0))
-		d.broadcast("asura-wallpaper.playlist.changed", map[string]interface{}{})
+		d.broadcast("toren-wallpaper.playlist.changed", map[string]interface{}{})
 		return ok(req.ID, map[string]interface{}{"ok": true})
 
 	case "playlist.assign":
 		if !d.playlists.assign(strParam(p, "output", ""), intParam(p, "id", 0)) {
 			return errResp(req.ID, 2, "unknown playlist")
 		}
-		d.broadcast("asura-wallpaper.playlist.changed", map[string]interface{}{})
+		d.broadcast("toren-wallpaper.playlist.changed", map[string]interface{}{})
 		return ok(req.ID, map[string]interface{}{"ok": true})
 
 	case "playlist.toggle":
 		d.playlists.toggle(strParam(p, "output", ""), intParam(p, "id", 0))
-		d.broadcast("asura-wallpaper.playlist.changed", map[string]interface{}{})
+		d.broadcast("toren-wallpaper.playlist.changed", map[string]interface{}{})
 		return ok(req.ID, map[string]interface{}{"ok": true})
 
 	case "playlist.stop":
 		d.playlists.stop(intParam(p, "id", 0))
-		d.broadcast("asura-wallpaper.playlist.changed", map[string]interface{}{})
+		d.broadcast("toren-wallpaper.playlist.changed", map[string]interface{}{})
 		return ok(req.ID, map[string]interface{}{"ok": true})
 
 	case "playlist.play_now":

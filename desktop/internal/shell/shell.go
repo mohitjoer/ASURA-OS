@@ -20,7 +20,7 @@
 // The shell's tree holds two kinds of file, and the difference runs through
 // everything here.
 //
-// Asura's own files are the shell root, the Hub's windows and the settings
+// Toren's own files are the shell root, the Hub's windows and the settings
 // bridge. Every rule in this package is a rule about those: a theme that has
 // to be a theme, a glyph that has to be in the font, an import that has to be
 // on a closed list, a path that has to be inside the boundary.
@@ -76,7 +76,7 @@ type Env struct {
 	// passes another's check.
 	EntryPoint string
 	// OwnsSettings says this tree is the one that reads GSettings. The desktop
-	// shell is; the Hub window is not — it renders what `asura config export`
+	// shell is; the Hub window is not — it renders what `toren config export`
 	// hands it and never touches a schema.
 	//
 	// It matters because Quickshell's `-p` sets the import path for one window
@@ -89,7 +89,7 @@ type Env struct {
 	// is empty in the checkout — schemas sit beside the QML that reads them —
 	// and is set only for an installed tree, where GLib installs schemas
 	// nowhere near the shell: /usr/share/glib-2.0/schemas, not
-	// /usr/share/asura/shell.
+	// /usr/share/toren/shell.
 	//
 	// Without it doctor checks an installed shell against a directory that
 	// holds no schemas, reports the schema missing, and then reports every
@@ -154,7 +154,7 @@ func (e Env) schemaPath(relative string) string {
 // not need one — it needs to know which keys exist so it can catch a QML file
 // that reads one that does not.
 type Schema struct {
-	// ID is the schema id, e.g. org.asura.shell.
+	// ID is the schema id, e.g. org.toren.shell.
 	ID string
 	// Keys are the key names, in file order.
 	Keys []string
@@ -267,7 +267,7 @@ func source(env Env, relative string) (string, error) {
 var catalogueEntry = regexp.MustCompile(`"([A-Za-z0-9_-]+)"\s*:\s*"([A-Za-z0-9_-]+)"`)
 
 // settingsRead is a `schema.<key>` read on a Settings object bound to a schema.
-// Both halves matter: a key that does not exist in *any* Asura schema is a
+// Both halves matter: a key that does not exist in *any* Toren schema is a
 // typo, and a key that exists in the schema but not on this object is a binding
 // to the wrong schema.
 // The key pattern admits capitals on purpose. Schema keys are kebab-case, but
@@ -304,7 +304,7 @@ func Check(env Env) []Finding {
 
 	// The shell's own files, and the vendored upstream tree.
 	//
-	// Every rule below is a rule about Asura's own code: a theme that has to
+	// Every rule below is a rule about Toren's own code: a theme that has to
 	// be a theme, a glyph that has to be in the font, an import that has to be
 	// on a closed list, a path that has to be inside the boundary. A vendored
 	// file is upstream's — a shipped file that is never edited in place — so a
@@ -349,17 +349,17 @@ func Check(env Env) []Finding {
 	return findings
 }
 
-// partition splits the tree's files into the ones Asura owns and the ones
+// partition splits the tree's files into the ones Toren owns and the ones
 // the vendored upstream tree holds.
 //
 // The vendored tree is upstream's namespace inside the shell: the component
 // kit, the bar, the dock, the side panel and the services, at the paths
 // upstream keeps them at. Everything else — the shell root, the Hub's
-// windows, the settings bridge — is Asura's own code, and only Asura's own
+// windows, the settings bridge — is Toren's own code, and only Toren's own
 // code is subject to the shell's rules.
 //
 // The overlay files are the exception that is not an exception: they are
-// Asura's files that live inside the vendored namespace, at upstream's
+// Toren's files that live inside the vendored namespace, at upstream's
 // paths. They are excluded here for the same reason the rest of the
 // namespace is: their shape is upstream's contract, because upstream's
 // components read them by upstream's names.
@@ -567,8 +567,8 @@ func qmlFiles(env Env) ([]string, error) {
 	return files, err
 }
 
-// asuraSchemaPrefix is the id prefix Asura owns, and the same value the
-// settings catalogue filters on — TestAsuraSchemaPrefixAgreesWithSettings
+// torenSchemaPrefix is the id prefix Toren owns, and the same value the
+// settings catalogue filters on — TestTorenSchemaPrefixAgreesWithSettings
 // asserts the two are equal so the checker and the catalogue cannot drift
 // apart.
 //
@@ -582,16 +582,16 @@ func qmlFiles(env Env) ([]string, error) {
 //
 // It matches on the file name rather than on the parsed id because the name is
 // the shipping contract: docs/architecture.md records the schema path as
-// /usr/share/glib-2.0/schemas/org.asura.*.gschema.xml, and build-debs.sh
+// /usr/share/glib-2.0/schemas/org.toren.*.gschema.xml, and build-debs.sh
 // copies exactly that pattern. A file that is not named that is somebody else's,
-// including when it is malformed — its parse errors are not Asura's findings.
-const asuraSchemaPrefix = "org.asura."
+// including when it is malformed — its parse errors are not Toren's findings.
+const torenSchemaPrefix = "org.toren."
 
 // loadSchemas parses the schema files the tree owns, keyed by the id they
 // declare.
 //
 // More than one, because the desktop schema is a real dependency: Config.qml
-// binds `org.asura.desktop` alongside the shell's, and it was never parsed at
+// binds `org.toren.desktop` alongside the shell's, and it was never parsed at
 // all. A key declared there was not checked for reachability, so a setting the
 // shell ships and no surface can read went unreported — the exact fault the
 // reachability rule exists for, in the half of the database nobody looked at.
@@ -618,7 +618,7 @@ func loadSchemas(env Env) (map[string]Schema, []Finding) {
 		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".gschema.xml") {
 			continue
 		}
-		if !strings.HasPrefix(entry.Name(), asuraSchemaPrefix) {
+		if !strings.HasPrefix(entry.Name(), torenSchemaPrefix) {
 			continue
 		}
 		path := env.schemaPath(entry.Name())
@@ -660,20 +660,20 @@ func loadSchemas(env Env) (map[string]Schema, []Finding) {
 	if found == 0 {
 		findings = append(findings, Finding{
 			Rule: "schema", Path: filepath.Join(env.Root, dir),
-			Detail: "contains no org.asura.*.gschema.xml, so no Asura key " +
+			Detail: "contains no org.toren.*.gschema.xml, so no Toren key " +
 				"can be checked",
 		})
 	}
 	return schemas, findings
 }
 
-// schemaID is a `schemaId: "org.asura.something"` in a Settings object.
+// schemaID is a `schemaId: "org.toren.something"` in a Settings object.
 var schemaID = regexp.MustCompile(`schemaId\s*:\s*"([A-Za-z0-9_.-]+)"`)
 
 // checkSchemaIds asserts that every schema the QML names has a schema file in the
 // tree.
 //
-// This is the fault of the moment. `Settings { schemaId: "org.asura.desktop" }`
+// This is the fault of the moment. `Settings { schemaId: "org.toren.desktop" }`
 // against a schema that was never shipped is not a build error and not a
 // startup error: the Settings object comes back invalid, every property read off
 // it is undefined, and a colour binding quietly evaluates to nothing. The shell
@@ -935,7 +935,7 @@ var wrapperExempt = map[string]bool{
 // This is the check that catches a setting that appears to work and does
 // nothing. Config.qml is the bridge between GSettings and the shell, so a key
 // there with no use site is a key the Hub writes and the shell never looks at:
-// both are working, and they disagree, and nothing says so. `asura doctor`
+// both are working, and they disagree, and nothing says so. `toren doctor`
 // reporting "the idle timeout is 0" is not useful if nothing reads the idle
 // timeout.
 //
@@ -969,7 +969,7 @@ func checkUnusedWrapperProperties(env Env, files []string) []Finding {
 		}
 	}
 
-	// The overlays. They are Asura's files at upstream's paths — the files
+	// The overlays. They are Toren's files at upstream's paths — the files
 	// the vendored components read their settings through — and the tree
 	// they sit in is upstream's, so the own/vendored partition above classes
 	// them as upstream's and never asks them. A wrapper property whose only
@@ -1069,7 +1069,7 @@ var colourExemptions = map[string]string{
 //
 // The whole shell reads through Palette, so a literal here is always either a
 // mistake or a value that should have been derived.
-// commandMap is the `commands` table in cmd/asura/main.go, matched by its
+// commandMap is the `commands` table in cmd/toren/main.go, matched by its
 // opening line and its closing brace rather than by any Go parser.
 //
 // The shell validator already reads files by regex — the schemas, the QML, the
@@ -1081,10 +1081,10 @@ var commandMap = regexp.MustCompile(`(?s)var commands = map\[string\]func\(args 
 // commandKey is one entry in that table.
 var commandKey = regexp.MustCompile(`"([a-z][a-z-]*)"\s*:`)
 
-// asuraCall is a shell invoking the CLI. `asura` as the executable and
-// `asura <cmd>` as the first two argv elements are the only two spellings the
+// torenCall is a shell invoking the CLI. `toren` as the executable and
+// `toren <cmd>` as the first two argv elements are the only two spellings the
 // shell uses, and both are matched.
-var asuraCall = regexp.MustCompile(`"asura"\s*,\s*"([a-z][a-z-]*)"`)
+var torenCall = regexp.MustCompile(`"toren"\s*,\s*"([a-z][a-z-]*)"`)
 
 // objectId matches `id: name`, which is what makes a file's own properties
 // addressable. Property names are collected separately because an assignment
@@ -1108,12 +1108,12 @@ var propertyAssign = regexp.MustCompile(`\b([A-Za-z_][A-Za-z0-9_]*)\.([A-Za-z_][
 // checkCommands reports a shell calling a subcommand the CLI does not have.
 //
 // Nothing else in this validator, and nothing in CI, would notice. A QML file
-// naming `asura winodws` is a panel that is empty forever — the Process runs,
+// naming `toren winodws` is a panel that is empty forever — the Process runs,
 // exits non-zero, the shell leaves its last document in place — with no test
 // failing anywhere and nothing in the journal saying so. It is the cheapest
 // possible break to make by accident and the most expensive to notice.
 func checkCommands(env Env, files []string) []Finding {
-	entry, err := os.ReadFile(filepath.Join(env.Root, "desktop", "cmd", "asura", "main.go"))
+	entry, err := os.ReadFile(filepath.Join(env.Root, "desktop", "cmd", "toren", "main.go"))
 	if err != nil {
 		return nil
 	}
@@ -1137,7 +1137,7 @@ func checkCommands(env Env, files []string) []Finding {
 		if err != nil {
 			continue
 		}
-		for _, call := range asuraCall.FindAllStringSubmatch(body, -1) {
+		for _, call := range torenCall.FindAllStringSubmatch(body, -1) {
 			name := string(call[1])
 			if known[name] {
 				continue
@@ -1145,8 +1145,8 @@ func checkCommands(env Env, files []string) []Finding {
 			findings = append(findings, Finding{
 				Rule: "unknown command",
 				Path: env.path(f),
-				Detail: fmt.Sprintf("runs `asura %s`, which is not in the "+
-					"commands table in cmd/asura/main.go; the call would fail "+
+				Detail: fmt.Sprintf("runs `toren %s`, which is not in the "+
+					"commands table in cmd/toren/main.go; the call would fail "+
 					"at runtime and the surface would silently stay empty", name),
 			})
 		}
@@ -1574,7 +1574,7 @@ func checkGlyphFamilies(body string) []Finding {
 
 // allowedImports is the set of modules the shell may import.
 //
-// Every one is a Asura-built or base-layer module. The list is closed so that a
+// Every one is a Toren-built or base-layer module. The list is closed so that a
 // new import is a decision rather than an accident: a QML file can pull in any
 // module the machine happens to have installed, and a shell whose behaviour
 // depends on what a user installed is not a shell this project controls.
@@ -1659,7 +1659,7 @@ func checkImports(env Env, files []string) []Finding {
 }
 
 // outsideBoundary matches an absolute path in the source that is not under
-// /usr/share/asura/.
+// /usr/share/toren/.
 //
 // It covers /etc, /usr, /var and /opt rather than /usr alone, because the
 // boundary is about what the shell may name and not about which prefix happens
@@ -1691,12 +1691,12 @@ func checkBoundaries(env Env, files []string) []Finding {
 		}
 		for _, match := range outsideBoundary.FindAllStringSubmatch(body, -1) {
 			path := match[1]
-			if strings.HasPrefix(path, "/usr/share/asura/") || boundaryAllowance[path] {
+			if strings.HasPrefix(path, "/usr/share/toren/") || boundaryAllowance[path] {
 				continue
 			}
 			findings = append(findings, Finding{
 				Rule: "boundary", Path: env.path(f),
-				Detail: fmt.Sprintf("names %s, outside /usr/share/asura/ "+
+				Detail: fmt.Sprintf("names %s, outside /usr/share/toren/ "+
 					"and not on the sanctioned list", path),
 			})
 		}

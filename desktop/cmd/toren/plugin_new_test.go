@@ -118,7 +118,7 @@ func TestPluginTitleFromID(t *testing.T) {
 	}
 }
 
-// TestPluginNewDryRun is the `asura plugin new demo --dry-run` check: it lists
+// TestPluginNewDryRun is the `toren plugin new demo --dry-run` check: it lists
 // the files a real run writes and writes none of them.
 func TestPluginNewDryRun(t *testing.T) {
 	pluginTestEnv(t)

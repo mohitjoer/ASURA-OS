@@ -73,7 +73,7 @@ Item {
         }
         Text {
             anchors.centerIn: parent
-            text: "asura"
+            text: "toren"
             color: Qt.rgba(mock.cFg.r, mock.cFg.g, mock.cFg.b, 0.82)
             font.family: Style.fontFamily; font.pixelSize: 10 * mock.s
         }
@@ -118,7 +118,7 @@ Item {
                 }
             }
             Row {
-                Text { text: "asura"; color: mock.cGreen; font.family: Style.fontFamilyMono; font.pixelSize: 10 * mock.s; font.weight: Font.DemiBold }
+                Text { text: "toren"; color: mock.cGreen; font.family: Style.fontFamilyMono; font.pixelSize: 10 * mock.s; font.weight: Font.DemiBold }
                 Text { text: I18n.tr("@arch"); color: mock.cMag; font.family: Style.fontFamilyMono; font.pixelSize: 10 * mock.s }
                 Text { text: " ~ "; color: mock.cBlue; font.family: Style.fontFamilyMono; font.pixelSize: 10 * mock.s }
                 Text { text: I18n.tr("\u276f fastfetch"); color: mock.cFg; font.family: Style.fontFamilyMono; font.pixelSize: 10 * mock.s }

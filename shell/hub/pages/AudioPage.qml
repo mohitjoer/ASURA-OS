@@ -12,7 +12,7 @@ import qs.Ui.Singletons
 // and the system's 10-band PipeWire graphic equalizer.
 //
 // Self-contained full-bleed page: draws its own header and scrolling body.
-// The Equalizer is powered by the Equalizer singleton and asura-eq DSP filter chain.
+// The Equalizer is powered by the Equalizer singleton and toren-eq DSP filter chain.
 Item {
     id: pg
 

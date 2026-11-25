@@ -30,7 +30,7 @@ import "schema/UpdatesPage.js" as UpdatesSchema
 import "ReloadCoverModel.js" as ReloadCoverModel
 import qs.FrameBars
 
-// Asura Settings, assembled. The rail owns navigation and global search; the
+// Toren Settings, assembled. The rail owns navigation and global search; the
 // head, cells and tabs are drawn once by SchemaPage from a page's schema; the
 // pinned side is the feedback loop (live preview, the dirty-state plate, the
 // pending-write diff); the action bar is the one surface whose absence eats an
@@ -52,7 +52,7 @@ Rectangle {
     property string section: "windowmanager"
     // remember the last section so a reopen lands where you left, not the default.
     // Read once at startup by `sectionGet` below; written here on every change.
-    onSectionChanged: Quickshell.execDetached(["asura-hubd", "config", "set", "section", hub.section])
+    onSectionChanged: Quickshell.execDetached(["toren-hubd", "config", "set", "section", hub.section])
     // A Hub that remembered the retired `windows` section, or a deep link that
     // still names it, lands on the compositor page that now holds those rows
     // rather than a blank pane.
@@ -532,7 +532,7 @@ Rectangle {
         "qsbar.barAutoHide": false, "qsbar.barBorderEnabled": true, "qsbar.barCornerRadius": 6,
         "qsbar.panelTooltipBorderEnabled": true, "qsbar.barShadowEnabled": false, "qsbar.barFrostEnabled": false,
         "qsbar.barGapTop": 0, "qsbar.barGapBottom": 0, "qsbar.barGapLeft": 0, "qsbar.barGapRight": 0,
-        "qsbar.launcherLogoMode": "icon", "qsbar.launcherLogoText": "asura", "qsbar.launcherLogoIcon": "asura",
+        "qsbar.launcherLogoMode": "icon", "qsbar.launcherLogoText": "toren", "qsbar.launcherLogoIcon": "toren",
         "qsbar.workspaceStyle": "default", "qsbar.workspaceMode": "active",
         "qsbar.widgets.battery": true, "qsbar.widgets.bluetooth": true, "qsbar.widgets.brightness": true,
         "qsbar.widgets.cpu": true, "qsbar.widgets.cpuTemperature": true, "qsbar.widgets.gpu": true,
@@ -598,7 +598,7 @@ Rectangle {
         return (home && p.indexOf(home) === 0) ? "~" + p.substring(home.length) : p;
     }
     // Ensure a user file exists (seeding a header when given), then open it via
-    // xdg-open (mimeapps route text/json/lua to asura-nvim); a base dir opens in
+    // xdg-open (mimeapps route text/json/lua to toren-nvim); a base dir opens in
     // the file manager.
     function openSettingsFile(e) {
         if (!e || e.noOpen || !e.path)
@@ -736,11 +736,11 @@ Rectangle {
         }
         hub.committed = JSON.parse(JSON.stringify(hub.draft));
         // language rides the normal Save: the file it just wrote (shell.json) is
-        // watched by every Asura surface's shared I18n, so the whole desktop
+        // watched by every Toren surface's shared I18n, so the whole desktop
         // retranslates. Set it here too so this window switches deterministically.
         if (files.shell) I18n.configLang = hub.committed.language || "auto";
         if (hub.hyprChanges().length) {
-            hyprSave.command = ["asura-hubd", "desktop", "save", JSON.stringify(hub.hyprDraft)];
+            hyprSave.command = ["toren-hubd", "desktop", "save", JSON.stringify(hub.hyprDraft)];
             hyprSave.running = true;
             hub.hyprCommitted = JSON.parse(JSON.stringify(hub.hyprDraft));
         }
@@ -752,7 +752,7 @@ Rectangle {
         hub.draft = JSON.parse(JSON.stringify(hub.committed));
         hub.restoreLiveUnsaved();
         hub.hyprDraft = JSON.parse(JSON.stringify(hub.hyprCommitted));
-        if (hub.wmLoaded) { hyprRestore.command = ["asura-hubd", "desktop", "restore"]; hyprRestore.running = true; }
+        if (hub.wmLoaded) { hyprRestore.command = ["toren-hubd", "desktop", "restore"]; hyprRestore.running = true; }
         hub.revertPage();
         hub.requestReloadCoverPrune(hub.committed.reloadCover);
     }
@@ -776,7 +776,7 @@ Rectangle {
         onTriggered: {
             if (reloadCoverPrune.running)
                 return;
-            var command = ["asura-hubd", "reload-cover", "prune"];
+            var command = ["toren-hubd", "reload-cover", "prune"];
             if (hub.reloadCoverPruneWanted !== "")
                 command.push(hub.reloadCoverPruneWanted);
             reloadCoverPrune.keep = hub.reloadCoverPruneWanted;
@@ -824,7 +824,7 @@ Rectangle {
     }
     Process {
         id: sectionGet
-        command: ["asura-hubd", "config", "get", "section"]
+        command: ["toren-hubd", "config", "get", "section"]
         running: true
         stdout: StdioCollector {
             onStreamFinished: {
@@ -836,9 +836,9 @@ Rectangle {
         }
     }
 
-    property string cfgDir: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/asura"
+    property string cfgDir: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/toren"
 
-    // shell.json is owned by the asura-shell settings daemon; the Hub reads it
+    // shell.json is owned by the toren-shell settings daemon; the Hub reads it
     // through the `settings` topic and writes it only through settings.patch
     // (Singletons/Settings.qml), never opening the file itself. A fresh daemon
     // frame rebases committed onto the pushed values, the way the FileView
@@ -909,7 +909,7 @@ Rectangle {
     }
 
     // ── hypr backend (the Lua pages) ─────────────────────────────────────
-    // Every Lua page persists through one nested object via asura-hubd, not a
+    // Every Lua page persists through one nested object via toren-hubd, not a
     // JsonAdapter. Pages read and write dotted paths (appearance.gapsIn); the
     // change shows up in the same dirty/diff/save the JSON pages use, grouped
     // under settings.conf. Nothing is written until Save calls `hypr save`.
@@ -929,7 +929,7 @@ Rectangle {
 
     Process {
         id: hyprGet
-        command: ["asura-hubd", "desktop", "get"]
+        command: ["toren-hubd", "desktop", "get"]
         running: true
         stdout: StdioCollector {
             onStreamFinished: {
@@ -944,7 +944,7 @@ Rectangle {
     }
     Process {
         id: hyprDefaultsGet
-        command: ["asura-hubd", "desktop", "defaults"]
+        command: ["toren-hubd", "desktop", "defaults"]
         running: true
         stdout: StdioCollector {
             onStreamFinished: { try { hub.hyprDefaults = JSON.parse(this.text); } catch (e) {} }
@@ -961,7 +961,7 @@ Rectangle {
         id: hyprPreviewThrottle
         interval: 140
         onTriggered: {
-            hyprPreview.command = ["asura-hubd", "desktop", "preview", JSON.stringify(hub.hyprDraft)];
+            hyprPreview.command = ["toren-hubd", "desktop", "preview", JSON.stringify(hub.hyprDraft)];
             hyprPreview.running = true;
         }
     }
@@ -970,7 +970,7 @@ Rectangle {
     function requestQuit() {
         if (hub.quitting) return;
         if (brandFV.loaded) {
-            var cleanup = ["asura-hubd", "reload-cover", "prune"];
+            var cleanup = ["toren-hubd", "reload-cover", "prune"];
             var keep = ReloadCoverModel.path(hub.committed.reloadCover);
             if (keep !== "")
                 cleanup.push(keep);
@@ -982,7 +982,7 @@ Rectangle {
         var restored = hub.restoreLiveUnsaved();
         if (hub.wmLoaded && hub.hyprChanges().length) {
             hub.quitting = true;
-            hyprRestore.command = ["asura-hubd", "desktop", "restore"];
+            hyprRestore.command = ["toren-hubd", "desktop", "restore"];
             hyprRestore.running = true;
         } else if (restored) {
             // hold the door one beat so the control socket flushes the patches
@@ -1092,7 +1092,7 @@ Rectangle {
                 Row {
                     anchors { left: parent.left; verticalCenter: parent.verticalCenter; leftMargin: Tokens.s4 }
                     spacing: Tokens.s3
-                    AsuraLogo {
+                    TorenLogo {
                         size: 26
                         variant: "white"
                         anchors.verticalCenter: parent.verticalCenter
@@ -1372,7 +1372,7 @@ Rectangle {
             Row {
                 spacing: Tokens.s2
                 Rectangle { width: 16; height: 1; color: Tokens.ink; anchors.verticalCenter: parent.verticalCenter }
-                AsuraLogo { size: 12; variant: "white"; anchors.verticalCenter: parent.verticalCenter }
+                TorenLogo { size: 12; variant: "white"; anchors.verticalCenter: parent.verticalCenter }
                 Text {
                     text: I18n.tr(hub.groupFor(hub.section)); color: Tokens.inkMuted
                     font.family: Tokens.ui; font.pixelSize: 9; font.weight: Font.Medium
@@ -1774,7 +1774,7 @@ Rectangle {
                     spacing: Tokens.s2
                     Text {
                         width: fcol.width
-                        text: I18n.tr("Each page's settings live in one full file below: the complete config you edit in place (the GUI writes the very same file). The shipped base underneath refreshes on update; your file wins. Run `asura reset <path>` to drop an override.")
+                        text: I18n.tr("Each page's settings live in one full file below: the complete config you edit in place (the GUI writes the very same file). The shipped base underneath refreshes on update; your file wins. Run `toren reset <path>` to drop an override.")
                         color: Tokens.inkMuted; font.family: Tokens.ui; font.pixelSize: 11; wrapMode: Text.WordWrap
                     }
                     Repeater {

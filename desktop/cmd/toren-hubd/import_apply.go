@@ -11,7 +11,7 @@ package main
 // error.
 
 import (
-	"asura/desktop/cmd/toren-hubd/internal/wm"
+	"toren/desktop/cmd/toren-hubd/internal/wm"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -30,14 +30,14 @@ type pendingWrite struct {
 	confCheck bool
 }
 
-// conflictChoice is a decoded conflict decision. mode is "asura" (default),
+// conflictChoice is a decoded conflict decision. mode is "toren" (default),
 // "mine", or "remap"; remap carries the new chord for the remap case.
 type conflictChoice struct {
 	mode  string
 	remap string
 }
 
-func backupsDir() string { return filepath.Join(configHome(), "asura", "import-backups") }
+func backupsDir() string { return filepath.Join(configHome(), "toren", "import-backups") }
 
 func applyImport(dec decisions) (applyResult, error) {
 	if strings.TrimSpace(dec.Source) == "" {
@@ -63,7 +63,7 @@ func applyImport(dec decisions) (applyResult, error) {
 		if hpath, ok := findConfig(dec.Source, "hypr", "hyprland.conf"); ok {
 			b, _ := os.ReadFile(hpath)
 			_, hs := parseHyprland(string(b))
-			plan := planBinds(hs.Binds, asuraShipped(), resolve)
+			plan := planBinds(hs.Binds, torenShipped(), resolve)
 
 			var userConf []string
 			for _, kb := range plan.keep {
@@ -237,7 +237,7 @@ func planBinds(binds []importBind, shipped map[string]shippedInfo, resolve map[s
 	unbound := map[string]bool{}
 	for i, b := range binds {
 		n := b.Norm
-		ch := resolve[n] // absent => zero value => default ("asura")
+		ch := resolve[n] // absent => zero value => default ("toren")
 		switch kind[n] {
 		case "shipped":
 			if i != shippedWinner[n] {
@@ -271,7 +271,7 @@ func planBinds(binds []importBind, shipped map[string]shippedInfo, resolve map[s
 				case dupSecond[n]:
 					plan.keep = append(plan.keep, remapBind(b, ch.remap))
 				}
-			default: // asura: keep the first, drop the rest
+			default: // toren: keep the first, drop the rest
 				if i == dupFirst[n] {
 					plan.keep = append(plan.keep, b)
 				}
@@ -289,7 +289,7 @@ func remapBind(b importBind, combo string) importBind {
 	return b
 }
 
-// parseChoice decodes a decisions.conflicts value: a bare string ("asura" /
+// parseChoice decodes a decisions.conflicts value: a bare string ("toren" /
 // "mine") or a { "remap": "<combo>" } object.
 func parseChoice(raw json.RawMessage) conflictChoice {
 	var s string
@@ -351,7 +351,7 @@ func snapshotBestEffort(ts string) {
 	}
 	// -c root + -c number so it uses the root config and prunes under NUMBER_LIMIT
 	// like update snapshots, instead of piling up untagged forever.
-	_ = exec.Command("snapper", "-c", "root", "create", "-c", "number", "-d", "asura config import "+ts).Run()
+	_ = exec.Command("snapper", "-c", "root", "create", "-c", "number", "-d", "toren config import "+ts).Run()
 	_ = exec.Command("snapper", "-c", "root", "cleanup", "number").Run()
 }
 
@@ -362,11 +362,11 @@ func layerWrite(app, name, prefix, ts, body string) pendingWrite {
 	return pendingWrite{path: target, content: []byte(upsertBlock(readFileOr(target), ts, body, prefix))}
 }
 
-// upsertBlock replaces any prior asura-import block (idempotent re-import) then
+// upsertBlock replaces any prior toren-import block (idempotent re-import) then
 // appends the new one, so a re-scan overwrites rather than stacks.
 func upsertBlock(existing, ts, body, prefix string) string {
 	cleaned := removeImportBlock(existing, prefix)
-	block := prefix + " >>> asura-import " + ts + " >>>\n" + body + prefix + " <<< asura-import <<<\n"
+	block := prefix + " >>> toren-import " + ts + " >>>\n" + body + prefix + " <<< toren-import <<<\n"
 	if strings.TrimSpace(cleaned) == "" {
 		return block
 	}
@@ -382,11 +382,11 @@ func removeImportBlock(s, prefix string) string {
 	inBlock := false
 	for _, l := range lines {
 		t := strings.TrimSpace(l)
-		if strings.HasPrefix(t, prefix+" >>> asura-import ") {
+		if strings.HasPrefix(t, prefix+" >>> toren-import ") {
 			inBlock = true
 			continue
 		}
-		if inBlock && strings.HasPrefix(t, prefix+" <<< asura-import") {
+		if inBlock && strings.HasPrefix(t, prefix+" <<< toren-import") {
 			inBlock = false
 			continue
 		}
@@ -403,7 +403,7 @@ func headerComment(prefix, ts, source string) string {
 
 // commentPreserve keeps a raw Hyprland line in user.conf as a comment, so an
 // unclassified line is never lost and never breaks the file.
-func commentPreserve(raw string) string { return "# asura-import: " + raw }
+func commentPreserve(raw string) string { return "# toren-import: " + raw }
 
 // knownHyprlandDispatchers names dispatchers accepted by Hyprland's parser.
 // Used as a fallback syntax gate when Hyprland is not installed.
@@ -453,7 +453,7 @@ func nativeBindOK(line string) bool {
 // portByHand keeps a bind Hyprland would reject as a comment, naming the
 // dispatcher the user must port manually; it does not take effect.
 func portByHand(b importBind) string {
-	return fmt.Sprintf("# asura-import (port by hand: %s): %s", b.Dispatcher, b.Raw)
+	return fmt.Sprintf("# toren-import (port by hand: %s): %s", b.Dispatcher, b.Raw)
 }
 
 // fishBody concatenates config.fish and every functions/ + conf.d/ file into one
@@ -535,7 +535,7 @@ func confContentOK(b []byte) bool {
 	if err != nil {
 		return true
 	}
-	f, err := os.CreateTemp("", "asura-import-*.conf")
+	f, err := os.CreateTemp("", "toren-import-*.conf")
 	if err != nil {
 		return true
 	}

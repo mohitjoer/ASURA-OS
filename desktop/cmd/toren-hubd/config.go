@@ -8,7 +8,7 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
-// Config = Hub's persisted state. TOML at ~/.config/asura/hub.toml. sections
+// Config = Hub's persisted state. TOML at ~/.config/toren/hub.toml. sections
 // add their own typed tables here as they graduate from "under construction";
 // for now the UI table just remembers the last open section so the Hub
 // reopens where you left it.
@@ -31,7 +31,7 @@ func configPath() string {
 	if base == "" {
 		base = filepath.Join(os.Getenv("HOME"), ".config")
 	}
-	return filepath.Join(base, "asura", "hub.toml")
+	return filepath.Join(base, "toren", "hub.toml")
 }
 
 func normalizeSection(section string) string {

@@ -25,7 +25,7 @@ func migrationSandbox(t *testing.T) (sysDir, sysState, userState string) {
 		}
 	}
 	return filepath.Join(tree, "system"), filepath.Join(base, "var", "migrations"),
-		filepath.Join(base, "state", "asura", "migrations")
+		filepath.Join(base, "state", "toren", "migrations")
 }
 
 func writeMigration(t *testing.T, dir, name, body string) {

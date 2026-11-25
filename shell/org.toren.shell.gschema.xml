@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  org.asura.shell — bar layout, dock, widgets, launcher, region selector.
+  org.toren.shell — bar layout, dock, widgets, launcher, region selector.
 
-  The shell daemon and asura-hub are the only writers. Hand-editing dconf
-  directly causes drift and `asura doctor` reports it, which is the whole reason
+  The shell daemon and toren-hub are the only writers. Hand-editing dconf
+  directly causes drift and `toren doctor` reports it, which is the whole reason
   these keys exist rather than a config file the shell reads at startup.
 
   Four of these keys — wallpaper-path, wallpaper-path-dark, favorites and
-  dock-position — are named by docs/adopting-asura.md, which imports into them
+  dock-position — are named by docs/adopting-toren.md, which imports into them
   from the GNOME schemas during adoption. Their names and types are a contract
   with that document and with the importer, not a choice made here.
 -->
 <schemalist>
 
-  <enum id="org.asura.shell.DesktopShell">
-    <value nick="asura" value="0"/>
+  <enum id="org.toren.shell.DesktopShell">
+    <value nick="toren" value="0"/>
     <value nick="desktop" value="1"/>
   </enum>
 
-  <enum id="org.asura.shell.Edge">
+  <enum id="org.toren.shell.Edge">
     <value nick="top" value="0"/>
     <value nick="bottom" value="1"/>
     <value nick="left" value="2"/>
     <value nick="right" value="3"/>
   </enum>
 
-  <schema id="org.asura.shell" path="/org/asura/shell/">
+  <schema id="org.toren.shell" path="/org/toren/shell/">
 
     <!-- ============================================================ wallpaper
          Imported by adoption from org.gnome.desktop.background. Both keys exist
@@ -43,7 +43,7 @@
     </key>
 
     <key name="wallpaper-path-dark" type="s">
-      <default>'file:///usr/share/asura/backgrounds/eva-berserk.jpg'</default>
+      <default>'file:///usr/share/toren/backgrounds/eva-berserk.jpg'</default>
       <summary>Dark-mode wallpaper</summary>
       <description>
         A URI, used when the colour scheme is prefer-dark. The default is the
@@ -51,7 +51,7 @@
         lightest in the middle, so white bar text sits on the darker band and the
         window buttons have somewhere to go. galaxy.png and code-art.png are
         quieter but are almost entirely black, which leaves the bar floating on
-        nothing. All seven ship in /usr/share/asura/backgrounds.
+        nothing. All seven ship in /usr/share/toren/backgrounds.
       </description>
     </key>
 
@@ -60,7 +60,7 @@
          shell, so a stored layout is a list of names the shell either knows or
          skips — which is what makes an unknown name a visible warning rather
          than a silent gap in the bar. -->
-    <key name="bar-position" enum="org.asura.shell.Edge">
+    <key name="bar-position" enum="org.toren.shell.Edge">
       <default>'top'</default>
       <summary>Which edge the bar is on</summary>
     </key>
@@ -70,7 +70,7 @@
       <summary>Widgets in the bar, left to right</summary>
       <description>
         Each entry is a widget name from the shell's catalogue. A name the shell
-        does not recognise is skipped and reported by `asura doctor`, never
+        does not recognise is skipped and reported by `toren doctor`, never
         dropped in silence.
       </description>
     </key>
@@ -85,7 +85,7 @@
          dock-position imports from org.gnome.desktop.wm.preferences
          button-layout, so it is an Edge rather than GNOME's left/right/top/
          bottom string layout. -->
-    <key name="dock-position" enum="org.asura.shell.Edge">
+    <key name="dock-position" enum="org.toren.shell.Edge">
       <default>'left'</default>
       <summary>Which edge the dock is on</summary>
     </key>
@@ -147,15 +147,15 @@
       <summary>Label the regions the selection snaps to</summary>
     </key>
 
-    <key name="desktop-shell" enum="org.asura.shell.DesktopShell">
+    <key name="desktop-shell" enum="org.toren.shell.DesktopShell">
       <default>'desktop'</default>
       <summary>Which desktop shell runs</summary>
       <description>
         desktop runs the desktop (bar, sidebars, overview,
-        dock, notifications, OSD, lock screen) from /usr/share/asura/shell-desktop;
-        asura runs ASURA's own shell from /usr/share/asura/shell. Both answer
+        dock, notifications, OSD, lock screen) from /usr/share/toren/shell-desktop;
+        toren runs ASURA's own shell from /usr/share/toren/shell. Both answer
         the same keybindings. Takes effect at the next login, or after
-        `sv restart ~/.local/share/asura/runit/quickshell`.
+        `sv restart ~/.local/share/toren/runit/quickshell`.
       </description>
     </key>
 

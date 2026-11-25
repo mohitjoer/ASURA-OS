@@ -1,4 +1,4 @@
--- Asura Safe Mode Hyprland Configuration
+-- Toren Safe Mode Hyprland Configuration
 -- Minimal fallback desktop for system recovery and repair.
 -- No shell, no user configs, no external plugins.
 

@@ -23,7 +23,7 @@ PanelWindow {
 
     color: "transparent"
     visible: overlay.shown
-    WlrLayershell.namespace: "asura-dock-menu"
+    WlrLayershell.namespace: "toren-dock-menu"
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
     exclusionMode: ExclusionMode.Ignore

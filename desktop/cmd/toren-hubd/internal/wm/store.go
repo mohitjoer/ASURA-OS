@@ -254,7 +254,7 @@ type Hyprscrolling struct {
 	FollowFocus bool    `json:"followFocus"`
 }
 
-// Keysounds is the key-click plugin. It is upstream's own C++ plugin and Asura does
+// Keysounds is the key-click plugin. It is upstream's own C++ plugin and Toren does
 // not build it, so the block is kept only so a store written elsewhere round-trips.
 type Keysounds struct {
 	Enabled bool    `json:"enabled"`

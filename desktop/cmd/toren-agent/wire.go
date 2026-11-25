@@ -49,7 +49,7 @@ func SupportedAgents() []AgentDef {
 			Name:     "OpenCode CLI",
 			Binaries: []string{"opencode"},
 			SkillPath: func() string {
-				return filepath.Join(getConfigHome(), "opencode", "skills", "asura")
+				return filepath.Join(getConfigHome(), "opencode", "skills", "toren")
 			},
 		},
 		{
@@ -57,7 +57,7 @@ func SupportedAgents() []AgentDef {
 			Name:     "Pi coding agent",
 			Binaries: []string{"pi"},
 			SkillPath: func() string {
-				return filepath.Join(getHome(), ".pi", "agent", "skills", "asura")
+				return filepath.Join(getHome(), ".pi", "agent", "skills", "toren")
 			},
 		},
 		{
@@ -65,7 +65,7 @@ func SupportedAgents() []AgentDef {
 			Name:     "Claude Code",
 			Binaries: []string{"claude"},
 			SkillPath: func() string {
-				return filepath.Join(getHome(), ".claude", "skills", "asura")
+				return filepath.Join(getHome(), ".claude", "skills", "toren")
 			},
 		},
 		{
@@ -73,20 +73,20 @@ func SupportedAgents() []AgentDef {
 			Name:     "Gemini CLI / Antigravity",
 			Binaries: []string{"gemini", "antigravity", "agy"},
 			SkillPath: func() string {
-				return filepath.Join(getHome(), ".gemini", "skills", "asura")
+				return filepath.Join(getHome(), ".gemini", "skills", "toren")
 			},
 		},
 	}
 }
 
-// ResolveSkillSource locates the asura skill directory.
+// ResolveSkillSource locates the toren skill directory.
 // Priority:
 // 1. ASURA_SKILLS_DIR environment override
-// 2. Packaged system skill at /usr/share/asura/shell/agent/skills/asura
-// 3. Repository checkout fallback (shell/agent/skills/asura)
+// 2. Packaged system skill at /usr/share/toren/shell/agent/skills/toren
+// 3. Repository checkout fallback (shell/agent/skills/toren)
 func ResolveSkillSource() (string, error) {
 	if env := os.Getenv("ASURA_SKILLS_DIR"); env != "" {
-		p := filepath.Join(env, "asura")
+		p := filepath.Join(env, "toren")
 		if isValidSkillDir(p) {
 			return p, nil
 		}
@@ -95,31 +95,31 @@ func ResolveSkillSource() (string, error) {
 		}
 	}
 
-	sysDir := "/usr/share/asura/shell/agent/skills/asura"
+	sysDir := "/usr/share/toren/shell/agent/skills/toren"
 	if isValidSkillDir(sysDir) {
 		return sysDir, nil
 	}
 
 	candidates := []string{
-		"shell/agent/skills/asura",
-		"../shell/agent/skills/asura",
-		"../../shell/agent/skills/asura",
+		"shell/agent/skills/toren",
+		"../shell/agent/skills/toren",
+		"../../shell/agent/skills/toren",
 	}
 
 	if pwd, err := os.Getwd(); err == nil {
 		candidates = append(candidates,
-			filepath.Join(pwd, "shell", "agent", "skills", "asura"),
-			filepath.Join(pwd, "..", "shell", "agent", "skills", "asura"),
-			filepath.Join(pwd, "..", "..", "shell", "agent", "skills", "asura"),
+			filepath.Join(pwd, "shell", "agent", "skills", "toren"),
+			filepath.Join(pwd, "..", "shell", "agent", "skills", "toren"),
+			filepath.Join(pwd, "..", "..", "shell", "agent", "skills", "toren"),
 		)
 	}
 
 	if exe, err := os.Executable(); err == nil {
 		exeDir := filepath.Dir(exe)
 		candidates = append(candidates,
-			filepath.Join(exeDir, "..", "shell", "agent", "skills", "asura"),
-			filepath.Join(exeDir, "..", "..", "shell", "agent", "skills", "asura"),
-			filepath.Join(exeDir, "..", "..", "..", "shell", "agent", "skills", "asura"),
+			filepath.Join(exeDir, "..", "shell", "agent", "skills", "toren"),
+			filepath.Join(exeDir, "..", "..", "shell", "agent", "skills", "toren"),
+			filepath.Join(exeDir, "..", "..", "..", "shell", "agent", "skills", "toren"),
 		)
 	}
 
@@ -133,7 +133,7 @@ func ResolveSkillSource() (string, error) {
 		}
 	}
 
-	return "", fmt.Errorf("could not locate Asura skill directory (checked %s and repo fallbacks)", sysDir)
+	return "", fmt.Errorf("could not locate Toren skill directory (checked %s and repo fallbacks)", sysDir)
 }
 
 func isValidSkillDir(dir string) bool {
@@ -149,14 +149,14 @@ func isValidSkillDir(dir string) bool {
 	content := string(buf[:n])
 	for _, line := range strings.Split(content, "\n") {
 		trimmed := strings.TrimSpace(line)
-		if trimmed == "name: asura" {
+		if trimmed == "name: toren" {
 			return true
 		}
 	}
 	return false
 }
 
-// isOurSkillLink checks if a link points to a valid asura skill directory.
+// isOurSkillLink checks if a link points to a valid toren skill directory.
 func isOurSkillLink(link string) bool {
 	fi, err := os.Lstat(link)
 	if err != nil || fi.Mode()&os.ModeSymlink == 0 {
@@ -244,7 +244,7 @@ func DetectAgents() []AgentInfo {
 	return out
 }
 
-// Wire links the Asura skill directory into one agent or all agents.
+// Wire links the Toren skill directory into one agent or all agents.
 func Wire(agentID string) (int, error) {
 	src, err := ResolveSkillSource()
 	if err != nil {
@@ -278,7 +278,7 @@ func Wire(agentID string) (int, error) {
 	return count, nil
 }
 
-// Unwire removes the Asura skill symlink for one agent or all agents.
+// Unwire removes the Toren skill symlink for one agent or all agents.
 func Unwire(agentID string) (int, error) {
 	defs := SupportedAgents()
 	count := 0

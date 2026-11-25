@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// config mirrors the Rust daemon's ~/.config/asura/asura-wallpaper.json: only the keys
+// config mirrors the Rust daemon's ~/.config/toren/toren-wallpaper.json: only the keys
 // the Go daemon consumes are modeled; unknown keys pass through untouched on
 // the persist path because the file is rewritten by targeted patches only.
 type config struct {
@@ -39,8 +39,8 @@ func home() string {
 	return h
 }
 
-// stateHome resolves XDG_STATE_HOME (~/.local/state fallback): where Asura's
-// cross-process state files live, including the legacy asura-wallpaper path the
+// stateHome resolves XDG_STATE_HOME (~/.local/state fallback): where Toren's
+// cross-process state files live, including the legacy toren-wallpaper path the
 // wallpaper readers (rice capture, the overview backdrop, the Super+W on-air
 // dot, the shell's palette bridge) watch to learn what is on screen.
 func stateHome() string {
@@ -50,14 +50,14 @@ func stateHome() string {
 	return filepath.Join(home(), ".local", "state")
 }
 
-func asuraConfigDir() string {
+func torenConfigDir() string {
 	if d := os.Getenv("XDG_CONFIG_HOME"); d != "" {
-		return filepath.Join(d, "asura")
+		return filepath.Join(d, "toren")
 	}
-	return filepath.Join(home(), ".config", "asura")
+	return filepath.Join(home(), ".config", "toren")
 }
 
-func configPath() string { return filepath.Join(asuraConfigDir(), "asura-wallpaper.json") }
+func configPath() string { return filepath.Join(torenConfigDir(), "toren-wallpaper.json") }
 
 func loadConfig() config {
 	var c config
@@ -108,7 +108,7 @@ func (c config) wallpaperDir() string {
 			return p
 		}
 	}
-	for _, sysPath := range []string{"/usr/share/asura/backgrounds", "/usr/share/backgrounds/asura", "/usr/share/backgrounds"} {
+	for _, sysPath := range []string{"/usr/share/toren/backgrounds", "/usr/share/backgrounds/toren", "/usr/share/backgrounds"} {
 		if dirExists(sysPath) && dirHasFiles(sysPath) {
 			return sysPath
 		}
@@ -125,7 +125,7 @@ func (c config) videoDir() string {
 	if p := resolvePath(c.Paths.VideoWallpaper); p != "" {
 		return p
 	}
-	// Asura keeps clips in ~/Pictures/livewalls (the switcher and the old live
+	// Toren keeps clips in ~/Pictures/livewalls (the switcher and the old live
 	// stack both scanned it); fall back to the shared wallpaper dir only when
 	// that folder is absent, mirroring upstream's shared-dir default.
 	if live := filepath.Join(home(), "Pictures", "livewalls"); dirExists(live) {
@@ -143,7 +143,7 @@ func (c config) cacheDir() string {
 	if p := resolvePath(c.Paths.Cache); p != "" {
 		return p
 	}
-	return filepath.Join(cacheHome(), "asura", "wallpaper")
+	return filepath.Join(cacheHome(), "toren", "wallpaper")
 }
 
 func (c config) wallpapersEnabled() bool {
@@ -182,7 +182,7 @@ func persistVideoFrame(sec float64) {
 		return
 	}
 	raw["matugen"] = b
-	_ = os.MkdirAll(asuraConfigDir(), 0o755)
+	_ = os.MkdirAll(torenConfigDir(), 0o755)
 	out, err := json.MarshalIndent(raw, "", "  ")
 	if err != nil {
 		return
@@ -191,7 +191,7 @@ func persistVideoFrame(sec float64) {
 }
 
 // persistResourceTier patches only the resource_tier key so hand-edited keys in
-// asura-wallpaper.json survive (the file is user-facing config, not daemon state).
+// toren-wallpaper.json survive (the file is user-facing config, not daemon state).
 func persistResourceTier(tier string) {
 	raw := map[string]json.RawMessage{}
 	loadJSON(configPath(), &raw)
@@ -200,7 +200,7 @@ func persistResourceTier(tier string) {
 		return
 	}
 	raw["resource_tier"] = b
-	_ = os.MkdirAll(asuraConfigDir(), 0o755)
+	_ = os.MkdirAll(torenConfigDir(), 0o755)
 	out, err := json.MarshalIndent(raw, "", "  ")
 	if err != nil {
 		return
@@ -216,7 +216,7 @@ func saveRaw(path string, b []byte) {
 	_ = os.Rename(tmp, path)
 }
 
-// contentFit reads the shell's wallpaper fill mode from asura's shell.json,
+// contentFit reads the shell's wallpaper fill mode from toren's shell.json,
 // mirroring the Rust daemon: the shell owns that preference, the daemon only
 // echoes it into published frames.
 func contentFit() string {
@@ -226,7 +226,7 @@ func contentFit() string {
 			Fit string `json:"content_fit"`
 		} `json:"wallpaper"`
 	}
-	loadJSON(filepath.Join(asuraConfigDir(), "shell.json"), &shell)
+	loadJSON(filepath.Join(torenConfigDir(), "shell.json"), &shell)
 	switch shell.Wallpaper.Fit {
 	case "Contain", "Cover", "Fill", "ScaleDown", "Center", "Tile":
 		return shell.Wallpaper.Fit
@@ -235,7 +235,7 @@ func contentFit() string {
 }
 
 // wallPrefs are the video-engine knobs the shell owns in shell.json: the
-// engine (asura-wallpaper C player or in-shell), the master switch, the bite-sized
+// engine (toren-wallpaper C player or in-shell), the master switch, the bite-sized
 // transcode, and the fps/width caps.
 type wallTune struct {
 	Engine     string `json:"video_engine"`
@@ -255,8 +255,8 @@ func wallPrefs() wallTune {
 			TransWidth *int    `json:"video_transcode_width"`
 		} `json:"wallpaper"`
 	}
-	p := wallTune{Engine: "asura-wallpaper", Enabled: true, TransFps: 24, TransWidth: 1920}
-	loadJSON(filepath.Join(asuraConfigDir(), "shell.json"), &shell)
+	p := wallTune{Engine: "toren-wallpaper", Enabled: true, TransFps: 24, TransWidth: 1920}
+	loadJSON(filepath.Join(torenConfigDir(), "shell.json"), &shell)
 	if shell.Wallpaper.Engine != nil {
 		if e := *shell.Wallpaper.Engine; e == "in_shell" {
 			p.Engine = "in_shell"
@@ -292,18 +292,18 @@ type wallAudio struct {
 
 // wallConfigDir resolves the wall-ui config directory the way its
 // Config.qml does: ASURA_WALLPAPER_WALL_CONFIG when set, else $XDG_CONFIG_HOME (or
-// ~/.config) + /asura-wallpaper-wall.
+// ~/.config) + /toren-wallpaper-wall.
 func wallConfigDir() string {
 	if d := os.Getenv("ASURA_WALLPAPER_WALL_CONFIG"); d != "" {
 		return d
 	}
 	if d := os.Getenv("XDG_CONFIG_HOME"); d != "" {
-		return filepath.Join(d, "asura-wallpaper-wall")
+		return filepath.Join(d, "toren-wallpaper-wall")
 	}
-	return filepath.Join(home(), ".config", "asura-wallpaper-wall")
+	return filepath.Join(home(), ".config", "toren-wallpaper-wall")
 }
 
-// wallAudioDefaults reads ~/.config/asura-wallpaper-wall/config.json for the picker's
+// wallAudioDefaults reads ~/.config/toren-wallpaper-wall/config.json for the picker's
 // global audio knobs, mirroring wall-ui's Config.qml: wallpaperMute is true
 // unless the key is exactly false, and wallpaperVolume defaults to 100, rounded
 // and clamped to 0-100. An absent file yields muted at full volume.

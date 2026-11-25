@@ -1,4 +1,4 @@
-// ASURA overlay (shell-desktop/asura/vendor.sh OVERLAYS): the desktop's services
+// ASURA overlay (shell-desktop/toren/vendor.sh OVERLAYS): the desktop's services
 // settings without the AI section (its sidebar is not part of ASURA).
 import QtQuick
 import QtQuick.Layouts

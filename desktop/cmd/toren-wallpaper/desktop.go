@@ -7,13 +7,13 @@ import (
 	"strings"
 )
 
-// The desktop shell (org.asura.shell desktop-shell = desktop) draws its own
+// The desktop shell (org.toren.shell desktop-shell = desktop) draws its own
 // background, wallpaper and palette, over this daemon's layer. When a wallpaper
 // is applied, applyDesktopWallpaper forwards the image to the desktop's switchwall.sh
 // so the background and Material 3 color palette stay synchronized.
 
 // desktopShellDir is where the desktop shell is installed.
-const desktopShellDir = "/usr/share/asura/shell-desktop"
+const desktopShellDir = "/usr/share/toren/shell-desktop"
 
 // desktopShell reads the configured desktop: ASURA_DESKTOP_SHELL, then the
 // GSettings key, then desktop, the schema's default.
@@ -21,7 +21,7 @@ var desktopShell = func() string {
 	if v := strings.TrimSpace(os.Getenv("ASURA_DESKTOP_SHELL")); v != "" {
 		return v
 	}
-	out, err := exec.Command("gsettings", "get", "org.asura.shell", "desktop-shell").Output()
+	out, err := exec.Command("gsettings", "get", "org.toren.shell", "desktop-shell").Output()
 	if err != nil {
 		return "desktop"
 	}

@@ -2,7 +2,7 @@ package wm
 
 // The cursor store may name a role instead of a concrete theme. "DYNAMIC" is the
 // Hub's "Follow the wallpaper" pick in upstream, where a package recolours a pointer
-// set from the palette. Asura ships no such set and is monochrome by design, so
+// set from the palette. Toren ships no such set and is monochrome by design, so
 // the sentinel is still understood (an imported rice may carry it) and resolves
 // to the default theme rather than reaching the compositor as a name that does
 // not exist on disk.

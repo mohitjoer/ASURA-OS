@@ -22,7 +22,7 @@ func TestSettingsSectionRoutesStoreCategories(t *testing.T) {
 	}
 	// Today has no Settings page; lockscreen and the app launcher are edit-only,
 	// and the flat-image categories have no page, so none routes to Settings.
-	for _, edit := range []string{"today", "lockscreens", "decors", "launcher-images", "asura-tunes-skins"} {
+	for _, edit := range []string{"today", "lockscreens", "decors", "launcher-images", "toren-tunes-skins"} {
 		if _, ok := settingsSection(edit); ok {
 			t.Fatalf("%q should have no Settings route", edit)
 		}
@@ -30,7 +30,7 @@ func TestSettingsSectionRoutesStoreCategories(t *testing.T) {
 }
 
 func TestStoreSectionIncludesShowroomRoutesAndEveryCategory(t *testing.T) {
-	for _, section := range []string{"discover", "library", "rices", "lockscreens", "barstyles", "fastfetch", "plugins", "bundles", "asura-tunes-skins"} {
+	for _, section := range []string{"discover", "library", "rices", "lockscreens", "barstyles", "fastfetch", "plugins", "bundles", "toren-tunes-skins"} {
 		if !storeSection(section) {
 			t.Fatalf("storeSection(%q) = false", section)
 		}
@@ -44,7 +44,7 @@ func TestStoreSectionIncludesShowroomRoutesAndEveryCategory(t *testing.T) {
 
 func TestDispatchRoutesHandoffCommands(t *testing.T) {
 	dir := t.TempDir()
-	for _, tool := range []string{"quickshell", "asura-shell"} {
+	for _, tool := range []string{"quickshell", "toren-shell"} {
 		if err := os.WriteFile(filepath.Join(dir, tool), []byte("#!/bin/sh\nexit 0\n"), 0o755); err != nil {
 			t.Fatal(err)
 		}

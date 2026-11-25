@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# asura-stage: the desktop's cut-out engine (docs/stage.md), shared by the
+# toren-stage: the desktop's cut-out engine (docs/stage.md), shared by the
 # Subject-in-front and Parallax effects. `cut` writes the wallpaper's subject as
 # an alpha-matted PNG, `inpaint` fills the hole it leaves with the surrounding
 # colour so a drifting subject reveals the backdrop and not its own ghost.
@@ -18,7 +18,7 @@ set -euo pipefail
 
 # One venv and one model cache for both effects.
 xdg_state="${XDG_STATE_HOME:-$HOME/.local/state}"
-state="$xdg_state/asura/asura-stage"
+state="$xdg_state/toren/toren-stage"
 venv="$state/venv"
 models="$state/models"
 export REMBG_HOME="$models"
@@ -133,7 +133,7 @@ cmd_cut() {
             break
             ;;
         -*)
-            printf 'asura-stage: unknown option %s\n' "$1" >&2
+            printf 'toren-stage: unknown option %s\n' "$1" >&2
             return 2
             ;;
         *)
@@ -152,21 +152,21 @@ cmd_cut() {
     }
 
     if [[ -z $in || -z $out ]]; then
-        printf 'usage: asura-stage cut <in> <out.png> [--model <id>] [--matting]\n' >&2
+        printf 'usage: toren-stage cut <in> <out.png> [--model <id>] [--matting]\n' >&2
         return 2
     fi
     [[ -f "$in" ]] || {
-        printf 'asura-stage: input not found: %s\n' "$in" >&2
+        printf 'toren-stage: input not found: %s\n' "$in" >&2
         return 1
     }
     is_curated "$model" || model="$default_model"
 
     rembg_python || {
-        printf 'asura-stage: engine not installed (run: asura-stage install)\n' >&2
+        printf 'toren-stage: engine not installed (run: toren-stage install)\n' >&2
         return 1
     }
     model_cached "$model" || {
-        printf 'asura-stage: model %s not downloaded\n' "$model" >&2
+        printf 'toren-stage: model %s not downloaded\n' "$model" >&2
         return 1
     }
 
@@ -201,7 +201,7 @@ PY
         fi
     fi
     rm -f "$tmp"
-    printf 'asura-stage: cut failed\n' >&2
+    printf 'toren-stage: cut failed\n' >&2
     return 1
 }
 
@@ -220,7 +220,7 @@ cmd_inpaint() {
             break
             ;;
         -*)
-            printf 'asura-stage inpaint: unknown option %s\n' "$1" >&2
+            printf 'toren-stage inpaint: unknown option %s\n' "$1" >&2
             return 2
             ;;
         *)
@@ -231,19 +231,19 @@ cmd_inpaint() {
     done
 
     if [[ -z $in || -z $mask || -z $out ]]; then
-        printf 'usage: asura-stage inpaint <image> <mask> <out.png>\n' >&2
+        printf 'usage: toren-stage inpaint <image> <mask> <out.png>\n' >&2
         return 2
     fi
     [[ -f "$in" ]] || {
-        printf 'asura-stage: image not found: %s\n' "$in" >&2
+        printf 'toren-stage: image not found: %s\n' "$in" >&2
         return 1
     }
     [[ -f "$mask" ]] || {
-        printf 'asura-stage: mask not found: %s\n' "$mask" >&2
+        printf 'toren-stage: mask not found: %s\n' "$mask" >&2
         return 1
     }
     inpaint_python || {
-        printf 'asura-stage: engine not installed (run: asura-stage install)\n' >&2
+        printf 'toren-stage: engine not installed (run: toren-stage install)\n' >&2
         return 1
     }
 
@@ -315,7 +315,7 @@ PY
         fi
     fi
     rm -f "$tmp"
-    printf 'asura-stage: inpaint failed\n' >&2
+    printf 'toren-stage: inpaint failed\n' >&2
     return 1
 }
 
@@ -350,7 +350,7 @@ ensure_venv() {
         uv python install 3.13 && uv venv --python 3.13 "$venv"
         [[ -x "$venv/bin/python" ]] && return 0
     fi
-    printf 'asura-stage: needs Python 3.11 or newer with venv (install it: sudo apt install python3-venv)\n' >&2
+    printf 'toren-stage: needs Python 3.11 or newer with venv (install it: sudo apt install python3-venv)\n' >&2
     return 1
 }
 
@@ -372,7 +372,7 @@ cmd_install() {
     printf 'Installing rembg (CPU)...\n'
     [[ -x "$venv/bin/pip" ]] && venv_pip --upgrade pip
     if ! venv_pip "rembg[cpu]"; then
-        printf 'asura-stage: could not install rembg (no onnxruntime wheel for this Python?)\n' >&2
+        printf 'toren-stage: could not install rembg (no onnxruntime wheel for this Python?)\n' >&2
         return 1
     fi
 
@@ -395,18 +395,18 @@ PY
         printf 'done\n'
         return 0
     fi
-    printf 'asura-stage: install finished but the engine is still unavailable\n' >&2
+    printf 'toren-stage: install finished but the engine is still unavailable\n' >&2
     return 1
 }
 
 cmd_remove() {
     local m="${1:-}"
     [[ -n $m ]] || {
-        printf 'usage: asura-stage remove <model>\n' >&2
+        printf 'usage: toren-stage remove <model>\n' >&2
         return 2
     }
     is_curated "$m" || {
-        printf 'asura-stage: not a curated model: %s\n' "$m" >&2
+        printf 'toren-stage: not a curated model: %s\n' "$m" >&2
         return 2
     }
     local f found=0
@@ -445,7 +445,7 @@ remove)
     cmd_remove "$@"
     ;;
 *)
-    printf 'usage: asura-stage check | models [--json] | cut <in> <out.png> [--model <id>] [--matting] | inpaint <image> <mask> <out.png> | install [model...] | remove <model>\n' >&2
+    printf 'usage: toren-stage check | models [--json] | cut <in> <out.png> [--model <id>] [--matting] | inpaint <image> <mask> <out.png> | install [model...] | remove <model>\n' >&2
     exit 2
     ;;
 esac

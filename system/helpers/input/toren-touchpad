@@ -1,11 +1,11 @@
 #!/bin/sh
-# asura-touchpad on|off|toggle|status|restore
+# toren-touchpad on|off|toggle|status|restore
 #
 # Hyprland cannot say whether a device is enabled, and it enables every pad again
 # when it rereads its config. So the intent lives in a flag file in the runtime
 # directory, and `restore` (the conf runs it on every reload) pushes it back. The
 # flag goes with the login session: a new login starts with the pad on.
-flag="${XDG_RUNTIME_DIR:-/tmp}/asura/touchpad-off"
+flag="${XDG_RUNTIME_DIR:-/tmp}/toren/touchpad-off"
 
 toast() { command -v notify-send >/dev/null 2>&1 && notify-send -a "Toren Touchpad" "$1"; return 0; }
 
@@ -32,8 +32,8 @@ flip() {
 	case $? in
 	0) toast "$2" ;;
 	1) toast "No touchpad found"; return 1 ;;
-	2) echo "asura-touchpad: cannot reach Hyprland (hyprctl devices failed)" >&2; exit 1 ;;
-	*) echo "asura-touchpad: Hyprland refused device[...]:enabled $1" >&2; exit 1 ;;
+	2) echo "toren-touchpad: cannot reach Hyprland (hyprctl devices failed)" >&2; exit 1 ;;
+	*) echo "toren-touchpad: Hyprland refused device[...]:enabled $1" >&2; exit 1 ;;
 	esac
 }
 
@@ -46,5 +46,5 @@ off) off ;;
 toggle) if [ -e "$flag" ]; then on; else off; fi ;;
 status) if [ -e "$flag" ]; then echo off; else echo on; fi ;;
 restore) if [ -e "$flag" ]; then set_pads false; fi; exit 0 ;;
-*) echo "usage: asura-touchpad on|off|toggle|status|restore" >&2; exit 2 ;;
+*) echo "usage: toren-touchpad on|off|toggle|status|restore" >&2; exit 2 ;;
 esac

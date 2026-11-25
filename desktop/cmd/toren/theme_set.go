@@ -10,11 +10,11 @@ import (
 	"strings"
 )
 
-// `asura theme set NAME` switches the desktop to a named look: the
+// `toren theme set NAME` switches the desktop to a named look: the
 // wallpaper, light or dark, the colour scheme and, for some, a fixed accent.
 // The desktop switcher (scripts/colors/switchwall.sh) applies it, and matugen
 // recolours the shell, the terminal, btop and GTK apps from it in one step.
-// The looks are listed in shell-desktop/asura/themes.json.
+// The looks are listed in shell-desktop/toren/themes.json.
 
 type namedTheme struct {
 	Name      string `json:"name"`
@@ -26,9 +26,9 @@ type namedTheme struct {
 }
 
 var (
-	themeCatalog     = "/usr/share/asura/shell-desktop/toren/themes.json"
-	themeWallpapers  = "/usr/share/asura/backgrounds"
-	themeSwitcher    = "/usr/share/asura/shell-desktop/scripts/colors/switchwall.sh"
+	themeCatalog     = "/usr/share/toren/shell-desktop/toren/themes.json"
+	themeWallpapers  = "/usr/share/toren/backgrounds"
+	themeSwitcher    = "/usr/share/toren/shell-desktop/scripts/colors/switchwall.sh"
 	themeDesktop     = currentDesktopShell
 	themeRunSwitcher = func(args ...string) error {
 		cmd := exec.Command(themeSwitcher, args...)
@@ -79,11 +79,11 @@ func themeStateFile() string {
 	if base == "" {
 		base = filepath.Join(homeDir(), ".local", "state")
 	}
-	return filepath.Join(base, "asura", "theme")
+	return filepath.Join(base, "toren", "theme")
 }
 
 func currentDesktopShell() string {
-	out, err := exec.Command("gsettings", "get", "org.asura.shell", "desktop-shell").Output()
+	out, err := exec.Command("gsettings", "get", "org.toren.shell", "desktop-shell").Output()
 	if err != nil {
 		return "desktop"
 	}
@@ -93,11 +93,11 @@ func currentDesktopShell() string {
 	return "desktop"
 }
 
-// themeSet is `asura theme set [NAME]`.
+// themeSet is `toren theme set [NAME]`.
 func themeSet(args []string) int {
 	themes, err := loadNamedThemes(themeCatalog)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura theme set:", err)
+		fmt.Fprintln(os.Stderr, "toren theme set:", err)
 		return exitFail
 	}
 	if len(args) == 0 {
@@ -105,7 +105,7 @@ func themeSet(args []string) int {
 		if b, err := os.ReadFile(themeStateFile()); err == nil {
 			current = strings.TrimSpace(string(b))
 		}
-		fmt.Println("Looks for the desktop (asura theme set NAME):")
+		fmt.Println("Looks for the desktop (toren theme set NAME):")
 		for _, t := range themes {
 			mark := " "
 			if t.Name == current {
@@ -116,7 +116,7 @@ func themeSet(args []string) int {
 		return exitOK
 	}
 	if len(args) > 1 {
-		fmt.Fprintln(os.Stderr, "usage: asura theme set [NAME]")
+		fmt.Fprintln(os.Stderr, "usage: toren theme set [NAME]")
 		return exitUsage
 	}
 	var chosen *namedTheme
@@ -130,30 +130,30 @@ func themeSet(args []string) int {
 		for _, t := range themes {
 			names = append(names, t.Name)
 		}
-		fmt.Fprintf(os.Stderr, "asura theme set: no look %q; one of: %s\n", args[0], strings.Join(names, ", "))
+		fmt.Fprintf(os.Stderr, "toren theme set: no look %q; one of: %s\n", args[0], strings.Join(names, ", "))
 		return exitUsage
 	}
 	if err := validateNamedTheme(*chosen); err != nil {
-		fmt.Fprintln(os.Stderr, "asura theme set:", err)
+		fmt.Fprintln(os.Stderr, "toren theme set:", err)
 		return exitFail
 	}
 	if shell := themeDesktop(); shell != "desktop" {
-		fmt.Fprintf(os.Stderr, "asura theme set: looks are for the desktop shell; this machine runs %q (asura theme generate IMAGE colours ASURA's shell)\n", shell)
+		fmt.Fprintf(os.Stderr, "toren theme set: looks are for the desktop shell; this machine runs %q (toren theme generate IMAGE colours ASURA's shell)\n", shell)
 		return exitFail
 	}
 	wall := filepath.Join(themeWallpapers, chosen.Wallpaper)
 	if _, err := os.Stat(wall); err != nil {
-		fmt.Fprintf(os.Stderr, "asura theme set: the wallpaper %s is not installed\n", wall)
+		fmt.Fprintf(os.Stderr, "toren theme set: the wallpaper %s is not installed\n", wall)
 		return exitFail
 	}
 	if err := themeRunSwitcher("--image", wall, "--mode", chosen.Mode, "--type", chosen.Scheme); err != nil {
-		fmt.Fprintln(os.Stderr, "asura theme set: applying the wallpaper and colours:", err)
+		fmt.Fprintln(os.Stderr, "toren theme set: applying the wallpaper and colours:", err)
 		return exitFail
 	}
 	// A fixed accent re-colours from it, keeping the wallpaper just set.
 	if chosen.Accent != "" {
 		if err := themeRunSwitcher("--noswitch", "--color", chosen.Accent, "--mode", chosen.Mode, "--type", chosen.Scheme); err != nil {
-			fmt.Fprintln(os.Stderr, "asura theme set: applying the accent colour:", err)
+			fmt.Fprintln(os.Stderr, "toren theme set: applying the accent colour:", err)
 			return exitFail
 		}
 	}

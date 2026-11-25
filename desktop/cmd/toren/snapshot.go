@@ -9,9 +9,9 @@ import (
 )
 
 // System snapshots: read-only Btrfs snapshots of / in /.snapshots, named by
-// why they were taken and when. `asura update` takes one before a system
-// update, asura-pkg-add before installing or removing packages, and a person
-// can take one by hand. `asura rollback --system` lists and restores them.
+// why they were taken and when. `toren update` takes one before a system
+// update, toren-pkg-add before installing or removing packages, and a person
+// can take one by hand. `toren rollback --system` lists and restores them.
 
 const (
 	snapshotPreUpdate  = "pre-update-"
@@ -20,14 +20,14 @@ const (
 	snapshotStamp      = "20060102-150405"
 )
 
-// snapshotReasons maps `asura snapshot create --reason` to a name prefix.
+// snapshotReasons maps `toren snapshot create --reason` to a name prefix.
 var snapshotReasons = map[string]string{
 	"update":  snapshotPreUpdate,
 	"install": snapshotPreInstall,
 	"manual":  snapshotManual,
 }
 
-const snapshotUsage = `Usage: asura snapshot [list | create [--reason update|install|manual]]
+const snapshotUsage = `Usage: toren snapshot [list | create [--reason update|install|manual]]
 
 System snapshots: read-only Btrfs snapshots of / in /.snapshots.
 
@@ -37,14 +37,14 @@ System snapshots: read-only Btrfs snapshots of / in /.snapshots.
                         it (default manual). The automatic kinds keep their
                         newest five; manual ones are never removed.
 
-Restore one with: sudo asura rollback --system NAME
+Restore one with: sudo toren rollback --system NAME
 `
 
 func init() {
-	register("snapshot", "take or list system (Btrfs) snapshots", asuraSnapshot)
+	register("snapshot", "take or list system (Btrfs) snapshots", torenSnapshot)
 }
 
-func asuraSnapshot(args []string) int {
+func torenSnapshot(args []string) int {
 	if len(args) == 0 || args[0] == "list" {
 		return printSnapshots("/.snapshots")
 	}
@@ -68,12 +68,12 @@ func asuraSnapshot(args []string) int {
 		}
 		prefix, ok := snapshotReasons[reason]
 		if !ok {
-			fmt.Fprintf(os.Stderr, "asura snapshot: unknown reason %q (update, install or manual)\n", reason)
+			fmt.Fprintf(os.Stderr, "toren snapshot: unknown reason %q (update, install or manual)\n", reason)
 			return exitUsage
 		}
 		path, err := createBtrfsSnapshotAs(prefix)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "asura snapshot:", err)
+			fmt.Fprintln(os.Stderr, "toren snapshot:", err)
 			return exitFail
 		}
 		if path == "" {
@@ -94,7 +94,7 @@ func asuraSnapshot(args []string) int {
 func printSnapshots(dir string) int {
 	snaps, err := listSnapshotsIn(dir)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura snapshot:", err)
+		fmt.Fprintln(os.Stderr, "toren snapshot:", err)
 		return exitFail
 	}
 	if len(snaps) == 0 {

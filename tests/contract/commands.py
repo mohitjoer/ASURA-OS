@@ -12,7 +12,7 @@ and .desktop Exec= lines (extract.py), and resolves each bare command against:
      one ubuntu-minimal depends on (asked of dpkg, so Ubuntu only);
   4. tests/contract/optional.txt: `name  # how the caller is gated`;
   5. a `# unavailable: TOOL (fallback)` note in a .deps file.
-Absolute /usr/share/asura/... paths must exist in the repo or in a build line.
+Absolute /usr/share/toren/... paths must exist in the repo or in a build line.
 
   commands.py            print UNRESOLVED (command, sites, file:line), exit 1 if any
   commands.py --report   same, exit 0
@@ -119,13 +119,13 @@ def providers():
     for _, _, line in read("release/build-debs.sh"):
         bins.update(re.findall(r"\$STAGE/usr/bin/([\w.+-]+)", line))
 
-    # Built Asura binaries & helper scripts
+    # Built Toren binaries & helper scripts
     cmd_dir = os.path.join(ROOT, "desktop", "cmd")
     if os.path.isdir(cmd_dir):
         for entry in os.listdir(cmd_dir):
             if os.path.isdir(os.path.join(cmd_dir, entry)):
                 bins.add(entry)
-    bins.update(["toren-vmd", "asura-vmd", "toren-vm-mon", "asura-vm-mon", "toren-vm-ssh", "asura-vm-ssh", "os-ctl", "toren-installer", "asura-installer", "void-installer", "toren-user-services", "asura-user-services"])
+    bins.update(["toren-vmd", "toren-vmd", "toren-vm-mon", "toren-vm-mon", "toren-vm-ssh", "toren-vm-ssh", "os-ctl", "toren-installer", "toren-installer", "void-installer", "toren-user-services", "toren-user-services"])
 
     runit_dir = os.path.join(ROOT, "session", "runit")
     if os.path.isdir(runit_dir):
@@ -134,7 +134,7 @@ def providers():
                 bins.add(s)
 
     for s in ("toren-hub", "toren-idle", "toren-pin", "toren-reload-cover", "toren-shot", "toren-vm", "toren-wallpaper-ui", "toren-welcome", "toren-greeter",
-              "asura-hub", "asura-idle", "asura-pin", "asura-reload-cover", "asura-shot", "asura-vm", "asura-wallpaper-ui", "asura-welcome", "asura-greeter"):
+              "toren-hub", "toren-idle", "toren-pin", "toren-reload-cover", "toren-shot", "toren-vm", "toren-wallpaper-ui", "toren-welcome", "toren-greeter"):
         if os.path.isfile(os.path.join(ROOT, "session", s)):
             bins.add(s)
     session_scripts = os.path.join(ROOT, "session", "scripts")
@@ -157,12 +157,12 @@ def providers():
         if os.path.isfile(os.path.join(ROOT, "system", "helpers", extra)):
             bins.add(extra)
 
-    # Stage 2 transition: installed systems keep asura* -> toren* symlinks in /usr/bin.
+    # Stage 2 transition: installed systems keep toren* -> toren* symlinks in /usr/bin.
     for b in list(bins):
         if b == "toren":
-            bins.add("asura")
+            bins.add("toren")
         elif b.startswith("toren-"):
-            bins.add("asura-" + b[len("toren-"):])
+            bins.add("toren-" + b[len("toren-"):])
 
     return bins, pkgs, unavail, bad
 
@@ -195,13 +195,13 @@ def owners(names):
 
 
 def path_ok(path):
-    m = re.match(r"/usr/share/asura/(shell|session|hyprland)/(.*)", path)
+    m = re.match(r"/usr/share/toren/(shell|session|hyprland)/(.*)", path)
     if m:
         sub = {"hyprland": "session/hyprland"}.get(m.group(1), m.group(1))
         rest = m.group(2)
         if os.path.exists(os.path.join(ROOT, sub, rest)):
             return True
-        if rest.startswith("asura-"):
+        if rest.startswith("toren-"):
             return os.path.exists(os.path.join(ROOT, sub, "toren-" + rest[6:]))
         return False
     return any(path == re.sub(r"^\s*\S+\s*->\s*(\S+).*", r"\1", l) for _, _, l in read("release/build.d/*.build"))
@@ -218,7 +218,7 @@ def main(argv):
     miss = {}
     for i in inv:
         if i.path and i.path.rsplit("/", 1)[0] not in BINDIRS:
-            ok = path_ok(i.path) if i.path.startswith("/usr/share/asura/") else os.path.exists(i.path)
+            ok = path_ok(i.path) if i.path.startswith("/usr/share/toren/") else os.path.exists(i.path)
         else:
             n = i.name
             alias_match = False
@@ -254,7 +254,7 @@ def selftest():
     assert {"flock", "qs", "sh", "a", "b", "c"} <= names, names
     assert any(i.dynamic for i in r.invocations)
     r = extract.ScanResult()
-    extract.scan_conf("t.conf", "$t = ghostty\nbind = SUPER, T, exec, $t -e btop\nexec-once = /usr/share/asura/x\n", r)
+    extract.scan_conf("t.conf", "$t = ghostty\nbind = SUPER, T, exec, $t -e btop\nexec-once = /usr/share/toren/x\n", r)
     assert {i.name for i in r.invocations} >= {"ghostty", "btop", "x"}
     print("commands selftest ok")
     return 0

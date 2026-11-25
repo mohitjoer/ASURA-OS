@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"asura/desktop/internal/runner/runnertest"
+	"toren/desktop/internal/runner/runnertest"
 )
 
 func TestHoldList(t *testing.T) {

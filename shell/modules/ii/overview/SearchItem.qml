@@ -52,10 +52,10 @@ RippleButton {
         if (name.includes("removable drives")) return Translation.tr("Media & Storage Device Manager");
         if (name.includes("volume") || name.includes("pavucontrol")) return Translation.tr("Audio & Mixer Settings");
         if (name.includes("mpv")) return Translation.tr("High Performance Media Player");
-        if (name.includes("asura vm") || name.includes("toren vm")) return Translation.tr("Virtual Machine Manager");
-        if (name.includes("asura store") || name.includes("toren store")) return Translation.tr("App & Package Store");
-        if (name.includes("asura settings") || name.includes("toren settings")) return Translation.tr("System Settings & Rice Hub");
-        if (name.includes("install asura") || name.includes("install toren")) return Translation.tr("Live OS Installer");
+        if (name.includes("toren vm") || name.includes("toren vm")) return Translation.tr("Virtual Machine Manager");
+        if (name.includes("toren store") || name.includes("toren store")) return Translation.tr("App & Package Store");
+        if (name.includes("toren settings") || name.includes("toren settings")) return Translation.tr("System Settings & Rice Hub");
+        if (name.includes("install toren") || name.includes("install toren")) return Translation.tr("Live OS Installer");
         if (name.includes("network")) return Translation.tr("Network Configuration & VPN");
         if (root.itemType && root.itemType !== Translation.tr("App") && root.itemType !== "App") {
             return root.itemType;
@@ -230,8 +230,8 @@ RippleButton {
                     }
 
                     const fallbacks = {
-                        "computer": ["asura-vm", "virtualbox", "system-run", "utilities-terminal", "application-x-executable"],
-                        "preferences-system": ["asura-settings", "asura-hub", "org.gnome.Settings", "system-run", "application-x-executable"],
+                        "computer": ["toren-vm", "virtualbox", "system-run", "utilities-terminal", "application-x-executable"],
+                        "preferences-system": ["toren-settings", "toren-hub", "org.gnome.Settings", "system-run", "application-x-executable"],
                         "preferences-system-network": ["network-wired", "network-workgroup", "network-wireless", "preferences-system", "application-x-executable"],
                         "nm-connection-editor": ["preferences-system-network", "network-wired"],
                         "utilities-terminal": ["ghostty", "terminal", "x-terminal-emulator", "system-run"],

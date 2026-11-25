@@ -10,7 +10,7 @@ and publishes a signed repository.
 1. `installation/apply-repo.sh --no-packages . build/stage` fills a staging
    tree, Go tools included.
 2. `packaging/xbps/build-repo.sh OUT STAGE` (in a Void container) checks the
-   stage holds the essentials, makes `asura-0.1.<commits>_1`, indexes `OUT`,
+   stage holds the essentials, makes `toren-0.1.<commits>_1`, indexes `OUT`,
    and signs both when `XBPS_SIGNING_KEY` names a private key.
    - Files under `/etc` are configuration: a locally edited one is kept, and
      the new copy is installed beside it. `/etc/sv` service scripts always
@@ -23,7 +23,7 @@ and publishes a signed repository.
 
 Every pull request that touches the packaging, and every `dev-unstable` commit
 whose `ci` workflow passed, runs this. The built repository is kept as the
-`asura-xbps-repo` artifact for seven days.
+`toren-xbps-repo` artifact for seven days.
 
 ## Turning publishing on (once, by the owner)
 
@@ -33,7 +33,7 @@ published.
 1. **Make the signing key** on your own machine, and keep it private:
 
    ```sh
-   openssl genrsa -out asura-repo.pem 4096
+   openssl genrsa -out toren-repo.pem 4096
    ```
 
 2. **Add it to the repository** as the Actions secret `XBPS_SIGNING_KEY`

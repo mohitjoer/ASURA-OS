@@ -17,4 +17,4 @@ services: []
 
 notes:
   - "Knowledge source: Linux kernel Documentation/admin-guide/laptops/hp-laptop.rst."
-  - "HP WMI thermal modes (cool, quiet, performance) via 'asura power profile'."
+  - "HP WMI thermal modes (cool, quiet, performance) via 'toren power profile'."

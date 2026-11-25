@@ -7,7 +7,7 @@ import qs.Ui.Singletons
 
 // Lighting: peripheral RGB (OpenRGB), folded from the Hub's Appearance > Lighting
 // tab. Master switch plus per-device controls (managed, mode, colour source,
-// brightness, speed, save, release), driven by `asura-hubd lighting`. State comes
+// brightness, speed, save, release), driven by `toren-hubd lighting`. State comes
 // from `lighting state`; per-device mode lists from `lighting scan`.
 Column {
     id: root
@@ -27,7 +27,7 @@ Column {
     property string _sBuf: ""
     Process {
         id: stateProc
-        command: ["asura-hubd", "lighting", "state"]
+        command: ["toren-hubd", "lighting", "state"]
         stdout: SplitParser { splitMarker: ""; onRead: function(d) { root._sBuf += d } }
         onExited: {
             try {
@@ -43,7 +43,7 @@ Column {
     property string _cBuf: ""
     Process {
         id: scanProc
-        command: ["asura-hubd", "lighting", "scan"]
+        command: ["toren-hubd", "lighting", "scan"]
         stdout: SplitParser { splitMarker: ""; onRead: function(d) { root._cBuf += d } }
         onExited: {
             try {
@@ -70,10 +70,10 @@ Column {
         }
     }
 
-    function _enable(on) { Quickshell.execDetached(["asura-hubd", "lighting", on ? "enable" : "disable"]); root._enabled = on; refreshTimer.restart() }
-    function _set(key, obj) { Quickshell.execDetached(["asura-hubd", "lighting", "set", key, JSON.stringify(obj)]); refreshTimer.restart() }
-    function _save(key) { Quickshell.execDetached(["asura-hubd", "lighting", "save", key]) }
-    function _release(key) { Quickshell.execDetached(["asura-hubd", "lighting", "release", key]); refreshTimer.restart() }
+    function _enable(on) { Quickshell.execDetached(["toren-hubd", "lighting", on ? "enable" : "disable"]); root._enabled = on; refreshTimer.restart() }
+    function _set(key, obj) { Quickshell.execDetached(["toren-hubd", "lighting", "set", key, JSON.stringify(obj)]); refreshTimer.restart() }
+    function _save(key) { Quickshell.execDetached(["toren-hubd", "lighting", "save", key]) }
+    function _release(key) { Quickshell.execDetached(["toren-hubd", "lighting", "release", key]); refreshTimer.restart() }
 
     SettingsCard {
         colors: root.colors

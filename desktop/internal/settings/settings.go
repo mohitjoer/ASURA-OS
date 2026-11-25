@@ -1,5 +1,5 @@
 // Package settings is the catalogue of everything a user can change about
-// Asura, and the commands that change it.
+// Toren, and the commands that change it.
 //
 // It exists so that "every setting that has a command also has a page, and vice
 // versa" can be checked rather than asserted. That sentence in
@@ -20,7 +20,7 @@ import (
 	"strconv"
 	"strings"
 
-	"asura/desktop/internal/gschema"
+	"toren/desktop/internal/gschema"
 )
 
 // Ref names one setting: a schema and a key.
@@ -31,27 +31,27 @@ type Ref struct {
 
 func (r Ref) String() string { return r.Schema + " " + r.Key }
 
-// Catalogue is every setting Asura ships, plus the command that reaches it.
+// Catalogue is every setting Toren ships, plus the command that reaches it.
 type Catalogue struct {
 	schemas []gschema.Schema
 }
 
-// AsuraSchemaPrefix is the id prefix Asura owns.
+// TorenSchemaPrefix is the id prefix Toren owns.
 //
 // Load keeps only these, and the filter is the point rather than a convenience.
 //
 // The schema directory on a real machine is /usr/share/glib-2.0/schemas, and it
 // holds every schema the desktop has: GTK, dconf, gsettings-desktop-schemas,
 // Firefox. Reading all of it produces a catalogue of several hundred settings
-// that have nothing to do with Asura — and the Hub's page registry would then
+// that have nothing to do with Toren — and the Hub's page registry would then
 // be checked against GNOME's preferences, which says nothing about whether
-// Asura's own settings have pages.
+// Toren's own settings have pages.
 //
-// It also means `asura config list` on a machine with GNOME installed lists
+// It also means `toren config list` on a machine with GNOME installed lists
 // GNOME's settings, which is not a tool anybody asked for.
-const AsuraSchemaPrefix = "org.asura."
+const TorenSchemaPrefix = "org.toren."
 
-// Load reads Asura's own schemas from a directory of .gschema.xml files.
+// Load reads Toren's own schemas from a directory of .gschema.xml files.
 func Load(dir string) (*Catalogue, error) {
 	schemas, err := gschema.LoadDir(dir)
 	if err != nil {
@@ -60,12 +60,12 @@ func Load(dir string) (*Catalogue, error) {
 
 	var own []gschema.Schema
 	for _, schema := range schemas {
-		if strings.HasPrefix(schema.ID, AsuraSchemaPrefix) {
+		if strings.HasPrefix(schema.ID, TorenSchemaPrefix) {
 			own = append(own, schema)
 		}
 	}
 	if len(own) == 0 {
-		return nil, fmt.Errorf("no org.asura.* schemas in %s", dir)
+		return nil, fmt.Errorf("no org.toren.* schemas in %s", dir)
 	}
 	return &Catalogue{schemas: own}, nil
 }
@@ -87,7 +87,7 @@ func (c *Catalogue) Lookup(ref Ref) (gschema.Key, gschema.Schema, error) {
 		return key, schema, nil
 	}
 	return gschema.Key{}, gschema.Schema{}, fmt.Errorf(
-		"no schema %q; Asura ships %s", ref.Schema, c.schemaIDs())
+		"no schema %q; Toren ships %s", ref.Schema, c.schemaIDs())
 }
 
 func (c *Catalogue) schemaIDs() string {
@@ -196,7 +196,7 @@ func gsettings(args ...string) (string, error) {
 // Available reports whether gsettings is installed.
 //
 // It is checked rather than assumed because the control tool is built and tested
-// on machines that are not Asura, and `asura config` on such a machine should
+// on machines that are not Toren, and `toren config` on such a machine should
 // say what is missing rather than reporting a missing schema.
 func Available() bool {
 	_, err := exec.LookPath("gsettings")

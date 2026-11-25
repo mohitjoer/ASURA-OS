@@ -558,7 +558,7 @@ Item {
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
-                                Quickshell.execDetached(["asura-store", "open", "plugins"])
+                                Quickshell.execDetached(["toren-store", "open", "plugins"])
                                 page.pickerOpen = false
                             }
                         }

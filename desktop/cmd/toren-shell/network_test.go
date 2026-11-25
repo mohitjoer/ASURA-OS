@@ -361,23 +361,23 @@ func TestDnsHelperPathUsesExecutableDirectory(t *testing.T) {
 	t.Cleanup(func() { shellDir = previousShellDir })
 
 	// Point the packaged-helper probe at an absent path so the executable-dir
-	// fallback is reachable regardless of whether this host has asura-dns.
+	// fallback is reachable regardless of whether this host has toren-dns.
 	previousPackaged := dnsPackagedHelper
-	dnsPackagedHelper = filepath.Join(t.TempDir(), "absent-asura-dns")
+	dnsPackagedHelper = filepath.Join(t.TempDir(), "absent-toren-dns")
 	t.Cleanup(func() { dnsPackagedHelper = previousPackaged })
 
 	executable, err := os.Executable()
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := filepath.Join(filepath.Dir(executable), "asura-dns")
+	want := filepath.Join(filepath.Dir(executable), "toren-dns")
 	if got := dnsHelperPath(); got != want {
 		t.Errorf("dnsHelperPath() = %q, want %q", got, want)
 	}
 }
 
 func TestDnsHelperPathPrefersPackaged(t *testing.T) {
-	pkg := filepath.Join(t.TempDir(), "asura-dns")
+	pkg := filepath.Join(t.TempDir(), "toren-dns")
 	if err := os.WriteFile(pkg, []byte("#!/bin/sh\n"), 0o755); err != nil {
 		t.Fatal(err)
 	}

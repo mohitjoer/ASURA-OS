@@ -1,11 +1,11 @@
 #!/bin/sh
 # The store window.
 #
-# A wrapper for the same reason asura-hub is one: `quickshell -p` on the entry
+# A wrapper for the same reason toren-hub is one: `quickshell -p` on the entry
 # file is the whole program, and the entry file sits at the shell's root so the
 # `qs.*` imports resolve. It is installed with the session scripts and not on
-# PATH, because /usr/bin/asura-store is the command line tool, and that tool
-# (`asura-store open`) is what starts this and then steers the window by IPC.
+# PATH, because /usr/bin/toren-store is the command line tool, and that tool
+# (`toren-store open`) is what starts this and then steers the window by IPC.
 #
 # The lock keeps a second start (a Browse button in Settings, the launcher) to
 # the one window; the second start exits at the lock and the IPC call reaches the
@@ -13,12 +13,12 @@
 set -eu
 
 QUICKSHELL_BIN=${ASURA_QUICKSHELL:-/usr/bin/quickshell}
-ENTRY=/usr/share/asura/shell/store.qml
-LOCK="${XDG_RUNTIME_DIR:-/tmp}/asura-store.lock"
+ENTRY=/usr/share/toren/shell/store.qml
+LOCK="${XDG_RUNTIME_DIR:-/tmp}/toren-store.lock"
 
 if [ ! -x "$QUICKSHELL_BIN" ]; then
-    echo "asura-store: $QUICKSHELL_BIN is not installed." >&2
-    echo "asura-store: the store window is drawn by Quickshell, which Asura builds." >&2
+    echo "toren-store: $QUICKSHELL_BIN is not installed." >&2
+    echo "toren-store: the store window is drawn by Quickshell, which Toren builds." >&2
     exit 1
 fi
 

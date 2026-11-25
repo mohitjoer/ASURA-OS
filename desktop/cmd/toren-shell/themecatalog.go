@@ -6,9 +6,9 @@ import "encoding/json"
 // wallpaper switcher's Color-scheme belt draws from. It is derived from the
 // authoritative 30-role palettes (themes_gen.go), so those stay the single
 // source of the colours; only the two dynamic variants and the handful of
-// accented display labels are named here. `asura-shell theme catalog` prints it
+// accented display labels are named here. `toren-shell theme catalog` prints it
 // (client-side, in main.go: the JSON is larger than the daemon socket's reply
-// buffer and needs no running daemon), and `asura-shell theme <name>` applies a
+// buffer and needs no running daemon), and `toren-shell theme <name>` applies a
 // scheme through the settings seam (daemon.go).
 
 // themeCard is one entry in the projection: the id written to theme.theme, a

@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-// Extension sets mirror crates/asura-wallpaper/src/wall/mod.rs (IMAGE_EXTS/VIDEO_EXTS)
+// Extension sets mirror crates/toren-wallpaper/src/wall/mod.rs (IMAGE_EXTS/VIDEO_EXTS)
 // rather than the leaner set sketched in the port brief: the daemon must key the
 // cache identically to the Rust build it drops in for, so gif stays a static and
 // the extra raster formats stay recognized.
@@ -177,7 +177,7 @@ func processItem(it scanned, prior map[string]Entry, onItem func(Entry)) Entry {
 	}
 	if regen {
 		if err := genFullThumb(it); err != nil {
-			fmt.Fprintf(os.Stderr, "asura-wallpaper: thumb failed for %s: %v\n", it.name, err)
+			fmt.Fprintf(os.Stderr, "toren-wallpaper: thumb failed for %s: %v\n", it.name, err)
 			return e
 		}
 	}
@@ -185,7 +185,7 @@ func processItem(it scanned, prior map[string]Entry, onItem func(Entry)) Entry {
 
 	if smi, err := os.Stat(it.thumbSmPath); err != nil || smi.ModTime().Unix() < fileMtime(it.thumbPath) {
 		if err := genSmallThumb(it.thumbPath, it.thumbSmPath); err != nil {
-			fmt.Fprintf(os.Stderr, "asura-wallpaper: small thumb failed for %s: %v\n", it.name, err)
+			fmt.Fprintf(os.Stderr, "toren-wallpaper: small thumb failed for %s: %v\n", it.name, err)
 		} else {
 			e.ThumbSm = it.thumbSmPath
 		}
@@ -493,7 +493,7 @@ func ensureAnimatedMp4(it scanned) string {
 	}
 	if out, err := cmd.CombinedOutput(); err != nil {
 		os.Remove(tmp)
-		fmt.Fprintf(os.Stderr, "asura-wallpaper: animated transcode failed for %s: %v: %s\n",
+		fmt.Fprintf(os.Stderr, "toren-wallpaper: animated transcode failed for %s: %v: %s\n",
 			it.name, err, strings.TrimSpace(string(out)))
 		return ""
 	}
@@ -536,7 +536,7 @@ func ensureVideoPreview(it scanned) string {
 	}
 	if out, err := cmd.CombinedOutput(); err != nil {
 		os.Remove(tmp)
-		fmt.Fprintf(os.Stderr, "asura-wallpaper: preview failed for %s: %v: %s\n", it.name, err, strings.TrimSpace(string(out)))
+		fmt.Fprintf(os.Stderr, "toren-wallpaper: preview failed for %s: %v: %s\n", it.name, err, strings.TrimSpace(string(out)))
 		return ""
 	}
 	if os.Rename(tmp, prev) != nil {

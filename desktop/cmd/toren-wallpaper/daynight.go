@@ -91,13 +91,13 @@ func isDay(fallback bool) bool {
 	return fallback
 }
 
-// shellSocketPath is asura-shell's control socket, where the weather topic lives.
+// shellSocketPath is toren-shell's control socket, where the weather topic lives.
 func shellSocketPath() string {
 	dir := os.Getenv("XDG_RUNTIME_DIR")
 	if dir == "" {
 		dir = "/tmp"
 	}
-	return filepath.Join(dir, "asura-shell.sock")
+	return filepath.Join(dir, "toren-shell.sock")
 }
 
 // poolFor returns the active pool directory for the current phase.

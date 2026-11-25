@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import ".."
 
-// Asura tab / filter pill, orthogonal (never skewed):
+// Toren tab / filter pill, orthogonal (never skewed):
 //  · text, active   -> a bone plate with dark ink, and a //LEAD when register.
 //  · text, inactive -> transparent hairline, tracked ink label.
 //  · icon, active    -> a subtle ink-tint cell with the sun accent glyph (never
@@ -17,7 +17,7 @@ Item {
     property string label: ""
     property bool useNerdFont: icon !== ""
     property string tooltip: ""
-    property int skew: 10                 // kept for API; Asura draws orthogonal
+    property int skew: 10                 // kept for API; Toren draws orthogonal
     property color activeColor: "transparent"
     property bool hasActiveColor: false
     property real activeOpacity: 1.0

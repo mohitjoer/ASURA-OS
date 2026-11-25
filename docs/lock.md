@@ -5,17 +5,17 @@ is in the Void archive, and it runs as a process of its own, apart from the
 shell. The shell, hypridle and the `toren-shell` daemon only decide when it
 runs.
 
-| Piece | Where | Job |
-|---|---|---|
-| hyprlock | `session/hyprland/hyprlock.conf` | the look: blurred wallpaper, clock, date, password field, battery, now playing |
-| hypridle | `session/hyprland/hypridle.conf` | the idle stages (dim, lock, screen off) and locking before sleep |
-| `toren-idle` | `session/toren-idle`, `system/runit/user-services/toren-idle/run` | runs hypridle with the timeouts |
-| the shell | `shell/Idle.qml`, `shell/IdleOverlay.qml` | draws the dim scrim; keeps the lock's wallpaper link current |
-| Lockscreen page | `shell/hub/pages/LockscreenPage.qml` | says what is missing; locks now |
+| Piece           | Where                                                             | Job                                                                            |
+| --------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| hyprlock        | `session/hyprland/hyprlock.conf`                                  | the look: blurred wallpaper, clock, date, password field, battery, now playing |
+| hypridle        | `session/hyprland/hypridle.conf`                                  | the idle stages (dim, lock, screen off) and locking before sleep               |
+| `toren-idle`    | `session/toren-idle`, `system/runit/user-services/toren-idle/run` | runs hypridle with the timeouts                                                |
+| the shell       | `shell/Idle.qml`, `shell/IdleOverlay.qml`                         | draws the dim scrim; keeps the lock's wallpaper link current                   |
+| Lockscreen page | `shell/hub/pages/LockscreenPage.qml`                              | says what is missing; locks now                                                |
 
 ## Timeouts
 
-`org.asura.desktop` holds `idle-dim-seconds`, `idle-blank-seconds` and
+`org.toren.desktop` holds `idle-dim-seconds`, `idle-blank-seconds` and
 `idle-lock-seconds`; 0 means never. hypridle cannot read GSettings, so
 `toren-idle start` reads them with `gsettings` and exports `ASURA_IDLE_DIM`,
 `ASURA_IDLE_BLANK` and `ASURA_IDLE_LOCK`, leaving a variable unset for a 0.
@@ -42,8 +42,8 @@ The screen-off stage is `hyprctl dispatch dpms off`, so there is no blank scrim.
 
 1. do nothing, successfully, when this user's hyprlock is already running;
 2. run `hyprlock -c CONF`, with CONF the first readable of
-   `~/.config/asura/hyprland/hyprlock.conf` and
-   `/usr/share/asura/hyprland/hyprlock.conf` (hyprlock exits without locking
+   `~/.config/toren/hyprland/hyprlock.conf` and
+   `/usr/share/toren/hyprland/hyprlock.conf` (hyprlock exits without locking
    when its config is missing, as a bare `hyprlock` does with no
    `~/.config/hypr/hyprlock.conf`);
 3. work when the daemon is not running, since hypridle calls it directly;
@@ -58,10 +58,10 @@ The screen-off stage is `hyprctl dispatch dpms off`, so there is no blank scrim.
   hyprlock never starts, logind suspends after its delay anyway.
 - hyprlock's own fingerprint support is left off. Void's `libpam-fprintd` puts
   the reader in the PAM stack, and enabling both would have each ask for it.
-- The lock background is a link at `~/.config/asura/current/background`, kept at
+- The lock background is a link at `~/.config/toren/current/background`, kept at
   the current wallpaper by `shell/Idle.qml`. A video wallpaper keeps the last
   image.
-- There is no suspend stage: `org.asura.desktop` has no key for it. Adding
+- There is no suspend stage: `org.toren.desktop` has no key for it. Adding
   `idle-suspend-seconds` (schema and registry page) and one more `# hyprlang if`
   block in `hypridle.conf` that runs `toren-shell suspend` is all it takes.
 - Session confirmations (logout, reboot, shutdown) stay as they are in

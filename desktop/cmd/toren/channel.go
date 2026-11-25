@@ -7,29 +7,29 @@ import (
 	"strings"
 )
 
-// `asura channel get` is read by the Hub's Updates page to say which channel
+// `toren channel get` is read by the Hub's Updates page to say which channel
 // the machine follows. `set` is not here: moving a machine between channels
 // is one line in the repository config file.
 
 // xbpsRepoConf is the repository configuration file for Void Linux XBPS.
-const xbpsRepoConf = "/etc/xbps.d/asura.conf"
+const xbpsRepoConf = "/etc/xbps.d/toren.conf"
 
-const channelUsage = `Usage: asura channel get [--root DIR]
-       asura channel set stable|unstable [--root DIR]
+const channelUsage = `Usage: toren channel get [--root DIR]
+       toren channel set stable|unstable [--root DIR]
 
 get prints the channel this machine follows. set chooses it:
 
   stable     follow main, where releases are cut
   unstable   follow dev-unstable, which every merged change reaches first
 
-Either way, asura update only installs commits that passed CI.
+Either way, toren update only installs commits that passed CI.
 `
 
 func init() {
-	register("channel", "the channel updates follow (get, or set stable|unstable)", asuraChannel)
+	register("channel", "the channel updates follow (get, or set stable|unstable)", torenChannel)
 }
 
-func asuraChannel(args []string) int {
+func torenChannel(args []string) int {
 	set := newFlags("channel", channelUsage)
 	root := set.String("root", "", "operate on a tree under this directory")
 	positional, err := parseFlags(set, args)
@@ -50,23 +50,23 @@ func asuraChannel(args []string) int {
 
 	channel, err := xbpsChannel(*root)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura channel:", err)
+		fmt.Fprintln(os.Stderr, "toren channel:", err)
 		return exitFail
 	}
 	fmt.Println(channel)
 	return exitOK
 }
 
-// xbpsChannel reads the channel or primary repository from Asura's XBPS configuration.
+// xbpsChannel reads the channel or primary repository from Toren's XBPS configuration.
 func xbpsChannel(root string) (string, error) {
 	path := filepath.Join(root, xbpsRepoConf)
 	data, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			alt := filepath.Join(root, "/usr/share/xbps.d/asura.conf")
+			alt := filepath.Join(root, "/usr/share/xbps.d/toren.conf")
 			data, err = os.ReadFile(alt)
 			if err != nil {
-				return "", fmt.Errorf("no Asura repository is configured: %s does not exist", path)
+				return "", fmt.Errorf("no Toren repository is configured: %s does not exist", path)
 			}
 		} else {
 			return "", err

@@ -1,7 +1,7 @@
 # Writing an Toren shell plugin
 
 A plugin is a small widget you write that the **user** drops into the Toren
-desktop. You write the *content and the logic*. **Toren owns everything about how
+desktop. You write the _content and the logic_. **Toren owns everything about how
 it looks, moves, sizes, and where it lives.** That split is the whole point: a
 plugin always looks and behaves like a native part of the shell, because the
 shell - not you - draws the surface around it.
@@ -22,56 +22,56 @@ Eleven rules make a plugin safe to install and native to the shell.
 `toren plugin audit` enforces the ones a machine can check.
 
 - **R1 Place.** A plugin is one folder named after its id, authored under
-  `$(xdg-user-dir DOCUMENTS)/asura-plugins/<id>/` (fallback
-  `~/asura-plugins/<id>/`); `toren plugin new <id>` creates it there. Never write
-  into `~/.local/share/asura/plugins/` (the install root, which `toren plugin
-  install` fills) or `/usr/share/asura/` (the shipped shell). *Why:* those trees
+  `$(xdg-user-dir DOCUMENTS)/toren-plugins/<id>/` (fallback
+  `~/toren-plugins/<id>/`); `toren plugin new <id>` creates it there. Never write
+  into `~/.local/share/toren/plugins/` (the install root, which `toren plugin
+install` fills) or `/usr/share/toren/` (the shipped shell). _Why:_ those trees
   belong to the installer and the package, so a stray file there is either
   loaded unaudited or replaced on the next update.
 - **R2 Shape.** `manifest.json` at the root; `service/Main.qml` (logic, no UI);
   `content/Widget.qml` (the one view); optional `content/Panel.qml` (a bar
   panel); `README.md`; `LICENSE`; `assets/preview-widget.png` (a real capture);
   scripts only under `bin/` with a shebang and the exec bit. Every extra file is
-  listed in manifest `files`. *Why:* the list is what a reader, and any catalogue
+  listed in manifest `files`. _Why:_ the list is what a reader, and any catalogue
   that packages the plugin, takes the plugin to consist of.
 - **R3 Id.** Lowercase `[a-z0-9][a-z0-9-]*`, unique, and not a built-in widget
-  id. *Why:* the id is the folder name, the layout key and the settings
+  id. _Why:_ the id is the folder name, the layout key and the settings
   namespace, so a collision shadows a built-in or another plugin.
 - **R4 Imports.** Only `QtQuick*`, `Quickshell*`, `qs.PluginKit`,
   `qs.PluginKit.Singletons`, and files inside the plugin folder. Never
   `shell.*`, any other `qs.*` module, or a relative import that climbs out of the
-  folder. *Why:* the kit is the only stable surface, so reaching into shell
+  folder. _Why:_ the kit is the only stable surface, so reaching into shell
   internals breaks on every update and escapes the folder.
 - **R5 Settings.** Declared in `metadata.settings` (the types the bar renders:
   `toggle`, `choice`, `multi`, `int`, `text`); read through
   `pluginApi.pluginSettings` behind a default; written only through
   `pluginApi.saveSetting(key, value)`. Never edit `shell.json` or `plugins.json`
-  directly. *Why:* the shell renders and persists settings for you, and
+  directly. _Why:_ the shell renders and persists settings for you, and
   hand-editing those files corrupts state it owns.
 - **R6 Commands.** Every external program is in the plugin's own `bin/` or listed
   in `dependencies.commands`. No `sudo`, `doas`, `su`. A privileged action is
   allowed only through `pkexec`, only on an explicit click, only when listed in
   manifest `capabilities.privileged` (exact command strings) and explained in the
-  README. *Why:* a reader and the validator can then see every binary the plugin
+  README. _Why:_ a reader and the validator can then see every binary the plugin
   runs and every escalation it can ask for.
 - **R7 Network.** Every host the plugin talks to is listed in
   `capabilities.network`. No `curl … | sh`, no downloading and running code.
-  *Why:* the manifest declares the whole network reach up front, and
+  _Why:_ the manifest declares the whole network reach up front, and
   fetch-and-run hides code from review.
 - **R8 Files.** Write only under `pluginApi.stateDir`
-  (`$XDG_STATE_HOME/asura/plugins/<id>`), `$XDG_CACHE_HOME/asura/plugins/<id>`,
+  (`$XDG_STATE_HOME/toren/plugins/<id>`), `$XDG_CACHE_HOME/toren/plugins/<id>`,
   or a temp dir. Never touch `~/.ssh`, `/etc`, shell rc files, or another
-  plugin's folder. *Why:* a widget has no business outside its own state, and
+  plugin's folder. _Why:_ a widget has no business outside its own state, and
   those paths are where damage and data theft happen.
 - **R9 Shell.** No `sh -c` with a string built from settings or program output;
-  pass argv arrays. *Why:* a value spliced into a shell string is a command
+  pass argv arrays. _Why:_ a value spliced into a shell string is a command
   injection hole.
 - **R10 Secrets and binaries.** No tokens, keys or credentials in the tree; no
-  compiled binaries (ELF/Mach-O/`.so`) and no symlinks; scripts only. *Why:* the
+  compiled binaries (ELF/Mach-O/`.so`) and no symlinks; scripts only. _Why:_ the
   tree is public and readable, so a secret leaks and a binary cannot be reviewed.
 - **R11 Honesty.** `official` is never `true` for a community plugin; `author` is
   `Name <mail>`; the README says what runs, what it reads, what it writes, and
-  every privileged or network capability. *Why:* users decide to trust an
+  every privileged or network capability. _Why:_ users decide to trust an
   unsandboxed widget from the manifest and README, so both must be truthful.
 
 ---
@@ -100,17 +100,17 @@ to check, and one to install:
 
 ## Who does what
 
-| You (the contributor) write... | Toren (the shell) handles for you... |
-|---|---|
-| The **logic**: fetch data, hold state, run commands (`service/Main.qml`). | **Where the widget lives** (frame popout, desktop widget) and letting the user choose and move it. |
-| **One view** of your widget (`content/Widget.qml`) - the labels, buttons, grid, etc. | The **card / popout surface** behind your view: background, rounded corners, shadow, hairline. |
-| A small **manifest** describing your plugin and its defaults. | **Dragging, resizing, the right-click menu, hover-to-open** - all the interaction. |
-| A **settings schema** in your manifest (`metadata.settings`). | **Sizing**: the popout grows to fit your content; the desktop tile scales as the user resizes it. |
-| Optionally, **shipped scripts/binaries** (`bin/`). | **Theming, motion, the brand look** (the "deck dialect"), so you match the shell automatically. |
+| You (the contributor) write...                                                       | Toren (the shell) handles for you...                                                               |
+| ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| The **logic**: fetch data, hold state, run commands (`service/Main.qml`).            | **Where the widget lives** (frame popout, desktop widget) and letting the user choose and move it. |
+| **One view** of your widget (`content/Widget.qml`) - the labels, buttons, grid, etc. | The **card / popout surface** behind your view: background, rounded corners, shadow, hairline.     |
+| A small **manifest** describing your plugin and its defaults.                        | **Dragging, resizing, the right-click menu, hover-to-open** - all the interaction.                 |
+| A **settings schema** in your manifest (`metadata.settings`).                        | **Sizing**: the popout grows to fit your content; the desktop tile scales as the user resizes it.  |
+| Optionally, **shipped scripts/binaries** (`bin/`).                                   | **Theming, motion, the brand look** (the "deck dialect"), so you match the shell automatically.    |
 
 **The golden rule:** never set your own position, never draw your own window
-chrome, never assume your size. You declare *how big your content naturally
-wants to be*; Toren does the rest. Break this rule and your plugin will look
+chrome, never assume your size. You declare _how big your content naturally
+wants to be_; Toren does the rest. Break this rule and your plugin will look
 bolted-on instead of native.
 
 ---
@@ -126,7 +126,7 @@ bolted-on instead of native.
   README.md            what it is + a preview.gif                      (recommended)
 ```
 
-- **Installed** to `~/.local/share/asura/plugins/<id>/`.
+- **Installed** to `~/.local/share/toren/plugins/<id>/`.
 - **For local dev**, point `ASURA_PLUGINS_DIR` at a folder of plugins (colon-
   separated for several): they shadow installed ones of the same id, and the
   shell discovers them live.
@@ -136,7 +136,7 @@ bolted-on instead of native.
 ## The three hosts a user can choose
 
 When a user enables your plugin they pick **one** of these in Toren Settings →
-Plugins. Your *same* `content/Widget.qml` is used for all three - Toren just
+Plugins. Your _same_ `content/Widget.qml` is used for all three - Toren just
 renders it differently.
 
 ### 1. Desktop widget - a tile on the wallpaper
@@ -204,7 +204,7 @@ island.
 - A bar glyph **is a layout entry**, the same kind of entry as a built-in widget:
   it lives in `shell.json` `top.layout`, so a user drags it between lanes in QS
   Bar Settings' Layout route or moves it from a terminal with `toren-shell bar
-  move <id> --section left|center|right`. It shows once it is enabled with
+move <id> --section left|center|right`. It shows once it is enabled with
   `host: topbarGlyph` in `plugins.json`.
 
 Declare `topbarGlyph` in `hosts`, and include `"glyph"` in
@@ -212,12 +212,12 @@ Declare `topbarGlyph` in `hosts`, and include `"glyph"` in
 
 What the bar host sets on your `content` (read them, never assign them):
 
-| Property | Value on the bar |
-| --- | --- |
-| `density` | `"glyph"` |
-| `widthBudget` | `220` (logical px; cap any text you draw to it) |
-| `active` | `true` while mounted |
-| `pluginApi` | your handle: `mainInstance`, `pluginSettings`, `pluginDir` |
+| Property      | Value on the bar                                           |
+| ------------- | ---------------------------------------------------------- |
+| `density`     | `"glyph"`                                                  |
+| `widthBudget` | `220` (logical px; cap any text you draw to it)            |
+| `active`      | `true` while mounted                                       |
+| `pluginApi`   | your handle: `mainInstance`, `pluginSettings`, `pluginDir` |
 
 The host reads your `implicitWidth`/`implicitHeight` and centres the view in a
 slot about 32 px tall. Draw the mark with the shell's own icon font: `Text {
@@ -232,7 +232,7 @@ menu types and do not render there, so a bar widget picks from the first set.
 
 Install a bar plugin straight from git, or from a folder on this desktop, with
 `toren plugin install <git-url|dir> --bar`: it validates the manifest, audits
-the tree, copies it to `~/.local/share/asura/plugins/<id>`, enables it on the
+the tree, copies it to `~/.local/share/toren/plugins/<id>`, enables it on the
 bar, and the shell picks it up on the `plugins.json` change, no restart. It
 lists on the bar's Community page (any plugin whose manifest is not
 `"official": true`) with the community warning, its author, its switch and
@@ -256,13 +256,13 @@ the bar stays your `content/Widget.qml`; the panel is what opens beneath it.
 `Panel.qml` receives the same host-set properties as `content/Widget.qml`, at
 `full` density:
 
-| Property Toren sets | Value on `Panel.qml` |
-| --- | --- |
-| `pluginApi` | your handle (the reference below) |
-| `density` | `"full"` |
-| `s` | scale multiplier; multiply your sizes and font sizes by it |
-| `widthBudget` | the panel width from manifest `panel.width` (default `320`, clamped `240..520`) |
-| `active` | `true` while the panel is open |
+| Property Toren sets | Value on `Panel.qml`                                                            |
+| ------------------- | ------------------------------------------------------------------------------- |
+| `pluginApi`         | your handle (the reference below)                                               |
+| `density`           | `"full"`                                                                        |
+| `s`                 | scale multiplier; multiply your sizes and font sizes by it                      |
+| `widthBudget`       | the panel width from manifest `panel.width` (default `320`, clamped `240..520`) |
+| `active`            | `true` while the panel is open                                                  |
 
 The host fills `Panel.qml` to the card's inside width, `panel.width` minus 24 px
 of padding, and reads back its `implicitHeight` to size the card, capping that
@@ -279,15 +279,15 @@ onClicked: pluginApi.togglePanel()
 Every entry point (`main`, `content`, `panel`) receives one `pluginApi` object.
 Read it; never reassign it.
 
-| Member | Kind | What it is |
-| --- | --- | --- |
-| `mainInstance` | `var` | your live `service/Main.qml` instance |
-| `pluginSettings` | `var` | the resolved settings; read each key behind its default |
-| `pluginDir` | `string` | the installed plugin folder (build `bin/` paths from it) |
-| `stateDir` | `string` | `$XDG_STATE_HOME/asura/plugins/<id>`, created by the host on load; the only place you write (R8) |
-| `saveSetting(key, value)` | function | persists one setting through `asura-plugins-place`; `pluginSettings` re-derives on the `plugins.json` change (R5) |
-| `panelOpen` | `bool` (readonly) | whether the bar panel is open (bar host; present but inert elsewhere) |
-| `openPanel()` / `closePanel()` / `togglePanel()` | function | open, close, or toggle the bar panel |
+| Member                                           | Kind              | What it is                                                                                                        |
+| ------------------------------------------------ | ----------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `mainInstance`                                   | `var`             | your live `service/Main.qml` instance                                                                             |
+| `pluginSettings`                                 | `var`             | the resolved settings; read each key behind its default                                                           |
+| `pluginDir`                                      | `string`          | the installed plugin folder (build `bin/` paths from it)                                                          |
+| `stateDir`                                       | `string`          | `$XDG_STATE_HOME/toren/plugins/<id>`, created by the host on load; the only place you write (R8)                  |
+| `saveSetting(key, value)`                        | function          | persists one setting through `toren-plugins-place`; `pluginSettings` re-derives on the `plugins.json` change (R5) |
+| `panelOpen`                                      | `bool` (readonly) | whether the bar panel is open (bar host; present but inert elsewhere)                                             |
+| `openPanel()` / `closePanel()` / `togglePanel()` | function          | open, close, or toggle the bar panel                                                                              |
 
 Your service and its `pluginApi` survive a settings write: `saveSetting`
 persists the value and re-derives `pluginSettings` without tearing anything
@@ -306,13 +306,13 @@ changes anything.
 This is your view. Toren sets a few properties on its root **for you to read** -
 **never assign them**:
 
-| Property Toren sets | What it means | What you do with it |
-|---|---|---|
-| `pluginApi` | handle to your service + settings + folder | read `pluginApi.mainInstance` for your live `service/Main.qml` |
-| `density` | `"glyph"`, `"compact"`, or `"full"` | lay out smaller/larger for the space you're given |
-| `widthBudget` | the width you have to lay out within | size your content to this width, not to the screen |
-| `active` | true while your widget is open/visible | start/stop work (e.g. don't poll when hidden) |
-| `screen` | the monitor this copy is on | usually ignore it |
+| Property Toren sets | What it means                              | What you do with it                                            |
+| ------------------- | ------------------------------------------ | -------------------------------------------------------------- |
+| `pluginApi`         | handle to your service + settings + folder | read `pluginApi.mainInstance` for your live `service/Main.qml` |
+| `density`           | `"glyph"`, `"compact"`, or `"full"`        | lay out smaller/larger for the space you're given              |
+| `widthBudget`       | the width you have to lay out within       | size your content to this width, not to the screen             |
+| `active`            | true while your widget is open/visible     | start/stop work (e.g. don't poll when hidden)                  |
+| `screen`            | the monitor this copy is on                | usually ignore it                                              |
 
 ### Sizing - the one thing you MUST get right
 
@@ -352,6 +352,7 @@ Item {
 ```
 
 Rules that keep it native:
+
 - **Bind children to your own `contentW`**, never to `parent.width` through
   nested layouts (that leaves width-derived heights at zero and your widget
   collapses).
@@ -432,10 +433,34 @@ value for it, and `undefined` must not become your poll interval.
   "dependencies": { "commands": ["curl", "jq"] },
   "metadata": {
     "settings": [
-      { "key": "poll", "type": "int", "label": "Refresh seconds", "group": "General", "default": 10, "min": 3, "max": 60 },
-      { "key": "barLabel", "type": "choice", "label": "Beside the mark", "group": "General", "default": "name",
-        "options": [ { "value": "none", "label": "Nothing" }, { "value": "name", "label": "Name" }, { "value": "ip", "label": "IP" } ] },
-      { "key": "confirmOff", "type": "toggle", "label": "Ask before turning off", "group": "General", "default": true }
+      {
+        "key": "poll",
+        "type": "int",
+        "label": "Refresh seconds",
+        "group": "General",
+        "default": 10,
+        "min": 3,
+        "max": 60
+      },
+      {
+        "key": "barLabel",
+        "type": "choice",
+        "label": "Beside the mark",
+        "group": "General",
+        "default": "name",
+        "options": [
+          { "value": "none", "label": "Nothing" },
+          { "value": "name", "label": "Name" },
+          { "value": "ip", "label": "IP" }
+        ]
+      },
+      {
+        "key": "confirmOff",
+        "type": "toggle",
+        "label": "Ask before turning off",
+        "group": "General",
+        "default": true
+      }
     ]
   }
 }
@@ -444,11 +469,11 @@ value for it, and `undefined` must not become your poll interval.
 - `hosts` - declare **only the hosts you actually support and have tested**
   (today: `framePopout`, `desktopWidget`, `topbarGlyph`). Don't list hosts that
   don't work.
-- `defaults` - *suggestions*. The user's choices in Settings always win. For
+- `defaults` - _suggestions_. The user's choices in Settings always win. For
   `framePopout`, `align` is `start`, `center` or `end`, and `edge: "center"`
   asks for the centred (modal) surface, which opens only on request. A bar
   widget's defaults are just `{ "host": "topbarGlyph", "icon": "...", "label":
-  "..." }`, plus an optional `"bar": { "section": "left|center|right" }` for
+"..." }`, plus an optional `"bar": { "section": "left|center|right" }` for
   the lane it first lands in (the end of the right lane when absent; the
   Layout route moves it from there, and that choice is kept). `icon` is a
   Material Symbols Rounded ligature name (`vpn_lock`, `extension`, ...), the
@@ -484,20 +509,20 @@ refuse to install (unless
 you pass `--allow-findings`); `--allow <rule>` downgrades one named blocking rule
 to a warning for the run. **Warning** rules are printed but do not block.
 
-| Rule id | Blocks? | What it catches |
-| --- | --- | --- |
-| `symlink` | **yes** | any symlink in the tree (R2, R10) |
-| `escalation` | **yes** | `sudo`, `doas` or `su` anywhere, or `pkexec` not declared in `capabilities.privileged` (R6) |
-| `pipe-shell` | **yes** | `curl … \| sh` and other download-and-run (R7) |
-| `internal-import` | **yes** | importing `shell.*`, the prior project's module or any `qs.*` module but the kit, or climbing out of the folder (R4) |
-| `config-write` | **yes** | writing to `shell.json`, `plugins.json`, `~/.ssh`, `/etc`, or shell rc files (R5, R8) |
-| `secret` | **yes** | a token, key or credential in the tree (R10) |
-| `binary` | **yes** | a compiled binary, ELF/Mach-O/`.so` (R10) |
-| `undeclared-command` | no | a `Process` / `execDetached` `argv[0]` not in `bin/`, `dependencies.commands`, or the allowlist (R6) |
-| `undeclared-host` | no | an `https?://host` literal not in `capabilities.network` (R7) |
-| `dynamic-shell` | no | `sh` / `bash -c` whose argument is not a single string literal (R9) |
-| `outside-write` | no | a write outside `stateDir`, cache, or a temp dir (R8) |
-| `large-tree` | no | a tree larger than 20 MB |
+| Rule id              | Blocks? | What it catches                                                                                                      |
+| -------------------- | ------- | -------------------------------------------------------------------------------------------------------------------- |
+| `symlink`            | **yes** | any symlink in the tree (R2, R10)                                                                                    |
+| `escalation`         | **yes** | `sudo`, `doas` or `su` anywhere, or `pkexec` not declared in `capabilities.privileged` (R6)                          |
+| `pipe-shell`         | **yes** | `curl … \| sh` and other download-and-run (R7)                                                                       |
+| `internal-import`    | **yes** | importing `shell.*`, the prior project's module or any `qs.*` module but the kit, or climbing out of the folder (R4) |
+| `config-write`       | **yes** | writing to `shell.json`, `plugins.json`, `~/.ssh`, `/etc`, or shell rc files (R5, R8)                                |
+| `secret`             | **yes** | a token, key or credential in the tree (R10)                                                                         |
+| `binary`             | **yes** | a compiled binary, ELF/Mach-O/`.so` (R10)                                                                            |
+| `undeclared-command` | no      | a `Process` / `execDetached` `argv[0]` not in `bin/`, `dependencies.commands`, or the allowlist (R6)                 |
+| `undeclared-host`    | no      | an `https?://host` literal not in `capabilities.network` (R7)                                                        |
+| `dynamic-shell`      | no      | `sh` / `bash -c` whose argument is not a single string literal (R9)                                                  |
+| `outside-write`      | no      | a write outside `stateDir`, cache, or a temp dir (R8)                                                                |
+| `large-tree`         | no      | a tree larger than 20 MB                                                                                             |
 
 The audit is a safety net, not a sandbox: a plugin runs unsandboxed inside the
 shell with your permissions, and nothing reviews a community plugin for you.
@@ -511,11 +536,11 @@ URL it finds.
 ## Install, enable, place
 
 - **Install**: `toren plugin install <git-url|dir> [--bar]` (audited, then copied
-  to `~/.local/share/asura/plugins/<id>`; `add` is an alias). A folder you drop
+  to `~/.local/share/toren/plugins/<id>`; `add` is an alias). A folder you drop
   there by hand loads too, but nothing audited it.
 - **Enable & place**: `toren plugin enable <id> [--bar|--desktop|--popout]` and
   `disable <id>`, or the bar's Community page. Placement saves to
-  `~/.config/asura/plugins.json`, written only by `asura-plugins-place`; the
+  `~/.config/toren/plugins.json`, written only by `toren-plugins-place`; the
   shell watches that file and retunes live - no restart.
 - **Desktop widgets** are then moved/resized/hidden directly on the wallpaper
   (drag, corner-resize, right-click) - not from Settings.
@@ -527,13 +552,13 @@ URL it finds.
 A plugin written for the prior project needs these renames, and `toren plugin audit` reports
 each one with the fix:
 
-| Prior project | Toren |
-|---|---|
-| `import <prior>.PluginKit` | `import qs.PluginKit` |
-| `import <prior>.PluginKit.Singletons` | `import qs.PluginKit.Singletons` |
-| `<prior>-shell`, `<prior>-plugins-place`, `<prior>` | `toren-shell`, `asura-plugins-place`, `toren` |
-| `~/.config/<prior>`, `~/.local/share/<prior>`, `$XDG_STATE_HOME/<prior>/plugins/<id>` | the same paths with `toren` |
-| `<PRIOR>_*`, `<PRIOR_STORE>_PLUGINS_DIR` | `ASURA_*`, `ASURA_PLUGINS_DIR` |
+| Prior project                                                                         | Toren                                         |
+| ------------------------------------------------------------------------------------- | --------------------------------------------- |
+| `import <prior>.PluginKit`                                                            | `import qs.PluginKit`                         |
+| `import <prior>.PluginKit.Singletons`                                                 | `import qs.PluginKit.Singletons`              |
+| `<prior>-shell`, `<prior>-plugins-place`, `<prior>`                                   | `toren-shell`, `toren-plugins-place`, `toren` |
+| `~/.config/<prior>`, `~/.local/share/<prior>`, `$XDG_STATE_HOME/<prior>/plugins/<id>` | the same paths with `toren`                   |
+| `<PRIOR>_*`, `<PRIOR_STORE>_PLUGINS_DIR`                                              | `ASURA_*`, `ASURA_PLUGINS_DIR`                |
 
 The kit keeps every token name it had (`Theme.verm`, `Theme.flameInk` ...) so the
 plugin still loads, but the values are greys: the design system has no accent
@@ -551,4 +576,3 @@ paints** in Quickshell (a scene-graph quirk). Put image/thumbnail delegates
 inline - a plain `Rectangle { Image {} }` - or in their own `.qml` file, **not**
 inside an inline `component { ... }`. See `wallhaven`'s grid for the working
 pattern.
-

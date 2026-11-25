@@ -16,13 +16,13 @@ import (
 
 	"golang.org/x/sys/unix"
 
-	"asura/desktop/internal/wm"
+	"toren/desktop/internal/wm"
 )
 
 // nightlight.go owns the night light so its state is a pushed topic instead of
 // a shell poll. The on/off truth is the provider's backend process, named by its
 // caps (gamma lives in the compositor, so a dead process is the only honest
-// "off"); the temperature is the state file asura-cmd-nightlight writes. The
+// "off"); the temperature is the state file toren-cmd-nightlight writes. The
 // watcher inotifies the state directory and rescans /proc on every change, so a
 // toggle from the keybind, the script, the Hub, or a kill all reach QML without
 // anything polling. Toggling from QML rides the same script: an intent is a user
@@ -136,7 +136,7 @@ func nightlightPaths() (dir, temp string) {
 		}
 		base = filepath.Join(home, ".local", "state")
 	}
-	return base, filepath.Join(base, "asura-nightlight")
+	return base, filepath.Join(base, "toren-nightlight")
 }
 
 // startNightlight registers the `nightlight` topic and its intents, then starts
@@ -151,7 +151,7 @@ func (d *daemon) startNightlight() {
 		wmc:            d.wmc,
 		stateDir:       dir,
 		tempFile:       temp,
-		schedFile:      filepath.Join(dir, "asura-nightlight-schedule.json"),
+		schedFile:      filepath.Join(dir, "toren-nightlight-schedule.json"),
 		schedMode:      nlSchedOff,
 		schedMarginMin: nlDefaultMarginMin,
 		stopR:          -1,
@@ -247,12 +247,12 @@ func (n *nightlightState) intent(args ...string) error {
 	return err
 }
 
-// run execs asura-cmd-nightlight with the verb and waits, so the caller's reply
+// run execs toren-cmd-nightlight with the verb and waits, so the caller's reply
 // reflects a completed toggle. The script republishes nothing itself; the
 // marker and temp writes land in the state dir, which wakes the watcher to push
 // the new frame.
 func (n *nightlightState) run(args ...string) error {
-	bin, err := exec.LookPath("asura-cmd-nightlight")
+	bin, err := exec.LookPath("toren-cmd-nightlight")
 	if err != nil {
 		return err
 	}
@@ -260,7 +260,7 @@ func (n *nightlightState) run(args ...string) error {
 	cmd.SysProcAttr = &syscall.SysProcAttr{Pdeathsig: syscall.SIGKILL}
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Printf("asura-shell: nightlight %v: %v: %s", args, err, strings.TrimSpace(string(out)))
+		log.Printf("toren-shell: nightlight %v: %v: %s", args, err, strings.TrimSpace(string(out)))
 	}
 	return err
 }
@@ -288,7 +288,7 @@ func (n *nightlightState) watch() {
 	if n.stateDir != "" {
 		_ = os.MkdirAll(n.stateDir, 0o755)
 		if _, err := unix.InotifyAddWatch(fd, n.stateDir, unix.IN_CLOSE_WRITE|unix.IN_CREATE|unix.IN_DELETE|unix.IN_MOVED_TO); err != nil {
-			log.Printf("asura-shell: nightlight watch failed: %v", err)
+			log.Printf("toren-shell: nightlight watch failed: %v", err)
 		}
 	}
 
@@ -362,7 +362,7 @@ func (n *nightlightState) loopNoWatch() {
 }
 
 // settle resolves a state-dir wake, where the first /proc scan can lie: the
-// script writes the enabled marker before `asura wm act nightlight.on` has
+// script writes the enabled marker before `toren wm act nightlight.on` has
 // spawned the backend, so a scan in that window sees no process and would
 // publish off. Read the marker (the script's declared intent) once, then rescan
 // /proc every 100 ms until running() agrees with it or 3 s elapse, and report
@@ -391,7 +391,7 @@ func (n *nightlightState) markerEnabled() bool {
 	if n.stateDir == "" {
 		return false
 	}
-	_, err := os.Stat(filepath.Join(n.stateDir, "asura-nightlight-enabled"))
+	_, err := os.Stat(filepath.Join(n.stateDir, "toren-nightlight-enabled"))
 	return err == nil
 }
 

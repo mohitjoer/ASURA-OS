@@ -3,7 +3,7 @@ import qs.services
 import QtQuick
 import QtQuick.Layouts
 
-// ASURA overlay (shell-desktop/asura/vendor.sh OVERLAYS): the bar's resources,
+// ASURA overlay (shell-desktop/toren/vendor.sh OVERLAYS): the bar's resources,
 // at the right end of the bar. CPU and RAM are always shown, swap only while
 // it is in use, each as a labelled readout (Resource.qml). Hovering shows
 // end-4's detailed popup.

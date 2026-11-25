@@ -3,12 +3,12 @@
 # report, the conf keys it writes, the verb that was dropped, and the launcher's
 # dispatch. Nothing here starts QEMU or Quickshell.
 #
-#   sh desktop/cmd/asura-vm/vm_test.sh
+#   sh desktop/cmd/toren-vm/vm_test.sh
 set -eu
 
 here=$(cd "$(dirname "$0")" && pwd)
-engine=$here/asura-vmd
-launcher=$here/../../../session/asura-vm
+engine=$here/toren-vmd
+launcher=$here/../../../session/toren-vm
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 fail() { echo "FAIL: $*" >&2; exit 1; }
@@ -37,11 +37,11 @@ echo "$caps" | jq -e '(.kvm | not) or .kvmDevice' >/dev/null || fail "usable /de
 : >"$work/disc.iso"
 run import probe "$work/disc.iso" linux ubuntu >/dev/null
 conf=$work/vm/probe.conf
-grep -q '^asura_vm_os="ubuntu"' "$conf" || fail "the VM's catalogue slug was not stamped: $(cat "$conf")"
+grep -q '^toren_vm_os="ubuntu"' "$conf" || fail "the VM's catalogue slug was not stamped: $(cat "$conf")"
 sh -c ". '$conf'" || fail "the conf does not source as shell"
 [ "$(run list | jq -r '.[0].os')" = ubuntu ] || fail "list does not read the slug back"
 
-# 4. Looking Glass is not set up on Asura, so its verb is gone.
+# 4. Looking Glass is not set up on Toren, so its verb is gone.
 rc=0; run lg >/dev/null 2>"$work/err" || rc=$?
 [ "$rc" = 2 ] || fail "the lg verb still exists (exit $rc)"
 grep -q '|lg' "$work/err" && fail "usage still lists lg"
@@ -49,11 +49,11 @@ grep -q '|lg' "$work/err" && fail "usage still lists lg"
 # 5. The launcher hands engine verbs on and opens the window for nothing else.
 fake=$work/fake
 mkdir "$fake"
-printf '#!/bin/sh\necho "vmd $*"\n' >"$fake/asura-vmd"
+printf '#!/bin/sh\necho "vmd $*"\n' >"$fake/toren-vmd"
 printf '#!/bin/sh\necho "qs $*"\n' >"$fake/quickshell"
-chmod +x "$fake/asura-vmd" "$fake/quickshell"
+chmod +x "$fake/toren-vmd" "$fake/quickshell"
 [ "$(PATH="$fake:$PATH" sh "$launcher" list foo)" = "vmd list foo" ] || fail "launcher did not forward an engine verb"
-[ "$(PATH="$fake:$PATH" XDG_RUNTIME_DIR="$work" ASURA_QUICKSHELL="$fake/quickshell" sh "$launcher")" = "qs -p /usr/share/asura/shell/vm.qml" ] \
+[ "$(PATH="$fake:$PATH" XDG_RUNTIME_DIR="$work" ASURA_QUICKSHELL="$fake/quickshell" sh "$launcher")" = "qs -p /usr/share/toren/shell/vm.qml" ] \
     || fail "launcher did not start the window with the VM entry"
 rc=0; PATH="$fake:$PATH" ASURA_QUICKSHELL="$work/missing" sh "$launcher" ui >/dev/null 2>&1 || rc=$?
 [ "$rc" = 1 ] || fail "launcher with no Quickshell should exit 1, got $rc"

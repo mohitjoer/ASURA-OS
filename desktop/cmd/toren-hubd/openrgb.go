@@ -22,10 +22,10 @@ import (
 const (
 	orgbAddr     = "127.0.0.1:6742"
 	orgbProtocol = 5
-	orgbClient   = "asura-hubd"
+	orgbClient   = "toren-hubd"
 )
 
-// packet ids (NetworkProtocol.h). Only the ones Asura needs.
+// packet ids (NetworkProtocol.h). Only the ones Toren needs.
 const (
 	pktControllerCount   = 0
 	pktControllerData    = 1
@@ -51,7 +51,7 @@ const (
 	modeAutomaticSave  = 1 << 9
 )
 
-// direction values (RGBController.h MODE_DIRECTION_*), by the name Asura stores.
+// direction values (RGBController.h MODE_DIRECTION_*), by the name Toren stores.
 var orgbDirections = []struct {
 	Name string
 	Flag uint32

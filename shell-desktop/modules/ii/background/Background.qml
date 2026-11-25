@@ -60,7 +60,7 @@ Variants {
         readonly property bool verticalParallax: (Config.options.background.parallax.autoVertical && wallpaperHeight > wallpaperWidth) || Config.options.background.parallax.vertical
         // Colors
         property bool shouldBlur: (GlobalStates.screenLocked && Config.options.lock.blur.enable)
-        property color dominantColor: (bgQuantizer.colors && bgQuantizer.colors.length > 0) ? bgQuantizer.colors[0] : (asuraColorsAdapter.primary ?? Appearance.colors.colPrimary)
+        property color dominantColor: (bgQuantizer.colors && bgQuantizer.colors.length > 0) ? bgQuantizer.colors[0] : (torenColorsAdapter.primary ?? Appearance.colors.colPrimary)
         property bool dominantColorIsDark: dominantColor.hslLightness < 0.55
         property color colText: {
             if (wallpaperSafetyTriggered)
@@ -102,14 +102,14 @@ Variants {
 
         // Cache colors file reader
         FileView {
-            id: asuraColorsFile
-            path: (Quickshell.env("XDG_CACHE_HOME") || (Quickshell.env("HOME") + "/.cache")) + "/asura/colors.json"
+            id: torenColorsFile
+            path: (Quickshell.env("XDG_CACHE_HOME") || (Quickshell.env("HOME") + "/.cache")) + "/toren/colors.json"
             watchChanges: true
             printErrors: false
             onFileChanged: reload()
 
             JsonAdapter {
-                id: asuraColorsAdapter
+                id: torenColorsAdapter
                 property color primary: Appearance.colors.colPrimary
                 property color secondary: Appearance.colors.colSecondary
             }
@@ -117,14 +117,14 @@ Variants {
 
         // ASURA widgets persistence (reads widgets.json configured from Hub Settings > Widgets)
         FileView {
-            id: asuraWidgetsFile
-            path: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/asura/widgets.json"
+            id: torenWidgetsFile
+            path: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/toren/widgets.json"
             watchChanges: true
             printErrors: false
             onFileChanged: reload()
 
             JsonAdapter {
-                id: asuraWidgetsAdapter
+                id: torenWidgetsAdapter
                 property bool clockEnabled: true
                 property string clockDesign: "zen"
                 property bool clock24h: true
@@ -321,26 +321,26 @@ Variants {
 
                 // ASURA Desktop HUD Clock: Default Wallpaper Widget
                 FadeLoader {
-                    id: asuraClockLoader
-                    shown: asuraWidgetsAdapter.clockEnabled && (!GlobalStates.screenLocked || Config.options.lock.centerClock === false)
+                    id: torenClockLoader
+                    shown: torenWidgetsAdapter.clockEnabled && (!GlobalStates.screenLocked || Config.options.lock.centerClock === false)
                     sourceComponent: Item {
                         id: clockWidget
                         width: clockCol.implicitWidth
                         height: clockCol.implicitHeight
 
-                        readonly property real s: Math.max(0.5, Math.min(2.0, asuraWidgetsAdapter.clockScale || 1.0))
-                        readonly property string anchor: asuraWidgetsAdapter.clockAnchor || "top-left"
+                        readonly property real s: Math.max(0.5, Math.min(2.0, torenWidgetsAdapter.clockScale || 1.0))
+                        readonly property string anchor: torenWidgetsAdapter.clockAnchor || "top-left"
                         readonly property real marginX: 72
                         readonly property real marginY: 64
 
                         x: {
-                            if (anchor === "free") return Math.max(0, Math.min(asuraWidgetsAdapter.clockX, bgRoot.screen.width - width));
+                            if (anchor === "free") return Math.max(0, Math.min(torenWidgetsAdapter.clockX, bgRoot.screen.width - width));
                             if (anchor.indexOf("right") >= 0) return bgRoot.screen.width - width - marginX;
                             if (anchor.indexOf("center") >= 0 || anchor === "top" || anchor === "bottom") return (bgRoot.screen.width - width) / 2;
                             return marginX;
                         }
                         y: {
-                            if (anchor === "free") return Math.max(0, Math.min(asuraWidgetsAdapter.clockY, bgRoot.screen.height - height));
+                            if (anchor === "free") return Math.max(0, Math.min(torenWidgetsAdapter.clockY, bgRoot.screen.height - height));
                             if (anchor.indexOf("bottom") >= 0) return bgRoot.screen.height - height - marginY;
                             if (anchor === "center" || anchor === "left" || anchor === "right") return (bgRoot.screen.height - height) / 2;
                             return marginY;
@@ -360,7 +360,7 @@ Variants {
                         readonly property int mins: now.getMinutes()
                         readonly property int secs: now.getSeconds()
                         readonly property int h12: (rawH % 12) === 0 ? 12 : (rawH % 12)
-                        readonly property string hh: asuraWidgetsAdapter.clock24h ? pad2(rawH) : String(h12)
+                        readonly property string hh: torenWidgetsAdapter.clock24h ? pad2(rawH) : String(h12)
                         readonly property string mm: pad2(mins)
                         readonly property string ss: pad2(secs)
                         readonly property string ampm: rawH < 12 ? "AM" : "PM"
@@ -369,7 +369,7 @@ Variants {
                         readonly property string dateStr: weekdaysShort[now.getDay()] + " " + now.getDate()
 
                         readonly property color wallAccent: {
-                            var p = (asuraColorsAdapter.primary && asuraColorsAdapter.primary != "#000000") ? asuraColorsAdapter.primary : bgRoot.dominantColor;
+                            var p = (torenColorsAdapter.primary && torenColorsAdapter.primary != "#000000") ? torenColorsAdapter.primary : bgRoot.dominantColor;
                             var hue = p.hsvHue < 0 ? bgRoot.dominantColor.hsvHue : p.hsvHue;
                             if (hue < 0) hue = 0.58; // clean cyan-blue fallback
                             var sat = Math.max(0.45, Math.min(1.0, p.hsvSaturation * 1.35));
@@ -380,8 +380,8 @@ Variants {
                         readonly property color inkSoft: CF.ColorUtils.transparentize(ink, 0.20)
                         readonly property color inkDim: CF.ColorUtils.transparentize(ink, 0.45)
                         readonly property color accent: {
-                            if (asuraWidgetsAdapter.clockAccent === "brand") return "#F25623";
-                            if (asuraWidgetsAdapter.clockAccent === "mono") return ink;
+                            if (torenWidgetsAdapter.clockAccent === "brand") return "#F25623";
+                            if (torenWidgetsAdapter.clockAccent === "mono") return ink;
                             return wallAccent;
                         }
 
@@ -427,11 +427,11 @@ Variants {
                                 }
 
                                 Column {
-                                    visible: asuraWidgetsAdapter.clockSeconds || !asuraWidgetsAdapter.clock24h
+                                    visible: torenWidgetsAdapter.clockSeconds || !torenWidgetsAdapter.clock24h
                                     anchors.verticalCenter: parent.verticalCenter
                                     spacing: 2
                                     Text {
-                                        visible: asuraWidgetsAdapter.clockSeconds
+                                        visible: torenWidgetsAdapter.clockSeconds
                                         text: clockWidget.ss
                                         color: clockWidget.accent
                                         font.family: Appearance.font.family.mono
@@ -439,7 +439,7 @@ Variants {
                                         font.weight: Font.Medium
                                     }
                                     Text {
-                                        visible: !asuraWidgetsAdapter.clock24h
+                                        visible: !torenWidgetsAdapter.clock24h
                                         text: clockWidget.ampm
                                         color: clockWidget.inkDim
                                         font.family: Appearance.font.family.main
@@ -452,7 +452,7 @@ Variants {
                             // HUD Date & Vitals Pill: [ FRI 20 | 94% | 12% CPU · 4.2G ]
                             Rectangle {
                                 id: hudPill
-                                visible: asuraWidgetsAdapter.dateShow
+                                visible: torenWidgetsAdapter.dateShow
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 implicitWidth: hudRow.implicitWidth + Math.round(22 * clockWidget.s)
                                 implicitHeight: hudRow.implicitHeight + Math.round(10 * clockWidget.s)

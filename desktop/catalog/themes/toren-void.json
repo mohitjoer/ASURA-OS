@@ -1,5 +1,5 @@
 {
-  "id": "asura-void",
+  "id": "toren-void",
   "name": "Toren Void",
   "category": "themes",
   "summary": "Signature minimal brutalist pitch-black theme with crimson accents",
@@ -8,7 +8,7 @@
   "version": "1.0.0",
   "license": "GPL-3.0",
   "tags": ["official", "dark", "brutalist", "minimal", "void"],
-  "upstream": "https://github.com/ASURA-OS/theme-asura-void",
+  "upstream": "https://github.com/TOREN-OS/theme-toren-void",
   "metadata": {
     "provider": "Official",
     "verified": true

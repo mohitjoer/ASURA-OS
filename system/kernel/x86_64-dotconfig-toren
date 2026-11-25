@@ -1,4 +1,4 @@
-# Asura OS Low-Latency Gaming & Compilation Kernel Configuration
+# Toren OS Low-Latency Gaming & Compilation Kernel Configuration
 # Designed for maximum 1% low gaming framerates and sub-millisecond desktop response
 # Layer 2 Tuning: CachyOS / BORE patchset, 1000Hz, Full Preemption, sched_ext
 

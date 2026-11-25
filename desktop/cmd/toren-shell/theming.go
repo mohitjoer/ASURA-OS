@@ -11,31 +11,31 @@ import (
 	"strings"
 	"time"
 
-	"asura/desktop/internal/wm"
+	"toren/desktop/internal/wm"
 )
 
-// theming.go is what asura-shell keeps of the old wallpaper file after asura-wallpaper
+// theming.go is what toren-shell keeps of the old wallpaper file after toren-wallpaper
 // took ownership of the wallpaper (apply, the topic, transitions, depth) and the
 // dynamic wallpaper->palette pipeline: the named-theme palette worker, plus the
 // few wallpaper-adjacent helpers the surviving readers (walltone, the matugen
 // preview CLI) still need. The wallpaper render backend itself lives in the
-// asura-wallpaper daemon now.
+// toren-wallpaper daemon now.
 
 func findHubBin() string {
-	if p, err := exec.LookPath("asura-hubd"); err == nil {
+	if p, err := exec.LookPath("toren-hubd"); err == nil {
 		return p
 	}
 	home := os.Getenv("HOME")
 	for _, cand := range []string{
-		filepath.Join(home, ".local", "bin", "asura-hubd"),
-		"/usr/local/bin/asura-hubd",
-		"/usr/bin/asura-hubd",
+		filepath.Join(home, ".local", "bin", "toren-hubd"),
+		"/usr/local/bin/toren-hubd",
+		"/usr/bin/toren-hubd",
 	} {
 		if _, err := os.Stat(cand); err == nil {
 			return cand
 		}
 	}
-	return "asura-hubd"
+	return "toren-hubd"
 }
 
 func isFile(p string) bool {
@@ -51,9 +51,9 @@ func isVideo(p string) bool {
 	return false
 }
 
-// wallsTune: the wallpaper per-image tune (asura-walls.json). frameOffset
+// wallsTune: the wallpaper per-image tune (toren-walls.json). frameOffset
 // reads the sampled frame second for a video wallpaper from it.
-func wallsTune() string { return filepath.Join(stateDir(), "asura-walls.json") }
+func wallsTune() string { return filepath.Join(stateDir(), "toren-walls.json") }
 
 // liveFrame: one still from the video, for matugen (and the wallpaper preview) to
 // read. Cached per clip, mtime and offset, and renamed into place. It used to be
@@ -66,7 +66,7 @@ func liveFrame(video string) string {
 		return ""
 	}
 	off := frameOffset(video)
-	dir := filepath.Join(stateDir(), "asura-live-frames")
+	dir := filepath.Join(stateDir(), "toren-live-frames")
 	name := strings.TrimSuffix(filepath.Base(video), filepath.Ext(video))
 	out := filepath.Join(dir, name+"-"+strconv.FormatInt(st.ModTime().Unix(), 10)+"-"+off+".png")
 	if isFile(out) {
@@ -98,7 +98,7 @@ const liveFrameKeep = 24
 
 func pruneLiveFrames(dir string) {
 	// the one shared still this cache replaced, on a box that still carries it
-	_ = os.Remove(filepath.Join(stateDir(), "asura-live-frame.png"))
+	_ = os.Remove(filepath.Join(stateDir(), "toren-live-frame.png"))
 	ents, err := os.ReadDir(dir)
 	if err != nil || len(ents) <= liveFrameKeep {
 		return
@@ -152,8 +152,8 @@ func (d *daemon) scheduleTheme() {
 
 // paintWorker: regen the palette for whatever is on screen, reload hypr
 // (config-only, monitors untouched), wake the LED worker. The wallpaper source
-// is the asura-wallpaper frame the bridge mirrors (watchWallpaper schedules a pass on
-// every switch), matugenApply authors ~/.cache/asura/colors.json and fans the
+// is the toren-wallpaper frame the bridge mirrors (watchWallpaper schedules a pass on
+// every switch), matugenApply authors ~/.cache/toren/colors.json and fans the
 // palette into the app templates, and a fixed named theme overrides the
 // dynamic path entirely so the two never write colors.json on the same
 // trigger. Runs for the life of the daemon.
@@ -219,7 +219,7 @@ func themeAppsEnabled() bool {
 	if base == "" {
 		base = filepath.Join(os.Getenv("HOME"), ".config")
 	}
-	b, err := os.ReadFile(filepath.Join(base, "asura", "theme.json"))
+	b, err := os.ReadFile(filepath.Join(base, "toren", "theme.json"))
 	if err != nil {
 		return true
 	}
@@ -232,10 +232,10 @@ func themeAppsEnabled() bool {
 	return *s.ThemeApps
 }
 
-// blankGtk drops the Asura palette from the generated GTK stylesheets, so GTK /
+// blankGtk drops the Toren palette from the generated GTK stylesheets, so GTK /
 // libadwaita apps fall back to their own stock colours when app theming is off.
 func blankGtk(cfgBase string) {
-	const off = "/* Asura: app theming is off; apps use their own colours. */\n"
+	const off = "/* Toren: app theming is off; apps use their own colours. */\n"
 	for _, rel := range []string{"gtk-3.0/gtk.css", "gtk-4.0/gtk.css"} {
 		p := filepath.Join(cfgBase, rel)
 		_ = os.MkdirAll(filepath.Dir(p), 0o755)
@@ -244,7 +244,7 @@ func blankGtk(cfgBase string) {
 }
 
 // ledsWorker: push the new accent at the lighting devices the user put under
-// Asura's control. `asura-hubd lighting accent` returns without touching anything
+// Toren's control. `toren-hubd lighting accent` returns without touching anything
 // while lighting is off or no device is adopted, so an untouched install never
 // talks to a keyboard. Reaching hardware is slow (seconds on first use), so it
 // lives on its own coalescing worker and never touches the theme hot path. Runs

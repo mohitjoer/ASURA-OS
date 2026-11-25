@@ -7,7 +7,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
 
-// ASURA overlay (shell-desktop/asura/vendor.sh OVERLAYS): the desktop's dock as an
+// ASURA overlay (shell-desktop/toren/vendor.sh OVERLAYS): the desktop's dock as an
 // island. It holds only the apps (the desktop's DockApps: pinned apps and running
 // windows, with their previews), in a compact pill that floats above the
 // bottom edge.

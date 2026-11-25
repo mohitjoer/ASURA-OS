@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Engine for asura-vm: the data plane behind the asura-vm app. A thin, JSON-speaking
+# Engine for toren-vm: the data plane behind the toren-vm app. A thin, JSON-speaking
 # wrapper around quickemu + quickget (the QEMU front-end that auto-downloads
 # ~1000 OSes and runs them with tuned defaults), so the QML never shells out to
 # qemu itself. Every VM is one quickemu .conf under the VMs dir, which makes
@@ -12,7 +12,7 @@
 #   list                             local VMs + live run state
 #   get <name>                       one VM: config + state + snapshots
 #   create <os> <release> [edition]  quickget download+config (streams progress)
-#   instant <os> [name] [--disposable] a prebuilt cloud image, asura/asura burn account, no installer
+#   instant <os> [name] [--disposable] a prebuilt cloud image, toren/toren burn account, no installer
 #   cloud-catalog                    the curated cloud-image list (JSON)
 #   import <name> <iso> [guest]      a VM from any ISO (full QEMU, off-catalogue)
 #   launch <name> [window|spice|headless]   start detached
@@ -27,10 +27,10 @@
 #   folder [name]                    print the VMs dir (or one VM dir)
 set -euo pipefail
 
-vms_dir="${ASURA_VM_HOME:-${XDG_DATA_HOME:-$HOME/.local/share}/asura/vm}"
-cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/asura"
-catalog_cache="$cache_dir/asura-vm-catalog.json"
-icon_dir="$cache_dir/asura-vm-icons"
+vms_dir="${ASURA_VM_HOME:-${XDG_DATA_HOME:-$HOME/.local/share}/toren/vm}"
+cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/toren"
+catalog_cache="$cache_dir/toren-vm-catalog.json"
+icon_dir="$cache_dir/toren-vm-icons"
 icon_ttl_days=14                 # refresh a cached OS logo after this many days
 
 die() { printf '%s\n' "$1" >&2; exit "${2:-1}"; }
@@ -41,9 +41,9 @@ have() { command -v "$1" >/dev/null 2>&1; }
 conf_get() { sed -n -E "/^$2=/{s/^$2=\"?([^\"]*)\"?\$/\1/p;q}" "$1" 2>/dev/null; }
 
 # the catalogue OS slug for a conf, used to pick the right brand logo. create and
-# import stamp `asura_vm_os`; quickemu ignores the unknown key. Empty when unknown
+# import stamp `toren_vm_os`; quickemu ignores the unknown key. Empty when unknown
 # (a hand-rolled conf), so the UI falls back to a generic glyph.
-os_slug() { conf_get "$1" asura_vm_os; }
+os_slug() { conf_get "$1" toren_vm_os; }
 
 # resolve a VM's runtime triplet from its conf: the on-disk name, its dir, and
 # the absolute disk image. quickget writes relative disk paths, so the dir is
@@ -141,15 +141,15 @@ cmd_caps() {
 # quickemu pulls QEMU, swtpm and the SPICE viewer in with it;
 # OVMF is the UEFI firmware it boots guests with.
 cmd_setup() {
-	if have asura-pkg-add; then
-		asura-pkg-add quickemu ovmf
+	if have toren-pkg-add; then
+		toren-pkg-add quickemu ovmf
 	elif have xbps-install; then
 		pkexec xbps-install -y quickemu ovmf
 	else
 		die "package manager is not available to install quickemu ovmf"
 	fi
 	have quickemu || die "the install finished but quickemu is still missing; see the output above"
-	echo "Done: quickemu is installed. Close this window; asura-vm lights up in a few seconds."
+	echo "Done: quickemu is installed. Close this window; toren-vm lights up in a few seconds."
 }
 
 # ---- catalog ---------------------------------------------------------------
@@ -188,7 +188,7 @@ cmd_list() {
 			ssh="$(port_of "$vm_ports" ssh)"; spice="$(spice_target "$vm_ports" "$vm_subdir")"
 		fi
 		disposable=false; [ "$running" = true ] && [ -e "$vm_subdir/$vm_name.disposable" ] && disposable=true
-		sealed=false; [ "$(conf_get "$conf" asura_vm_sealed)" = "1" ] && [ -e "$vm_disk" ] && sealed=true
+		sealed=false; [ "$(conf_get "$conf" toren_vm_sealed)" = "1" ] && [ -e "$vm_disk" ] && sealed=true
 		tpm=false; [ "$(conf_get "$conf" tpm)" = "on" ] && tpm=true
 		sb=false; [ "$(conf_get "$conf" secureboot)" = "on" ] && sb=true
 		# quickemu boots EFI unless the conf pins legacy.
@@ -240,7 +240,7 @@ cmd_get() {
 	uefi=true; [ "$(conf_get "$conf" boot)" = "legacy" ] && uefi=false
 	# the login ssh will use, said out loud: a password prompt for an account
 	# that doesn't exist in the guest reads as a haunted machine otherwise.
-	local suser; suser="$(conf_get "$conf" asura_vm_ssh_user)"
+	local suser; suser="$(conf_get "$conf" toren_vm_ssh_user)"
 	[ -n "$suser" ] || suser="${SUDO_USER:-$USER}"
 	jq -cn --arg name "$vm_name" --arg guest "${guest:-linux}" --arg os "${os:-}" --arg display "$disp" \
 		--arg cores "${cores:-auto}" --arg ram "${ram:-auto}" --arg disk "${disk:-}" --argjson used "$used" \
@@ -257,7 +257,7 @@ cmd_get() {
 # Emits one JSON line per step so the app draws a live bar and can cancel: a
 # {"phase":...} for each stage, with the Go fetcher's own {"event":...} progress
 # flowing through during download. The fast path (most Linux distros) resolves a
-# direct URL and downloads it in parallel with asura-vm-fetch, then has quickget
+# direct URL and downloads it in parallel with toren-vm-fetch, then has quickget
 # write the conf from the local image. Windows, macOS and the special-boot OSes
 # fall back to quickget's own downloader (streamed as log lines), since their
 # config needs quickget's full per-OS logic. Cancellation (SIGTERM from the app)
@@ -287,10 +287,10 @@ cmd_create() {
 	# under set -e would abort the trap before it cleans up and reports.
 	trap 'set +e; [ -n "$child" ] && kill -TERM "$child" 2>/dev/null; wait "$child" 2>/dev/null; [ -n "$stage" ] && rm -rf "$stage"; emit "{\"phase\":\"cancelled\"}"; exit 130' TERM INT
 
-	# asura-vm-fetch is not shipped on Asura: this fast path hands quickget an
+	# toren-vm-fetch is not shipped on Toren: this fast path hands quickget an
 	# image nothing has checked, while quickget's own download verifies the
 	# publisher's hash. Without the helper every create takes the path below.
-	if ! create_special "$os" && have asura-vm-fetch; then
+	if ! create_special "$os" && have toren-vm-fetch; then
 		emit '{"phase":"resolve"}'
 		local url base
 		# `|| true`: no URL match must fall through to the quickget path, not
@@ -302,7 +302,7 @@ cmd_create() {
 				stage="$vms_dir/.staging-$name"
 				rm -rf "$stage"; mkdir -p "$stage"
 				emit "{\"phase\":\"download\",\"name\":\"$name\"}"
-				asura-vm-fetch "$url" "$stage/$base" & child=$!
+				toren-vm-fetch "$url" "$stage/$base" & child=$!
 				local rc=0; wait "$child" || rc=$?; child=""
 				[ "$rc" -eq 0 ] || { rm -rf "$stage"; emit '{"phase":"error","message":"download failed"}'; exit 1; }
 				emit '{"phase":"config"}'
@@ -310,7 +310,7 @@ cmd_create() {
 				local crc=0; wait "$child" || crc=$?; child=""
 				[ "$crc" -eq 0 ] || { rm -rf "$stage"; emit '{"phase":"error","message":"could not write the VM config"}'; exit 1; }
 				rm -rf "$stage"
-				grep -q '^asura_vm_os=' "$vms_dir/$name.conf" 2>/dev/null || echo "asura_vm_os=\"$os\"" >>"$vms_dir/$name.conf"
+				grep -q '^toren_vm_os=' "$vms_dir/$name.conf" 2>/dev/null || echo "toren_vm_os=\"$os\"" >>"$vms_dir/$name.conf"
 				emit "{\"phase\":\"done\",\"name\":\"$name\"}"
 				return 0 ;;
 		esac
@@ -336,7 +336,7 @@ cmd_create() {
 	for c in "$vms_dir/$os-$release"*.conf; do
 		[ -e "$c" ] || continue
 		case "$before" in *"$c"*) continue ;; esac
-		grep -q '^asura_vm_os=' "$c" || echo "asura_vm_os=\"$os\"" >>"$c"
+		grep -q '^toren_vm_os=' "$c" || echo "toren_vm_os=\"$os\"" >>"$c"
 		made="$(basename "$c" .conf)"
 	done
 	local g="" mi=""
@@ -394,7 +394,7 @@ cmd_import() {
 		echo "disk_size=\"64G\""
 		# the guest type doubles as the logo slug when no catalogue OS is given
 		# (windows/macos/android all have brand icons; linux falls back to a glyph).
-		echo "asura_vm_os=\"${os:-$guest}\""
+		echo "toren_vm_os=\"${os:-$guest}\""
 	} >"$conf"
 	# Windows ships no in-box virtio driver, so a plain ISO install finds no disk
 	# without the driver CD; point it at the shared VirtIO CD (fetched on demand
@@ -437,15 +437,15 @@ ensure_virtio_win() {
 		"https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso"
 	do
 		rm -f "$tmp"
-		if have asura-vm-fetch; then asura-vm-fetch "$u" "$tmp" 2>/dev/null
+		if have toren-vm-fetch; then toren-vm-fetch "$u" "$tmp" 2>/dev/null
 		else curl -fsSL -A "Mozilla/5.0" --retry 2 -o "$tmp" "$u" 2>/dev/null; fi
 		valid_iso "$tmp" && { mv -f "$tmp" "$dst"; return 0; }
 	done
 	rm -f "$tmp"; return 1
 }
 
-# asura-vm virtio          : ensure the shared driver CD exists and is real
-# asura-vm virtio <name>   : also point that VM's fixed_iso at it, replacing a stub
+# toren-vm virtio          : ensure the shared driver CD exists and is real
+# toren-vm virtio <name>   : also point that VM's fixed_iso at it, replacing a stub
 #                         a failed quickget download may have left in the VM dir.
 cmd_virtio() {
 	emit '{"phase":"download","name":"virtio-win"}'
@@ -467,13 +467,13 @@ cmd_virtio() {
 
 # ---- instant (a prebuilt cloud image, no installer) ------------------------
 # The Kali/Vagrant model: distros publish qcow2 images that are ALREADY
-# installed. asura-vm fetches one (cached + shared), makes a thin copy-on-write
-# overlay, and attaches a cloud-init "cidata" seed that bakes in the Asura burn
-# account (asura/asura + the burn key + passwordless sudo) on first boot. No
+# installed. toren-vm fetches one (cached + shared), makes a thin copy-on-write
+# overlay, and attaches a cloud-init "cidata" seed that bakes in the Toren burn
+# account (toren/toren + the burn key + passwordless sudo) on first boot. No
 # 14-step installer, ssh-able in under a minute. quickget deliberately excludes
 # cloud images, so the catalogue is ours.
 imagesDir() { printf '%s' "$vms_dir/.images"; }
-burnKey()   { printf '%s' "${XDG_DATA_HOME:-$HOME/.local/share}/asura/keys/asura-vm"; }
+burnKey()   { printf '%s' "${XDG_DATA_HOME:-$HOME/.local/share}/toren/keys/toren-vm"; }
 
 # ensure the burn keypair exists (ed25519, no passphrase): the identity the app
 # logs into every burn/instant machine with.
@@ -481,7 +481,7 @@ ensure_burn_key() {
 	local k; k="$(burnKey)"
 	[ -f "$k" ] && return 0
 	mkdir -p "$(dirname "$k")"
-	ssh-keygen -t ed25519 -N "" -C "asura-vm-burn" -f "$k" -q 2>/dev/null || die "could not create the burn key"
+	ssh-keygen -t ed25519 -N "" -C "toren-vm-burn" -f "$k" -q 2>/dev/null || die "could not create the burn key"
 }
 
 # the curated cloud-image catalogue: os slug -> qcow2 url (or a fedora-style
@@ -585,16 +585,16 @@ tool_pkgs() { # $1 tool  $2 family
 tool_runcmd() { # $1 tool  $2 family
 	case "$1:$2" in
 		docker:apk)
-			printf '  - rc-update add docker default\n  - rc-service docker start\n  - addgroup asura docker\n' ;;
+			printf '  - rc-update add docker default\n  - rc-service docker start\n  - addgroup toren docker\n' ;;
 		docker:dnf-rhel)
 			printf '  - dnf -y install dnf-plugins-core\n'
 			printf '  - dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo\n'
 			printf '  - dnf -y install docker-ce docker-ce-cli containerd.io docker-compose-plugin\n'
-			printf '  - systemctl enable --now docker\n  - groupadd -f docker\n  - usermod -aG docker asura\n' ;;
+			printf '  - systemctl enable --now docker\n  - groupadd -f docker\n  - usermod -aG docker toren\n' ;;
 		docker:*)
-			printf '  - systemctl enable --now docker\n  - groupadd -f docker\n  - usermod -aG docker asura\n' ;;
+			printf '  - systemctl enable --now docker\n  - groupadd -f docker\n  - usermod -aG docker toren\n' ;;
 		rustup:*)
-			printf "  - [ su, -l, asura, -c, \"curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y\" ]\n" ;;
+			printf "  - [ su, -l, toren, -c, \"curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y\" ]\n" ;;
 		spice:apk)
 			printf '  - rc-update add spice-vdagentd default\n  - rc-service spice-vdagentd start\n' ;;
 		spice:*)
@@ -603,7 +603,7 @@ tool_runcmd() { # $1 tool  $2 family
 }
 
 # build the cidata seed ISO for a VM: a cloud-init NoCloud payload that creates
-# the asura burn account (password asura, passwordless sudo, the burn key + any
+# the toren burn account (password toren, passwordless sudo, the burn key + any
 # host keys), bakes the OSC-52 `clip` helper, and installs the chosen toolset.
 # Re-read on every disposable boot (the overlay resets), applied once on a
 # persistent one. The volid MUST be cidata.
@@ -662,8 +662,8 @@ write_seed() { # $1=dir $2=name $3=want_sudo $4=os $5=tools_csv $6=extra_csv $7=
 		printf 'package_upgrade: false\n'
 		printf 'chpasswd:\n  expire: false\n'
 		printf 'users:\n'
-		printf '  - name: asura\n'
-		printf '    plain_text_passwd: asura\n'
+		printf '  - name: toren\n'
+		printf '    plain_text_passwd: toren\n'
 		printf '    lock_passwd: false\n'
 		printf '    sudo: "ALL=(ALL) NOPASSWD:ALL"\n'
 		printf '    groups: [wheel, adm, sudo]\n'
@@ -738,8 +738,8 @@ cmd_instant() {
 	trap 'set +e; [ -n "$child" ] && kill -TERM "$child" 2>/dev/null; wait "$child" 2>/dev/null; rm -f "$base.part"; [ -n "$sub" ] && rm -rf "$sub"; emit "{\"phase\":\"cancelled\"}"; exit 130' TERM INT
 	if [ ! -s "$base" ]; then
 		emit "{\"phase\":\"download\",\"name\":\"$name\"}"
-		if have asura-vm-fetch; then
-			asura-vm-fetch "$url" "$base.part" & child=$!
+		if have toren-vm-fetch; then
+			toren-vm-fetch "$url" "$base.part" & child=$!
 			local rc=0; wait "$child" || rc=$?; child=""
 			[ "$rc" -eq 0 ] || { rm -f "$base.part"; emit '{"phase":"error","message":"image download failed"}'; exit 1; }
 		else
@@ -765,12 +765,12 @@ cmd_instant() {
 		echo "disk_img=\"$name/disk.qcow2\""
 		echo "preallocation=\"metadata\""
 		echo "extra_args=\"-drive file=$sub/seed.iso,media=cdrom,readonly=on\""
-		echo "asura_vm_os=\"$os\""
-		echo "asura_vm_ssh_user=\"asura\""
-		echo "asura_vm_burn=\"1\""
-		[ -n "$tools" ] && echo "asura_vm_tools=\"$tools\""
+		echo "toren_vm_os=\"$os\""
+		echo "toren_vm_ssh_user=\"toren\""
+		echo "toren_vm_burn=\"1\""
+		[ -n "$tools" ] && echo "toren_vm_tools=\"$tools\""
 	} >"$vms_dir/$name.conf"
-	[ -n "$sealme" ] && echo 'asura_vm_sealed="1"' >>"$vms_dir/$name.conf"
+	[ -n "$sealme" ] && echo 'toren_vm_sealed="1"' >>"$vms_dir/$name.conf"
 
 	trap - TERM INT
 	# seal the pristine cloud state so restore-seal returns here.
@@ -812,7 +812,7 @@ cmd_template() {
 	wait "$child" || { child=""; rm -f "$out.part"; trap - TERM INT; die "could not build the template"; }
 	child=""; trap - TERM INT
 	mv "$out.part" "$out"; chmod 0444 "$out"
-	jq -cn --arg os "$(conf_get "$conf" asura_vm_os)" --arg tools "$(conf_get "$conf" asura_vm_tools)" \
+	jq -cn --arg os "$(conf_get "$conf" toren_vm_os)" --arg tools "$(conf_get "$conf" toren_vm_tools)" \
 		--arg base "$out" '{os:$os,tools:$tools,base:$base}' >"$(templatesDir)/$tpl.json"
 	echo "templated $src as '$tpl'"
 }
@@ -849,7 +849,7 @@ cmd_spawn() {
 	local sub="$vms_dir/$name"; mkdir -p "$sub"
 	qemu-img create -f qcow2 -F qcow2 -b "$base" "$sub/disk.qcow2" 32G >/dev/null 2>&1 \
 		|| { rm -rf "$sub"; emit '{"phase":"error","message":"overlay failed"}'; exit 1; }
-	# the tools + asura account (and bash-completion) are already baked into the
+	# the tools + toren account (and bash-completion) are already baked into the
 	# base; the spawn needs no packages: seed. A tiny seed only refreshes the
 	# hostname/instance so cloud-init settles quickly. want_base=false keeps it
 	# empty so the clone still boots in seconds. ssh identity stays burn policy.
@@ -860,10 +860,10 @@ cmd_spawn() {
 		echo "disk_img=\"$name/disk.qcow2\""
 		echo "preallocation=\"metadata\""
 		echo "extra_args=\"-drive file=$sub/seed.iso,media=cdrom,readonly=on\""
-		echo "asura_vm_os=\"$os\""
-		echo "asura_vm_ssh_user=\"asura\""
-		echo "asura_vm_burn=\"1\""
-		echo "asura_vm_template=\"$tpl\""
+		echo "toren_vm_os=\"$os\""
+		echo "toren_vm_ssh_user=\"toren\""
+		echo "toren_vm_burn=\"1\""
+		echo "toren_vm_template=\"$tpl\""
 	} >"$vms_dir/$name.conf"
 	emit "{\"phase\":\"done\",\"name\":\"$name\"}"
 	if [ -n "$disposable" ]; then
@@ -1005,7 +1005,7 @@ cmd_config() {
 	local conf; conf="$(conf_path "$1")"
 	local key="${2:?config needs a key}" val="${3-}"
 	case "$key" in
-		cpu_cores|ram|disk_size|display|guest_os|secureboot|tpm|iso|asura_vm_os|asura_vm_ssh_user|asura_vm_burn) ;;
+		cpu_cores|ram|disk_size|display|guest_os|secureboot|tpm|iso|toren_vm_os|toren_vm_ssh_user|toren_vm_burn) ;;
 		*) die "config key not allowed: $key" ;;
 	esac
 	vm_paths "$conf"
@@ -1056,10 +1056,10 @@ cmd_ssh() {
 	vm_running "$vm_pid" || die "$vm_name is not running"
 	local port; port="$(port_of "$vm_ports" ssh)"
 	[ -n "$port" ] || die "$vm_name has no forwarded SSH port"
-	# the guest account rarely has to match the host user: asura_vm_ssh_user in
+	# the guest account rarely has to match the host user: toren_vm_ssh_user in
 	# the conf pins the login (config verb sets it); host username is only the
 	# fallback guess.
-	local user; user="$(conf_get "$conf" asura_vm_ssh_user)"
+	local user; user="$(conf_get "$conf" toren_vm_ssh_user)"
 	local ident=""; [ -f "$(burnKey)" ] && ident="-i $(burnKey) "
 	# host-key policy: an installed machine has a stable identity, pinned to its
 	# own known_hosts (accept-new). A burn/cloud machine REGENERATES its host key
@@ -1067,7 +1067,7 @@ cmd_ssh() {
 	# disposable boot as a changed host — a throwaway has no identity to verify,
 	# so accept anything and store nothing.
 	local hostpol
-	if [ "$(conf_get "$conf" asura_vm_burn)" = "1" ]; then
+	if [ "$(conf_get "$conf" toren_vm_burn)" = "1" ]; then
 		hostpol="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=ERROR"
 	else
 		hostpol="-o UserKnownHostsFile=$vm_subdir/$vm_name.known_hosts -o StrictHostKeyChecking=accept-new"
@@ -1171,10 +1171,10 @@ cmd_seal() {
 		sleep 0.5
 	done
 	[ -n "$ok" ] || die "could not write the seal"
-	if grep -qE '^asura_vm_sealed=' "$conf"; then
-		sed -i -E 's|^asura_vm_sealed=.*|asura_vm_sealed="1"|' "$conf"
+	if grep -qE '^toren_vm_sealed=' "$conf"; then
+		sed -i -E 's|^toren_vm_sealed=.*|toren_vm_sealed="1"|' "$conf"
 	else
-		echo 'asura_vm_sealed="1"' >>"$conf"
+		echo 'toren_vm_sealed="1"' >>"$conf"
 	fi
 	echo "sealed $vm_name at its current state"
 }
@@ -1373,7 +1373,7 @@ cmd_prefetch() {
 	[ -s "$catalog_cache" ] || cmd_catalog >/dev/null 2>&1 || true
 	[ -s "$catalog_cache" ] || { echo '{}'; return 0; }
 	mkdir -p "$icon_dir"
-	local self; self="$(command -v asura-vm 2>/dev/null || printf '%s' "$0")"
+	local self; self="$(command -v toren-vm 2>/dev/null || printf '%s' "$0")"
 	jq -r '[.[].OS] | unique | .[]' "$catalog_cache" 2>/dev/null \
 		| xargs -P 12 -I {} "$self" icon {} >/dev/null 2>&1 || true
 	jq -r '[.[].OS] | unique | .[]' "$catalog_cache" 2>/dev/null \
@@ -1396,21 +1396,21 @@ cmd_paths() {
 
 # ---- mon: live control of a running VM ------------------------------------
 # Talks to the sockets quickemu already opens (HMP monitor + optional guest
-# agent) via the asura-vm-mon helper. Additive and read-mostly; the engine only
+# agent) via the toren-vm-mon helper. Additive and read-mostly; the engine only
 # resolves the paths. A stopped VM reports running:false, never an error.
 cmd_mon() {
 	local conf; conf="$(conf_path "$1")"
 	vm_paths "$conf"
 	local sub="${2:-stats}" arg="${3:-}"
-	command -v asura-vm-mon >/dev/null 2>&1 || die "asura-vm-mon is not installed"
+	command -v toren-vm-mon >/dev/null 2>&1 || die "toren-vm-mon is not installed"
 	local mon="$vm_subdir/$vm_name-monitor.socket"
 	local agent="$vm_subdir/$vm_name-agent.sock"; [ -S "$agent" ] || agent="-"
 	local pid="$vm_pid"; [ -r "$pid" ] || pid="-"
 	case "$sub" in
-		stats)   asura-vm-mon stats "$mon" "$agent" "$pid" ;;
-		power)   [ -n "$arg" ] || die "power needs pause|resume|reset|shutdown"; asura-vm-mon power "$mon" "$arg" ;;
-		balloon) [ -n "$arg" ] || die "balloon needs a size in MB"; asura-vm-mon balloon "$mon" "$arg" ;;
-		pin)     asura-vm-mon pin "$mon" "$vm_pid" "${arg:-auto}" ;;
+		stats)   toren-vm-mon stats "$mon" "$agent" "$pid" ;;
+		power)   [ -n "$arg" ] || die "power needs pause|resume|reset|shutdown"; toren-vm-mon power "$mon" "$arg" ;;
+		balloon) [ -n "$arg" ] || die "balloon needs a size in MB"; toren-vm-mon balloon "$mon" "$arg" ;;
+		pin)     toren-vm-mon pin "$mon" "$vm_pid" "${arg:-auto}" ;;
 		*)       die "mon: unknown subcommand '$sub'" ;;
 	esac
 }
@@ -1448,5 +1448,5 @@ case "$cmd" in
 	prefetch) cmd_prefetch "$@" ;;
 	paths)    cmd_paths "$@" ;;
 	mon)      cmd_mon "$@" ;;
-	*) die "usage: asura-vm caps|setup|catalog|cloud-catalog|list|get|create|instant|template|templates|spawn|import|launch|console|stop|config|rename|resize|snapshot|seal|restore-seal|usb|portfwd|ssh|delete|folder|icon|prefetch|paths|mon" 2 ;;
+	*) die "usage: toren-vm caps|setup|catalog|cloud-catalog|list|get|create|instant|template|templates|spawn|import|launch|console|stop|config|rename|resize|snapshot|seal|restore-seal|usb|portfwd|ssh|delete|folder|icon|prefetch|paths|mon" 2 ;;
 esac

@@ -8,13 +8,13 @@ import (
 	"regexp"
 	"strings"
 
-	"asura/desktop/internal/runner"
+	"toren/desktop/internal/runner"
 )
 
-// The live half of `asura status`: which services are up, which versions run, and
+// The live half of `toren status`: which services are up, which versions run, and
 // with --json the report the shell shows as its Updates page.
 //
-// `asura status --json` is called by the daemon, on login and then on a timer.
+// `toren status --json` is called by the daemon, on login and then on a timer.
 // It publishes the line this prints, unread, on its "updates" topic, and the
 // bar's update glyph and the Hub's Updates page read the fields below.
 
@@ -30,7 +30,7 @@ type statusReport struct {
 	Installed string `json:"installedVersion"`
 	Latest    string `json:"latestVersion"`
 	Available bool   `json:"available"`
-	// Behind counts the Asura packages with a newer version waiting.
+	// Behind counts the Toren packages with a newer version waiting.
 	Behind  int          `json:"pendingUpdates"`
 	Updates []updateItem `json:"updates"`
 	// Recent is the history a current machine shows.
@@ -70,17 +70,17 @@ func buildStatusReport(root string, run runner.Func) statusReport {
 		Updates: []updateItem{}, Recent: []updateItem{}, Packages: []updateItem{},
 		Channel: channel,
 	}
-	if out, err := run("xbps-query", "-p", "pkgver", "asura"); err == nil && strings.TrimSpace(out) != "" {
-		report.Installed = strings.TrimPrefix(strings.TrimSpace(out), "asura-")
+	if out, err := run("xbps-query", "-p", "pkgver", "toren"); err == nil && strings.TrimSpace(out) != "" {
+		report.Installed = strings.TrimPrefix(strings.TrimSpace(out), "toren-")
 		report.Latest = report.Installed
 	}
 	if out, err := run("xbps-install", "-un"); err == nil {
 		for _, item := range parseUpgradable(out) {
 			switch {
-			case item.Name == "asura":
+			case item.Name == "toren":
 				report.Latest = item.New
 				report.Updates = append(report.Updates, item)
-			case strings.HasPrefix(item.Name, "asura-"):
+			case strings.HasPrefix(item.Name, "toren-"):
 				report.Updates = append(report.Updates, item)
 			default:
 				report.Packages = append(report.Packages, item)
@@ -108,9 +108,9 @@ func statusJSON(root string, out io.Writer, run runner.Func) int {
 // printLiveStatus adds the lines that need the running machine.
 func printLiveStatus(out io.Writer, run runner.Func) {
 	fmt.Fprintf(out, "shell:     %s\n", unitSummary(run, "quickshell"))
-	fmt.Fprintf(out, "daemon:    %s\n", unitSummary(run, "asurad"))
+	fmt.Fprintf(out, "daemon:    %s\n", unitSummary(run, "torend"))
 
-	versions := []string{"asura " + version}
+	versions := []string{"toren " + version}
 	// "Quickshell 0.3.2 (revision ...)".
 	if fields := strings.Fields(firstOutput(run, "quickshell", "--version")); len(fields) > 1 {
 		versions = append(versions, "quickshell "+fields[1])

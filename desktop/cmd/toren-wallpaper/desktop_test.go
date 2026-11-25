@@ -12,15 +12,15 @@ func TestWallpaperKeysOpenDesktopInTheDesktopShell(t *testing.T) {
 		return "ok"
 	}
 
-	desktopShell = func() string { return "asura" }
+	desktopShell = func() string { return "toren" }
 	if isDesktopShell() {
-		t.Fatal("the asura shell was taken for desktop")
+		t.Fatal("the toren shell was taken for desktop")
 	}
 
 	desktopShell = func() string { return "desktop" }
 	// isDesktopShell also needs the installed tree, which a test machine lacks.
 	if isDesktopShell() {
-		t.Skip("/usr/share/asura/shell-desktop exists here; skipping the absent-tree case")
+		t.Skip("/usr/share/toren/shell-desktop exists here; skipping the absent-tree case")
 	}
 	if len(calls) != 0 {
 		t.Fatalf("desktop was called while not installed: %v", calls)

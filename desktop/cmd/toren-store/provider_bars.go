@@ -27,12 +27,12 @@ func (barProvider) Category() Category {
 		ID:          "barstyles",
 		Name:        "Bar styles",
 		Group:       "wear",
-		Description: "Complete bar compositions for the Asura shell.",
+		Description: "Complete bar compositions for the Toren shell.",
 	}
 }
 
 func (barProvider) Load(context.Context, bool) ([]Item, SourceState, error) {
-	active := readBarStyleSelection(filepath.Join(configHome(), "asura", "shell.json"))
+	active := readBarStyleSelection(filepath.Join(configHome(), "toren", "shell.json"))
 	if active == "" {
 		active = "top"
 	}

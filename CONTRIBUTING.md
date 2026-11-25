@@ -16,7 +16,7 @@ This is the most valuable contribution in Toren and the cheapest to make. It nee
 and no code.
 
 1. Install Toren and boot it.
-2. Run `asura hardware report`. It emits a candidate profile from live detection, with
+2. Run `toren hardware report`. It emits a candidate profile from live detection, with
    identifying data stripped.
 3. Fill in what only a human on the machine knows: does suspend work, does the GPU switch,
    what fails.
@@ -49,14 +49,14 @@ Two rules in [`agents/agents.md`](agents/agents.md) bind every contribution to t
 repository, not just some of them.
 
 **One writer per setting.** If a setting has a command or a tool that owns it, that tool is
-the only thing allowed to write it. `asura-shell` and `asura-hub` are the only writers of
-`org.asura.shell` and `org.asura.desktop`. Hand-editing dconf causes drift, and drift is the most
+the only thing allowed to write it. `toren-shell` and `toren-hub` are the only writers of
+`org.toren.shell` and `org.toren.desktop`. Hand-editing dconf causes drift, and drift is the most
 expensive bug class in a distribution. A new setting needs a schema entry and an owning tool
 in the same pull request, or it does not land.
 
 **Never edit a shipped file in place.** Files laid into the system by a package are replaced
 on update. A change to one belongs in an override, in the store the owning tool reads, or in
-the tool itself. Toren's packages write only to `/usr/share/asura/` and `/etc/asura/` — never to
+the tool itself. Toren's packages write only to `/usr/share/toren/` and `/etc/toren/` — never to
 another package's files, and never to `~`. A patch against `/etc/NetworkManager/` is not a
 contribution, it is a fork, and it is what stops the next clean base system update.
 
@@ -110,14 +110,14 @@ request. If a check is not configured yet, the checklist item says so — that i
 
 ## Where to ask questions
 
-| Question about | Ask in |
-|---|---|
-| Hardware, profiles, tiers | [`system/hardware/README.md`](system/hardware/README.md) first, then an issue. The answer is usually already written down there. |
-| A bug | The issue forms. If it is about one specific laptop, use the **hardware support** form — it is the intake path that becomes a profile. |
-| A design decision | An issue. [`docs/architecture.md`](docs/architecture.md) separates settled decisions from open questions; check which side of that line your question is on before arguing it. |
-| Packaging, repository, release | An issue. Say which command failed and paste what it printed. |
-| Conduct | `conduct@asuraos.dev`. See [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md). |
-| A vulnerability | **Not** a public issue. See [`SECURITY.md`](SECURITY.md). |
+| Question about                 | Ask in                                                                                                                                                                         |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Hardware, profiles, tiers      | [`system/hardware/README.md`](system/hardware/README.md) first, then an issue. The answer is usually already written down there.                                               |
+| A bug                          | The issue forms. If it is about one specific laptop, use the **hardware support** form — it is the intake path that becomes a profile.                                         |
+| A design decision              | An issue. [`docs/architecture.md`](docs/architecture.md) separates settled decisions from open questions; check which side of that line your question is on before arguing it. |
+| Packaging, repository, release | An issue. Say which command failed and paste what it printed.                                                                                                                  |
+| Conduct                        | `conduct@torenos.dev`. See [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md).                                                                                                         |
+| A vulnerability                | **Not** a public issue. See [`SECURITY.md`](SECURITY.md).                                                                                                                      |
 
 Before opening an issue, read [`docs/architecture.md`](docs/architecture.md) and
 [`docs/roadmap.md`](docs/roadmap.md). Most questions that arrive as an issue were answered in

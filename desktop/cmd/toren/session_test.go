@@ -19,8 +19,8 @@ import (
 // The keybinds no longer name a path, because a name for the instance points
 // at one tree and the machine can be running another: the installed shell,
 // which the package owns, is not the shell a development checkout starts, and
-// both are legitimate. The calls say who to call — the target "asura", the
-// shell's own IPC handler — and leave which instance is running to `asura
+// both are legitimate. The calls say who to call — the target "toren", the
+// shell's own IPC handler — and leave which instance is running to `toren
 // ipc`, which finds it in the process table.
 
 // repoRoot is the checkout, from the package directory.
@@ -84,7 +84,7 @@ func TestTheCompositorStartsTheActivationScript(t *testing.T) {
 	}
 	script := match[1]
 
-	if !strings.HasPrefix(script, "/usr/share/asura/") {
+	if !strings.HasPrefix(script, "/usr/share/toren/") {
 		t.Errorf("the activation script is %q, which is not in the package's "+
 			"own tree; the package can only install what it owns", script)
 	}
@@ -93,8 +93,8 @@ func TestTheCompositorStartsTheActivationScript(t *testing.T) {
 	base := filepath.Base(script)
 	local := filepath.Join(root, "session", base)
 	info, err := os.Stat(local)
-	if err != nil && strings.HasPrefix(base, "asura-") {
-		alt := "toren-" + strings.TrimPrefix(base, "asura-")
+	if err != nil && strings.HasPrefix(base, "toren-") {
+		alt := "toren-" + strings.TrimPrefix(base, "toren-")
 		if altInfo, altErr := os.Stat(filepath.Join(root, "session", alt)); altErr == nil {
 			info, err = altInfo, nil
 		}
@@ -116,7 +116,7 @@ func TestTheCompositorStartsTheActivationScript(t *testing.T) {
 // TestTheKeybindsReachTheShell checks that the keybinds, the compositor's
 // configuration and the shell's IPC surface agree.
 //
-// Every IPC bind dispatches through `asura ipc call`, and every one of those
+// Every IPC bind dispatches through `toren ipc call`, and every one of those
 // calls names the target the shell's entry point registers. A call whose
 // target is anything else is a bind that runs a command that succeeds and
 // opens nothing.
@@ -124,25 +124,25 @@ func TestTheKeybindsReachTheShell(t *testing.T) {
 	root := repoRoot(t)
 	config := compositorConfig(t, root)
 
-	const pattern = `asura ipc call (\S+) ?(\S*)`
+	const pattern = `toren ipc call (\S+) ?(\S*)`
 	matches := regexp.MustCompile(pattern).FindAllStringSubmatch(config, -1)
 	if len(matches) == 0 {
-		t.Fatal("no keybind dispatches through `asura ipc call`; either the " +
+		t.Fatal("no keybind dispatches through `toren ipc call`; either the " +
 			"keybinds run the shell's surfaces themselves, which is a second " +
 			"shell, or they call quickshell directly by a path that only names " +
 			"one of the trees it can run from")
 	}
 	for _, match := range matches {
-		if match[1] != "asura" {
+		if match[1] != "toren" {
 			t.Errorf("a keybind calls the IPC target %q, and the shell's "+
-				"handler is \"asura\"", match[1])
+				"handler is \"toren\"", match[1])
 		}
 	}
 
 	// The command exists: a bind that dispatches through a subcommand the
 	// control tool does not have fails before it reaches any IPC surface.
 	if _, ok := commands["ipc"]; !ok {
-		t.Error("the keybinds dispatch through `asura ipc`, and the control " +
+		t.Error("the keybinds dispatch through `toren ipc`, and the control " +
 			"tool has no ipc command")
 	}
 
@@ -152,8 +152,8 @@ func TestTheKeybindsReachTheShell(t *testing.T) {
 	if err != nil {
 		t.Skipf("the shell's entry point is not in the checkout: %v", err)
 	}
-	if !strings.Contains(string(entry), `target: "asura"`) {
-		t.Error("the keybinds call the target \"asura\", and the shell's " +
+	if !strings.Contains(string(entry), `target: "toren"`) {
+		t.Error("the keybinds call the target \"toren\", and the shell's " +
 			"entry point registers no such handler")
 	}
 }

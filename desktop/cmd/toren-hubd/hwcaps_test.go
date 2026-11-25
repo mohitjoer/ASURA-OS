@@ -242,7 +242,7 @@ func TestPrettyModel(t *testing.T) {
 
 func TestGpuRecordsFromToolTimeout(t *testing.T) {
 	dir := t.TempDir()
-	bin := filepath.Join(dir, "asura-gpu")
+	bin := filepath.Join(dir, "toren-gpu")
 	if err := os.WriteFile(bin, []byte("#!/bin/sh\nsleep 30\n"), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -262,8 +262,8 @@ func TestGpuRecordsFromToolTimeout(t *testing.T) {
 
 func TestGpuRecordsFromToolRejectsNonJSON(t *testing.T) {
 	dir := t.TempDir()
-	bin := filepath.Join(dir, "asura-gpu")
-	// an out-of-date asura-gpu ignores --json and prints its CARD table.
+	bin := filepath.Join(dir, "toren-gpu")
+	// an out-of-date toren-gpu ignores --json and prints its CARD table.
 	if err := os.WriteFile(bin, []byte("#!/bin/sh\necho 'CARD    PCI    CLASS'\n"), 0o755); err != nil {
 		t.Fatal(err)
 	}

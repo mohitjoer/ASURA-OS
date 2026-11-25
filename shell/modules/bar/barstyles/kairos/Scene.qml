@@ -51,7 +51,7 @@ Item {
         WlrLayershell.layer: WlrLayer.Top
         WlrLayershell.keyboardFocus: island.quickOpen
             ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
-        WlrLayershell.namespace: "asura-bar"
+        WlrLayershell.namespace: "toren-bar"
 
         // Rests as tall as the island's tallest state so the surface never
         // resizes: the pill is what grows.
@@ -100,7 +100,7 @@ Item {
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Bottom
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
-        WlrLayershell.namespace: "asura-kairos-dismiss"
+        WlrLayershell.namespace: "toren-kairos-dismiss"
 
         MouseArea {
             anchors.fill: parent

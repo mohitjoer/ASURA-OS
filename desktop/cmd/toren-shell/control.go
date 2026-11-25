@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"asura/desktop/internal/wm"
+	"toren/desktop/internal/wm"
 )
 
 // control.go adds the reference control surface to the CLI over the existing
@@ -20,7 +20,7 @@ import (
 // barEdges are the four frame edges plus "all". The reference offered per-edge
 // toggles and a toggle/reveal/hide-all trio whose -x flag excluded bars marked
 // hidden-by-default; that flag's meaning was inverted from its name (with -x set
-// it acted ONLY on reveal-by-default bars). Asura drops the flag for an explicit
+// it acted ONLY on reveal-by-default bars). Toren drops the flag for an explicit
 // edge list, so "all" is every edge (the reference's default, non-excluding
 // path) and a named edge is just that one.
 var barEdges = map[string]bool{"top": true, "bottom": true, "left": true, "right": true, "all": true}
@@ -52,7 +52,7 @@ func audioArgv(sub string) ([]string, bool) {
 	return nil, false
 }
 
-// brightnessArgv maps a brightness subcommand to a asura-cmd-brightness step.
+// brightnessArgv maps a brightness subcommand to a toren-cmd-brightness step.
 // The reference stepped brightness by 5 on a 0..100 scale (5%); the helper
 // drives both the laptop backlight and any DDC/CI external monitor at once.
 func brightnessArgv(sub string) ([]string, bool) {
@@ -88,7 +88,7 @@ func (d *daemon) brightness(sub string) string {
 	if !ok {
 		return "err brightness: expected up or down"
 	}
-	if err := exec.Command("asura-cmd-brightness", argv...).Run(); err != nil {
+	if err := exec.Command("toren-cmd-brightness", argv...).Run(); err != nil {
 		return "err brightness: " + err.Error()
 	}
 	return "ok"
@@ -105,8 +105,8 @@ func (d *daemon) menuClose() string {
 // barToggle drives the per-edge bar reveal state (reference bar toggle/reveal/
 // hide, per edge or across all).
 //
-// asura: the shell exposes no setBar IPC function. Its bar reveal is a single
-// whole-bar toggle driven in-process by the global:asura:barToggle keybind
+// toren: the shell exposes no setBar IPC function. Its bar reveal is a single
+// whole-bar toggle driven in-process by the global:toren:barToggle keybind
 // (CustomShortcut -> ShellState.barRevealed), with no per-edge reveal/hide
 // grammar. This CLI verb still emits setBar on the shell target, so it is a
 // no-op pending the retire phase (add a shell IPC fn there, or drop the verb).
@@ -115,7 +115,7 @@ func (d *daemon) barToggle(edge, action string) string {
 	return shellIpc("setBar", d.activeMonitor(), edge, action)
 }
 
-// hub opens or closes Asura Hub, which replaces the reference settings window.
+// hub opens or closes Toren Hub, which replaces the reference settings window.
 // The Hub is one app: Bar Studio and every other page are sections inside it,
 // reached by in-app navigation, never separate processes. Open on a running
 // Hub navigates (when a section is named) and raises the window; open on a
@@ -152,12 +152,12 @@ func (d *daemon) hub(sub, section string) string {
 				return
 			}
 			// -o, or the Hub's own children inherit the locked descriptor:
-			// one detached grandchild (asura-store, a terminal, xdg-open) then
+			// one detached grandchild (toren-store, a terminal, xdg-open) then
 			// held the lock for the rest of the session and every later open
 			// silently did nothing. The lock lives in the runtime dir, which is
 			// per user, unlike /tmp.
 			hubEntry := filepath.Join(shellRoot(), "hub.qml")
-			cmd := exec.Command("flock", "-n", "-o", filepath.Join(os.Getenv("XDG_RUNTIME_DIR"), "asura-hub.lock"),
+			cmd := exec.Command("flock", "-n", "-o", filepath.Join(os.Getenv("XDG_RUNTIME_DIR"), "toren-hub.lock"),
 				"quickshell", "-p", hubEntry)
 			env := withWaylandDisplay(os.Environ())
 			if os.Getenv("ASURA_SCHEMA_DIR") == "" {

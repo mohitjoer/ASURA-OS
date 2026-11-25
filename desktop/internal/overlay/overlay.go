@@ -1,4 +1,4 @@
-// Package overlay implements Asura's materialization model.
+// Package overlay implements Toren's materialization model.
 //
 // The whole model is one rule: a user's override always wins at its mirrored
 // path, and no update can ever clobber it. Everything else here exists to make
@@ -6,10 +6,10 @@
 //
 // The paths are the ones the architecture record fixes:
 //
-//	/usr/share/asura/            the packaged base, replaced on update
-//	/etc/asura/                  machine-level config, replaced on update
-//	~/.config/asura/             the materialized base, the user's copy
-//	~/.config/asura/user_edits/  the user's overlay; wins at the mirrored path
+//	/usr/share/toren/            the packaged base, replaced on update
+//	/etc/toren/                  machine-level config, replaced on update
+//	~/.config/toren/             the materialized base, the user's copy
+//	~/.config/toren/user_edits/  the user's overlay; wins at the mirrored path
 //
 // Every path this package touches is taken from a struct rather than read from
 // the process environment, so a test can run the real code against a temporary
@@ -28,15 +28,15 @@ import (
 
 // Paths is the set of roots the model is built on.
 type Paths struct {
-	// Base is the packaged base, /usr/share/asura by default.
+	// Base is the packaged base, /usr/share/toren by default.
 	Base string
-	// Etc is machine-level config, /etc/asura.
+	// Etc is machine-level config, /etc/toren.
 	Etc string
-	// Config is the materialized copy the user reads, ~/.config/asura.
+	// Config is the materialized copy the user reads, ~/.config/toren.
 	Config string
 	// Edits is the user's overlay inside Config.
 	Edits string
-	// State holds revisions and snapshots, ~/.local/state/asura.
+	// State holds revisions and snapshots, ~/.local/state/toren.
 	State string
 }
 
@@ -46,11 +46,11 @@ type Paths struct {
 // caller — a test, or a root invocation with a different home — controls it.
 func DefaultPaths(home string) Paths {
 	return Paths{
-		Base:   "/usr/share/asura",
-		Etc:    "/etc/asura",
-		Config: filepath.Join(home, ".config", "asura"),
-		Edits:  filepath.Join(home, ".config", "asura", "user_edits"),
-		State:  filepath.Join(home, ".local", "state", "asura"),
+		Base:   "/usr/share/toren",
+		Etc:    "/etc/toren",
+		Config: filepath.Join(home, ".config", "toren"),
+		Edits:  filepath.Join(home, ".config", "toren", "user_edits"),
+		State:  filepath.Join(home, ".local", "state", "toren"),
 	}
 }
 
@@ -130,7 +130,7 @@ func materializeInto(sourceRoot, destRoot, editsRoot string) error {
 
 		// A user edit wins *at the mirrored path*, which means its content is
 		// written there — not that the path is left alone. Applications read
-		// ~/.config/asura/<path>; they do not know user_edits/ exists, so a
+		// ~/.config/toren/<path>; they do not know user_edits/ exists, so a
 		// model that left the mirrored path absent would resolve the user's edit
 		// in the one place nothing reads. user_edits/ is the record of who
 		// changed it and when, and it is what `reset` and `doctor` consult.
@@ -388,7 +388,7 @@ func isThemeRendered(path string) bool {
 	if err != nil {
 		return false
 	}
-	return bytes.Contains(data, []byte("Rendered by asura theme"))
+	return bytes.Contains(data, []byte("Rendered by toren theme"))
 }
 
 // cleanRelative validates a path the user typed.
@@ -425,7 +425,7 @@ func isUserConfig(relative string) bool {
 	}
 	if parts[0] == "hyprland" && len(parts) == 2 {
 		switch parts[1] {
-		case "monitors-auto.conf", "monitors-user.conf", "settings.conf", "rebinds.conf", "asura.conf", "user.conf",
+		case "monitors-auto.conf", "monitors-user.conf", "settings.conf", "rebinds.conf", "toren.conf", "user.conf",
 			"shell.conf", "vm-perf.conf":
 			return true
 		}

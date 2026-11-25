@@ -13,7 +13,7 @@ import (
 // cue on output volume up/down/mute (input stays silent), a critical-battery
 // alert, and AC plug/unplug. The clips are the desktop sound theme's own (Yaru,
 // then freedesktop, both installed with the desktop), looked up at play time:
-// Asura does not ship audio of its own. Every failure mode is silent: a missing
+// Toren does not ship audio of its own. Every failure mode is silent: a missing
 // player or an absent theme drops the cue rather than disturbing the caller.
 // There is no per-sound volume scaling; each clip plays at the sink's level.
 
@@ -25,7 +25,7 @@ const (
 	soundPowerUnplug  = "power-unplug"
 )
 
-// knownSound gates the `sound <event>` verb so an external caller (the asura-shot
+// knownSound gates the `sound <event>` verb so an external caller (the toren-shot
 // screenshot config) can only trigger a real cue.
 func knownSound(name string) bool {
 	switch name {

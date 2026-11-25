@@ -4,22 +4,22 @@
 unit `toren-wallpaper.service`) ported from another project's wallpaper daemon; the picker is the ported
 wall-ui (itself the skwd-wall picker), and the shell draws what the daemon publishes.
 
-| Part | Where |
-|---|---|
-| daemon, socket `$XDG_RUNTIME_DIR/toren-wallpaper.sock` | `desktop/cmd/toren-wallpaper` |
-| picker window (entry file at the shell root so `qs.*` resolves) | `shell/wallpaper-ui.qml`, `shell/wallpaper-ui/`, launcher `session/toren-wallpaper-ui` |
-| the surface that paints the frame | `shell/modules/wallpaper/` (`Wallpaper.qml` subscribes, `Backdrop.qml` reveals and plays clips) |
-| Depth/Parallax cut-out engine | `shell/scripts/asura-stage`, drawn by `shell/modules/stage/` |
+| Part                                                            | Where                                                                                           |
+| --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| daemon, socket `$XDG_RUNTIME_DIR/toren-wallpaper.sock`          | `desktop/cmd/toren-wallpaper`                                                                   |
+| picker window (entry file at the shell root so `qs.*` resolves) | `shell/wallpaper-ui.qml`, `shell/wallpaper-ui/`, launcher `session/toren-wallpaper-ui`          |
+| the surface that paints the frame                               | `shell/modules/wallpaper/` (`Wallpaper.qml` subscribes, `Backdrop.qml` reveals and plays clips) |
+| Depth/Parallax cut-out engine                                   | `shell/scripts/toren-stage`, drawn by `shell/modules/stage/`                                    |
 
 ## Where things live
 
-| What | Path |
-|---|---|
-| daemon config (`paths`, `restoreOnStartup`, `resource_tier`, `matugen.videoFrame`) | `~/.config/asura/toren-wallpaper.json` |
-| picker config (layout, transitions, day/night, sources) | `~/.config/toren-wallpaper-wall/config.json` |
-| catalogue, thumbnails, stored choice (`outputs.json`), playlists, transcodes, logs | `~/.cache/asura/wallpaper/` |
-| the wallpaper on screen, one absolute path | `$XDG_STATE_HOME/toren-wallpaper` |
-| library | `~/Pictures/Wallpapers`, or an existing `Pictures/wallpaper` spelling of it |
+| What                                                                               | Path                                                                        |
+| ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| daemon config (`paths`, `restoreOnStartup`, `resource_tier`, `matugen.videoFrame`) | `~/.config/toren/toren-wallpaper.json`                                      |
+| picker config (layout, transitions, day/night, sources)                            | `~/.config/toren-wallpaper-wall/config.json`                                |
+| catalogue, thumbnails, stored choice (`outputs.json`), playlists, transcodes, logs | `~/.cache/toren/wallpaper/`                                                 |
+| the wallpaper on screen, one absolute path                                         | `$XDG_STATE_HOME/toren-wallpaper`                                           |
+| library                                                                            | `~/Pictures/Wallpapers`, or an existing `Pictures/wallpaper` spelling of it |
 
 The look settings the picker shows (fit, video engine, transcode) are `wallpaper.*` in `shell.json`.
 The picker changes them with `settings.patch` on `toren-shell.sock`; it never writes the file.
@@ -48,7 +48,7 @@ way: the shell daemon's stage worker sends `depth set <json>` / `depth clear`.
   `Backdrop.qml` plays the clip through QtMultimedia (`qml6-module-qtmultimedia`).
 - **No upscale.** `waifu2x-ncnn-vulkan` is not in the Void archive, so the daemon has no
   `upscale.*` and the picker has no Upscale tab.
-- **First start** paints the wallpaper `org.asura.shell` names (`wallpaper-path[-dark]`, so an
+- **First start** paints the wallpaper `org.toren.shell` names (`wallpaper-path[-dark]`, so an
   adopted desktop keeps its background), else the first image in the library. It reads the keys and
   never writes them.
 - The Browse surface drops the original project's store source; Wallhaven, Steam, moewalls, motionbgs and GitHub

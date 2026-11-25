@@ -84,7 +84,7 @@ ShellRoot {
     property string target: mode
     readonly property string homeDir: Quickshell.env("HOME")
     readonly property string shotsDir: (Quickshell.env("XDG_PICTURES_DIR") || (homeDir + "/Pictures")) + "/Screenshots"
-    readonly property string pinDir: (Quickshell.env("XDG_RUNTIME_DIR") || "/tmp") + "/asura/pins"
+    readonly property string pinDir: (Quickshell.env("XDG_RUNTIME_DIR") || "/tmp") + "/toren/pins"
 
     /**
      * Canonical tool list. The toolbar renders it, the key handler derives its
@@ -505,7 +505,7 @@ ShellRoot {
         if (!w) { if (after) after(false); return; }
         if (spansMonitors()) { seamStitch(path, after); return; }
         w.grabExport(path, function (ok) {
-            console.log("asura-shot: grab " + path + " => " + ok);
+            console.log("toren-shot: grab " + path + " => " + ok);
             if (after) after(ok);
         });
     }
@@ -525,7 +525,7 @@ ShellRoot {
         var parts = [], done = 0, okAll = true;
         for (var j = 0; j < plan.slices.length; j++) {
             (function (sl, idx) {
-                var tmp = "/tmp/asura-shot-seam-" + idx + ".png";
+                var tmp = "/tmp/toren-shot-seam-" + idx + ".png";
                 parts.push({ tmp: tmp, ox: sl.ox, oy: sl.oy });
                 overlays[sl.screen].grabExport(tmp, function (ok) {
                     if (!ok) okAll = false;
@@ -537,7 +537,7 @@ ShellRoot {
     }
 
     function compositeSlices(parts, canvas, path, okAll, after) {
-        if (!okAll) { console.log("asura-shot: seam-stitch slice grab failed"); if (after) after(false); return; }
+        if (!okAll) { console.log("toren-shot: seam-stitch slice grab failed"); if (after) after(false); return; }
         var args = ["magick", "-size", canvas.w + "x" + canvas.h, "xc:black"];
         for (var i = 0; i < parts.length; i++)
             args = args.concat([parts[i].tmp, "-geometry", "+" + parts[i].ox + "+" + parts[i].oy, "-composite"]);
@@ -547,20 +547,20 @@ ShellRoot {
 
     // shutter cue: the daemon owns the shell's event sounds, so a completed
     // capture asks it to play rather than shipping an asset in this config.
-    function shutter() { Quickshell.execDetached(["asura-shell", "sound", "shutter"]); }
+    function shutter() { Quickshell.execDetached(["toren-shell", "sound", "shutter"]); }
 
     Timer { id: quitTimer; interval: 250; onTriggered: Qt.quit() }
     function quitSoon() { quitTimer.restart(); }
 
     function notifySend(title, body) {
         Quickshell.execDetached(body && body.length > 0
-            ? ["notify-send", "-a", "asura", title, body]
-            : ["notify-send", "-a", "asura", title]);
+            ? ["notify-send", "-a", "toren", title, body]
+            : ["notify-send", "-a", "toren", title]);
     }
 
     /** A saved shot carries its own thumbnail, so the toast shows the result. */
     function notifyShot(title, path) {
-        Quickshell.execDetached(["notify-send", "-a", "asura", "-i", path, title, path]);
+        Quickshell.execDetached(["notify-send", "-a", "toren", "-i", path, title, path]);
     }
 
     /**
@@ -577,8 +577,8 @@ ShellRoot {
         running: true
         onTriggered: {
             if (root.framePainted) return;
-            console.error("asura-shot: no frame rendered 15s after launch, giving up");
-            root.notifySend(I18n.tr("asura-shot could not draw its overlay"),
+            console.error("toren-shot: no frame rendered 15s after launch, giving up");
+            root.notifySend(I18n.tr("toren-shot could not draw its overlay"),
                 I18n.tr("graphics init failed, press the key again"));
             quitFallback.start();
         }
@@ -600,9 +600,9 @@ ShellRoot {
     // rather than swallowed. okTitle is the toast for a copy that worked.
     function clipCopy(file, okTitle) {
         Quickshell.execDetached(["sh", "-c",
-            "if asura-shell clip-copy image/png \"$1\" >/dev/null 2>&1 || wl-copy --type image/png < \"$1\"; then "
-            + "[ -z \"$2\" ] || notify-send -a asura \"$2\"; "
-            + "else notify-send -a asura \"Screenshot not copied\" \"Install wl-clipboard: sudo apt install wl-clipboard\"; fi",
+            "if toren-shell clip-copy image/png \"$1\" >/dev/null 2>&1 || wl-copy --type image/png < \"$1\"; then "
+            + "[ -z \"$2\" ] || notify-send -a toren \"$2\"; "
+            + "else notify-send -a toren \"Screenshot not copied\" \"Install wl-clipboard: sudo apt install wl-clipboard\"; fi",
             "sh", file, okTitle]);
     }
     function copyImageAndQuit(file) {
@@ -619,7 +619,7 @@ ShellRoot {
         if (root.exported) return;
         root.exported = true;
         Quickshell.execDetached(["sh", "-c",
-            "f=$(mktemp); printf %s \"$1\" > \"$f\"; asura-shell clip-copy text/plain \"$f\"; rm -f \"$f\"", "sh", text]);
+            "f=$(mktemp); printf %s \"$1\" > \"$f\"; toren-shell clip-copy text/plain \"$f\"; rm -f \"$f\"", "sh", text]);
         root.quitSoon();
     }
 
@@ -654,7 +654,7 @@ ShellRoot {
     }
 
     function doUpload() {
-        var tmp = "/tmp/asura-shot-upload.png";
+        var tmp = "/tmp/toren-shot-upload.png";
         grabTo(tmp, function (ok) {
             if (ok) { root.shutter(); uploadProc.run(tmp); }
             else Qt.quit();
@@ -663,8 +663,8 @@ ShellRoot {
 
     /**
      * Pins the finished shot: the PNG lands in the pin directory, the poke file
-     * wakes an already running host, and the asura-pin spawn starts one if there is
-     * none (the wrapper is single-instance). asura-shot then leaves, so the pin
+     * wakes an already running host, and the toren-pin spawn starts one if there is
+     * none (the wrapper is single-instance). toren-shot then leaves, so the pin
      * outlives it.
      */
     function doPin() {
@@ -672,15 +672,15 @@ ShellRoot {
         var id = String(Date.now()) + "-" + String(Math.floor(Math.random() * 100000));
         var path = root.pinDir + "/pin-" + id + ".png";
         Quickshell.execDetached(["mkdir", "-p", root.pinDir]);
-        grabTo("/tmp/asura-shot-pin.png", function (ok) {
+        grabTo("/tmp/toren-shot-pin.png", function (ok) {
             if (!ok) { Qt.quit(); return; }
             root.exported = true;
             root.shutter();
             Spawn.run(["sh", "-c",
                 "mkdir -p \"$1\"; cp -- \"$2\" \"$3\"; date +%s%N > \"$1/.poke\"; "
-                + "if command -v asura-pin >/dev/null 2>&1; then asura-pin >/dev/null 2>&1 & "
-                + "else notify-send -a asura \"Pinning is not available\" \"asura-pin is not installed\"; fi",
-                "sh", root.pinDir, "/tmp/asura-shot-pin.png", path]);
+                + "if command -v toren-pin >/dev/null 2>&1; then toren-pin >/dev/null 2>&1 & "
+                + "else notify-send -a toren \"Pinning is not available\" \"toren-pin is not installed\"; fi",
+                "sh", root.pinDir, "/tmp/toren-shot-pin.png", path]);
             root.quitSoon();
         });
     }
@@ -696,11 +696,11 @@ ShellRoot {
         var ov = overlayAt(gx, gy);
         if (!ov) { bumpAnn(); return; }
         var s = ov.modelData;
-        var tmp = "/tmp/asura-shot-ocr.png";
+        var tmp = "/tmp/toren-shot-ocr.png";
         ov.grabRegion({ x: gx - s.x, y: gy - s.y, w: w, h: h }, tmp, function (ok) {
             if (!ok) { root.notifySend(I18n.tr("Could not read that region"), ""); return; }
             root.exported = true;
-            Quickshell.execDetached(["asura-cmd-ocr", "--file", tmp]);
+            Quickshell.execDetached(["toren-cmd-ocr", "--file", tmp]);
             root.quitSoon();
         });
         bumpAnn();
@@ -718,7 +718,7 @@ ShellRoot {
         var ov = overlayAt(gx, gy);
         if (!ov) return;
         var s = ov.modelData;
-        var tmp = "/tmp/asura-shot-redact.png";
+        var tmp = "/tmp/toren-shot-redact.png";
         a.seed = Redact.seedFor({ x: Math.round(gx), y: Math.round(gy), w: Math.round(w), h: Math.round(h) });
         ov.grabPlate({ x: gx - s.x, y: gy - s.y, w: w, h: h }, tmp, function (ok) {
             if (ok) palProc.read(index, tmp);
@@ -765,7 +765,7 @@ ShellRoot {
         }
         onExited: (code) => {
             var url = uploadOut.text.trim();
-            console.log("asura-shot: upload exit " + code + " url=" + JSON.stringify(url));
+            console.log("toren-shot: upload exit " + code + " url=" + JSON.stringify(url));
             if (code === 0 && url.indexOf("http") === 0) root.copyTextAndQuit(url);
             else {
                 root.notifySend(I18n.tr("Upload failed"), I18n.tr("The shot was not uploaded; check the network."));
@@ -779,7 +779,7 @@ ShellRoot {
         property var cb: null
         function runWith(args, after) { cb = after; command = args; running = true; }
         onExited: (code) => {
-            console.log("asura-shot: seam-stitch composite exit " + code);
+            console.log("toren-shot: seam-stitch composite exit " + code);
             var f = cb;
             cb = null;
             if (f) f(code === 0);
@@ -867,7 +867,7 @@ ShellRoot {
             exclusionMode: ExclusionMode.Ignore
             WlrLayershell.layer: WlrLayer.Overlay
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
-            WlrLayershell.namespace: "asura-shot"
+            WlrLayershell.namespace: "toren-shot"
 
             readonly property string scrName: win.modelData.name
             readonly property bool showToolbar: root.toolbarFor(win).visible

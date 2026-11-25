@@ -15,8 +15,8 @@ kernel_parameters: []
 
 files:
   udev:
-    - target: "/etc/udev/rules.d/99-asura-power.rules"
-      source: "system/udev/99-asura-power.rules"
+    - target: "/etc/udev/rules.d/99-toren-power.rules"
+      source: "system/udev/99-toren-power.rules"
       reason: "Configure snd_hda_intel power_save=1 (Linux Documentation/sound/designs/powersave.rst)"
 
 services: []

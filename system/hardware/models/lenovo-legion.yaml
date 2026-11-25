@@ -27,5 +27,5 @@ services: []
 
 notes:
   - "Battery conservation mode: stops charging around 60-80% via ideapad_acpi conservation_mode."
-  - "Thermal profiles: quiet, balanced, and performance profiles via ideapad_laptop platform_profile ('asura power profile')."
-  - "Legion Fn+Q mode switching integrates with asura power."
+  - "Thermal profiles: quiet, balanced, and performance profiles via ideapad_laptop platform_profile ('toren power profile')."
+  - "Legion Fn+Q mode switching integrates with toren power."

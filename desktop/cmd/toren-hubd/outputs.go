@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"asura/desktop/cmd/toren-hubd/internal/wm"
+	"toren/desktop/cmd/toren-hubd/internal/wm"
 )
 
 // outputs is the display page's backend. It enumerates the connected screens
@@ -22,12 +22,12 @@ import (
 // through ApplyOutputs, so it works on every compositor and survives a switch
 // (the provider reports whatever the new compositor cannot honour).
 //
-//	asura-hubd outputs                list the connected outputs (JSON)
-//	asura-hubd outputs apply <json>   apply an output layout, print the report
-//	asura-hubd outputs profiles       list saved profiles and whether each matches
-//	asura-hubd outputs save <n> <json> save a profile and apply it
-//	asura-hubd outputs load <n>       apply a saved profile
-//	asura-hubd outputs rm <n>         delete a saved profile
+//	toren-hubd outputs                list the connected outputs (JSON)
+//	toren-hubd outputs apply <json>   apply an output layout, print the report
+//	toren-hubd outputs profiles       list saved profiles and whether each matches
+//	toren-hubd outputs save <n> <json> save a profile and apply it
+//	toren-hubd outputs load <n>       apply a saved profile
+//	toren-hubd outputs rm <n>         delete a saved profile
 
 // outputRow is one output as the display editor reads it: the seam's Output plus
 // the physical width, height and refresh parsed from the current mode, since the
@@ -144,7 +144,7 @@ func applyLayout(layout []wm.OutputLayout) error {
 	if err != nil {
 		return err
 	}
-	f, err := os.CreateTemp("", "asura-outputs-*.json")
+	f, err := os.CreateTemp("", "toren-outputs-*.json")
 	if err != nil {
 		return err
 	}
@@ -265,7 +265,7 @@ func greeterPrimaryPath() string {
 	if p := os.Getenv("ASURA_GREETER_PRIMARY_FILE"); p != "" {
 		return p
 	}
-	return "/var/lib/asura/greeter-primary"
+	return "/var/lib/toren/greeter-primary"
 }
 func parseLayout(raw string) ([]wm.OutputLayout, error) {
 	var layout []wm.OutputLayout
@@ -285,7 +285,7 @@ type outputProfile struct {
 	Matches bool   `json:"matches"`
 }
 
-func profilesDir() string { return filepath.Join(asuraConfigDir(), "output-profiles") }
+func profilesDir() string { return filepath.Join(torenConfigDir(), "output-profiles") }
 
 // profileName rejects a name that would escape the profiles dir, since it comes
 // from a text field.

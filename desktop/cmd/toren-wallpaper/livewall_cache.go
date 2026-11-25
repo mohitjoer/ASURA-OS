@@ -11,7 +11,7 @@ import (
 // with every distinct clip and is never reclaimed on its own, so the picker
 // exposes a retention policy that drives pruneLivewallCache.
 func livewallCacheDir() string {
-	return filepath.Join(cacheHome(), "asura", "wallpaper", "livewall")
+	return filepath.Join(cacheHome(), "toren", "wallpaper", "livewall")
 }
 
 // pruneLivewallCache reclaims the livewall cache. With days > 0 it removes only

@@ -1,4 +1,4 @@
-// The session screen, as Asura ships it.
+// The session screen, as Toren ships it.
 //
 // This is an overlay. Upstream's version of this file is the same menu — a
 // translucent overlay layer over the focused screen, a title, a row of square
@@ -7,16 +7,16 @@
 // differences are who dispatches it and where the actions go.
 //
 // Upstream's entry point registers one IPC handler (target "session") and
-// three global shortcuts of its own. Asura's registers none: the toggle
-// reaches the flag through the shell's own IPC bridge (`asura ipc call asura
+// three global shortcuts of its own. Toren's registers none: the toggle
+// reaches the flag through the shell's own IPC bridge (`toren ipc call toren
 // session`, bound to Ctrl+Alt+Delete — the chord upstream binds to this
 // screen's own shortcut), the sidebar's power button opens it, and a click
 // anywhere, Escape, or the lock engaging are the ways out.
 //
-// The buttons route into Asura's session machinery rather than upstream's
+// The buttons route into Toren's session machinery rather than upstream's
 // Session singleton, whose logout kills every window pid and then pkills the
 // compositor and whose poweroff runs loginctl directly. Lock runs
-// `asura-shell lock` — the daemon spawns hyprlock, and that is the only lock
+// `toren-shell lock` — the daemon spawns hyprlock, and that is the only lock
 // surface this desktop has. Logout, reboot and shutdown raise the shell's
 // confirmation dialog (ShellState.askSessionAction), which runs the action
 // through the daemon only on its positive press — reboot and shutdown are
@@ -138,7 +138,7 @@ Scope {
                         buttonIcon: "lock"
                         buttonText: Translation.tr("Lock")
                         onClicked: {
-                            Quickshell.execDetached(["asura-shell", "lock"]);
+                            Quickshell.execDetached(["toren-shell", "lock"]);
                             sessionRoot.hide();
                         }
                         onFocusChanged: {

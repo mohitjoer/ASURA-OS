@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# extended sysread for the Asura Hub Profile dossier (stat sheet next to the
+# extended sysread for the Toren Hub Profile dossier (stat sheet next to the
 # specimen card). one field per line, exact order SysInfo.qml's extended parser
 # wants. each field falls back to "-" or "" if its source is gone, so the panel
-# degrades cleanly. separate from asura-sysinfo so the pill's 30s poll stays light.
+# degrades cleanly. separate from toren-sysinfo so the pill's 30s poll stays light.
 export LC_ALL=C
 
 read -r l1 _ < /proc/loadavg
@@ -28,7 +28,7 @@ done
 # carry is dropped rather than joined as an empty swatch, so a palette without
 # the sixteen terminal colours reads as no strip instead of sixteen blanks.
 palette=""
-cj="${XDG_CACHE_HOME:-$HOME/.cache}/asura/colors.json"
+cj="${XDG_CACHE_HOME:-$HOME/.cache}/toren/colors.json"
 if [ -s "$cj" ] && command -v jq >/dev/null 2>&1; then
     palette=$(jq -r '[.color0,.color1,.color2,.color3,.color4,.color5,.color6,.color7,.color8,.color9,.color10,.color11,.color12,.color13,.color14,.color15]|map(select(. != null))|join(",")' "$cj" 2>/dev/null)
 fi
@@ -85,7 +85,7 @@ explicit=$(awk -v native="$(dpkg --print-architecture 2>/dev/null)" '
 # until dpkg's status file changes (install and remove both rewrite it).
 foreign="-"
 stamp=$(stat -c %Y /var/lib/dpkg/status 2>/dev/null)
-fc="${XDG_CACHE_HOME:-$HOME/.cache}/asura/profile-foreign-pkgs"
+fc="${XDG_CACHE_HOME:-$HOME/.cache}/toren/profile-foreign-pkgs"
 if [ -n "$stamp" ]; then
     { read -r cstamp ccount < "$fc"; } 2>/dev/null || true
     if [ "${cstamp:-}" = "$stamp" ] && [ -n "${ccount:-}" ]; then

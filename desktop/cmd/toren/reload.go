@@ -7,29 +7,29 @@ import (
 	"path/filepath"
 	"time"
 
-	"asura/desktop/internal/runner"
+	"toren/desktop/internal/runner"
 )
 
-// `asura reload` is called by the Hub after it changes the login shell, and
+// `toren reload` is called by the Hub after it changes the login shell, and
 // named by the plugin installer as the way to see an updated plugin.
 // It signals the user runit services under ~/.config/service.
 
 const (
 	reloadShellService  = "quickshell"
-	reloadDaemonService = "asurad"
+	reloadDaemonService = "torend"
 )
 
-const reloadUsage = `Usage: asura reload
+const reloadUsage = `Usage: toren reload
 
 Reloads the running shell and daemon via user runit supervision.
 Use it after changing config that is already in place.
 `
 
 func init() {
-	register("reload", "reload the running shell and daemon", asuraReload)
+	register("reload", "reload the running shell and daemon", torenReload)
 }
 
-func asuraReload(args []string) int {
+func torenReload(args []string) int {
 	return reloadMain(args, os.Stdout, os.Stderr, runner.Exec(30*time.Second))
 }
 

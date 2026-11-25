@@ -12,42 +12,42 @@ import (
 	"strings"
 	"time"
 
-	"asura/desktop/internal/runner"
+	"toren/desktop/internal/runner"
 )
 
-// `asura refresh` brings the running desktop up to what is installed, without
-// logging out. `asura update` runs it after applying a pulled checkout:
+// `toren refresh` brings the running desktop up to what is installed, without
+// logging out. `toren update` runs it after applying a pulled checkout:
 //
 //  1. the user's runit services are re-synced from the installed ones, so a
 //     changed run script (the shell's, a daemon's) is the one that restarts;
 //  2. the compositor look for the chosen desktop shell is rewritten (the same
-//     file asura-session writes at login) and Hyprland reloads its config;
+//     file toren-session writes at login) and Hyprland reloads its config;
 //  3. the desktop shell and ASURA's user daemons restart on the new code;
 //  4. a notification says it happened.
 //
 // Audio (pipewire, wireplumber) and the portals are left running: restarting
 // them would cut sound and break open file dialogs for nothing.
 
-const refreshUsage = `Usage: asura refresh
+const refreshUsage = `Usage: toren refresh
 
 Applies installed desktop changes to the running session: re-syncs the user
 services, reloads Hyprland, restarts the desktop shell and ASURA's daemons.
-Run as root (sudo asura update), it refreshes the session of the user who ran
+Run as root (sudo toren update), it refreshes the session of the user who ran
 sudo.
 `
 
 // The installed user services, and the ones refresh restarts when running.
 var (
-	refreshServicesSrc = "/usr/share/asura/runit/services"
-	refreshShellLook   = "/usr/share/asura/shell-desktop/toren/hyprland.conf"
-	refreshDaemons     = []string{"asurad", "asura-userd", "asura-hubd", "asura-wallpaper", "asura-idle"}
+	refreshServicesSrc = "/usr/share/toren/runit/services"
+	refreshShellLook   = "/usr/share/toren/shell-desktop/toren/hyprland.conf"
+	refreshDaemons     = []string{"torend", "toren-userd", "toren-hubd", "toren-wallpaper", "toren-idle"}
 )
 
 func init() {
-	register("refresh", "apply installed desktop changes to the running session", asuraRefresh)
+	register("refresh", "apply installed desktop changes to the running session", torenRefresh)
 }
 
-func asuraRefresh(args []string) int {
+func torenRefresh(args []string) int {
 	if len(args) != 0 {
 		if args[0] == "-h" || args[0] == "--help" {
 			fmt.Print(refreshUsage)
@@ -78,7 +78,7 @@ func refreshAsSudoUser(out, errOut io.Writer) int {
 	}
 	self, err := os.Executable()
 	if err != nil {
-		self = "asura"
+		self = "toren"
 	}
 	cmd := exec.Command("sudo", "-u", name, "env",
 		"HOME="+u.HomeDir,
@@ -212,7 +212,7 @@ func copyFileAtomic(from, to string) error {
 	if err != nil {
 		return err
 	}
-	tmp := to + ".asura-new"
+	tmp := to + ".toren-new"
 	if err := os.WriteFile(tmp, data, info.Mode().Perm()); err != nil {
 		return err
 	}
@@ -222,25 +222,25 @@ func copyFileAtomic(from, to string) error {
 	return os.Rename(tmp, to)
 }
 
-// writeShellLook writes ~/.config/asura/hyprland/shell.conf the way
-// asura-session does at login: the desktop's compositor look while it is the
+// writeShellLook writes ~/.config/toren/hyprland/shell.conf the way
+// toren-session does at login: the desktop's compositor look while it is the
 // desktop shell, nothing for ASURA's shell.
 func writeShellLook(run runner.Func) error {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return err
 	}
-	dir := filepath.Join(home, ".config", "asura", "hyprland")
+	dir := filepath.Join(home, ".config", "toren", "hyprland")
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return err
 	}
 	shell := os.Getenv("ASURA_DESKTOP_SHELL")
 	if shell == "" {
-		if got, err := run("gsettings", "get", "org.asura.shell", "desktop-shell"); err == nil {
+		if got, err := run("gsettings", "get", "org.toren.shell", "desktop-shell"); err == nil {
 			shell = strings.Trim(strings.TrimSpace(got), "'")
 		}
 	}
-	text := "# Written by asura-session at login; do not edit.\n"
+	text := "# Written by toren-session at login; do not edit.\n"
 	if (shell == "" || shell == "desktop") && fileExists(refreshShellLook) {
 		text += "source = " + refreshShellLook + "\n"
 	}
@@ -290,6 +290,6 @@ func clearShellCrashCount() {
 		dir = filepath.Join(home, ".local", "state")
 	}
 	for _, f := range []string{"desktop-quick-exits", "desktop-last-start"} {
-		_ = os.Remove(filepath.Join(dir, "asura", f))
+		_ = os.Remove(filepath.Join(dir, "toren", f))
 	}
 }

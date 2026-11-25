@@ -18,11 +18,12 @@ Hyprland compositor. When Hyprland updates via XBPS, any previously compiled plu
 built against a prior Hyprland version will fail to load until recompiled against the new headers.
 
 Toren manages this lifecycle through:
+
 1. **The Hub Backend (`toren-hubd`)**: `toren-hubd desktop plugins list` interrogates the
    installed plugins, checks their build hashes against the current compositor hash, and reports
    ABI status (`compatible`, `mismatch`, or `unbuilt`).
 2. **Settings Hub GUI (`shell/hub/pages/PluginsPage.qml`)**: The Plugins page under
-   *Settings > Compositor > Plugins* displays status cards for every plugin on the system,
+   _Settings > Compositor > Plugins_ displays status cards for every plugin on the system,
    providing one-click **Rebuild**, **Docs**, and **Remove** actions.
 3. **Hyprland Plugin Manager (`hyprpm`)**: Upstream plugin toolchain integration used to
    clone repositories carrying a `hyprpm.toml`, build them against system headers, and stage
@@ -34,22 +35,23 @@ Toren manages this lifecycle through:
 
 Toren Linux supports standard curated Hyprland plugins:
 
-| Plugin | Repository | Description |
-|---|---|---|
-| `hyprbars` | `hyprwm/hyprland-plugins` | Client-side title bars with window controls and titles |
-| `hyprfocus` | `hyprfocus` | Window flash and animation on focus change |
-| `hyprtrails` | `hyprwm/hyprland-plugins` | Smooth trail visual effect trailing active windows |
-| `dynamic-cursors` | `VirtCode/hypr-dynamic-cursors` | Realistic cursor tilt, stretch, and momentum physics |
+| Plugin            | Repository                      | Description                                            |
+| ----------------- | ------------------------------- | ------------------------------------------------------ |
+| `hyprbars`        | `hyprwm/hyprland-plugins`       | Client-side title bars with window controls and titles |
+| `hyprfocus`       | `hyprfocus`                     | Window flash and animation on focus change             |
+| `hyprtrails`      | `hyprwm/hyprland-plugins`       | Smooth trail visual effect trailing active windows     |
+| `dynamic-cursors` | `VirtCode/hypr-dynamic-cursors` | Realistic cursor tilt, stretch, and momentum physics   |
 
 ---
 
 ## Configuration & Settings Flow
 
 Compositor plugin settings ride Toren's hypr draft system:
+
 1. When a plugin loads, its configuration keys are exported by the compositor.
-2. In Settings Hub (*Plugins*), controls adjust properties (e.g. `plugin:hyprbars:bar_height`,
+2. In Settings Hub (_Plugins_), controls adjust properties (e.g. `plugin:hyprbars:bar_height`,
    `plugin:hyprbars:bar_color`).
-3. On save, `toren-hubd` renders committed changes to `~/.config/asura/hyprland/settings.conf`.
+3. On save, `toren-hubd` renders committed changes to `~/.config/toren/hyprland/settings.conf`.
 4. Compositor reloading (`hyprctl reload`) activates the updated settings immediately without
    restarting the session.
 
@@ -58,6 +60,7 @@ Compositor plugin settings ride Toren's hypr draft system:
 ## Adding Custom Plugins
 
 To add a new Hyprland plugin:
+
 1. In the Settings Hub, open **Plugins** and click **Add from Git**.
 2. Enter the URL of a Git repository containing a valid `hyprpm.toml`.
 3. Toren invokes the build chain, verifies header compatibility, and generates the `.so`.

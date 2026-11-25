@@ -7,7 +7,7 @@ import qs.Ui.Singletons
 import "../Singletons"
 
 // Window Rules (DESIGN.md section 11, ADVANCED). Custom Hyprland window rules
-// layered over the ones Asura ships: each entry matches a window by class
+// layered over the ones Toren ships: each entry matches a window by class
 // and/or title and applies ONE action, a few of which carry a typed value.
 // This is not a settings sheet -- windowRules is an array of rule records, so
 // it is a bespoke list editor: a section head, a scrolling column of rule
@@ -173,7 +173,7 @@ Item {
             Image {
                 width: 12; height: 12
                 anchors.verticalCenter: parent.verticalCenter
-                source: Qt.resolvedUrl("../../assets/asura-logo-on-dark.svg")
+                source: Qt.resolvedUrl("../../assets/toren-logo-on-dark.svg")
                 sourceSize.width: 24; sourceSize.height: 24
                 fillMode: Image.PreserveAspectFit
                 smooth: true

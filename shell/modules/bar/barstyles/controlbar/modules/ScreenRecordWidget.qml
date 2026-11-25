@@ -61,7 +61,7 @@ Item {
 
     Process {
         id: toggleProc
-        command: ["bash", "-c", "asura-cmd-screenrecord --stop"]
+        command: ["bash", "-c", "toren-cmd-screenrecord --stop"]
         onExited: root.refreshRecordingStatus()
     }
 

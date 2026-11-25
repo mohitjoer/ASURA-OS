@@ -6,7 +6,7 @@ import qs.Ui
 import qs.Ui.Singletons
 import "Singletons"
 
-// The compositor Asura is running, and which version of it. Asura has one
+// The compositor Toren is running, and which version of it. Toren has one
 // compositor, Hyprland, so this is a statement and not a picker: there is no
 // switch to offer and no second store for settings to be carried across to. The
 // version is read from the compositor that is running rather than from a package

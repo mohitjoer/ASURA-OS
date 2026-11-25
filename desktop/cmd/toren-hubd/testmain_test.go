@@ -10,7 +10,7 @@ import (
 // and no user config to write into. A test that needs its own paths sets them
 // with t.Setenv, which is restored afterwards.
 func TestMain(m *testing.M) {
-	dir, err := os.MkdirTemp("", "asura-hubd-test-")
+	dir, err := os.MkdirTemp("", "toren-hubd-test-")
 	if err != nil {
 		panic(err)
 	}

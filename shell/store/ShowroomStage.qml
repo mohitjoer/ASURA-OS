@@ -93,7 +93,7 @@ Item {
 
     ProductCover {
         id: artwork
-        objectName: "asura-store-stage-artwork"
+        objectName: "toren-store-stage-artwork"
         anchors.fill: parent
         item: stage.coverItem
         mode: "hero"
@@ -111,7 +111,7 @@ Item {
     }
 
     Rectangle {
-        objectName: "asura-store-stage-scrim"
+        objectName: "toren-store-stage-scrim"
         anchors.fill: parent
         gradient: Gradient {
             orientation: Gradient.Horizontal
@@ -173,7 +173,7 @@ Item {
     }
 
     Text {
-        objectName: "asura-store-stage-position"
+        objectName: "toren-store-stage-position"
         anchors { top: parent.top; right: parent.right; margins: Tokens.s5 }
         text: stage.positionText
         visible: text !== ""
@@ -201,7 +201,7 @@ Item {
         }
 
         Text {
-            objectName: "asura-store-stage-title"
+            objectName: "toren-store-stage-title"
             width: parent.width
             text: String(stage.displayItem && (stage.displayItem.name || stage.displayItem.id) || "")
             color: Tokens.ink
@@ -226,7 +226,7 @@ Item {
         }
 
         StatusReadout {
-            objectName: "asura-store-stage-status"
+            objectName: "toren-store-stage-status"
             item: stage.displayItem
             busyKey: stage.busyKey
             installStage: stage.installStage
@@ -236,7 +236,7 @@ Item {
         }
 
         Text {
-            objectName: "asura-store-stage-foreign-wm"
+            objectName: "toren-store-stage-foreign-wm"
             width: parent.width
             visible: StoreLogic.isUnavailable(stage.displayItem)
             text: StoreLogic.unavailableReason(stage.displayItem).length > 0
@@ -252,7 +252,7 @@ Item {
         }
 
         Text {
-            objectName: "asura-store-stage-pause"
+            objectName: "toren-store-stage-pause"
             width: parent.width
             visible: StoreLogic.isDownloadPaused(stage.displayItem)
             text: I18n.tr("Under construction.") + " " + StoreLogic.downloadPauseReason(stage.displayItem)
@@ -269,7 +269,7 @@ Item {
             spacing: Tokens.s2
 
             Btn {
-                objectName: "asura-store-stage-primary"
+                objectName: "toren-store-stage-primary"
                 text: I18n.tr(stage.primaryLabel)
                 // Installed is the status line above; no greyed-out button for it.
                 visible: !stage.hasActionItem || StoreLogic.primaryAction(stage.actionItem) !== "INSTALLED"
@@ -285,7 +285,7 @@ Item {
             }
 
             Btn {
-                objectName: "asura-store-stage-details"
+                objectName: "toren-store-stage-details"
                 text: I18n.tr("VIEW DETAILS")
                 armed: stage.hasActionItem
                 Accessible.role: Accessible.Button
@@ -295,7 +295,7 @@ Item {
             }
 
             Btn {
-                objectName: "asura-store-stage-settings"
+                objectName: "toren-store-stage-settings"
                 text: I18n.tr(stage.secondaryLabel)
                 visible: text !== ""
                 armed: visible && stage.hasActionItem
@@ -306,7 +306,7 @@ Item {
             }
 
             Btn {
-                objectName: "asura-store-stage-remove"
+                objectName: "toren-store-stage-remove"
                 text: I18n.tr("REMOVE")
                 visible: StoreLogic.isInstalled(stage.actionItem)
                 armed: visible && stage.busyKey === ""

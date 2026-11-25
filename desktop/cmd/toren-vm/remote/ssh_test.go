@@ -50,7 +50,7 @@ func TestPveGuests(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	g, err := pveGuests(PVE{URL: srv.URL, Token: "asura-vm@pve!hub=secret"})
+	g, err := pveGuests(PVE{URL: srv.URL, Token: "toren-vm@pve!hub=secret"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -63,7 +63,7 @@ func TestPveGuests(t *testing.T) {
 	if g[0].Type != "qemu" || g[1].Type != "lxc" {
 		t.Fatalf("types wrong: %s,%s", g[0].Type, g[1].Type)
 	}
-	if gotAuth != "PVEAPIToken=asura-vm@pve!hub=secret" {
+	if gotAuth != "PVEAPIToken=toren-vm@pve!hub=secret" {
 		t.Fatalf("auth header wrong: %q", gotAuth)
 	}
 	if gotPath != "/api2/json/cluster/resources" {

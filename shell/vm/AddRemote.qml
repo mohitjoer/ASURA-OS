@@ -7,7 +7,7 @@ import "Singletons"
 
 // The manifest: add or amend one remote. A plain sheet of the facts a connection
 // needs -- alias, address, user, port, key, and the harbour's own grouping. It
-// writes through asura-vm-ssh into asura-vm's ~/.ssh/config.d include, so the host also
+// writes through toren-vm-ssh into toren-vm's ~/.ssh/config.d include, so the host also
 // works from a bare `ssh <alias>`; nothing is locked in here.
 Item {
     id: sheet

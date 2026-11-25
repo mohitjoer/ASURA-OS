@@ -13,7 +13,7 @@ import qs.Ui.Singletons
 // head, a bone-pill tab strip (Wi-Fi / Bluetooth / Hotspot), and a Loader that
 // swaps between three live subtabs. Every backend is a system tool -- the
 // Quickshell Networking/Bluetooth services plus nmcli/bluetoothctl -- so the
-// page applies immediately and writes no Asura config. The subtab bodies are
+// page applies immediately and writes no Toren config. The subtab bodies are
 // ported verbatim from the old WifiTab/BluetoothTab/HotspotTab: identical
 // process wiring, identical logic; only the presentation is recast to
 // monochrome. State is by word and inversion, never colour; signal strength is
@@ -1655,7 +1655,7 @@ Item {
 
     // ── Hotspot subtab ───────────────────────────────────────────────────────
 
-    // brings the persistent AsuraHotspot NetworkManager profile up/down through
+    // brings the persistent TorenHotspot NetworkManager profile up/down through
     // nmcli, with an editable SSID + WPA2 password. state and credentials read
     // straight from NM on entry. name + password ride in as positional args,
     // NEVER spliced into the shell string.
@@ -1665,9 +1665,9 @@ Item {
         readonly property var devices: (typeof Networking !== "undefined" && Networking && Networking.devices) ? Networking.devices.values : []
         readonly property var wifiDev: hs.devices.find(function(d) { return d && d.type === DeviceType.Wifi }) || null
 
-        readonly property string hsCon: "AsuraHotspot"
+        readonly property string hsCon: "TorenHotspot"
         readonly property string hsIface: hs.wifiDev ? (hs.wifiDev.name || "wlan0") : "wlan0"
-        property string hsName: "Asura"
+        property string hsName: "Toren"
         property string hsPw: ""
         property bool hsActive: false
         property bool hsBusy: false
@@ -1888,7 +1888,7 @@ Item {
                     field: "name"
                     label: I18n.tr("Network name")
                     value: hs.hsName
-                    placeholder: "Asura"
+                    placeholder: "Toren"
                     editing: hs.hsEdit === "name"
                     draft: hs.hsDraft
                     onBeginEdit: { hs.hsDraft = value; hs.hsEdit = "name"; }
@@ -1948,7 +1948,7 @@ Item {
                 Image {
                 width: 12; height: 12
                 anchors.verticalCenter: parent.verticalCenter
-                source: Qt.resolvedUrl("../../assets/asura-logo-on-dark.svg")
+                source: Qt.resolvedUrl("../../assets/toren-logo-on-dark.svg")
                 sourceSize.width: 24; sourceSize.height: 24
                 fillMode: Image.PreserveAspectFit
                 smooth: true

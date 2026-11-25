@@ -9,9 +9,9 @@ import (
 	"strings"
 )
 
-const shareUsage = `Usage: asura share send FILE DEVICE
-       asura share receive
-       asura share devices
+const shareUsage = `Usage: toren share send FILE DEVICE
+       toren share receive
+       toren share devices
 
 File sharing over Tailscale Taildrop.
 
@@ -21,11 +21,11 @@ Commands:
   devices           list available Tailscale devices
 
 Requirements:
-  Requires Tailscale to be enabled and running (asura enable tailscale).
+  Requires Tailscale to be enabled and running (toren enable tailscale).
 `
 
 func init() {
-	register("share", "share files across devices with Tailscale", asuraShare)
+	register("share", "share files across devices with Tailscale", torenShare)
 	helpText["share"] = shareUsage
 }
 
@@ -51,10 +51,10 @@ func isTailscaleAvailable() bool {
 	return true
 }
 
-func asuraShare(args []string) int {
+func torenShare(args []string) int {
 	if !isTailscaleAvailable() {
-		fmt.Fprintln(os.Stderr, "asura share: Tailscale is not enabled or running.")
-		fmt.Fprintln(os.Stderr, "Enable it with:  asura enable tailscale")
+		fmt.Fprintln(os.Stderr, "toren share: Tailscale is not enabled or running.")
+		fmt.Fprintln(os.Stderr, "Enable it with:  toren enable tailscale")
 		fmt.Fprintln(os.Stderr, "And log in with: sudo tailscale up")
 		return exitFail
 	}
@@ -66,7 +66,7 @@ func asuraShare(args []string) int {
 	switch args[0] {
 	case "send":
 		if len(args) < 3 {
-			fmt.Fprintln(os.Stderr, "asura share send: missing FILE or DEVICE argument")
+			fmt.Fprintln(os.Stderr, "toren share send: missing FILE or DEVICE argument")
 			fmt.Fprint(os.Stderr, shareUsage)
 			return exitUsage
 		}
@@ -74,7 +74,7 @@ func asuraShare(args []string) int {
 	case "receive":
 		return shareReceive()
 	default:
-		fmt.Fprintf(os.Stderr, "asura share: unknown subcommand %q\n\n", args[0])
+		fmt.Fprintf(os.Stderr, "toren share: unknown subcommand %q\n\n", args[0])
 		fmt.Fprint(os.Stderr, shareUsage)
 		return exitUsage
 	}
@@ -83,7 +83,7 @@ func asuraShare(args []string) int {
 func shareDevices() int {
 	out, err := shareTailscaleStatus()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "asura share: tailscale status failed: %v\n", err)
+		fmt.Fprintf(os.Stderr, "toren share: tailscale status failed: %v\n", err)
 		return exitFail
 	}
 
@@ -102,7 +102,7 @@ func shareDevices() int {
 	}
 
 	if err := json.Unmarshal(out, &status); err != nil {
-		fmt.Fprintf(os.Stderr, "asura share: could not parse tailscale status: %v\n", err)
+		fmt.Fprintf(os.Stderr, "toren share: could not parse tailscale status: %v\n", err)
 		return exitFail
 	}
 
@@ -121,7 +121,7 @@ func shareDevices() int {
 
 func shareSend(file, device string) int {
 	if _, err := os.Stat(file); err != nil {
-		fmt.Fprintf(os.Stderr, "asura share send: file %q not found\n", file)
+		fmt.Fprintf(os.Stderr, "toren share send: file %q not found\n", file)
 		return exitFail
 	}
 
@@ -130,9 +130,9 @@ func shareSend(file, device string) int {
 		target += ":"
 	}
 
-	fmt.Printf("asura share: sending %s to %s...\n", filepath.Base(file), device)
+	fmt.Printf("toren share: sending %s to %s...\n", filepath.Base(file), device)
 	if err := shareExec("file", "cp", file, target); err != nil {
-		fmt.Fprintf(os.Stderr, "asura share: send failed: %v\n", err)
+		fmt.Fprintf(os.Stderr, "toren share: send failed: %v\n", err)
 		return exitFail
 	}
 	fmt.Println("✓ File sent successfully.")
@@ -143,11 +143,11 @@ func shareReceive() int {
 	downloads := filepath.Join(homeDir(), "Downloads")
 	_ = os.MkdirAll(downloads, 0o755)
 
-	fmt.Println("asura share: checking for incoming Taildrop files...")
+	fmt.Println("toren share: checking for incoming Taildrop files...")
 	cmd := exec.Command("tailscale", "file", "get", downloads)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "asura share: receive failed: %v\n%s\n", err, string(out))
+		fmt.Fprintf(os.Stderr, "toren share: receive failed: %v\n%s\n", err, string(out))
 		return exitFail
 	}
 
@@ -158,7 +158,7 @@ func shareReceive() int {
 	fmt.Printf("✓ Files received into %s\n", downloads)
 
 	_ = exec.Command("notify-send",
-		"-a", "Asura Share",
+		"-a", "Toren Share",
 		"-i", "preferences-desktop-remote-desktop",
 		"File Received",
 		fmt.Sprintf("Tailscale files received into %s", downloads),

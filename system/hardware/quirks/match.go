@@ -6,8 +6,8 @@ import (
 	"sort"
 	"strings"
 
-	"asura/hardware/match"
-	"asura/hardware/probe"
+	"toren/hardware/match"
+	"toren/hardware/probe"
 )
 
 // IsLaptopChassis checks if the chassis type indicates a portable machine.

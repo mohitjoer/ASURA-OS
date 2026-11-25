@@ -224,7 +224,7 @@ func isBuiltin(name string) bool {
 	return false
 }
 
-// ── storage: ~/.config/asura/gpu-presets.json ───────────────────────────────
+// ── storage: ~/.config/toren/gpu-presets.json ───────────────────────────────
 
 type presetFile struct {
 	Presets []preset `json:"presets"`
@@ -235,7 +235,7 @@ func presetsPath() string {
 	if base == "" {
 		base = filepath.Join(os.Getenv("HOME"), ".config")
 	}
-	return filepath.Join(base, "asura", "gpu-presets.json")
+	return filepath.Join(base, "toren", "gpu-presets.json")
 }
 
 func loadCustomPresets() []preset {

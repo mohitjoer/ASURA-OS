@@ -93,7 +93,7 @@
       "label": "Lock the screen",
       "chord": "SUPER + L",
       "kind": "app",
-      "action": "asura-shell",
+      "action": "toren-shell",
       "argument": "lock"
     },
     {
@@ -107,10 +107,10 @@
     {
       "id": "settings",
       "category": "desktop",
-      "label": "Open Asura Settings",
+      "label": "Open Toren Settings",
       "chord": "SUPER + comma",
       "kind": "app",
-      "action": "asura-shell",
+      "action": "toren-shell",
       "argument": "hub open"
     },
     {
@@ -119,7 +119,7 @@
       "label": "Voice typing (press again to stop)",
       "chord": "SUPER + grave",
       "kind": "app",
-      "action": "asura-shell",
+      "action": "toren-shell",
       "argument": "voice"
     },
     {
@@ -128,7 +128,7 @@
       "label": "Choose a wallpaper",
       "chord": "SUPER + W",
       "kind": "app",
-      "action": "asura-wallpaper",
+      "action": "toren-wallpaper",
       "argument": "wallpaper ui"
     },
     {
@@ -137,7 +137,7 @@
       "label": "Random wallpaper",
       "chord": "SUPER + SHIFT + W",
       "kind": "app",
-      "action": "asura-wallpaper",
+      "action": "toren-wallpaper",
       "argument": "wallpaper random"
     },
     {
@@ -208,7 +208,7 @@
       "label": "Open a terminal",
       "chord": "SUPER + T",
       "kind": "app",
-      "action": "asura-app",
+      "action": "toren-app",
       "argument": "terminal",
       "also": [
         {
@@ -222,7 +222,7 @@
       "label": "Resource Monitor",
       "chord": "CTRL + SHIFT + Escape",
       "kind": "app",
-      "action": "asura-app",
+      "action": "toren-app",
       "argument": "terminal -- btop",
       "also": [
         {
@@ -236,7 +236,7 @@
       "label": "Open the file manager",
       "chord": "SUPER + E",
       "kind": "app",
-      "action": "asura-app",
+      "action": "toren-app",
       "argument": "files"
     },
     {
@@ -245,7 +245,7 @@
       "label": "Open the browser",
       "chord": "SUPER + B",
       "kind": "app",
-      "action": "asura-app",
+      "action": "toren-app",
       "argument": "browser"
     },
     {
@@ -263,7 +263,7 @@
       "label": "Open the notes",
       "chord": "SUPER + O",
       "kind": "app",
-      "action": "asura-app",
+      "action": "toren-app",
       "argument": "notes"
     },
     {
@@ -272,8 +272,8 @@
       "label": "Open the virtual machine manager",
       "chord": "SUPER + SHIFT + V",
       "kind": "app",
-      "action": "asura-summon",
-      "argument": "asura-vm flock -n -o /tmp/asura-vm.lock asura-vm"
+      "action": "toren-summon",
+      "argument": "toren-vm flock -n -o /tmp/toren-vm.lock toren-vm"
     },
     {
       "id": "close",
@@ -465,7 +465,7 @@
       "label": "Switch to a workspace of this desktop",
       "chord": "SUPER + {n}",
       "kind": "app",
-      "action": "asura-workspace",
+      "action": "toren-workspace",
       "argument": "focus {n}"
     },
     {
@@ -474,7 +474,7 @@
       "label": "Send the window to a workspace and follow it",
       "chord": "SUPER + ALT + {n}",
       "kind": "app",
-      "action": "asura-workspace",
+      "action": "toren-workspace",
       "argument": "move {n}"
     },
     {
@@ -483,7 +483,7 @@
       "label": "Send the window to a workspace",
       "chord": "SUPER + SHIFT + {n}",
       "kind": "app",
-      "action": "asura-workspace",
+      "action": "toren-workspace",
       "argument": "movesilent {n}"
     },
     {
@@ -538,7 +538,7 @@
       "label": "Hide the window in the scratchpad, or bring it back",
       "chord": "SUPER + H",
       "kind": "app",
-      "action": "asura-workspace",
+      "action": "toren-workspace",
       "argument": "hide"
     },
     {
@@ -547,7 +547,7 @@
       "label": "Show or hide the scratchpad",
       "chord": "SUPER + ALT + H",
       "kind": "app",
-      "action": "asura-workspace",
+      "action": "toren-workspace",
       "argument": "scratch"
     },
     {
@@ -625,7 +625,7 @@
       "label": "Mirror or extend the displays",
       "chord": "SUPER + P",
       "kind": "app",
-      "action": "asura-monitor",
+      "action": "toren-monitor",
       "argument": "toggle"
     },
     {
@@ -634,7 +634,7 @@
       "label": "Capture, annotate and beautify a screenshot",
       "chord": "Print",
       "kind": "app",
-      "action": "asura-shot",
+      "action": "toren-shot",
       "also": [
         {
           "chord": "SUPER + SHIFT + S"
@@ -648,7 +648,7 @@
       "chord": "SHIFT + Print",
       "kind": "app",
       "action": "env",
-      "argument": "ASURA_SHOT_MODE=monitor asura-shot"
+      "argument": "ASURA_SHOT_MODE=monitor toren-shot"
     },
     {
       "id": "color-picker",
@@ -656,7 +656,7 @@
       "label": "Pick a colour from the screen",
       "chord": "SUPER + SHIFT + C",
       "kind": "app",
-      "action": "asura-cmd-color-picker"
+      "action": "toren-cmd-color-picker"
     },
     {
       "id": "ocr",
@@ -672,7 +672,7 @@
       "label": "Raise the volume",
       "chord": "XF86AudioRaiseVolume",
       "kind": "app",
-      "action": "asura-volume",
+      "action": "toren-volume",
       "argument": "up"
     },
     {
@@ -681,7 +681,7 @@
       "label": "Lower the volume",
       "chord": "XF86AudioLowerVolume",
       "kind": "app",
-      "action": "asura-volume",
+      "action": "toren-volume",
       "argument": "down"
     },
     {
@@ -731,7 +731,7 @@
       "label": "Recover the audio when sound stops",
       "chord": "SUPER + SHIFT + A",
       "kind": "app",
-      "action": "asura-restart-audio"
+      "action": "toren-restart-audio"
     },
     {
       "id": "brightness-up",
@@ -739,7 +739,7 @@
       "label": "Brighten the screen",
       "chord": "XF86MonBrightnessUp",
       "kind": "app",
-      "action": "asura-cmd-brightness",
+      "action": "toren-cmd-brightness",
       "argument": "+5"
     },
     {
@@ -748,7 +748,7 @@
       "label": "Dim the screen",
       "chord": "XF86MonBrightnessDown",
       "kind": "app",
-      "action": "asura-cmd-brightness",
+      "action": "toren-cmd-brightness",
       "argument": "-5"
     },
     {
@@ -757,7 +757,7 @@
       "label": "Brighten the keyboard backlight",
       "chord": "XF86KbdBrightnessUp",
       "kind": "app",
-      "action": "asura",
+      "action": "toren",
       "argument": "brightness up --device kbd"
     },
     {
@@ -766,7 +766,7 @@
       "label": "Dim the keyboard backlight",
       "chord": "XF86KbdBrightnessDown",
       "kind": "app",
-      "action": "asura",
+      "action": "toren",
       "argument": "brightness down --device kbd"
     },
     {
@@ -775,7 +775,7 @@
       "label": "Toggle the touchpad",
       "chord": "XF86TouchpadToggle",
       "kind": "app",
-      "action": "asura-touchpad",
+      "action": "toren-touchpad",
       "argument": "toggle",
       "also": [
         {
@@ -798,4 +798,3 @@
     }
   ]
 }
-

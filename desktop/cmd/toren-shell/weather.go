@@ -31,7 +31,7 @@ import (
 //
 // Divergence from the reference (recorded): the reference default location is the
 // null island (Coordinates 0,0), and upstream fell back to an IP lookup whenever no
-// location was set. Asura makes no request nobody asked for: with no location
+// location was set. Toren makes no request nobody asked for: with no location
 // the topic says so (status "noLocation") and nothing is fetched. The IP lookup
 // happens only for the explicit choice "auto"; a place name or coordinates behave
 // as they always did.
@@ -182,7 +182,7 @@ func conditionLabel(code int) string {
 	}
 }
 
-// weatherIcon maps a condition and day/night flag to a Asura weather icon token
+// weatherIcon maps a condition and day/night flag to a Toren weather icon token
 // (reference get_weather_icon_name, appendix A). Only Clear and PartlyCloudy
 // split on day/night; every other condition uses one icon for both. Daily items
 // always pass isDay=true.

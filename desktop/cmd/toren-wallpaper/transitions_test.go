@@ -7,12 +7,12 @@ import (
 	"testing"
 )
 
-// writeTransitionConfig drops a asura-wallpaper-wall/config.json under XDG_CONFIG_HOME
+// writeTransitionConfig drops a toren-wallpaper-wall/config.json under XDG_CONFIG_HOME
 // with the given transition.shader, the value the picker writes when a single
 // transition is pinned.
 func writeTransitionConfig(t *testing.T, shader string) {
 	t.Helper()
-	dir := filepath.Join(os.Getenv("XDG_CONFIG_HOME"), "asura-wallpaper-wall")
+	dir := filepath.Join(os.Getenv("XDG_CONFIG_HOME"), "toren-wallpaper-wall")
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}

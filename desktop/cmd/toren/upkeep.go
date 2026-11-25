@@ -9,20 +9,20 @@ import (
 	"strings"
 )
 
-// Keeping a machine current, beyond `asura update` itself:
+// Keeping a machine current, beyond `toren update` itself:
 //
-//	asura channel set stable|unstable   which branch updates follow
-//	asura firmware [check|update]       device firmware through fwupd
-//	asura clean                         orphaned packages and the package cache
-//	asura notify-updates                one check for the desktop notice (run by
-//	                                    the asura-updates user service)
+//	toren channel set stable|unstable   which branch updates follow
+//	toren firmware [check|update]       device firmware through fwupd
+//	toren clean                         orphaned packages and the package cache
+//	toren notify-updates                one check for the desktop notice (run by
+//	                                    the toren-updates user service)
 //
 // and the "reboot needed" check every update ends with.
 
-// channelFile holds the channel chosen with `asura channel set`. It is a file
-// of its own because apply-repo.sh rewrites /etc/xbps.d/asura.conf on every
-// update; nothing but `asura channel set` writes this one.
-var channelFile = "/etc/asura/channel"
+// channelFile holds the channel chosen with `toren channel set`. It is a file
+// of its own because apply-repo.sh rewrites /etc/xbps.d/toren.conf on every
+// update; nothing but `toren channel set` writes this one.
+var channelFile = "/etc/toren/channel"
 
 // channelBranches maps a channel to the branch updates follow. stable follows
 // main, where releases are cut; unstable follows dev-unstable, which every
@@ -45,11 +45,11 @@ func pinnedChannel(root string) string {
 	return ""
 }
 
-// channelSet writes the channel. It is called from `asura channel set`.
+// channelSet writes the channel. It is called from `toren channel set`.
 func channelSet(root, ch string) int {
 	branch, ok := channelBranches[ch]
 	if !ok {
-		fmt.Fprintf(os.Stderr, "asura channel set: %q is not a channel (stable or unstable)\n", ch)
+		fmt.Fprintf(os.Stderr, "toren channel set: %q is not a channel (stable or unstable)\n", ch)
 		return exitUsage
 	}
 	path := filepath.Join(root, channelFile)
@@ -63,7 +63,7 @@ func channelSet(root, ch string) int {
 		}
 	}
 	if err := write(path, ch+"\n"); err != nil {
-		fmt.Fprintln(os.Stderr, "asura channel set:", err)
+		fmt.Fprintln(os.Stderr, "toren channel set:", err)
 		return exitFail
 	}
 	fmt.Printf("channel: %s (updates follow %s; only commits that passed CI)\n", ch, branch)
@@ -127,7 +127,7 @@ func reportRebootNeeded() {
 
 // ── Firmware ────────────────────────────────────────────────────────────────
 
-const firmwareUsage = `Usage: asura firmware [check | update]
+const firmwareUsage = `Usage: toren firmware [check | update]
 
 Device firmware (laptop, SSD, dock, keyboard...) from the vendors' service, through fwupd.
 
@@ -136,9 +136,9 @@ Device firmware (laptop, SSD, dock, keyboard...) from the vendors' service, thro
 `
 
 func init() {
-	register("firmware", "check or install device firmware updates (fwupd)", asuraFirmware)
-	register("clean", "remove orphaned packages and the downloaded package cache", asuraClean)
-	register("notify-updates", "check once for an update or a needed reboot, and notify the desktop", asuraNotifyUpdates)
+	register("firmware", "check or install device firmware updates (fwupd)", torenFirmware)
+	register("clean", "remove orphaned packages and the downloaded package cache", torenClean)
+	register("notify-updates", "check once for an update or a needed reboot, and notify the desktop", torenNotifyUpdates)
 }
 
 var fwupdRun = func(args ...string) error {
@@ -147,7 +147,7 @@ var fwupdRun = func(args ...string) error {
 	return cmd.Run()
 }
 
-func asuraFirmware(args []string) int {
+func torenFirmware(args []string) int {
 	mode := "check"
 	if len(args) > 0 {
 		mode = args[0]
@@ -157,7 +157,7 @@ func asuraFirmware(args []string) int {
 		return exitOK
 	}
 	if _, err := exec.LookPath("fwupdmgr"); err != nil {
-		fmt.Fprintln(os.Stderr, "asura firmware: fwupd is not installed (sudo xbps-install -S fwupd)")
+		fmt.Fprintln(os.Stderr, "toren firmware: fwupd is not installed (sudo xbps-install -S fwupd)")
 		return exitFail
 	}
 	switch mode {
@@ -188,14 +188,14 @@ func asuraFirmware(args []string) int {
 
 // ── Clean ───────────────────────────────────────────────────────────────────
 
-const cleanUsage = `Usage: asura clean
+const cleanUsage = `Usage: toren clean
 
 Removes packages nothing needs any more (installed only as dependencies of
 something since removed) and the downloaded package files in the cache. XBPS
 lists what it will remove and asks before it does. Kernels are left alone.
 `
 
-func asuraClean(args []string) int {
+func torenClean(args []string) int {
 	if len(args) > 0 {
 		fmt.Print(cleanUsage)
 		if args[0] == "-h" || args[0] == "--help" {
@@ -204,17 +204,17 @@ func asuraClean(args []string) int {
 		return exitUsage
 	}
 	if _, err := exec.LookPath("xbps-remove"); err != nil {
-		fmt.Fprintln(os.Stderr, "asura clean: xbps-remove is not installed")
+		fmt.Fprintln(os.Stderr, "toren clean: xbps-remove is not installed")
 		return exitFail
 	}
 	fmt.Println("==> Packages nothing needs any more")
 	if err := runPrivileged("xbps-remove", "-o"); err != nil {
-		fmt.Fprintln(os.Stderr, "asura clean: removing orphans:", err)
+		fmt.Fprintln(os.Stderr, "toren clean: removing orphans:", err)
 		return exitFail
 	}
 	fmt.Println("==> The downloaded package cache")
 	if err := runPrivileged("xbps-remove", "-O"); err != nil {
-		fmt.Fprintln(os.Stderr, "asura clean: cleaning the cache:", err)
+		fmt.Fprintln(os.Stderr, "toren clean: cleaning the cache:", err)
 		return exitFail
 	}
 	return exitOK
@@ -246,7 +246,7 @@ func notifyStateDir() string {
 	if base == "" {
 		base = filepath.Join(homeDir(), ".local", "state")
 	}
-	return filepath.Join(base, "asura", "notified")
+	return filepath.Join(base, "toren", "notified")
 }
 
 // notifyOnce sends the notice unless key was the last one sent for kind.
@@ -263,7 +263,7 @@ func notifyOnce(kind, key, title, body string) {
 	_ = os.WriteFile(path, []byte(key+"\n"), 0o644)
 }
 
-func asuraNotifyUpdates(args []string) int {
+func torenNotifyUpdates(args []string) int {
 	out, code := updateCheckOutput()
 	if code == exitNoMatch {
 		line := ""
@@ -275,7 +275,7 @@ func asuraNotifyUpdates(args []string) int {
 		if line == "" {
 			line = "update available"
 		}
-		notifyOnce("update", line, "An ASURA update is available", "Run asura update in a terminal. ("+line+")")
+		notifyOnce("update", line, "An ASURA update is available", "Run toren update in a terminal. ("+line+")")
 	}
 	if newest, ok := rebootNeeded(); ok {
 		notifyOnce("reboot", newest, "Reboot to finish updating", "A new kernel ("+newest+") is installed; it is used after a reboot.")

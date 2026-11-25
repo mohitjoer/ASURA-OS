@@ -3,12 +3,12 @@ package main
 import (
 	"fmt"
 
-	"asura/desktop/cmd/toren-hubd/internal/wm"
+	"toren/desktop/cmd/toren-hubd/internal/wm"
 )
 
 // The keybind legend the Hub keybinds page and the Super+K cheatsheet draw.
 // ASURA's own shortcuts are shown read-only (project rule: ASURA shortcuts cannot be changed).
-// User-added custom bindings in ~/.config/asura/hyprland/ are shown and editable.
+// User-added custom bindings in ~/.config/toren/hyprland/ are shown and editable.
 
 type bind struct {
 	wm.BindRow

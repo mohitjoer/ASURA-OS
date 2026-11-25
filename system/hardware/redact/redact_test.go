@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"asura/hardware/probe"
+	"toren/hardware/probe"
 )
 
 // testSalt is a fixed key. Tests need determinism, not entropy.
@@ -214,7 +214,7 @@ func TestSweepRefusesIPv6LinkLocal(t *testing.T) {
 // username.
 func TestSweepRefusesHomeDirectory(t *testing.T) {
 	for _, path := range []string{
-		"/home/alice/.config/asura",
+		"/home/alice/.config/toren",
 		"/root/.cache",
 		"/Users/alice/Library",
 	} {
@@ -364,7 +364,7 @@ func TestRefusalNeverEchoesTheSecret(t *testing.T) {
 
 // TestSaltRoundTrip checks the salt file, including its permissions.
 func TestSaltRoundTrip(t *testing.T) {
-	path := filepath.Join(t.TempDir(), "state", "asura", "hardware", "report-salt")
+	path := filepath.Join(t.TempDir(), "state", "toren", "hardware", "report-salt")
 
 	created, err := LoadOrCreateSalt(path)
 	if err != nil {

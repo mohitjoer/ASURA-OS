@@ -6,12 +6,10 @@
       "covers": "shell.qml command socket fast path",
       "steps": [
         "sh mkdir -p /tmp/launcher-qa-fixtures",
-        "sh S=$XDG_RUNTIME_DIR/asura-launcher.sock; (printf 'toggle\\n'; sleep .3)|socat - UNIX-CONNECT:$S >/tmp/launcher-qa-fixtures/t1.out; sleep .7; (printf 'state\\n'; sleep .5)|socat - UNIX-CONNECT:$S >/tmp/launcher-qa-fixtures/s1.json",
-        "sh S=$XDG_RUNTIME_DIR/asura-launcher.sock; (printf 'toggle\\n'; sleep .3)|socat - UNIX-CONNECT:$S >/dev/null; sleep .7"
+        "sh S=$XDG_RUNTIME_DIR/toren-launcher.sock; (printf 'toggle\\n'; sleep .3)|socat - UNIX-CONNECT:$S >/tmp/launcher-qa-fixtures/t1.out; sleep .7; (printf 'state\\n'; sleep .5)|socat - UNIX-CONNECT:$S >/tmp/launcher-qa-fixtures/s1.json",
+        "sh S=$XDG_RUNTIME_DIR/toren-launcher.sock; (printf 'toggle\\n'; sleep .3)|socat - UNIX-CONNECT:$S >/dev/null; sleep .7"
       ],
-      "asserts": [
-        ".open == false"
-      ],
+      "asserts": [".open == false"],
       "shell_asserts": [
         "grep -q '^ok' /tmp/launcher-qa-fixtures/t1.out",
         "jq -e '.open == true' /tmp/launcher-qa-fixtures/s1.json >/dev/null"
@@ -22,25 +20,16 @@
       "name": "Unknown socket command answers err and changes nothing",
       "covers": "shell.qml runCommand fallback contract",
       "steps": [
-        "sh S=$XDG_RUNTIME_DIR/asura-launcher.sock; (printf 'frobnicate\\n'; sleep .3)|socat - UNIX-CONNECT:$S >/tmp/launcher-qa-fixtures/err.out"
+        "sh S=$XDG_RUNTIME_DIR/toren-launcher.sock; (printf 'frobnicate\\n'; sleep .3)|socat - UNIX-CONNECT:$S >/tmp/launcher-qa-fixtures/err.out"
       ],
-      "asserts": [
-        ".open == false"
-      ],
-      "shell_asserts": [
-        "grep -q '^err' /tmp/launcher-qa-fixtures/err.out"
-      ]
+      "asserts": [".open == false"],
+      "shell_asserts": ["grep -q '^err' /tmp/launcher-qa-fixtures/err.out"]
     },
     {
       "id": "show-resets-clean",
       "name": "Reopening resets query, scope, shelf, and help to a clean hero",
       "covers": "Launcher.onShownChanged reset",
-      "steps": [
-        "show",
-        "type kitty",
-        "hide",
-        "show"
-      ],
+      "steps": ["show", "type kitty", "hide", "show"],
       "asserts": [
         ".open == true",
         ".query == \"\"",
@@ -53,11 +42,7 @@
       "id": "app-exact",
       "name": "Exact app name puts the app first with Launch verb",
       "covers": "apps provider ranking + primary action",
-      "steps": [
-        "show",
-        "type kitty",
-        "settle"
-      ],
+      "steps": ["show", "type kitty", "settle"],
       "asserts": [
         ".resultCount >= 1",
         ".results[0].title == \"kitty\"",
@@ -70,24 +55,14 @@
       "id": "app-prefix-rank",
       "name": "Name-prefix match outranks looser matches",
       "covers": "fuzzy 3-tier ranking",
-      "steps": [
-        "show",
-        "type neo",
-        "settle"
-      ],
-      "asserts": [
-        ".results[0].title | test(\"^Neo\"; \"i\")"
-      ]
+      "steps": ["show", "type neo", "settle"],
+      "asserts": [".results[0].title | test(\"^Neo\"; \"i\")"]
     },
     {
       "id": "app-subsequence",
       "name": "Character subsequence still finds the app",
       "covers": "fuzzy tier 3 subsequence",
-      "steps": [
-        "show",
-        "type fntfrg",
-        "settle"
-      ],
+      "steps": ["show", "type fntfrg", "settle"],
       "asserts": [
         "[.results[] | select(.title == \"FontForge\")] | length == 1"
       ]
@@ -96,11 +71,7 @@
       "id": "app-genericname",
       "name": "Match via generic name / keywords (terminal finds kitty)",
       "covers": "fuzzy haystack includes genericName+keywords",
-      "steps": [
-        "show",
-        "type terminal",
-        "settle"
-      ],
+      "steps": ["show", "type terminal", "settle"],
       "asserts": [
         "[.results[] | select(.title == \"kitty\" and .type == \"App\")] | length == 1"
       ]
@@ -110,19 +81,17 @@
       "name": "Enter launches the app, closes palette, bumps frecency",
       "covers": "activation, execDetached, Frecency.bump persistence",
       "steps": [
-        "sh mkdir -p /tmp/launcher-qa-fixtures; hyprctl clients -j | jq '[.[]|select(.class==\"kitty\")]|length' >/tmp/launcher-qa-fixtures/kitty.before; jq -r '[to_entries[]|select(.key|test(\"kitty\";\"i\"))|.value] | add // 0' ~/.local/state/asura/launcher-usage.json 2>/dev/null >/tmp/launcher-qa-fixtures/frec.before || echo 0 >/tmp/launcher-qa-fixtures/frec.before",
+        "sh mkdir -p /tmp/launcher-qa-fixtures; hyprctl clients -j | jq '[.[]|select(.class==\"kitty\")]|length' >/tmp/launcher-qa-fixtures/kitty.before; jq -r '[to_entries[]|select(.key|test(\"kitty\";\"i\"))|.value] | add // 0' ~/.local/state/toren/launcher-usage.json 2>/dev/null >/tmp/launcher-qa-fixtures/frec.before || echo 0 >/tmp/launcher-qa-fixtures/frec.before",
         "show",
         "type kitty",
         "settle",
         "key Return",
         "sleep 2"
       ],
-      "asserts": [
-        ".open == false"
-      ],
+      "asserts": [".open == false"],
       "shell_asserts": [
         "b=$(cat /tmp/launcher-qa-fixtures/kitty.before); a=$(hyprctl clients -j | jq '[.[]|select(.class==\"kitty\")]|length'); [ \"$a\" -gt \"$b\" ]",
-        "b=$(cat /tmp/launcher-qa-fixtures/frec.before); a=$(jq -r '[to_entries[]|select(.key|test(\"kitty\";\"i\"))|.value] | add // 0' ~/.local/state/asura/launcher-usage.json); [ \"$a\" -gt \"$b\" ]"
+        "b=$(cat /tmp/launcher-qa-fixtures/frec.before); a=$(jq -r '[to_entries[]|select(.key|test(\"kitty\";\"i\"))|.value] | add // 0' ~/.local/state/toren/launcher-usage.json); [ \"$a\" -gt \"$b\" ]"
       ],
       "teardown": [
         "addr=$(hyprctl clients -j | jq -r '[.[]|select(.class==\"kitty\")]|sort_by(.pid)|last.address'); [ -n \"$addr\" ] && hyprctl dispatch closewindow address:$addr"
@@ -132,11 +101,7 @@
       "id": "nomatch-web-fallback",
       "name": "Unmatched plain query still offers exactly the web fallback row",
       "covers": "web provider low-ranked fallback",
-      "steps": [
-        "show",
-        "type qzwxecrv",
-        "settle"
-      ],
+      "steps": ["show", "type qzwxecrv", "settle"],
       "asserts": [
         ".resultCount == 1",
         ".results[0].subtitle == \"Search Google\"",
@@ -148,11 +113,7 @@
       "id": "all-open",
       "name": "Ctrl+A at rest opens the ALL app ledger",
       "covers": "ALL scope and dense lead/ledger",
-      "steps": [
-        "show",
-        "ctrl a",
-        "sleep 0.6"
-      ],
+      "steps": ["show", "ctrl a", "sleep 0.6"],
       "asserts": [
         ".activeMode == \"all\"",
         ".gridMode == true",
@@ -164,36 +125,24 @@
       "id": "all-escape-back",
       "name": "Escape leaves ALL and restores the image-only hero",
       "covers": "escape precedence: scope before close",
-      "steps": [
-        "show",
-        "ctrl a",
-        "sleep 0.5",
-        "key Escape",
-        "sleep 0.4"
-      ],
-      "asserts": [
-        ".gridMode == false",
-        ".open == true",
-        ".resting == true"
-      ]
+      "steps": ["show", "ctrl a", "sleep 0.5", "key Escape", "sleep 0.4"],
+      "asserts": [".gridMode == false", ".open == true", ".resting == true"]
     },
     {
       "id": "all-launch",
       "name": "Enter in ALL launches the selected app and bumps frecency",
       "covers": "ALL lead primary action and frecency",
       "steps": [
-        "sh mkdir -p /tmp/launcher-qa-fixtures; jq -r '[to_entries[]|.value]|add // 0' ~/.local/state/asura/launcher-usage.json 2>/dev/null >/tmp/launcher-qa-fixtures/grid.frec.before || echo 0 >/tmp/launcher-qa-fixtures/grid.frec.before; hyprctl clients -j | jq -r '[.[].address]|join(\",\")' >/tmp/launcher-qa-fixtures/grid.win.before",
+        "sh mkdir -p /tmp/launcher-qa-fixtures; jq -r '[to_entries[]|.value]|add // 0' ~/.local/state/toren/launcher-usage.json 2>/dev/null >/tmp/launcher-qa-fixtures/grid.frec.before || echo 0 >/tmp/launcher-qa-fixtures/grid.frec.before; hyprctl clients -j | jq -r '[.[].address]|join(\",\")' >/tmp/launcher-qa-fixtures/grid.win.before",
         "show",
         "ctrl a",
         "sleep 0.6",
         "key Return",
         "sleep 2"
       ],
-      "asserts": [
-        ".open == false"
-      ],
+      "asserts": [".open == false"],
       "shell_asserts": [
-        "b=$(cat /tmp/launcher-qa-fixtures/grid.frec.before); a=$(jq -r '[to_entries[]|.value]|add // 0' ~/.local/state/asura/launcher-usage.json); [ \"$a\" -gt \"$b\" ]"
+        "b=$(cat /tmp/launcher-qa-fixtures/grid.frec.before); a=$(jq -r '[to_entries[]|.value]|add // 0' ~/.local/state/toren/launcher-usage.json); [ \"$a\" -gt \"$b\" ]"
       ],
       "teardown": [
         "before=$(cat /tmp/launcher-qa-fixtures/grid.win.before); for a in $(hyprctl clients -j | jq -r '.[].address'); do case \",$before,\" in *,\"$a\",*) : ;; *) hyprctl dispatch closewindow address:$a ;; esac; done"
@@ -203,48 +152,23 @@
       "id": "help-open",
       "name": "F1 opens the help cheat-sheet",
       "covers": "help panel toggle",
-      "steps": [
-        "show",
-        "key F1",
-        "sleep 0.6"
-      ],
-      "asserts": [
-        ".help == true",
-        ".open == true"
-      ],
+      "steps": ["show", "key F1", "sleep 0.6"],
+      "asserts": [".help == true", ".open == true"],
       "screenshot": true
     },
     {
       "id": "help-escape-back",
       "name": "Escape leaves help but keeps the palette open",
       "covers": "escape precedence: help before close",
-      "steps": [
-        "show",
-        "key F1",
-        "sleep 0.5",
-        "key Escape",
-        "sleep 0.4"
-      ],
-      "asserts": [
-        ".help == false",
-        ".open == true"
-      ]
+      "steps": ["show", "key F1", "sleep 0.5", "key Escape", "sleep 0.4"],
+      "asserts": [".help == false", ".open == true"]
     },
     {
       "id": "nav-down-moves",
       "name": "Arrow keys move the selection",
       "covers": "keyboard selection movement",
-      "steps": [
-        "show",
-        "type a",
-        "settle",
-        "key Down Down",
-        "sleep 0.3"
-      ],
-      "asserts": [
-        ".selectedIndex == 2",
-        ".resultCount >= 3"
-      ]
+      "steps": ["show", "type a", "settle", "key Down Down", "sleep 0.3"],
+      "asserts": [".selectedIndex == 2", ".resultCount >= 3"]
     },
     {
       "id": "nav-clamp-end",
@@ -257,9 +181,7 @@
         "key Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down",
         "sleep 0.3"
       ],
-      "asserts": [
-        ".selectedIndex == .resultCount - 1"
-      ]
+      "asserts": [".selectedIndex == .resultCount - 1"]
     },
     {
       "id": "shelf-open",
@@ -267,7 +189,7 @@
       "covers": "ActionShelf open + selected Desktop Actions",
       "steps": [
         "show",
-        "type Asura QA Options 3",
+        "type Toren QA Options 3",
         "settle",
         "ctrl k",
         "sleep 0.5"
@@ -286,7 +208,7 @@
       "covers": "escape precedence: shelf first",
       "steps": [
         "show",
-        "type Asura QA Options 3",
+        "type Toren QA Options 3",
         "settle",
         "ctrl k",
         "sleep 0.4",
@@ -297,7 +219,7 @@
         ".shelfOpen == false",
         ".panelOpen == false",
         ".open == true",
-        ".query == \"Asura QA Options 3\""
+        ".query == \"Toren QA Options 3\""
       ]
     },
     {
@@ -306,13 +228,13 @@
       "covers": "expanded option matrix: zero secondary actions",
       "steps": [
         "show",
-        "type Asura QA Options 0",
+        "type Toren QA Options 0",
         "settle",
         "ctrl k",
         "sleep 0.4"
       ],
       "asserts": [
-        ".results[0].title == \"Asura QA Options 0\"",
+        ".results[0].title == \"Toren QA Options 0\"",
         ".selectedActions == [\"Launch\"]",
         ".secondaryActionCount == 0",
         ".shelfOpen == false",
@@ -328,7 +250,7 @@
       "covers": "expanded option matrix: one secondary action",
       "steps": [
         "show",
-        "type Asura QA Options 1",
+        "type Toren QA Options 1",
         "settle",
         "ctrl k",
         "sleep 0.4"
@@ -350,7 +272,7 @@
       "covers": "expanded option matrix: two secondary actions",
       "steps": [
         "show",
-        "type Asura QA Options 2",
+        "type Toren QA Options 2",
         "settle",
         "ctrl k",
         "sleep 0.4"
@@ -369,7 +291,7 @@
       "covers": "expanded option matrix: three secondary actions",
       "steps": [
         "show",
-        "type Asura QA Options 3",
+        "type Toren QA Options 3",
         "settle",
         "ctrl k",
         "sleep 0.4"
@@ -388,7 +310,7 @@
       "covers": "expanded option matrix: four secondary actions",
       "steps": [
         "show",
-        "type Asura QA Options 4",
+        "type Toren QA Options 4",
         "settle",
         "ctrl k",
         "sleep 0.4"
@@ -407,7 +329,7 @@
       "covers": "expanded option matrix: five secondary actions",
       "steps": [
         "show",
-        "type Asura QA Options 5",
+        "type Toren QA Options 5",
         "settle",
         "ctrl k",
         "sleep 0.4"
@@ -427,7 +349,7 @@
       "covers": "expanded option matrix: six secondary actions",
       "steps": [
         "show",
-        "type Asura QA Options 6",
+        "type Toren QA Options 6",
         "settle",
         "ctrl k",
         "sleep 0.4"
@@ -446,7 +368,7 @@
       "covers": "expanded option matrix: seven secondary actions",
       "steps": [
         "show",
-        "type Asura QA Options 7",
+        "type Toren QA Options 7",
         "settle",
         "ctrl k",
         "sleep 0.4"
@@ -466,7 +388,7 @@
       "covers": "expanded option matrix: eight secondary actions",
       "steps": [
         "show",
-        "type Asura QA Options 8",
+        "type Toren QA Options 8",
         "settle",
         "ctrl k",
         "sleep 0.4"
@@ -486,7 +408,7 @@
       "covers": "expanded option keyboard traversal and visible range",
       "steps": [
         "show",
-        "type Asura QA Options 8",
+        "type Toren QA Options 8",
         "settle",
         "ctrl k",
         "key Tab Tab Tab Tab Tab Tab",
@@ -503,33 +425,23 @@
       "name": "Enter runs the focused Desktop Action instead of Launch",
       "covers": "expanded option dispatch targets the chosen action",
       "steps": [
-        "sh rm -f /tmp/asura-launcher-qa-option-1-01",
+        "sh rm -f /tmp/toren-launcher-qa-option-1-01",
         "show",
-        "type Asura QA Options 1",
+        "type Toren QA Options 1",
         "settle",
         "ctrl k",
         "key Return",
         "sleep 0.6"
       ],
-      "asserts": [
-        ".open == false"
-      ],
-      "shell_asserts": [
-        "test -f /tmp/asura-launcher-qa-option-1-01"
-      ],
-      "teardown": [
-        "rm -f /tmp/asura-launcher-qa-option-1-01"
-      ]
+      "asserts": [".open == false"],
+      "shell_asserts": ["test -f /tmp/toren-launcher-qa-option-1-01"],
+      "teardown": ["rm -f /tmp/toren-launcher-qa-option-1-01"]
     },
     {
       "id": "actions-catalog",
       "name": "Bare / lists the full 24-action catalog with tabs",
       "covers": "actions provider + category tabs browse",
-      "steps": [
-        "show",
-        "type /",
-        "settle"
-      ],
+      "steps": ["show", "type /", "settle"],
       "asserts": [
         ".actionMode == true",
         ".modeLabel == \"ACTIONS\"",
@@ -542,25 +454,14 @@
       "id": "actions-filter-exact",
       "name": "/night narrows to exactly Night Light",
       "covers": "action fuzzy filter",
-      "steps": [
-        "show",
-        "type /night",
-        "settle"
-      ],
-      "asserts": [
-        ".resultCount == 1",
-        ".results[0].title == \"Night Light\""
-      ]
+      "steps": ["show", "type /night", "settle"],
+      "asserts": [".resultCount == 1", ".results[0].title == \"Night Light\""]
     },
     {
       "id": "actions-category-word",
       "name": "/media matches the whole Media category",
       "covers": "category keyword matching",
-      "steps": [
-        "show",
-        "type /media",
-        "settle"
-      ],
+      "steps": ["show", "type /media", "settle"],
       "asserts": [
         ".resultCount == 5",
         "[.results[].type] | unique == [\"Media\"]"
@@ -576,13 +477,11 @@
         "settle",
         "key Tab",
         "sleep 0.5",
-        "sh S=$XDG_RUNTIME_DIR/asura-launcher.sock; (printf 'state\\n'; sleep .5)|socat - UNIX-CONNECT:$S >/tmp/launcher-qa-fixtures/tabs.state",
+        "sh S=$XDG_RUNTIME_DIR/toren-launcher.sock; (printf 'state\\n'; sleep .5)|socat - UNIX-CONNECT:$S >/tmp/launcher-qa-fixtures/tabs.state",
         "key ISO_Left_Tab",
         "sleep 0.5"
       ],
-      "asserts": [
-        ".resultCount == 24"
-      ],
+      "asserts": [".resultCount == 24"],
       "shell_asserts": [
         "jq -e '([.results[].type] | unique == [\"System\"]) and .resultCount < 24' /tmp/launcher-qa-fixtures/tabs.state >/dev/null"
       ]
@@ -591,11 +490,7 @@
       "id": "actions-subsequence",
       "name": "/scn subsequence-matches Screenshot and Screen Record",
       "covers": "action subsequence matching",
-      "steps": [
-        "show",
-        "type /scn",
-        "settle"
-      ],
+      "steps": ["show", "type /scn", "settle"],
       "asserts": [
         "[.results[] | select(.title == \"Screenshot\")] | length == 1",
         "[.results[] | select(.title == \"Screen Record\")] | length == 1"
@@ -605,11 +500,7 @@
       "id": "calc-prefix",
       "name": "=2+2 shows 4 in CALC mode",
       "covers": "calc provider prefix mode",
-      "steps": [
-        "show",
-        "type =2+2",
-        "settle"
-      ],
+      "steps": ["show", "type =2+2", "settle"],
       "asserts": [
         ".modeLabel == \"CALC\"",
         ".results[0].title == \"4\"",
@@ -621,11 +512,7 @@
       "id": "calc-numeric-fallback",
       "name": "Numeric-looking plain query gets a calc row without prefix",
       "covers": "calc numericFallback in fan-out",
-      "steps": [
-        "show",
-        "type 17*3",
-        "settle"
-      ],
+      "steps": ["show", "type 17*3", "settle"],
       "asserts": [
         "[.results[] | select(.type == \"Calc\" and .title == \"51\")] | length == 1"
       ]
@@ -634,11 +521,7 @@
       "id": "calc-units",
       "name": "Unit conversion works (=100 cm to m)",
       "covers": "qalc unit conversion pass-through",
-      "steps": [
-        "show",
-        "type =100 cm to m",
-        "settle"
-      ],
+      "steps": ["show", "type =100 cm to m", "settle"],
       "asserts": [
         ".results[0].type == \"Calc\"",
         ".results[0].title | test(\"^1\\\\s?m$\")"
@@ -656,12 +539,8 @@
         "key Return",
         "sleep 1"
       ],
-      "asserts": [
-        ".open == false"
-      ],
-      "shell_asserts": [
-        "[ \"$(wl-paste -n 2>/dev/null)\" = \"42\" ]"
-      ]
+      "asserts": [".open == false"],
+      "shell_asserts": ["[ \"$(wl-paste -n 2>/dev/null)\" = \"42\" ]"]
     },
     {
       "id": "find-file",
@@ -694,9 +573,7 @@
         ".modeLabel == \"FOLDER\"",
         "[.results[] | select(.title == \"qa_probe_dir\")] | length == 1"
       ],
-      "teardown": [
-        "rmdir ~/qa_probe_dir 2>/dev/null || true"
-      ]
+      "teardown": ["rmdir ~/qa_probe_dir 2>/dev/null || true"]
     },
     {
       "id": "find-image",
@@ -712,9 +589,7 @@
         ".modeLabel == \"IMAGE\"",
         "[.results[] | select(.title == \"qa_probe_img.png\")] | length == 1"
       ],
-      "teardown": [
-        "rm -f ~/Pictures/qa_probe_img.png"
-      ]
+      "teardown": ["rm -f ~/Pictures/qa_probe_img.png"]
     },
     {
       "id": "typed-deck-stable",
@@ -723,10 +598,10 @@
       "steps": [
         "sh mkdir -p ~/Pictures /tmp/launcher-qa-fixtures; printf 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==' | base64 -d > ~/Pictures/qa_stable_deck.png",
         "show",
-        "sh wtype -- '/image qa_stable_deck'; sleep 0.6; S=$XDG_RUNTIME_DIR/asura-launcher.sock; (printf 'state\\n'; sleep .2) | socat - UNIX-CONNECT:$S > /tmp/launcher-qa-fixtures/deck.before.json",
+        "sh wtype -- '/image qa_stable_deck'; sleep 0.6; S=$XDG_RUNTIME_DIR/toren-launcher.sock; (printf 'state\\n'; sleep .2) | socat - UNIX-CONNECT:$S > /tmp/launcher-qa-fixtures/deck.before.json",
         "settle",
         "sleep 0.6",
-        "sh S=$XDG_RUNTIME_DIR/asura-launcher.sock; (printf 'state\\n'; sleep .2) | socat - UNIX-CONNECT:$S > /tmp/launcher-qa-fixtures/deck.after.json"
+        "sh S=$XDG_RUNTIME_DIR/toren-launcher.sock; (printf 'state\\n'; sleep .2) | socat - UNIX-CONNECT:$S > /tmp/launcher-qa-fixtures/deck.after.json"
       ],
       "asserts": [
         "[.results[] | select(.title == \"qa_stable_deck.png\")] | length == 1"
@@ -734,9 +609,7 @@
       "shell_asserts": [
         "before=/tmp/launcher-qa-fixtures/deck.before.json; after=/tmp/launcher-qa-fixtures/deck.after.json; jq -e '.open and .drawerHeight > 0 and .cardHeight > 0' $before >/dev/null && [ \"$(jq -r .drawerHeight $before)\" = \"$(jq -r .drawerHeight $after)\" ] && [ \"$(jq -r .cardHeight $before)\" = \"$(jq -r .cardHeight $after)\" ]"
       ],
-      "teardown": [
-        "rm -f ~/Pictures/qa_stable_deck.png"
-      ]
+      "teardown": ["rm -f ~/Pictures/qa_stable_deck.png"]
     },
     {
       "id": "typed-results-coalesce",
@@ -744,9 +617,9 @@
       "covers": "typed result presentation debounce",
       "steps": [
         "show",
-        "sh mkdir -p /tmp/launcher-qa-fixtures; wtype -- a; sleep .30; S=$XDG_RUNTIME_DIR/asura-launcher.sock; (printf 'state\\n'; sleep .2) | socat - UNIX-CONNECT:$S > /tmp/launcher-qa-fixtures/coalesce.first.json; wtype -- p; sleep .30; wtype -- p; sleep .08; (printf 'state\\n'; sleep .2) | socat - UNIX-CONNECT:$S > /tmp/launcher-qa-fixtures/coalesce.early.json",
+        "sh mkdir -p /tmp/launcher-qa-fixtures; wtype -- a; sleep .30; S=$XDG_RUNTIME_DIR/toren-launcher.sock; (printf 'state\\n'; sleep .2) | socat - UNIX-CONNECT:$S > /tmp/launcher-qa-fixtures/coalesce.first.json; wtype -- p; sleep .30; wtype -- p; sleep .08; (printf 'state\\n'; sleep .2) | socat - UNIX-CONNECT:$S > /tmp/launcher-qa-fixtures/coalesce.early.json",
         "sleep 0.5",
-        "sh S=$XDG_RUNTIME_DIR/asura-launcher.sock; (printf 'state\\n'; sleep .2) | socat - UNIX-CONNECT:$S > /tmp/launcher-qa-fixtures/coalesce.settled.json"
+        "sh S=$XDG_RUNTIME_DIR/toren-launcher.sock; (printf 'state\\n'; sleep .2) | socat - UNIX-CONNECT:$S > /tmp/launcher-qa-fixtures/coalesce.settled.json"
       ],
       "asserts": [
         ".query == \"app\"",
@@ -764,7 +637,7 @@
       "covers": "query-token invalidation and single deck publication",
       "steps": [
         "show",
-        "sh wtype -- app; sleep .8; S=$XDG_RUNTIME_DIR/asura-launcher.sock; (printf 'state\\n'; sleep .2) | socat - UNIX-CONNECT:$S > /tmp/launcher-qa-fixtures/stale.before.json; wtype -- x; sleep .10; (printf 'state\\n'; sleep .2) | socat - UNIX-CONNECT:$S > /tmp/launcher-qa-fixtures/stale.after.json",
+        "sh wtype -- app; sleep .8; S=$XDG_RUNTIME_DIR/toren-launcher.sock; (printf 'state\\n'; sleep .2) | socat - UNIX-CONNECT:$S > /tmp/launcher-qa-fixtures/stale.before.json; wtype -- x; sleep .10; (printf 'state\\n'; sleep .2) | socat - UNIX-CONNECT:$S > /tmp/launcher-qa-fixtures/stale.after.json",
         "sleep 0.5"
       ],
       "asserts": [
@@ -780,29 +653,16 @@
       "id": "find-empty-state",
       "name": "/file with no hits shows the empty state, not a hang",
       "covers": "find empty result + No matches UI",
-      "steps": [
-        "show",
-        "type /file zzzznoexistfile",
-        "settle 25"
-      ],
-      "asserts": [
-        ".resultCount == 0",
-        ".searching == false"
-      ],
+      "steps": ["show", "type /file zzzznoexistfile", "settle 25"],
+      "asserts": [".resultCount == 0", ".searching == false"],
       "screenshot": true,
-      "teardown": [
-        "rm -f ~/qa_probe_launcher.txt"
-      ]
+      "teardown": ["rm -f ~/qa_probe_launcher.txt"]
     },
     {
       "id": "pkg-search",
       "name": "> searches packages across sources",
       "covers": "packages provider gpk search",
-      "steps": [
-        "show",
-        "type >firefox",
-        "settle 40"
-      ],
+      "steps": ["show", "type >firefox", "settle 40"],
       "asserts": [
         ".modeLabel == \"PACKAGE\"",
         "[.results[] | select(.title | test(\"firefox\"; \"i\"))] | length >= 1"
@@ -814,11 +674,7 @@
       "id": "pkg-installed-row",
       "name": ">kitty surfaces the installed package with its installed tag",
       "covers": "packages verb/installed marker",
-      "steps": [
-        "show",
-        "type >kitty",
-        "settle 40"
-      ],
+      "steps": ["show", "type >kitty", "settle 40"],
       "asserts": [
         "[.results[] | select((.title | test(\"^kitty\\\\s\")) and (.subtitle | test(\"^pacman\\\\s+\\\\(installed\\\\)\")))] | length >= 1"
       ],
@@ -829,25 +685,14 @@
       "id": "pkg-verb-incomplete",
       "name": "A bare package verb (>install ) searches nothing",
       "covers": "packages parseOp incomplete-command guard",
-      "steps": [
-        "show",
-        "type >install ",
-        "settle"
-      ],
-      "asserts": [
-        ".resultCount == 0",
-        ".busy == false"
-      ]
+      "steps": ["show", "type >install ", "settle"],
+      "asserts": [".resultCount == 0", ".busy == false"]
     },
     {
       "id": "pkg-fast-lane",
       "name": "Package search shows local pacman/aur rows within seconds",
       "covers": "packages two-phase fast lane",
-      "steps": [
-        "show",
-        "type >ripgrep",
-        "settle 8"
-      ],
+      "steps": ["show", "type >ripgrep", "settle 8"],
       "asserts": [
         "[.results[] | select(.title | test(\"^ripgrep\"))] | length >= 1"
       ],
@@ -860,16 +705,8 @@
       "id": "web-prefix-answer",
       "name": "? query fetches a DDG instant answer panel",
       "covers": "web provider instant answers + AnswerPanel",
-      "steps": [
-        "show",
-        "type ?what is nmap",
-        "settle 15",
-        "sleep 1"
-      ],
-      "asserts": [
-        ".modeLabel == \"WEB\"",
-        ".answerMode == true"
-      ],
+      "steps": ["show", "type ?what is nmap", "settle 15", "sleep 1"],
+      "asserts": [".modeLabel == \"WEB\"", ".answerMode == true"],
       "screenshot": true,
       "network": true
     },
@@ -877,11 +714,7 @@
       "id": "web-bang-engine",
       "name": "?!gh routes the search row to GitHub",
       "covers": "bang engine routing",
-      "steps": [
-        "show",
-        "type ?!gh quickshell",
-        "settle"
-      ],
+      "steps": ["show", "type ?!gh quickshell", "settle"],
       "asserts": [
         "[.results[] | select(.subtitle == \"Search GitHub\")] | length == 1"
       ]
@@ -890,11 +723,7 @@
       "id": "web-plain-no-answer",
       "name": "Plain unprefixed query never fires the answer fetch",
       "covers": "web fallback row without DDG fetch",
-      "steps": [
-        "show",
-        "type nmap",
-        "settle"
-      ],
+      "steps": ["show", "type nmap", "settle"],
       "asserts": [
         ".answerMode == false",
         "[.results[] | select(.subtitle == \"Search Google\")] | length == 1"
@@ -956,9 +785,7 @@
         "key Return",
         "sleep 1.5"
       ],
-      "asserts": [
-        ".open == false"
-      ],
+      "asserts": [".open == false"],
       "shell_asserts": [
         "before=$(cat /tmp/launcher-qa-fixtures/kitty.instances.before); after=$(hyprctl clients -j | jq '[.[]|select(.class==\"kitty\")]|length'); [ \"$after\" -gt \"$before\" ]"
       ],
@@ -976,14 +803,11 @@
         "type kitty",
         "settle",
         "sleep 0.5",
-        "sh S=$XDG_RUNTIME_DIR/asura-launcher.sock; (printf 'state\\n'; sleep .2) | socat - UNIX-CONNECT:$S >/tmp/launcher-qa-fixtures/focus.before.json",
+        "sh S=$XDG_RUNTIME_DIR/toren-launcher.sock; (printf 'state\\n'; sleep .2) | socat - UNIX-CONNECT:$S >/tmp/launcher-qa-fixtures/focus.before.json",
         "type y",
         "sleep 0.4"
       ],
-      "asserts": [
-        ".query == \"kittyy\"",
-        ".inputFocused == true"
-      ],
+      "asserts": [".query == \"kittyy\"", ".inputFocused == true"],
       "shell_asserts": [
         "jq -e '.windowRailActive == true and .inputFocused == true and .selectedIndex == 0' /tmp/launcher-qa-fixtures/focus.before.json >/dev/null"
       ],
@@ -1004,9 +828,7 @@
         "key Return",
         "sleep 1.5"
       ],
-      "asserts": [
-        ".open == false"
-      ],
+      "asserts": [".open == false"],
       "shell_asserts": [
         "[ \"$(hyprctl activewindow -j | jq -r .title)\" = \"qa-probe-win\" ]"
       ],
@@ -1020,31 +842,27 @@
       "name": "Snippet row copies its expanded body on Enter",
       "covers": "snippets provider + placeholder expansion",
       "steps": [
-        "sh mkdir -p ~/.config/asura; printf '[{\"name\":\"qa-sig\",\"body\":\"QA-BODY {date}\"}]' > ~/.config/asura/launcher-snippets.json; wl-copy qa-sentinel; sleep 0.5",
+        "sh mkdir -p ~/.config/toren; printf '[{\"name\":\"qa-sig\",\"body\":\"QA-BODY {date}\"}]' > ~/.config/toren/launcher-snippets.json; wl-copy qa-sentinel; sleep 0.5",
         "show",
         "type qa-sig",
         "settle",
-        "sh S=$XDG_RUNTIME_DIR/asura-launcher.sock; (printf 'state\\n'; sleep .5)|socat - UNIX-CONNECT:$S >/tmp/launcher-qa-fixtures/snip.state",
+        "sh S=$XDG_RUNTIME_DIR/toren-launcher.sock; (printf 'state\\n'; sleep .5)|socat - UNIX-CONNECT:$S >/tmp/launcher-qa-fixtures/snip.state",
         "key Return",
         "sleep 1"
       ],
-      "asserts": [
-        ".open == false"
-      ],
+      "asserts": [".open == false"],
       "shell_asserts": [
         "jq -e '[.results[] | select(.title == \"qa-sig\" and .type == \"Snippet\")] | length == 1' /tmp/launcher-qa-fixtures/snip.state >/dev/null",
         "wl-paste -n 2>/dev/null | grep -q '^QA-BODY 20'"
       ],
-      "teardown": [
-        "rm -f ~/.config/asura/launcher-snippets.json; wl-copy -c"
-      ]
+      "teardown": ["rm -f ~/.config/toren/launcher-snippets.json; wl-copy -c"]
     },
     {
       "id": "quicklink-row",
       "name": "Quicklink surfaces by name",
       "covers": "quicklinks provider",
       "steps": [
-        "sh mkdir -p ~/.config/asura; printf '[{\"name\":\"qa wiki\",\"url\":\"https://wiki.archlinux.org/index.php?search={query}\"}]' > ~/.config/asura/launcher-quicklinks.json; sleep 0.5",
+        "sh mkdir -p ~/.config/toren; printf '[{\"name\":\"qa wiki\",\"url\":\"https://wiki.archlinux.org/index.php?search={query}\"}]' > ~/.config/toren/launcher-quicklinks.json; sleep 0.5",
         "show",
         "type qa wiki",
         "settle"
@@ -1052,16 +870,14 @@
       "asserts": [
         "[.results[] | select(.title == \"qa wiki\" and .type == \"Quicklink\")] | length == 1"
       ],
-      "teardown": [
-        "rm -f ~/.config/asura/launcher-quicklinks.json"
-      ]
+      "teardown": ["rm -f ~/.config/toren/launcher-quicklinks.json"]
     },
     {
       "id": "quicklink-query-routing",
       "name": "Quicklink with {query} accepts trailing search text",
       "covers": "snippets keyword-prefix routing into {query}",
       "steps": [
-        "sh mkdir -p ~/.config/asura; printf '[{\"name\":\"qa wiki\",\"url\":\"https://wiki.archlinux.org/index.php?search={query}\"}]' > ~/.config/asura/launcher-quicklinks.json; sleep 0.5",
+        "sh mkdir -p ~/.config/toren; printf '[{\"name\":\"qa wiki\",\"url\":\"https://wiki.archlinux.org/index.php?search={query}\"}]' > ~/.config/toren/launcher-quicklinks.json; sleep 0.5",
         "show",
         "type qa wiki pacman",
         "settle"
@@ -1069,16 +885,14 @@
       "asserts": [
         "[.results[] | select(.title == \"qa wiki\" and .type == \"Quicklink\")] | length == 1"
       ],
-      "teardown": [
-        "rm -f ~/.config/asura/launcher-quicklinks.json"
-      ]
+      "teardown": ["rm -f ~/.config/toren/launcher-quicklinks.json"]
     },
     {
       "id": "script-provider",
       "name": "rofi-script rows appear for keyword query and get env per protocol",
       "covers": "script provider rofi protocol pass 1",
       "steps": [
-        "sh mkdir -p /tmp/launcher-qa-fixtures ~/.config/asura; printf '#!/bin/sh\\necho \"$ROFI_RETV|$ROFI_INFO|$1\" >> /tmp/launcher-qa-fixtures/qaz.log\\nprintf \"QA Row One\\\\nQA Row Two\\\\n\"\\n' > /tmp/launcher-qa-fixtures/qaz.sh; chmod +x /tmp/launcher-qa-fixtures/qaz.sh; printf '[{\"keyword\":\"qaz\",\"name\":\"QA Script\",\"exec\":\"/tmp/launcher-qa-fixtures/qaz.sh\"}]' > ~/.config/asura/launcher-scripts.json; rm -f /tmp/launcher-qa-fixtures/qaz.log; sleep 0.5",
+        "sh mkdir -p /tmp/launcher-qa-fixtures ~/.config/toren; printf '#!/bin/sh\\necho \"$ROFI_RETV|$ROFI_INFO|$1\" >> /tmp/launcher-qa-fixtures/qaz.log\\nprintf \"QA Row One\\\\nQA Row Two\\\\n\"\\n' > /tmp/launcher-qa-fixtures/qaz.sh; chmod +x /tmp/launcher-qa-fixtures/qaz.sh; printf '[{\"keyword\":\"qaz\",\"name\":\"QA Script\",\"exec\":\"/tmp/launcher-qa-fixtures/qaz.sh\"}]' > ~/.config/toren/launcher-scripts.json; rm -f /tmp/launcher-qa-fixtures/qaz.log; sleep 0.5",
         "show",
         "type qaz hello",
         "settle"
@@ -1090,9 +904,7 @@
       "shell_asserts": [
         "grep -q '^0|hello|' /tmp/launcher-qa-fixtures/qaz.log"
       ],
-      "teardown": [
-        "rm -f ~/.config/asura/launcher-scripts.json"
-      ]
+      "teardown": ["rm -f ~/.config/toren/launcher-scripts.json"]
     },
     {
       "id": "routed-mode-labels",
@@ -1102,61 +914,43 @@
         "show",
         "type /x",
         "sleep 0.4",
-        "sh S=$XDG_RUNTIME_DIR/asura-launcher.sock; (printf 'state\\n'; sleep .5)|socat - UNIX-CONNECT:$S | jq -r .modeLabel >/tmp/launcher-qa-fixtures/chips.out",
+        "sh S=$XDG_RUNTIME_DIR/toren-launcher.sock; (printf 'state\\n'; sleep .5)|socat - UNIX-CONNECT:$S | jq -r .modeLabel >/tmp/launcher-qa-fixtures/chips.out",
         "hide",
         "show",
         "type =1",
         "sleep 0.4",
-        "sh S=$XDG_RUNTIME_DIR/asura-launcher.sock; (printf 'state\\n'; sleep .5)|socat - UNIX-CONNECT:$S | jq -r .modeLabel >>/tmp/launcher-qa-fixtures/chips.out",
+        "sh S=$XDG_RUNTIME_DIR/toren-launcher.sock; (printf 'state\\n'; sleep .5)|socat - UNIX-CONNECT:$S | jq -r .modeLabel >>/tmp/launcher-qa-fixtures/chips.out",
         "hide",
         "show",
         "type /folder x",
         "sleep 0.4"
       ],
-      "asserts": [
-        ".modeLabel == \"FOLDER\""
-      ],
+      "asserts": [".modeLabel == \"FOLDER\""],
       "shell_asserts": [
         "printf 'ACTIONS\\nCALC\\n' | diff - /tmp/launcher-qa-fixtures/chips.out"
       ]
     },
     {
       "id": "ask-mode-ui",
-      "name": "Backslash enters Asura Agent ask mode with AGENT chip",
+      "name": "Backslash enters Toren Agent ask mode with AGENT chip",
       "covers": "ask mode routing + panel",
-      "steps": [
-        "show",
-        "type \\what is asura",
-        "sleep 0.8"
-      ],
-      "asserts": [
-        ".askMode == true",
-        ".modeLabel == \"AGENT\""
-      ],
+      "steps": ["show", "type \\what is toren", "sleep 0.8"],
+      "asserts": [".askMode == true", ".modeLabel == \"AGENT\""],
       "screenshot": true
     },
     {
       "id": "ask-resume-list",
       "name": "Bare backslash shows the ask panel in resume/recall state",
       "covers": "ask resume list",
-      "steps": [
-        "show",
-        "type \\",
-        "sleep 0.8"
-      ],
-      "asserts": [
-        ".askMode == true"
-      ],
+      "steps": ["show", "type \\", "sleep 0.8"],
+      "asserts": [".askMode == true"],
       "screenshot": true
     },
     {
       "id": "hero-rest",
       "name": "Rest is the full image hero with no result drawer",
       "covers": "250px HeroShutter rest face",
-      "steps": [
-        "show",
-        "sleep 1.2"
-      ],
+      "steps": ["show", "sleep 1.2"],
       "asserts": [
         ".resting == true",
         ".open == true",
@@ -1175,11 +969,7 @@
         "show",
         "sleep 1"
       ],
-      "asserts": [
-        ".hasMedia == true",
-        ".resting == true",
-        ".resultCount == 0"
-      ],
+      "asserts": [".hasMedia == true", ".resting == true", ".resultCount == 0"],
       "screenshot": true,
       "teardown": [
         "kill $(cat /tmp/launcher-qa-fixtures/mpv.pid 2>/dev/null) 2>/dev/null || true"
@@ -1194,7 +984,7 @@
         "show",
         "type p",
         "settle",
-        "sh S=$XDG_RUNTIME_DIR/asura-launcher.sock; (printf 'state\\n'; sleep .5)|socat - UNIX-CONNECT:$S >/tmp/launcher-qa-fixtures/p1.state",
+        "sh S=$XDG_RUNTIME_DIR/toren-launcher.sock; (printf 'state\\n'; sleep .5)|socat - UNIX-CONNECT:$S >/tmp/launcher-qa-fixtures/p1.state",
         "type a",
         "settle"
       ],
@@ -1220,12 +1010,8 @@
         "key Return",
         "sleep 1.5"
       ],
-      "asserts": [
-        ".open == false"
-      ],
-      "shell_asserts": [
-        "playerctl -p mpv status | grep -q Paused"
-      ],
+      "asserts": [".open == false"],
+      "shell_asserts": ["playerctl -p mpv status | grep -q Paused"],
       "teardown": [
         "kill $(cat /tmp/launcher-qa-fixtures/mpv.pid 2>/dev/null) 2>/dev/null || true"
       ]
@@ -1234,11 +1020,7 @@
       "id": "variant-hero-rest",
       "name": "Hero selection opens the image-backed resting face",
       "covers": "catalog selection + Hero rest contract",
-      "steps": [
-        "variant hero",
-        "show",
-        "sleep 1.2"
-      ],
+      "steps": ["variant hero", "show", "sleep 1.2"],
       "asserts": [
         ".variant == \"hero\"",
         ".open == true",
@@ -1251,17 +1033,12 @@
       "id": "variant-main-provider",
       "name": "Main selection returns shared provider results",
       "covers": "catalog selection + Main shared providers",
-      "steps": [
-        "variant main",
-        "show",
-        "type Asura QA Options 1",
-        "settle"
-      ],
+      "steps": ["variant main", "show", "type Toren QA Options 1", "settle"],
       "asserts": [
         ".variant == \"main\"",
         ".open == true",
         ".resultCount >= 1",
-        "[.results[] | select(.title == \"Asura QA Options 1\" and .type == \"App\")] | length == 1"
+        "[.results[] | select(.title == \"Toren QA Options 1\" and .type == \"App\")] | length == 1"
       ],
       "screenshot": true
     },
@@ -1269,11 +1046,7 @@
       "id": "variant-okshell-apps",
       "name": "OkShell selection opens its application rows",
       "covers": "catalog selection + OkShell application model",
-      "steps": [
-        "variant okshell",
-        "show",
-        "sleep 0.8"
-      ],
+      "steps": ["variant okshell", "show", "sleep 0.8"],
       "asserts": [
         ".variant == \"okshell\"",
         ".open == true",
@@ -1306,11 +1079,7 @@
       "id": "variant-unknown-default",
       "name": "Unknown launcher selection resolves to Hero",
       "covers": "catalog unknown-ID default resolution",
-      "steps": [
-        "variant does-not-exist",
-        "show",
-        "sleep 0.8"
-      ],
+      "steps": ["variant does-not-exist", "show", "sleep 0.8"],
       "asserts": [
         ".requestedVariant == \"does-not-exist\"",
         ".variant == \"hero\"",

@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const paletteBridgeUnit = "asura-palette-bridge.service"
+const paletteBridgeUnit = "toren-palette-bridge.service"
 
 var paletteBridgeRun = func(name string, args ...string) ([]byte, error) {
 	return exec.Command(name, args...).CombinedOutput()
@@ -53,7 +53,7 @@ func paletteBridgeConfigRoot() string {
 
 func paletteBridgeSource(source string, files ...string) (string, error) {
 	if source == "" {
-		source = "/usr/share/asura/palette-bridge"
+		source = "/usr/share/toren/palette-bridge"
 	}
 	abs, err := filepath.Abs(source)
 	if err != nil {
@@ -97,7 +97,7 @@ func paletteBridgeManagedFiles() map[string]bool {
 	if state == "" {
 		state = filepath.Join(paletteBridgeHome(), ".local", "state")
 	}
-	b, err := os.ReadFile(filepath.Join(state, "asura", "palette-bridge", "owned-files.tsv"))
+	b, err := os.ReadFile(filepath.Join(state, "toren", "palette-bridge", "owned-files.tsv"))
 	if err != nil {
 		return map[string]bool{}
 	}
@@ -113,10 +113,10 @@ func paletteBridgeManagedFiles() map[string]bool {
 func paletteBridgeStatusFor(source string) paletteBridgeStatus {
 	config := paletteBridgeConfigRoot()
 	managed := paletteBridgeManagedFiles()
-	spotify := filepath.Join(config, "spicetify", "Extensions", "asura-wallpaper-colors.js")
-	vesktop := filepath.Join(config, "vesktop", "themes", "midnight-asura.theme.css")
-	zen := filepath.Join(config, "asura", "user_edits", "matugen", "templates", "zen.css")
-	_, binErr := exec.LookPath("asura-palette-bridge")
+	spotify := filepath.Join(config, "spicetify", "Extensions", "toren-wallpaper-colors.js")
+	vesktop := filepath.Join(config, "vesktop", "themes", "midnight-toren.theme.css")
+	zen := filepath.Join(config, "toren", "user_edits", "matugen", "templates", "zen.css")
+	_, binErr := exec.LookPath("toren-palette-bridge")
 	_, sourceErr := paletteBridgeSource(source, "install.sh", "install-integrations.sh")
 	client := http.Client{Timeout: 350 * time.Millisecond}
 	resp, healthErr := client.Get("http://127.0.0.1:47616/healthz")
@@ -182,7 +182,7 @@ func runPaletteBridge(args []string) error {
 		}
 		return paletteBridgeCommand("systemctl", "--user", "restart", paletteBridgeUnit)
 	case "doctor":
-		doctor, lookupErr := exec.LookPath("asura-palette-bridge-doctor")
+		doctor, lookupErr := exec.LookPath("toren-palette-bridge-doctor")
 		if lookupErr != nil {
 			source := ""
 			if len(args) > 1 {

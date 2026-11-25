@@ -1,21 +1,21 @@
-// asura-store is the Go data plane for the Asura store window: it normalizes
+// toren-store is the Go data plane for the Toren store window: it normalizes
 // the places software comes from into one JSON catalogue and installs items
 // without activating them. The Quickshell front end and the Settings pages shell
 // out to these subcommands.
 //
-//	asura-store catalog [--refresh] [--category <id>]   normalized catalogue, JSON
-//	asura-store search <query>                          native packages matching a query, JSON
-//	asura-store check                                   upstream-changed probe, JSON
-//	asura-store install <category> <id>                 install
-//	asura-store remove <category> <id>                  removal
-//	asura-store open <section>                          open the store window
-//	asura-store settings <category> [id]                open Settings on its page
+//	toren-store catalog [--refresh] [--category <id>]   normalized catalogue, JSON
+//	toren-store search <query>                          native packages matching a query, JSON
+//	toren-store check                                   upstream-changed probe, JSON
+//	toren-store install <category> <id>                 install
+//	toren-store remove <category> <id>                  removal
+//	toren-store open <section>                          open the store window
+//	toren-store settings <category> [id]                open Settings on its page
 //
 // install and remove print {"stage","percent"} lines on stdout while they work
 // and a failure as one sentence on stderr, which is what the window shows.
 //
-// Asura Store data plane backend. Asura has no remote catalogue
-// and a plugin is just a folder (`asura plugin` installs and removes them).
+// Toren Store data plane backend. Toren has no remote catalogue
+// and a plugin is just a folder (`toren plugin` installs and removes them).
 package main
 
 import (
@@ -33,7 +33,7 @@ import (
 func main() {
 	scrubQuickshellCrashEnv()
 	if err := dispatch(os.Args[1:]); err != nil {
-		fmt.Fprintln(os.Stderr, "asura-store:", err)
+		fmt.Fprintln(os.Stderr, "toren-store:", err)
 		os.Exit(1)
 	}
 }
@@ -46,7 +46,7 @@ func dispatch(args []string) error {
 	}
 	switch args[0] {
 	case "-h", "--help", "help":
-		fmt.Print(`Usage: asura-store <command> [args]
+		fmt.Print(`Usage: toren-store <command> [args]
 
   catalog            the catalog as JSON
   search QUERY       search the catalog and the package sources

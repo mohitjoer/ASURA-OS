@@ -11,8 +11,8 @@ kernel_parameters: []
 
 files:
   udev:
-    - target: "/etc/udev/rules.d/99-asura-power.rules"
-      source: "system/udev/99-asura-power.rules"
+    - target: "/etc/udev/rules.d/99-toren-power.rules"
+      source: "system/udev/99-toren-power.rules"
       reason: "Universal audio power-saving (snd_hda_intel power_save=1), PCIe ASPM, and SATA link power"
     - target: "/etc/udev/rules.d/90-backlight.rules"
       content: |
@@ -24,7 +24,7 @@ files:
 services: []
 
 notes:
-  - "ACPI platform_profile: quiet, balanced, and performance thermal profiles via /sys/firmware/acpi/platform_profile ('asura power profile')."
+  - "ACPI platform_profile: quiet, balanced, and performance thermal profiles via /sys/firmware/acpi/platform_profile ('toren power profile')."
   - "Universal battery management: automatically detects charge_control_end_threshold or charge_stop_threshold on BAT0/BAT1."
   - "PCIe ASPM & SATA ALPM: balances battery endurance and thermal dissipation under mobile workloads."
   - "Screen and keyboard backlight: write permissions granted to session seat users for smooth brightness controls."

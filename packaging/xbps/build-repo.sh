@@ -6,7 +6,7 @@
 # STAGE_DIR is a tree installation/apply-repo.sh has already filled (with the
 # Go tools built): the package holds exactly what an update installs. This
 # script, which needs xbps-create and xbps-rindex (a Void container in CI),
-# turns that tree into the `asura` package, indexes OUT_DIR, and signs both
+# turns that tree into the `toren` package, indexes OUT_DIR, and signs both
 # when XBPS_SIGNING_KEY names a private key (PEM) file.
 #
 # The version is 0.1.<commits on the branch>_1, so every newer commit is a
@@ -25,24 +25,24 @@ else
 	count=$(git -C "$REPO_ROOT" rev-list --count HEAD 2>/dev/null || echo 0)
 	VERSION="0.1.$count"
 fi
-PKGVER="asura-${VERSION}_1"
+PKGVER="toren-${VERSION}_1"
 
 # The package must hold what makes a machine ASURA: refuse a stage that is
 # missing any of these (an apply-repo run that failed part way).
 for f in \
-	usr/bin/asura \
-	usr/bin/asura-session \
-	usr/share/asura/session/asura-activate \
-	usr/share/asura/shell-desktop/shell.qml \
-	usr/share/asura/hyprland/hyprland.lua \
-	usr/share/asura/hyprland/hyprland.conf \
-	usr/share/asura/migrations; do
+	usr/bin/toren \
+	usr/bin/toren-session \
+	usr/share/toren/session/toren-activate \
+	usr/share/toren/shell-desktop/shell.qml \
+	usr/share/toren/hyprland/hyprland.lua \
+	usr/share/toren/hyprland/hyprland.conf \
+	usr/share/toren/migrations; do
 	if [ ! -e "$STAGE/$f" ]; then
 		echo "build-repo: $f is not in $STAGE; run installation/apply-repo.sh into it first" >&2
 		exit 1
 	fi
 done
-for f in usr/bin/asura usr/bin/asura-session usr/share/asura/session/asura-activate; do
+for f in usr/bin/toren usr/bin/toren-session usr/share/toren/session/toren-activate; do
 	[ -x "$STAGE/$f" ] || { echo "build-repo: $f is not executable" >&2; exit 1; }
 done
 

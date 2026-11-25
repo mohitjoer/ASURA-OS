@@ -2,12 +2,12 @@ pragma Singleton
 import QtQuick
 import Quickshell
 
-// Asura Settings palette, the website's "Greek-noir yakuza" language in QML.
+// Toren Settings palette, the website's "Greek-noir yakuza" language in QML.
 // A near-black canvas so the one vermillion accent (A mark, active section,
 // focused search, numerals) reads as deliberate, never a wash. Warm-white type,
 // gold used only as kintsugi. Depth from hairlines + hard offset shadows, not
 // gradients. Display face is Fraunces (editorial serif); UI is Space Grotesk;
-// labels are JetBrains Mono. Mirrors asura-site/app/assets/css/tokens.css.
+// labels are JetBrains Mono. Mirrors toren-site/app/assets/css/tokens.css.
 Singleton {
     // brand: follows live scheme accent, falling back to one vermillion (#e2342a)
     readonly property color brand:     Scheme.accent || "#e2342a"

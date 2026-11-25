@@ -43,7 +43,7 @@ func runUpdates(args []string) error {
 
 func updatesStatus() error {
 	channel := "unstable"
-	out, err := exec.Command("asura", "channel", "get").Output()
+	out, err := exec.Command("toren", "channel", "get").Output()
 	if err == nil {
 		channel = strings.TrimSpace(string(out))
 	}
@@ -53,7 +53,7 @@ func updatesStatus() error {
 }
 
 func updatesCheck() error {
-	cmd := exec.Command("asura", "update", "--check")
+	cmd := exec.Command("toren", "update", "--check")
 	out, _ := cmd.CombinedOutput()
 	return printJSON(map[string]any{
 		"output": strings.TrimSpace(string(out)),
@@ -61,9 +61,9 @@ func updatesCheck() error {
 }
 
 func getChannel() error {
-	out, err := exec.Command("asura", "channel", "get").Output()
+	out, err := exec.Command("toren", "channel", "get").Output()
 	if err != nil {
-		return fmt.Errorf("asura channel get failed: %w", err)
+		return fmt.Errorf("toren channel get failed: %w", err)
 	}
 	return printJSON(map[string]string{
 		"channel": strings.TrimSpace(string(out)),
@@ -71,10 +71,10 @@ func getChannel() error {
 }
 
 func setChannel(ch string) error {
-	cmd := exec.Command("asura", "channel", "set", ch)
+	cmd := exec.Command("toren", "channel", "set", ch)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("asura channel set %s failed: %v: %s", ch, err, strings.TrimSpace(string(out)))
+		return fmt.Errorf("toren channel set %s failed: %v: %s", ch, err, strings.TrimSpace(string(out)))
 	}
 	return printJSON(map[string]string{
 		"status":  "set",
@@ -83,7 +83,7 @@ func setChannel(ch string) error {
 }
 
 func listSnapshots() error {
-	cmd := exec.Command("asura", "snapshot", "list")
+	cmd := exec.Command("toren", "snapshot", "list")
 	out, err := cmd.Output()
 	var entries []snapshotEntry
 	if err == nil {

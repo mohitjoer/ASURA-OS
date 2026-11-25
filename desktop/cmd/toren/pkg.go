@@ -1,8 +1,8 @@
 package main
 
-// pkg.go carries `asura pkg`, the engine apm stands on. The two names are
+// pkg.go carries `toren pkg`, the engine apm stands on. The two names are
 // one tool split by audience: apm is the six letters a person types on an
-// install line, and `asura pkg` is the same verbs inside the control tool,
+// install line, and `toren pkg` is the same verbs inside the control tool,
 // where every other desktop action already lives.
 //
 // Routing, from the base layer out: a package name goes through the base
@@ -20,10 +20,10 @@ import (
 	"strings"
 	"time"
 
-	"asura/desktop/internal/runner"
+	"toren/desktop/internal/runner"
 )
 
-const pkgUsage = `Usage: asura pkg [-flatpak] [-repo URL] verb [package...]
+const pkgUsage = `Usage: toren pkg [-flatpak] [-repo URL] verb [package...]
 
 Verbs: install, remove, search, update, upgrade, hold, unhold.
 
@@ -37,7 +37,7 @@ password is asked for in the terminal that runs the command.
 `
 
 func init() {
-	register("pkg", "install, remove, search or move packages (the verbs apm calls)", asuraPkg)
+	register("pkg", "install, remove, search or move packages (the verbs apm calls)", torenPkg)
 }
 
 // pkgSudoPick decides the privilege prefix a system package manager runs
@@ -172,10 +172,10 @@ func pkgMain(args []string, out, errOut io.Writer, run runner.Func, backend stri
 	argv, ok := pkgArgv(chosen, verb, packages, *repoURL)
 	if !ok {
 		if chosen == "" {
-			fmt.Fprintln(errOut, "asura pkg: xbps is not on this machine; "+
+			fmt.Fprintln(errOut, "toren pkg: xbps is not on this machine; "+
 				"install its packages from your own package manager")
 		} else {
-			fmt.Fprintf(errOut, "asura pkg: the %s backend cannot perform %s\n", chosen, verb)
+			fmt.Fprintf(errOut, "toren pkg: the %s backend cannot perform %s\n", chosen, verb)
 		}
 		fmt.Fprint(errOut, pkgUsage)
 		return exitUsage
@@ -185,14 +185,14 @@ func pkgMain(args []string, out, errOut io.Writer, run runner.Func, backend stri
 	// with XBPS's exit 1 is reported with the reason that produced it.
 	outText, err := run(argv[0], argv[1:]...)
 	if err != nil {
-		fmt.Fprintf(errOut, "asura pkg: %s: %s\n", strings.Join(argv, " "), runner.Reason(err))
+		fmt.Fprintf(errOut, "toren pkg: %s: %s\n", strings.Join(argv, " "), runner.Reason(err))
 		return exitFail
 	}
 	fmt.Fprint(out, outText)
 	return exitOK
 }
 
-func asuraPkg(args []string) int {
+func torenPkg(args []string) int {
 	return pkgMain(args, os.Stdout, os.Stderr, runner.Exec(30*time.Minute), "")
 }
 

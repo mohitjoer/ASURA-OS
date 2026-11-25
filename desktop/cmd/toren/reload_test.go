@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"asura/desktop/internal/runner/runnertest"
+	"toren/desktop/internal/runner/runnertest"
 )
 
 // TestReload covers what the Hub's caller depends on: the shell is reloaded
@@ -17,8 +17,8 @@ func TestReload(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", filepath.Dir(svcDir))
 
 	shell := "sv restart " + filepath.Join(svcDir, "quickshell")
-	status := "sv status " + filepath.Join(svcDir, "asurad")
-	daemon := "sv restart " + filepath.Join(svcDir, "asurad")
+	status := "sv status " + filepath.Join(svcDir, "torend")
+	daemon := "sv restart " + filepath.Join(svcDir, "torend")
 
 	tests := []struct {
 		name     string
@@ -32,7 +32,7 @@ func TestReload(t *testing.T) {
 		{
 			name: "both reload",
 			setup: func(f *runnertest.Fake) {
-				f.Out(shell, "").Out(status, "run: asurad: (pid 1234) 10s\n").Out(daemon, "")
+				f.Out(shell, "").Out(status, "run: torend: (pid 1234) 10s\n").Out(daemon, "")
 			},
 			wantCode: exitOK,
 			wantOut:  []string{"shell:   reloaded", "daemon:  reloaded"},
@@ -41,7 +41,7 @@ func TestReload(t *testing.T) {
 		{
 			name: "no daemon to reload",
 			setup: func(f *runnertest.Fake) {
-				f.Out(shell, "").Fail(status, runnertest.Exit(1, "fail: asurad: unable to change to service directory: file does not exist\n"))
+				f.Out(shell, "").Fail(status, runnertest.Exit(1, "fail: torend: unable to change to service directory: file does not exist\n"))
 			},
 			wantCode: exitOK,
 			wantOut:  []string{"shell:   reloaded", "daemon:  not running"},
@@ -51,7 +51,7 @@ func TestReload(t *testing.T) {
 			name: "the shell refuses",
 			setup: func(f *runnertest.Fake) {
 				f.Fail(shell, runnertest.Exit(1, "fail: quickshell: unable to change to service directory\n")).
-					Fail(status, runnertest.Exit(1, "fail: asurad: unable to change to service directory\n"))
+					Fail(status, runnertest.Exit(1, "fail: torend: unable to change to service directory\n"))
 			},
 			wantCode: exitFail,
 			wantErr:  []string{"shell:   not reloaded: fail: quickshell: unable to change to service directory"},

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"asura/desktop/internal/backlight"
+	"toren/desktop/internal/backlight"
 )
 
 // A /sys with a screen at 10% of 1000 and a keyboard at level 2 of 3, written

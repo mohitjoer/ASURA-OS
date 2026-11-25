@@ -8,7 +8,7 @@ import (
 // The lock is the guard that keeps a second daemon from supervising a second
 // desktop when the socket file is missing or was cleaned away.
 func TestHoldDaemonLockIsExclusive(t *testing.T) {
-	path := t.TempDir() + "/asura-shell.sock.lock"
+	path := t.TempDir() + "/toren-shell.sock.lock"
 	first, err := holdDaemonLock(path)
 	if err != nil {
 		t.Fatalf("first daemon could not take the lock: %v", err)

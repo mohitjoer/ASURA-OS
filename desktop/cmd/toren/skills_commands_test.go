@@ -10,16 +10,16 @@ import (
 
 // The agent skills (shell/agent/skills) tell an assistant which commands to run
 // on an ASURA machine. A command they name that does not exist sends the
-// assistant down a dead end, so every `asura <sub>` and `asura-<tool>` written
+// assistant down a dead end, so every `toren <sub>` and `toren-<tool>` written
 // in a skill's code must be a real command.
 
 var (
 	codeSpan   = regexp.MustCompile("(?s)```.*?```|`[^`\n]+`")
-	asuraSub   = regexp.MustCompile("(?:^|[\\s(|;&`])asura ([a-z][a-z-]*)")
-	asuraTool  = regexp.MustCompile(`\b(asura-[a-z]+(?:-[a-z]+)*)`)
+	torenSub   = regexp.MustCompile("(?:^|[\\s(|;&`])toren ([a-z][a-z-]*)")
+	torenTool  = regexp.MustCompile(`\b(toren-[a-z]+(?:-[a-z]+)*)`)
 	notCommand = map[string]bool{
-		"asura-plugins":    true, // the folder new plugins are created in
-		"asura-shell.sock": true,
+		"toren-plugins":    true, // the folder new plugins are created in
+		"toren-shell.sock": true,
 	}
 )
 
@@ -38,9 +38,9 @@ func TestSkillsNameRealCommands(t *testing.T) {
 	}
 	toolExists := func(name string) bool {
 		candidates := []string{name}
-		if strings.HasPrefix(name, "asura-") {
-			candidates = append(candidates, "toren-"+strings.TrimPrefix(name, "asura-"))
-		} else if name == "asura" {
+		if strings.HasPrefix(name, "toren-") {
+			candidates = append(candidates, "toren-"+strings.TrimPrefix(name, "toren-"))
+		} else if name == "toren" {
 			candidates = append(candidates, "toren")
 		}
 		for _, cand := range candidates {
@@ -65,14 +65,14 @@ func TestSkillsNameRealCommands(t *testing.T) {
 		}
 		rel, _ := filepath.Rel(repo, file)
 		for _, code := range codeSpan.FindAllString(string(b), -1) {
-			for _, m := range asuraSub.FindAllStringSubmatch(code, -1) {
+			for _, m := range torenSub.FindAllStringSubmatch(code, -1) {
 				_, builtIn := commands[m[1]]
 				_, registered := extraCommands[m[1]]
 				if !builtIn && !registered {
-					t.Errorf("%s: `asura %s` is not an asura command", rel, m[1])
+					t.Errorf("%s: `toren %s` is not an toren command", rel, m[1])
 				}
 			}
-			for _, m := range asuraTool.FindAllStringSubmatch(code, -1) {
+			for _, m := range torenTool.FindAllStringSubmatch(code, -1) {
 				name := strings.TrimSuffix(m[1], "-")
 				if notCommand[name] || strings.Contains(code, name+".") || strings.Contains(code, name+"/") {
 					continue // a file or folder name, not a command

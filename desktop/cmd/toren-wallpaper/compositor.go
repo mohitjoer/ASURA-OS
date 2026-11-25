@@ -11,7 +11,7 @@ import (
 
 // The compositor seam, reduced to what the wallpaper pipeline reads: the
 // connected outputs (to size video and to say which display the picker opens
-// on). Hyprland is the only compositor Asura runs, so this is
+// on). Hyprland is the only compositor Toren runs, so this is
 // `hyprctl -j monitors` and nothing else.
 
 // output is a compositor output. Width and Height are physical pixels; Scale is

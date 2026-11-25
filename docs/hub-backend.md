@@ -6,12 +6,12 @@ what it edits. It was originally ported from another project's hub with the same
 `desktop/cmd/toren-hubd/CONTRACT.md` lists every place that differs and every verb that is
 dropped, and is what the Hub pages are written against.
 
-| Piece | Where | Job |
-|---|---|---|
-| the verbs | `desktop/cmd/toren-hubd/*.go` | one file per area: `desktop`, `outputs`, `keybinds`, `rice`, `import`, `lighting`, `gpu`, `cpu`, `fastfetch`, `profile`, ... |
-| the compositor seam | `desktop/cmd/toren-hubd/internal/wm` | what the compositor can do, the neutral store, and the hyprlang it is rendered into |
-| the stores | `~/.config/asura/` | `desktop.json` (window and input settings), `hub.toml` (Hub state), `outputs-applied.json`, `anim-preset` |
-| the output | `~/.config/asura/hyprland/` | `settings.conf` and `rebinds.conf`, generated; `user.conf`, the user's, wins |
+| Piece               | Where                                | Job                                                                                                                          |
+| ------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| the verbs           | `desktop/cmd/toren-hubd/*.go`        | one file per area: `desktop`, `outputs`, `keybinds`, `rice`, `import`, `lighting`, `gpu`, `cpu`, `fastfetch`, `profile`, ... |
+| the compositor seam | `desktop/cmd/toren-hubd/internal/wm` | what the compositor can do, the neutral store, and the hyprlang it is rendered into                                          |
+| the stores          | `~/.config/toren/`                   | `desktop.json` (window and input settings), `hub.toml` (Hub state), `outputs-applied.json`, `anim-preset`                    |
+| the output          | `~/.config/toren/hyprland/`          | `settings.conf` and `rebinds.conf`, generated; `user.conf`, the user's, wins                                                 |
 
 ## From a setting to the compositor
 
@@ -47,4 +47,4 @@ whatever environment it is started in.
 
 A verb with no backend on Void (dictation, GPU passthrough, the MUX switch, QMK lighting)
 answers `{"available":false,"reason":"..."}` instead of erroring, so a page can say what is
-missing. Calls out to `asura-power` and `asura-gpu` are detected the same way.
+missing. Calls out to `toren-power` and `toren-gpu` are detected the same way.

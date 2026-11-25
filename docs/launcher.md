@@ -4,7 +4,7 @@ The launcher is the command palette on Super+Space: one search box for apps, com
 files, packages, radio, the calculator, open windows and system actions. It is a ported
 launcher, adapted in place (GPL-3.0, see `NOTICE.md`), and lives in `shell/modules/launcher/`.
 `shell.qml` loads it, builds it on the first open and tears it down a while after the last
-close. Its look is `~/.config/asura/launcher.json` (`variant`: hero, main, okshell or
+close. Its look is `~/.config/toren/launcher.json` (`variant`: hero, main, okshell or
 side).
 
 ## Providers
@@ -15,24 +15,24 @@ shell checks for it once when the launcher is built and **registers only if the 
 there**. A provider that did not register has no prefix, no row in the F1 help, and no mode
 key, and nothing is run or logged for it.
 
-| Provider | Prefix | Needs | Without it |
-|---|---|---|---|
-| apps | none | Quickshell desktop entries | n/a |
-| windows | none | the daemon's `wm` topic (`toren-shell`) | no rows until the daemon is up |
-| actions | `/` | the command each action runs | that action is left out |
-| calc | `=`, a leading digit | `asura-cmd-calc` (uses `qalc` when installed) | not registered |
-| packages | `>` | `xbps-query`, `apm`; installs use `pkexec` and a terminal | not registered |
-| find | `/file /folder /image /video`, the IMG and FILE keys | `plocate` with a readable database | not registered, keys hidden |
-| radio | `@` | `asura-cmd-radio` (mpv, yt-dlp) | not registered, status never polled |
-| web | `?` | a browser; the instant answer uses `curl` | no answer panel |
-| ask | `\` | `toren-agent` | the panel says "not available: install toren-agent" |
-| recent, snippets, script, mpris | various | files under `~/.config/asura/`, D-Bus | n/a |
+| Provider                        | Prefix                                               | Needs                                                     | Without it                                          |
+| ------------------------------- | ---------------------------------------------------- | --------------------------------------------------------- | --------------------------------------------------- |
+| apps                            | none                                                 | Quickshell desktop entries                                | n/a                                                 |
+| windows                         | none                                                 | the daemon's `wm` topic (`toren-shell`)                   | no rows until the daemon is up                      |
+| actions                         | `/`                                                  | the command each action runs                              | that action is left out                             |
+| calc                            | `=`, a leading digit                                 | `toren-cmd-calc` (uses `qalc` when installed)             | not registered                                      |
+| packages                        | `>`                                                  | `xbps-query`, `apm`; installs use `pkexec` and a terminal | not registered                                      |
+| find                            | `/file /folder /image /video`, the IMG and FILE keys | `plocate` with a readable database                        | not registered, keys hidden                         |
+| radio                           | `@`                                                  | `toren-cmd-radio` (mpv, yt-dlp)                           | not registered, status never polled                 |
+| web                             | `?`                                                  | a browser; the instant answer uses `curl`                 | no answer panel                                     |
+| ask                             | `\`                                                  | `toren-agent`                                             | the panel says "not available: install toren-agent" |
+| recent, snippets, script, mpris | various                                              | files under `~/.config/toren/`, D-Bus                     | n/a                                                 |
 
 ## Packages
 
 `>name` searches. `xbps-query -Rs` gives the names, ranked name matches first and capped at
 30, and `xbps-query -l` says what is installed. `>install name` and `>remove name` filter the
-same way; Enter opens a terminal (`asura-app terminal`) running `pkexec xbps-install` or `apm`, so the
+same way; Enter opens a terminal (`toren-app terminal`) running `pkexec xbps-install` or `apm`, so the
 password prompt and xbps's output are visible. A non-root `xbps-query` takes about a second when
 the database is stale, so the query is debounced and cached per term.
 
@@ -58,4 +58,4 @@ Flatpak's export directories, then `XDG_DATA_DIRS`) and applies `Hidden`, `NoDis
 `OnlyShowIn` and `NotShowIn` against `XDG_CURRENT_DESKTOP` (`Toren` in an Toren session) and
 `TryExec`. The launcher itself lists Quickshell's `DesktopEntries` and honours `NoDisplay`
 only, so a GNOME-only entry that does not set it still appears. Launch counts, which rank
-results, are kept in `~/.local/state/asura/launcher-usage.json`.
+results, are kept in `~/.local/state/toren/launcher-usage.json`.

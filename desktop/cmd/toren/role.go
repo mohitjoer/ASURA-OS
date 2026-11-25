@@ -7,10 +7,10 @@ import (
 )
 
 func init() {
-	register("role", "switch system roles: developer, security researcher, or gamer via native container bridge", asuraRole)
+	register("role", "switch system roles: developer, security researcher, or gamer via native container bridge", torenRole)
 }
 
-const roleUsage = `Usage: asura role <role-name> [flags]
+const roleUsage = `Usage: toren role <role-name> [flags]
 
 Roles:
   gamer, --enable-gamer    Enable gaming stack (Steam, Gamemode, MangoHud, Gamescope, 32-bit Vulkan)
@@ -19,7 +19,7 @@ Roles:
   list, status             List available roles and container bridge status
 `
 
-func asuraRole(args []string) int {
+func torenRole(args []string) int {
 	if len(args) == 0 || args[0] == "-h" || args[0] == "--help" {
 		fmt.Print(roleUsage)
 		return exitOK
@@ -36,7 +36,7 @@ func asuraRole(args []string) int {
 	case "list", "status":
 		return showRoleStatus()
 	default:
-		fmt.Fprintf(os.Stderr, "asura role: unknown role %q\n\n%s", role, roleUsage)
+		fmt.Fprintf(os.Stderr, "toren role: unknown role %q\n\n%s", role, roleUsage)
 		return exitUsage
 	}
 }
@@ -57,7 +57,7 @@ func enableGamerRole() int {
 		_ = runCmd("sudo", "xbps-install", "-Sy", "void-repo-nonfree", "void-repo-multilib", "void-repo-multilib-nonfree")
 		err := runCmd("sudo", "xbps-install", "-Sy", "steam", "gamemode", "mangohud", "gamescope", "vulkan-loader-32bit", "mesa-vulkan-radeon-32bit")
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "asura role: failed to install gaming packages: %v\n", err)
+			fmt.Fprintf(os.Stderr, "toren role: failed to install gaming packages: %v\n", err)
 			return exitFail
 		}
 	}

@@ -38,7 +38,7 @@ func (r *recorder) emit(event string, data map[string]interface{}) {
 		default:
 		}
 	}
-	if event == "asura-wallpaper.wall.optimize.finished" || event == "asura-wallpaper.wall.convert.finished" {
+	if event == "toren-wallpaper.wall.optimize.finished" || event == "toren-wallpaper.wall.convert.finished" {
 		r.once.Do(func() { close(r.done) })
 	}
 }
@@ -156,11 +156,11 @@ func TestOptimizeRunConvertsPNGs(t *testing.T) {
 	if len(events) < 2 {
 		t.Fatalf("want progress + finished events, got %d", len(events))
 	}
-	if events[0].event != "asura-wallpaper.wall.optimize.progress" {
+	if events[0].event != "toren-wallpaper.wall.optimize.progress" {
 		t.Fatalf("first event should be progress, got %q", events[0].event)
 	}
 	last := events[len(events)-1]
-	if last.event != "asura-wallpaper.wall.optimize.finished" {
+	if last.event != "toren-wallpaper.wall.optimize.finished" {
 		t.Fatalf("last event should be finished, got %q", last.event)
 	}
 	if last.data["optimized"] != 2 {
@@ -168,7 +168,7 @@ func TestOptimizeRunConvertsPNGs(t *testing.T) {
 	}
 	// finished must arrive after every progress event.
 	for _, e := range events[:len(events)-1] {
-		if e.event == "asura-wallpaper.wall.optimize.finished" {
+		if e.event == "toren-wallpaper.wall.optimize.finished" {
 			t.Fatal("finished emitted before the last event")
 		}
 	}

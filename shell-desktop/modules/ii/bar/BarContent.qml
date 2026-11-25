@@ -9,7 +9,7 @@ import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.common.functions
 
-// ASURA overlay (shell-desktop/asura/vendor.sh OVERLAYS): the bar's layout.
+// ASURA overlay (shell-desktop/toren/vendor.sh OVERLAYS): the bar's layout.
 // Left: the workspaces, then media while a player has a track (no active
 // window title).
 // Centre: the clock and date, alone. Right, from the end: the battery, the

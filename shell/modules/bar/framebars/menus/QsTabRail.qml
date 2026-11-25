@@ -59,19 +59,19 @@ Item {
 
         RailIconBtn {
             glyph: "lens"; icon: "center_focus_strong"; tipText: I18n.tr("Lens search")
-            onClicked: { Quickshell.execDetached(["asura-cmd-google-lens"]); root.requestClose(); }
+            onClicked: { Quickshell.execDetached(["toren-cmd-google-lens"]); root.requestClose(); }
         }
         RailIconBtn {
             icon: "document_scanner"; tipText: I18n.tr("Copy text on screen")
-            onClicked: { Quickshell.execDetached(["asura-cmd-ocr"]); root.requestClose(); }
+            onClicked: { Quickshell.execDetached(["toren-cmd-ocr"]); root.requestClose(); }
         }
         RailIconBtn {
             icon: "qr_code_scanner"; tipText: I18n.tr("Scan a QR code")
-            onClicked: { Quickshell.execDetached(["asura-cmd-qr-scan"]); root.requestClose(); }
+            onClicked: { Quickshell.execDetached(["toren-cmd-qr-scan"]); root.requestClose(); }
         }
         RailIconBtn {
             icon: "settings"; tipText: I18n.tr("Toren Hub")
-            onClicked: { Quickshell.execDetached(["asura-shell", "hub", "open"]); root.requestClose(); }
+            onClicked: { Quickshell.execDetached(["toren-shell", "hub", "open"]); root.requestClose(); }
         }
     }
 

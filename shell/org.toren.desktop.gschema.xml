@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  org.asura.desktop — desktop-level behaviour.
+  org.toren.desktop — desktop-level behaviour.
 
-  Separate from org.asura.shell because the shell is a consumer of these
+  Separate from org.toren.shell because the shell is a consumer of these
   decisions, not their owner. The colour scheme belongs to the desktop: the hub
   writes it, the shell reads it, and if the shell owned a copy it would be a
   second decision that could disagree with the first.
 
   Adoption imports `color-scheme` here from org.gnome.desktop.interface, so that
-  key's name and type are a contract with docs/adopting-asura.md.
+  key's name and type are a contract with docs/adopting-toren.md.
 -->
 <schemalist>
 
-  <enum id="org.asura.desktop.ColorScheme">
+  <enum id="org.toren.desktop.ColorScheme">
     <value nick="default" value="0"/>
     <value nick="prefer-dark" value="1"/>
     <value nick="prefer-light" value="2"/>
   </enum>
 
-  <schema id="org.asura.desktop" path="/org/asura/desktop/">
+  <schema id="org.toren.desktop" path="/org/toren/desktop/">
 
-    <key name="color-scheme" enum="org.asura.desktop.ColorScheme">
+    <key name="color-scheme" enum="org.toren.desktop.ColorScheme">
       <default>'default'</default>
       <summary>Whether the desktop prefers light or dark</summary>
       <description>
@@ -31,7 +31,7 @@
 
 
     <!-- =========================================================== idle policy
-         These live here rather than in org.asura.shell because they are
+         These live here rather than in org.toren.shell because they are
          desktop behaviour, not layout: the shell and the Hub both change them,
          and neither of them owns the other's schema.
 

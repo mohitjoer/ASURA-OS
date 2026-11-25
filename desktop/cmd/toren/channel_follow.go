@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-// How `asura update` follows its branch (dev-unstable by default):
+// How `toren update` follows its branch (dev-unstable by default):
 //
 //  1. fetch: bounded (30 s), never prompting for credentials, and an
 //     unreachable remote is not a failure while an earlier fetch is on disk;
@@ -96,7 +96,7 @@ func commitChecks(repo, sha string) (ciState, error) {
 		return ciUnchecked, err
 	}
 	req.Header.Set("Accept", "application/vnd.github+json")
-	req.Header.Set("User-Agent", "asura-update")
+	req.Header.Set("User-Agent", "toren-update")
 	if token := os.Getenv("GITHUB_TOKEN"); token != "" {
 		req.Header.Set("Authorization", "Bearer "+token)
 	}

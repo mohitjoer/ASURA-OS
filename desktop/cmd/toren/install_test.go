@@ -7,10 +7,10 @@ import (
 func TestInstallSubcommand(t *testing.T) {
 	cmd, taken := extraCommands["install"]
 	if !taken {
-		t.Fatalf("asura install command not registered")
+		t.Fatalf("toren install command not registered")
 	}
 
 	if code := cmd.run([]string{"--help"}); code != exitOK {
-		t.Errorf("asura install --help returned %d, want %d", code, exitOK)
+		t.Errorf("toren install --help returned %d, want %d", code, exitOK)
 	}
 }

@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"asura/desktop/internal/wm"
+	"toren/desktop/internal/wm"
 )
 
 // session.go runs the session power actions the confirmation dialog triggers.
@@ -32,7 +32,7 @@ func sessionActionArgv(action string) ([]string, bool) {
 func (d *daemon) startSession() {
 	d.registerCall("session.logout", func(json.RawMessage) (any, error) {
 		if err := d.wmc.Act(wm.ActionSessionExit); err != nil {
-			log.Printf("asura-shell: session logout: %v", err)
+			log.Printf("toren-shell: session logout: %v", err)
 		}
 		return map[string]any{"ok": true}, nil
 	})
@@ -51,19 +51,19 @@ func (d *daemon) startSession() {
 func runSessionAction(action string) {
 	argv, ok := sessionActionArgv(action)
 	if !ok {
-		log.Printf("asura-shell: unknown session action %q", action)
+		log.Printf("toren-shell: unknown session action %q", action)
 		return
 	}
 	cmd := exec.Command(argv[0], argv[1:]...)
 	var stderr strings.Builder
 	cmd.Stderr = &stderr
 	if err := cmd.Start(); err != nil {
-		log.Printf("asura-shell: session %s: %v", action, err)
+		log.Printf("toren-shell: session %s: %v", action, err)
 		return
 	}
 	go func() {
 		if err := cmd.Wait(); err != nil {
-			log.Printf("asura-shell: session %s: %v: %s", action, err, strings.TrimSpace(stderr.String()))
+			log.Printf("toren-shell: session %s: %v: %s", action, err, strings.TrimSpace(stderr.String()))
 		}
 	}()
 }

@@ -1,4 +1,4 @@
 #!/bin/sh
 exec 2>&1
-# Start the unprivileged Asura user daemon (state authority + telemetry bridge)
-exec /usr/bin/asura-userd
+# Start the unprivileged Toren user daemon (state authority + telemetry bridge)
+exec /usr/bin/toren-userd

@@ -1,11 +1,11 @@
 [SddmGreeterTheme]
-Name=Asura
-Description=The Asura login screen
-Author=Asura
+Name=Toren
+Description=The Toren login screen
+Author=Toren
 License=GPL-3.0-or-later
 Type=sddm-theme
 Version=0.1
 MainScript=Main.qml
-Theme-Id=asura
+Theme-Id=toren
 Theme-API=2.0
 QtVersion=6

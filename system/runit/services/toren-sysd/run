@@ -1,4 +1,4 @@
 #!/bin/sh
 exec 2>&1
-# Start the Asura privileged system daemon
-exec /usr/bin/asura-sysd run
+# Start the Toren privileged system daemon
+exec /usr/bin/toren-sysd run

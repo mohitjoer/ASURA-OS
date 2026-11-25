@@ -35,7 +35,7 @@ func appsTestSession(t *testing.T) (home, system string) {
 	t.Setenv("HOME", filepath.Join(root, "user"))
 	t.Setenv("XDG_DATA_HOME", home)
 	t.Setenv("XDG_DATA_DIRS", system)
-	t.Setenv("XDG_CURRENT_DESKTOP", "Asura")
+	t.Setenv("XDG_CURRENT_DESKTOP", "Toren")
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(root, "config"))
 	for _, key := range []string{"LC_ALL", "LC_MESSAGES", "LANGUAGE"} {
 		t.Setenv(key, "")
@@ -67,7 +67,7 @@ Type=Application
 Name=Terminal
 GenericName=Terminal Emulator
 Comment=Fast, native
-Exec=ghostty --title=Asura %U
+Exec=ghostty --title=Toren %U
 Icon=com.mitchellh.ghostty
 Terminal=false
 Keywords=shell;prompt;
@@ -92,7 +92,7 @@ StartupWMClass=com.mitchellh.ghostty
 	if app.Exec != "ghostty" {
 		t.Errorf("exec is %q, want ghostty", app.Exec)
 	}
-	if len(app.Args) != 1 || app.Args[0] != "--title=Asura" {
+	if len(app.Args) != 1 || app.Args[0] != "--title=Toren" {
 		t.Errorf("args are %q, want the command's own arguments", app.Args)
 	}
 	if app.GenericName != "Terminal Emulator" || app.Comment != "Fast, native" {
@@ -151,12 +151,12 @@ func TestDesktopEntryHonoursTheSessionDesktop(t *testing.T) {
 		extra   string
 		offered bool
 	}{
-		{"Asura", "", true},
-		{"Asura", "OnlyShowIn=GNOME;Unity;\n", false},
-		{"Asura", "OnlyShowIn=Asura;\n", true},
-		{"Asura", "NotShowIn=GNOME;\n", true},
-		{"Asura", "NotShowIn=GNOME;Asura;\n", false},
-		{"", "OnlyShowIn=Asura;\n", true},
+		{"Toren", "", true},
+		{"Toren", "OnlyShowIn=GNOME;Unity;\n", false},
+		{"Toren", "OnlyShowIn=Toren;\n", true},
+		{"Toren", "NotShowIn=GNOME;\n", true},
+		{"Toren", "NotShowIn=GNOME;Toren;\n", false},
+		{"", "OnlyShowIn=Toren;\n", true},
 		{"", "OnlyShowIn=GNOME;\n", false},
 		{"ubuntu:GNOME", "OnlyShowIn=GNOME;\n", true},
 		{"ubuntu:GNOME", "NotShowIn=GNOME;\n", false},
@@ -181,10 +181,10 @@ func TestTryExecHidesWhatIsNotInstalled(t *testing.T) {
 		return "[Desktop Entry]\nType=Application\nName=Thing\nExec=thing\nTryExec=" + tryExec + "\n"
 	}
 
-	if _, ok := parseDesktopEntry("thing", entry("/no/such/asura-binary")); ok {
+	if _, ok := parseDesktopEntry("thing", entry("/no/such/toren-binary")); ok {
 		t.Error("an entry whose TryExec is missing was offered")
 	}
-	if _, ok := parseDesktopEntry("thing", entry("asura-no-such-binary")); ok {
+	if _, ok := parseDesktopEntry("thing", entry("toren-no-such-binary")); ok {
 		t.Error("an entry whose relative TryExec is missing was offered")
 	}
 	if _, ok := parseDesktopEntry("thing", entry("sh")); !ok {

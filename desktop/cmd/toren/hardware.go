@@ -9,11 +9,11 @@ import (
 	"sort"
 	"strings"
 
-	"asura/hardware/lint"
-	"asura/hardware/match"
-	"asura/hardware/probe"
-	"asura/hardware/redact"
-	"asura/hardware/report"
+	"toren/hardware/lint"
+	"toren/hardware/match"
+	"toren/hardware/probe"
+	"toren/hardware/redact"
+	"toren/hardware/report"
 )
 
 var openBrowser = func(targetURL string) error {
@@ -27,7 +27,7 @@ var profilesDirOverride string
 
 // resolveProfilesDir finds the profile database.
 //
-// The installed paths come first, so an installed asura finds the database it
+// The installed paths come first, so an installed toren finds the database it
 // shipped with, and the repository layout is the last resort so the tool runs
 // from a checkout with nothing installed.
 //
@@ -35,8 +35,8 @@ var profilesDirOverride string
 // The binary-relative one assumes the binary is under a prefix directory
 // alongside a sibling of share/; the absolute one covers a binary that was
 // moved. Neither alone is the whole answer, and this used to check a path one
-// level too high — Dir(Dir(/usr/bin/asura)) is "/", not "/usr" — so an
-// installed asura silently fell through to the relative path and reported an
+// level too high — Dir(Dir(/usr/bin/toren)) is "/", not "/usr" — so an
+// installed toren silently fell through to the relative path and reported an
 // empty database, which is the one result that looks like "nothing to do"
 // rather than "the tool is broken".
 func resolveProfilesDir() string {
@@ -57,8 +57,8 @@ func resolveProfilesDir() string {
 // profileCandidates is where the database may be, most likely first.
 //
 // Split out because the first entry is the one that was wrong: joining
-// Dir(Dir("/usr/bin/asura")) yields "/", not "/usr", so an installed asura
-// looked in /share/asura/hardware/profiles, found nothing, and fell through to
+// Dir(Dir("/usr/bin/toren")) yields "/", not "/usr", so an installed toren
+// looked in /share/toren/hardware/profiles, found nothing, and fell through to
 // a path relative to the working directory — which reports an empty database
 // rather than a broken install. Separating the list from the search is what
 // makes that testable, since the search itself depends on os.Executable.
@@ -67,23 +67,23 @@ func profileCandidates() []string {
 
 	if executable, err := os.Executable(); err == nil {
 		candidates = append(candidates, filepath.Join(filepath.Dir(executable), "..",
-			"share", "asura", "hardware", "profiles"))
+			"share", "toren", "hardware", "profiles"))
 	}
 	return append(candidates,
-		filepath.Join("/usr", "share", "asura", "hardware", "profiles"),
+		filepath.Join("/usr", "share", "toren", "hardware", "profiles"),
 		filepath.Join("system", "hardware", "profiles"))
 }
 
-// saltPath is where the report token key lives: a Asura-owned path under the
+// saltPath is where the report token key lives: a Toren-owned path under the
 // user's state directory, never a home directory written by a package.
 func saltPath() string {
 	if base := os.Getenv("XDG_STATE_HOME"); base != "" {
-		return filepath.Join(base, "asura", "hardware", "report-salt")
+		return filepath.Join(base, "toren", "hardware", "report-salt")
 	}
 	if home, err := os.UserHomeDir(); err == nil {
-		return filepath.Join(home, ".local", "state", "asura", "hardware", "report-salt")
+		return filepath.Join(home, ".local", "state", "toren", "hardware", "report-salt")
 	}
-	return filepath.Join(os.TempDir(), "asura-report-salt")
+	return filepath.Join(os.TempDir(), "toren-report-salt")
 }
 
 // hostContext builds the redaction sweep's context from the live machine.
@@ -315,7 +315,7 @@ func hardwareReport(args []string) int {
 	if *raw {
 		if report.RawPathRefusesUnderCI(os.Getenv("CI")) {
 			fmt.Fprintln(os.Stderr,
-				"asura hardware report --raw refuses to run when CI is set: the "+
+				"toren hardware report --raw refuses to run when CI is set: the "+
 					"output contains serials and is for local debugging only.")
 			return exitUsage
 		}
@@ -329,14 +329,14 @@ func hardwareReport(args []string) int {
 
 	input, err := detect(*root)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura hardware report:", err)
+		fmt.Fprintln(os.Stderr, "toren hardware report:", err)
 		return exitFail
 	}
 
 	if *submit {
 		rendered, err := report.Render(input, report.Options{Format: report.FormatText, Deep: true})
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "asura hardware report:", err)
+			fmt.Fprintln(os.Stderr, "toren hardware report:", err)
 			return exitFail
 		}
 
@@ -353,7 +353,7 @@ func hardwareReport(args []string) int {
 		}
 
 		title := fmt.Sprintf("[hardware]: %s %s", vendor, model)
-		body := fmt.Sprintf("### Manufacturer\n%s\n\n### Model\n%s\n\n### asura hardware report output\n```yaml\n%s\n```",
+		body := fmt.Sprintf("### Manufacturer\n%s\n\n### Model\n%s\n\n### toren hardware report output\n```yaml\n%s\n```",
 			vendor, model, string(rendered))
 
 		params := url.Values{}
@@ -375,7 +375,7 @@ func hardwareReport(args []string) int {
 
 	rendered, err := report.Render(input, report.Options{Format: shape, Deep: *deep})
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura hardware report:", err)
+		fmt.Fprintln(os.Stderr, "toren hardware report:", err)
 		return exitFail
 	}
 	return write(rendered, *out)
@@ -388,7 +388,7 @@ func write(rendered []byte, path string) int {
 		return exitOK
 	}
 	if err := os.WriteFile(path, rendered, 0o644); err != nil {
-		fmt.Fprintln(os.Stderr, "asura: writing "+path+":", err)
+		fmt.Fprintln(os.Stderr, "toren: writing "+path+":", err)
 		return exitFail
 	}
 	fmt.Fprintln(os.Stderr, "wrote "+path)
@@ -406,7 +406,7 @@ const rawDumpSuffix = ".hardware.raw.yaml"
 // printed with an absolute path, and refused outright under CI.
 func writeRaw(root, outPath string) int {
 	if outPath == "" {
-		outPath = "asura" + rawDumpSuffix
+		outPath = "toren" + rawDumpSuffix
 	}
 	if !strings.HasSuffix(outPath, ".yaml") {
 		outPath += rawDumpSuffix
@@ -414,7 +414,7 @@ func writeRaw(root, outPath string) int {
 
 	raw := rawDMI(root)
 	if len(raw) == 0 {
-		fmt.Fprintln(os.Stderr, "asura hardware report --raw: no DMI at "+root)
+		fmt.Fprintln(os.Stderr, "toren hardware report --raw: no DMI at "+root)
 		return exitFail
 	}
 
@@ -432,7 +432,7 @@ func writeRaw(root, outPath string) int {
 		absolute = outPath
 	}
 	if err := os.WriteFile(absolute, []byte(b.String()), 0o600); err != nil {
-		fmt.Fprintln(os.Stderr, "asura: writing "+absolute+":", err)
+		fmt.Fprintln(os.Stderr, "toren: writing "+absolute+":", err)
 		return exitFail
 	}
 
@@ -465,17 +465,17 @@ func hardwareMatch(args []string) int {
 	dir := resolveProfilesDir()
 	profiles, err := lint.LoadDir(dir)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura hardware match:", err)
+		fmt.Fprintln(os.Stderr, "toren hardware match:", err)
 		return exitFail
 	}
 	if len(profiles) == 0 {
-		fmt.Fprintln(os.Stderr, "asura hardware match: no profiles in "+dir)
+		fmt.Fprintln(os.Stderr, "toren hardware match: no profiles in "+dir)
 		return exitNoMatch
 	}
 
 	input, err := detect(*root)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura hardware match:", err)
+		fmt.Fprintln(os.Stderr, "toren hardware match:", err)
 		return exitFail
 	}
 
@@ -556,13 +556,13 @@ func hardwareLintProfiles(args []string) int {
 	dir := resolveProfilesDir()
 	profiles, err := lint.LoadDir(dir)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura hardware lint-profiles:", err)
+		fmt.Fprintln(os.Stderr, "toren hardware lint-profiles:", err)
 		return exitFail
 	}
 
 	findings, err := lint.Run(profiles)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura hardware lint-profiles:", err)
+		fmt.Fprintln(os.Stderr, "toren hardware lint-profiles:", err)
 		return exitFail
 	}
 
@@ -603,13 +603,13 @@ func hardwareCapture(args []string) int {
 		return exitUsage
 	}
 	if *out == "" {
-		fmt.Fprintln(os.Stderr, "asura hardware capture: --out is required")
+		fmt.Fprintln(os.Stderr, "toren hardware capture: --out is required")
 		return exitUsage
 	}
 
 	captured, skipped, err := capture(*root, *out)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura hardware capture:", err)
+		fmt.Fprintln(os.Stderr, "toren hardware capture:", err)
 		return exitFail
 	}
 	fmt.Printf("wrote %d file(s) to %s\n", captured, *out)

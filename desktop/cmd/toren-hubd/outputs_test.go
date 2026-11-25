@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"asura/desktop/cmd/toren-hubd/internal/wm"
+	"toren/desktop/cmd/toren-hubd/internal/wm"
 )
 
 // TestPublishGreeterPrimary: the Displays apply records the layout's main output
@@ -73,7 +73,7 @@ func TestPublishGreeterPrimary(t *testing.T) {
 }
 
 // TestOutputsUserConfAndRevert verifies:
-// 1. apply-test writes ~/.config/asura/hyprland/monitors-user.conf
+// 1. apply-test writes ~/.config/toren/hyprland/monitors-user.conf
 // 2. revert restores the previous file content byte-for-byte
 func TestOutputsUserConfAndRevert(t *testing.T) {
 	tmpDir := t.TempDir()

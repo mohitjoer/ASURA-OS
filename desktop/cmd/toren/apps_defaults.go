@@ -11,11 +11,11 @@ import (
 	"strings"
 )
 
-// asura apps defaults makes Ghostty the default terminal everywhere the desktop
+// toren apps defaults makes Ghostty the default terminal everywhere the desktop
 // asks, for this user.
 //
 // docs/architecture.md names four places. Two ship as content: the shell's
-// launcher (asura-app terminal) and the zsh integration (apps/zsh/asura.zsh).
+// launcher (toren-app terminal) and the zsh integration (apps/zsh/toren.zsh).
 // This command covers the rest: the default-applications setting, the
 // x-terminal-emulator alternative (root, so it is printed and never run), and a
 // fifth the architecture predates. The shell starts terminal applications through
@@ -25,7 +25,7 @@ import (
 // The two lines the user's own dotfiles need are printed, never written: a
 // user's ~/.zshrc and ghostty config are not ours to edit.
 
-const appsDefaultsUsage = `Usage: asura apps defaults [--check]
+const appsDefaultsUsage = `Usage: toren apps defaults [--check]
 
 Make Ghostty the default terminal for this user. What this user owns is applied;
 the root-only registration and the lines your own dotfiles need are printed and
@@ -113,7 +113,7 @@ func runAppsDefaults(w io.Writer, check bool) int {
 		}
 	}
 
-	list := filepath.Join(defaultsConfigHome(), "asura-xdg-terminals.list")
+	list := filepath.Join(defaultsConfigHome(), "toren-xdg-terminals.list")
 	body, err := os.ReadFile(list)
 	switch first := defaultsFirstEntry(string(body)); {
 	case err == nil && first == defaultsDesktopID:
@@ -153,9 +153,9 @@ func runAppsDefaults(w io.Writer, check bool) int {
 		zshrc = filepath.Join(dir, ".zshrc")
 	}
 	defaultsHook(say, w, []string{filepath.Join(cfg, "ghostty", "config"), filepath.Join(cfg, "ghostty", "config.ghostty")},
-		"asura/apps/ghostty/config", "config-file = ?~/.config/asura/apps/ghostty/config")
-	defaultsHook(say, w, []string{zshrc}, "asura/apps/zsh/toren.zsh",
-		`[ -r "$HOME/.config/asura/apps/zsh/toren.zsh" ] && . "$HOME/.config/asura/apps/zsh/toren.zsh"`)
+		"toren/apps/ghostty/config", "config-file = ?~/.config/toren/apps/ghostty/config")
+	defaultsHook(say, w, []string{zshrc}, "toren/apps/zsh/toren.zsh",
+		`[ -r "$HOME/.config/toren/apps/zsh/toren.zsh" ] && . "$HOME/.config/toren/apps/zsh/toren.zsh"`)
 
 	if failed {
 		return exitFail
@@ -163,7 +163,7 @@ func runAppsDefaults(w io.Writer, check bool) int {
 	return exitOK
 }
 
-// defaultsHook says whether a dotfile reads Asura's base, and prints the line
+// defaultsHook says whether a dotfile reads Toren's base, and prints the line
 // when it does not. The first candidate that exists is the one named.
 func defaultsHook(say func(string, string, ...any), w io.Writer, files []string, marker, line string) {
 	target := files[0]
@@ -173,7 +173,7 @@ func defaultsHook(say func(string, string, ...any), w io.Writer, files []string,
 			continue
 		}
 		if strings.Contains(string(body), marker) {
-			say("ok", "%s reads Asura's base", files[i])
+			say("ok", "%s reads Toren's base", files[i])
 			return
 		}
 		target = files[i]

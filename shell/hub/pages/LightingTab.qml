@@ -11,8 +11,8 @@ import ".."
 // controls it says it has. Nothing is scanned until lighting is switched on and
 // nothing is written until a device is handed over, so a keyboard driven by its
 // own software can sit here untouched. Effects are listed in two groups because
-// they differ: the ones Asura paints work whatever the firmware ignores, the
-// device's own keep running with Asura closed.
+// they differ: the ones Toren paints work whatever the firmware ignores, the
+// device's own keep running with Toren closed.
 //
 // The list is keyed so a reply refreshes values without rebuilding cards, and one
 // command runs at a time: both keep the page still under the pointer.
@@ -73,7 +73,7 @@ Item {
         lt.queue = lt.queue.slice(1);
         if (next[0] === "scan" || next[0] === "enable")
             lt.busy = true;
-        cmdProc.command = ["asura-hubd", "lighting"].concat(next);
+        cmdProc.command = ["toren-hubd", "lighting"].concat(next);
         cmdProc.running = true;
     }
     Process {
@@ -197,7 +197,7 @@ Item {
         readonly property bool fixed: card.dev.source === "fixed"
         readonly property var zones: card.dev.zones || []
 
-        // what is driving the device: an effect Asura paints, or one of its own.
+        // what is driving the device: an effect Toren paints, or one of its own.
         readonly property bool painted: (card.dev.effect || "") !== ""
         readonly property var fx: lt.fxOf(card.dev)
         readonly property var mode: lt.modeOf(card.dev)
@@ -247,7 +247,7 @@ Item {
             }
         }
 
-        // Asura's own effects: drawn frame by frame, so they work even where the
+        // Toren's own effects: drawn frame by frame, so they work even where the
         // firmware ignores half its own effect list.
         SettingRow {
             anchors.left: parent.left; anchors.right: parent.right
@@ -495,7 +495,7 @@ Item {
                     label: I18n.tr("Let Toren control lighting")
                     desc: !lt.available
                           ? I18n.tr("No supported lighting provider is installed, so no device can be reached.")
-                          : I18n.tr("Your picks are kept in ~/.config/asura/lighting.json: an update, a shell restart or a reboot leaves them exactly as they are.")
+                          : I18n.tr("Your picks are kept in ~/.config/toren/lighting.json: an update, a shell restart or a reboot leaves them exactly as they are.")
                     controlWidth: 54
                     Sw {
                         anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter

@@ -6,7 +6,7 @@ import (
 )
 
 // The in-shell wallpaper surface: a default entry plus per-output overrides,
-// published as one `{default, outputs}` frame on the `wallpaper` topic. Asura's
+// published as one `{default, outputs}` frame on the `wallpaper` topic. Toren's
 // shell QML renders this frame directly; the entry keys are parsed verbatim by
 // modules/wallpaper/WallpaperFrame.qml. Mute and Volume (0-100) are the
 // in-shell clip's audio, meaningful only for a VideoPath frame.
@@ -78,7 +78,7 @@ type videoClip struct {
 }
 
 // show is the broadcast set: replace the default and clear every override.
-// live is the asura-wallpaper-live yield flag; isVideo marks a frame whose path is a
+// live is the toren-wallpaper-live yield flag; isVideo marks a frame whose path is a
 // video's still; clip.path, when set, is the in-shell clip (video_engine
 // "in_shell") and carries its audio.
 func (w *wallSurface) show(pic, fit string, tr interface{}, live, isVideo bool, clip videoClip) {

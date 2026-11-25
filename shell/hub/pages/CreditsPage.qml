@@ -7,7 +7,7 @@ import qs.Ui.Singletons
 
 // Credits, the kansha poster. Gratitude as a plate: an ancient tree, its roots
 // gripping the black, dissolves off the right; the left column carries the
-// bilingual title, a Fraunces deck, the projects Asura grows from as editorial
+// bilingual title, a Fraunces deck, the projects Toren grows from as editorial
 // type lines (never cards), the one bone placard in the whole app for the
 // crash-test crew, and a self-documenting colophon. Pure space-bone-grotesk --
 // bone on black, no colour, no marble; the tree is fal-generated and graded to
@@ -18,7 +18,7 @@ Item {
     property var hub
     readonly property bool fullBleed: true
 
-    // people + projects Asura is built on, reused verbatim from the old page.
+    // people + projects Toren is built on, reused verbatim from the old page.
     // an empty url is a quiet, unlinked credit: no home was given, none invented.
     readonly property var projects: [
         { "name": "dots-hyprland", "by": "end-4",         "role": I18n.tr("the vendored ii Quickshell config (GPL-3.0)"), "url": "https://github.com/end-4/dots-hyprland" },
@@ -44,7 +44,7 @@ Item {
         { "name": "nixos-configuration", "by": "ilyamiro", "role": I18n.tr("legacy island bar"),   "url": "https://github.com/ilyamiro/nixos-configuration" },
         { "name": "dotfiles",     "by": "Jules3182",     "role": I18n.tr("dyad dual-edge bar"),   "url": "https://github.com/Jules3182/dotfiles" },
         { "name": "NibrasShell",  "by": "Ahmed Saadi",    "role": I18n.tr("depth effect engine"),  "url": "https://github.com/AhmedSaadi0/NibrasShell" },
-        { "name": "skwd-wall",    "by": "liixini",        "role": I18n.tr("wallpaper engine (now asura-wallpaper)"), "url": "https://github.com/liixini/skwd-wall" }
+        { "name": "skwd-wall",    "by": "liixini",        "role": I18n.tr("wallpaper engine (now toren-wallpaper)"), "url": "https://github.com/liixini/skwd-wall" }
     ]
 
     // the alpha/beta crew, constantly stress-testing and filing bugs. each name

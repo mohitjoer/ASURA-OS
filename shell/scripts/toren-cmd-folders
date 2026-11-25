@@ -7,7 +7,7 @@
 # folders are grey: the desktop is monochrome, so the default is the neutral set
 # rather than Papirus's blue.
 #
-# The theme name consumers resolve to is fixed (asura-folders); only its content
+# The theme name consumers resolve to is fixed (toren-folders); only its content
 # changes. Each run builds the new colours in a temp dir and publishes them by
 # renaming a symlink over the old one, so a reader (a GTK app, or the shell
 # resolving a folder icon) atomically sees either the whole old tree or the whole
@@ -25,21 +25,21 @@ set -u
 pap=/usr/share/icons/Papirus
 src=$pap/64x64/places
 if [ ! -d "$src" ]; then
-  marker="${XDG_RUNTIME_DIR:-/tmp}/asura-folders-nopapirus"
+  marker="${XDG_RUNTIME_DIR:-/tmp}/toren-folders-nopapirus"
   if [ ! -e "$marker" ]; then
     : > "$marker" 2>/dev/null
-    echo "asura-cmd-folders: Papirus icons are not installed (sudo apt install papirus-icon-theme); folder icons keep the system theme" >&2
+    echo "toren-cmd-folders: Papirus icons are not installed (sudo apt install papirus-icon-theme); folder icons keep the system theme" >&2
   fi
   exit 127
 fi
 
 # Serialise: a burst of palette changes runs one at a time, so the last wins
 # instead of racing on the shared icon-theme setting.
-exec 9>"${XDG_RUNTIME_DIR:-/tmp}/asura-folders.lock" 2>/dev/null && flock 9 2>/dev/null
+exec 9>"${XDG_RUNTIME_DIR:-/tmp}/toren-folders.lock" 2>/dev/null && flock 9 2>/dev/null
 
 accent=${1:-}
 if [ -z "$accent" ]; then
-  cfg=${XDG_CACHE_HOME:-$HOME/.cache}/asura/colors.json
+  cfg=${XDG_CACHE_HOME:-$HOME/.cache}/toren/colors.json
   if command -v jq >/dev/null 2>&1; then
     accent=$(jq -r '.color4 // empty' "$cfg" 2>/dev/null)
   else
@@ -78,9 +78,9 @@ if [ -n "$accent" ]; then
 fi
 
 base=${XDG_DATA_HOME:-$HOME/.local/share}/icons
-name=asura-folders                # fixed theme name consumers resolve to
+name=toren-folders                # fixed theme name consumers resolve to
 link=$base/$name                   # symlink -> the live generation
-gens=$base/.asura-folders         # hidden container: generations + temp builds
+gens=$base/.toren-folders         # hidden container: generations + temp builds
 
 cur=""
 command -v gsettings >/dev/null 2>&1 && cur=$(gsettings get org.gnome.desktop.interface icon-theme 2>/dev/null | tr -d "'")
@@ -101,7 +101,7 @@ for f in "$src/folder-$color.svg" "$src"/folder-"$color"-*.svg "$src"/user-"$col
 done
 cat > "$tmp/index.theme" <<'EOF'
 [Icon Theme]
-Name=Asura Folders
+Name=Toren Folders
 Inherits=Papirus-Dark
 Directories=places
 
@@ -119,8 +119,8 @@ mv -T "$tmp" "$gens/$gen"
 
 # Publish atomically: rename a staging symlink over the live one, so a concurrent
 # reader follows either the whole old tree or the whole new one, never a partial.
-stage=$base/.asura-folders.link.$$
-ln -sfn ".asura-folders/$gen" "$stage"
+stage=$base/.toren-folders.link.$$
+ln -sfn ".toren-folders/$gen" "$stage"
 [ -e "$link" ] && [ ! -L "$link" ] && rm -rf "$link"
 mv -T "$stage" "$link"
 
@@ -131,7 +131,7 @@ mv -T "$stage" "$link"
 # Yaru and Yaru-dark are Ubuntu's own defaults, so a fresh install counts as
 # unpicked; the coloured Yaru variants are a choice and are left alone.
 case $cur in
-  ""|"$name"|Papirus|Papirus-Dark|Papirus-Light|Adwaita|hicolor|Yaru|Yaru-dark|asura-folders-*)
+  ""|"$name"|Papirus|Papirus-Dark|Papirus-Light|Adwaita|hicolor|Yaru|Yaru-dark|toren-folders-*)
     if [ "$cur" != "$name" ] && command -v gsettings >/dev/null 2>&1; then
       gsettings set org.gnome.desktop.interface icon-theme "$name"
     fi
@@ -148,11 +148,11 @@ for d in "$gens"/*; do
 done
 
 # Remove the per-change dirs the old scheme leaked, matching only
-# asura-folders-<digits> and never the still-active one (dropped next run).
-for d in "$base"/asura-folders-*; do
+# toren-folders-<digits> and never the still-active one (dropped next run).
+for d in "$base"/toren-folders-*; do
   [ -d "$d" ] || continue
   b=$(basename "$d")
-  case $b in asura-folders-*[!0-9]*) continue ;; esac
+  case $b in toren-folders-*[!0-9]*) continue ;; esac
   [ "$b" = "$cur" ] && continue
   rm -rf "$d"
 done

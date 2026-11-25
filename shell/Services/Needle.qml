@@ -7,7 +7,7 @@ import qs.Ui.Singletons
 
 // Needle: resident state of the Super+S chat, held in a singleton (not the
 // sidebar body) so the thread and any in-flight answer survive a close/reopen;
-// a new chat starts only after idleResetMs away. Turns run `asura-agent chat`,
+// a new chat starts only after idleResetMs away. Turns run `toren-agent chat`,
 // streaming the shared engine session as JSONL.
 Singleton {
     id: root
@@ -58,7 +58,7 @@ Singleton {
     function newChat() {
         if (root.busy)
             root.cancel();
-        Quickshell.execDetached(["asura-agent", "chat", "--new"]);
+        Quickshell.execDetached(["toren-agent", "chat", "--new"]);
         messages.clear();
         root.liveIdx = -1;
         root.lastSeen = Date.now();
@@ -102,7 +102,7 @@ Singleton {
         root.liveIdx = messages.count - 1;
         root.busy = true;
         root.lastSeen = Date.now();
-        var cmd = ["asura-agent", "chat"];
+        var cmd = ["toren-agent", "chat"];
         for (var i = 0; i < imgs.length; i++) {
             cmd.push("--image");
             cmd.push(String(imgs[i]));
@@ -116,7 +116,7 @@ Singleton {
 
     function cancel() {
         chatProc.running = false;
-        Quickshell.execDetached(["asura-agent", "chat", "--cancel"]);
+        Quickshell.execDetached(["toren-agent", "chat", "--cancel"]);
         if (root.liveIdx >= 0 && root.liveIdx < messages.count && messages.get(root.liveIdx).streaming) {
             messages.setProperty(root.liveIdx, "working", "");
             messages.setProperty(root.liveIdx, "streaming", false);
@@ -153,7 +153,7 @@ Singleton {
                 root.currentAgent = String(root.backends[i].name || id);
         root.currentModel = "";
         root.models = [];
-        Quickshell.execDetached(["asura-agent", "agent", "use", String(id)]);
+        Quickshell.execDetached(["toren-agent", "agent", "use", String(id)]);
         backendsReload.restart();
     }
 
@@ -161,7 +161,7 @@ Singleton {
         if (!id || id === root.currentModel)
             return;
         root.currentModel = String(id);
-        Quickshell.execDetached(["asura-agent", "chat", "--set-model", String(id)]);
+        Quickshell.execDetached(["toren-agent", "chat", "--set-model", String(id)]);
     }
 
     // Answer the approval the engine is waiting on; an empty option declines it.
@@ -173,7 +173,7 @@ Singleton {
         try { req = JSON.parse(messages.get(i).permJson); } catch (e) { return; }
         messages.setProperty(i, "permJson", "");
         messages.setProperty(i, "working", optionId ? I18n.tr("approved, continuing") : I18n.tr("declined"));
-        Quickshell.execDetached(["asura-agent", "chat", "--perm", String(req.id), String(optionId || "")]);
+        Quickshell.execDetached(["toren-agent", "chat", "--perm", String(req.id), String(optionId || "")]);
     }
 
     // Append or update (tools are keyed by id) an activity item on message i.
@@ -311,7 +311,7 @@ Singleton {
 
     Process {
         id: modelsProc
-        command: ["asura-agent", "chat", "--models"]
+        command: ["toren-agent", "chat", "--models"]
         stdout: SplitParser {
             splitMarker: "\n"
             onRead: (line) => {
@@ -328,7 +328,7 @@ Singleton {
 
     Process {
         id: readyProc
-        command: ["asura-agent", "status", "--json"]
+        command: ["toren-agent", "status", "--json"]
         stdout: SplitParser {
             splitMarker: "\n"
             onRead: (line) => {
@@ -344,7 +344,7 @@ Singleton {
 
     Process {
         id: backendsProc
-        command: ["asura-agent", "agent", "--json"]
+        command: ["toren-agent", "agent", "--json"]
         stdout: SplitParser {
             splitMarker: "\n"
             onRead: (line) => {
@@ -369,7 +369,7 @@ Singleton {
     // carry full activity. Only runs while the transcript is still empty.
     Process {
         id: historyProc
-        command: ["asura-agent", "chat", "--history"]
+        command: ["toren-agent", "chat", "--history"]
         stdout: SplitParser {
             splitMarker: "\n"
             onRead: (line) => {
@@ -393,7 +393,7 @@ Singleton {
     property var sessions: []
     Process {
         id: sessionsProc
-        command: ["asura-agent", "chat", "--sessions"]
+        command: ["toren-agent", "chat", "--sessions"]
         stdout: SplitParser {
             splitMarker: "\n"
             onRead: (line) => {
@@ -419,7 +419,7 @@ Singleton {
             root.cancel();
         messages.clear();
         root.liveIdx = -1;
-        loadProc.command = ["asura-agent", "chat", "--load", String(id)];
+        loadProc.command = ["toren-agent", "chat", "--load", String(id)];
         loadProc.running = true;
         root.lastSeen = Date.now();
         root.touched();

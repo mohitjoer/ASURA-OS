@@ -9,7 +9,7 @@ if [ -f "$KEY_FILE" ]; then
 fi
 
 mkdir -p /var/db/xbps/keys
-for src in /usr/share/asura/xbps/keys /usr/share/asura/keys; do
+for src in /usr/share/toren/xbps/keys /usr/share/toren/keys; do
 	[ -d "$src" ] || continue
 	for f in "$src"/*.plist; do
 		[ -f "$f" ] || continue

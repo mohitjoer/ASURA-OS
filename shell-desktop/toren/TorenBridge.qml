@@ -7,9 +7,9 @@ import qs.modules.common
 import qs.modules.common.functions
 
 // The ASURA bridge. ASURA's keybindings (session/hyprland/binds.conf) do not
-// talk to a shell directly: they run `asura ipc call asura <function>`, and
-// `asura ipc` delivers that to whichever desktop shell is running. In ASURA's
-// own shell the `asura` target is in shell.qml; when the desktop runs,
+// talk to a shell directly: they run `toren ipc call toren <function>`, and
+// `toren ipc` delivers that to whichever desktop shell is running. In ASURA's
+// own shell the `toren` target is in shell.qml; when the desktop runs,
 // this file answers the same twelve functions by driving the desktop's own
 // surfaces, so every shortcut keeps working without one binding changing.
 //
@@ -29,16 +29,16 @@ Item {
 
     // ── First login on this desktop ─────────────────────────────────────────
     // Once the desktop config has loaded: seed matugen and a palette from the
-    // user's ASURA wallpaper (asura/first-run.sh, which never overwrites), and
+    // user's ASURA wallpaper (toren/first-run.sh, which never overwrites), and
     // keep the bar on top and pin the dock with ASURA's apps. The dock is set once per user,
     // remembered by a marker, so a user who turns it off keeps it off.
-    readonly property string stateDir: (Quickshell.env("XDG_STATE_HOME") || (Quickshell.env("HOME") + "/.local/state")) + "/asura"
+    readonly property string stateDir: (Quickshell.env("XDG_STATE_HOME") || (Quickshell.env("HOME") + "/.local/state")) + "/toren"
     property bool firstRunDone: false
     function firstRun(): void {
         if (bridge.firstRunDone || !Config.ready)
             return;
         bridge.firstRunDone = true;
-        Quickshell.execDetached(["sh", bridge.configPath + "/asura/first-run.sh"]);
+        Quickshell.execDetached(["sh", bridge.configPath + "/toren/first-run.sh"]);
         dockMarker.running = true;
     }
     Connections {
@@ -55,7 +55,7 @@ Item {
     // The desktop rounding stays as set. Appearance.rounding is not
     // only corner radii: it also uses those values as margins and padding,
     // and rounding.full as "a circle". ASURA's square parts are the
-    // windows (asura/hyprland.conf), the plain bar, no screen corners, and its
+    // windows (toren/hyprland.conf), the plain bar, no screen corners, and its
     // own bar widgets, which set their own radii.
     Process {
         id: dockMarker
@@ -84,12 +84,12 @@ Item {
             Config.options.dock.pinnedOnStartup = false;
             // Apps in their own colours.
             Config.options.dock.monochromeIcons = false;
-            Config.options.dock.pinnedApps = ["com.mitchellh.ghostty", "thunar", "chromium", "asura-store"];
+            Config.options.dock.pinnedApps = ["com.mitchellh.ghostty", "thunar", "chromium", "toren-store"];
         }
     }
 
     IpcHandler {
-        target: "asura"
+        target: "toren"
 
         // Super+Space (launcher), Super+Alt+Space (menu): the search is
         // its overview. Super+Escape (quick) and Super+N (sidebar): the

@@ -7,7 +7,7 @@ import (
 )
 
 // The bind legend. The shipped binds are the catalogue (session/binds.json): a
-// label, a category and a chord for each, one list the cheat sheet, `asura
+// label, a category and a chord for each, one list the cheat sheet, `toren
 // doctor` and this page share. This file resolves it against the user's rebinds,
 // joins it with what the running compositor reports through `hyprctl binds -j`,
 // and returns the full effective legend as []BindRow: every catalogue row (marked
@@ -15,7 +15,7 @@ import (
 // catalogue does not know, then the user's own custom binds from the store.
 //
 // Ported from upstream's legend (GPL-3.0). upstream parsed its Lua bind modules to
-// learn what was bound; Asura asks the compositor, which cannot drift from the
+// learn what was bound; Toren asks the compositor, which cannot drift from the
 // config it actually loaded.
 
 // liveBind is one bind as the running compositor reports it.

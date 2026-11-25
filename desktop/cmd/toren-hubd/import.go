@@ -1,21 +1,20 @@
 package main
 
-// Config import: bring a migrating user's existing dotfiles onto Asura without
+// Config import: bring a migrating user's existing dotfiles onto Toren without
 // losing them and without breaking the desktop. `import scan` reports what was
 // found (apps, items, keybind conflicts) as JSON; `import apply` layers the
-// chosen config on top of Asura's defaults (Hyprland binds/rules into the hub
+// chosen config on top of Toren's defaults (Hyprland binds/rules into the hub
 // Overrides model, everything else into each app's user-include) after a full
 // backup; `import undo` restores a prior import from that backup. The verbs and
 // JSON are the cross-slice contract shared with the CLI and Hub UI; see
 // docs/config-import.md.
 //
 // This file owns the verb dispatch, the scan orchestration, and the pieces both
-// scan and apply share: combo normalization and Asura's shipped-bind legend.
+// scan and apply share: combo normalization and Toren's shipped-bind legend.
 // import_parse.go has the per-app parsers, import_apply.go the apply + backup,
 // import_undo.go the restore.
 
 import (
-	"asura/desktop/cmd/toren-hubd/internal/wm"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -24,6 +23,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"toren/desktop/cmd/toren-hubd/internal/wm"
 )
 
 // --- JSON contract (lowerCamel field names are the cross-slice interface) ----
@@ -55,12 +55,12 @@ type scanItem struct {
 type scanConflict struct {
 	Combo string        `json:"combo"` // display form
 	Norm  string        `json:"norm"`  // stable key, opaque to UI/CLI
-	Asura conflictAsura `json:"asura"`
+	Toren conflictToren `json:"toren"`
 	Mine  conflictMine  `json:"mine"`
 	Kind  string        `json:"kind"` // shipped | duplicate
 }
 
-type conflictAsura struct {
+type conflictToren struct {
 	Action string `json:"action"`
 	Desc   string `json:"desc"`
 }
@@ -71,7 +71,7 @@ type conflictMine struct {
 }
 
 // decisions is the apply input. An app absent or include:false is skipped; a
-// conflict absent from Conflicts defaults to "asura" (Asura's bind kept).
+// conflict absent from Conflicts defaults to "toren" (Toren's bind kept).
 type decisions struct {
 	Source    string                     `json:"source"`
 	Apps      map[string]appDecision     `json:"apps"`
@@ -163,7 +163,7 @@ func runImport(args []string) error {
 // can reuse it; a plain path is made absolute and must exist.
 func resolveSource(arg string) (string, error) {
 	if isGitURL(arg) {
-		dir, err := os.MkdirTemp("", "asura-import-*")
+		dir, err := os.MkdirTemp("", "toren-import-*")
 		if err != nil {
 			return "", err
 		}
@@ -279,7 +279,7 @@ func normToken(t string) string {
 	return strings.ToLower(t)
 }
 
-// --- Asura's shipped bind legend (for conflict detection + unbinds) ----------
+// --- Toren's shipped bind legend (for conflict detection + unbinds) ----------
 
 // shippedInfo is one shipped chord: Combo is the form an unbind keys on,
 // Action/Desc describe it for the conflict UI.
@@ -289,9 +289,9 @@ type shippedInfo struct {
 	Desc   string
 }
 
-// asuraShipped reads the bind catalogue into norm -> shippedInfo. A family is
+// torenShipped reads the bind catalogue into norm -> shippedInfo. A family is
 // expanded to its ten concrete chords so a Super+N import is caught as a shadow.
-func asuraShipped() map[string]shippedInfo {
+func torenShipped() map[string]shippedInfo {
 	out := map[string]shippedInfo{}
 	cat, err := wm.LoadCatalogue()
 	if err != nil {
@@ -320,8 +320,8 @@ func asuraShipped() map[string]shippedInfo {
 }
 
 func describeExec(cmd string) string {
-	if strings.HasPrefix(cmd, "asura-app ") {
-		return strings.TrimPrefix(cmd, "asura-app ")
+	if strings.HasPrefix(cmd, "toren-app ") {
+		return strings.TrimPrefix(cmd, "toren-app ")
 	}
 	switch {
 	case cmd == "kitty":

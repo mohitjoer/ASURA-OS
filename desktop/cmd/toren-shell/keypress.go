@@ -513,7 +513,7 @@ type keypressSettings struct {
 }
 
 func keypressSettingsPath() string {
-	dir := asuraConfigDir()
+	dir := torenConfigDir()
 	if dir == "" {
 		return ""
 	}

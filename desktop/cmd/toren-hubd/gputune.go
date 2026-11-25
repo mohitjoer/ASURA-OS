@@ -1,6 +1,6 @@
 package main
 
-// gputune.go: `asura-hubd gpu tune ...`, the per-session GPU tuning surface the
+// gputune.go: `toren-hubd gpu tune ...`, the per-session GPU tuning surface the
 // Hub GPU page drives. Everything here is runtime state (sysfs / nvidia-smi):
 // it applies live and is gone on the next reboot, which is the whole safety
 // model. A snapper snapshot would not help (it captures the filesystem, not GPU
@@ -61,7 +61,7 @@ type nvInfo struct {
 	clockCurGr                                 int
 }
 
-// gpuProbe = one GPU as the tuner sees it: identity from `asura-gpu detect`
+// gpuProbe = one GPU as the tuner sees it: identity from `toren-gpu detect`
 // plus whatever knobs its driver exposes on this box (nil/zero when absent).
 type gpuProbe struct {
 	slot, card, driver, model, class   string

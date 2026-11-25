@@ -1,7 +1,7 @@
 #!/bin/sh
 # First login for a user: give the desktop what it expects to find in
 # the home directory, without overwriting anything the user already has.
-# Run by AsuraBridge.qml once the desktop config has loaded.
+# Run by TorenBridge.qml once the desktop config has loaded.
 #
 # 1. ~/.config/matugen/config.toml, the config switchwall.sh runs
 #    matugen with (the shell's palette comes from it).
@@ -14,8 +14,8 @@ HERE=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 SHELL_DIR=$(dirname "$HERE")
 CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}"
 STATE="${XDG_STATE_HOME:-$HOME/.local/state}"
-LOG="$STATE/asura/desktop-first-run.log"
-mkdir -p "$STATE/asura"
+LOG="$STATE/toren/desktop-first-run.log"
+mkdir -p "$STATE/toren"
 exec >>"$LOG" 2>&1
 echo "== $(date) first-run"
 
@@ -29,17 +29,17 @@ fi
 # no palette exists. The desktop takes all its colours from the wallpaper, so a near-
 # black one (ASURA's default galaxy) gives a grey desktop: unless the user chose
 # another wallpaper, the desktop starts on a colourful one of ASURA's.
-LOOK_MARK="$STATE/asura/desktop-look-2"
-VIVID=/usr/share/asura/backgrounds/eva-berserk.jpg
+LOOK_MARK="$STATE/toren/desktop-look-2"
+VIVID=/usr/share/toren/backgrounds/eva-berserk.jpg
 if [ ! -e "$LOOK_MARK" ] || [ ! -s "$STATE/quickshell/user/generated/colors.json" ]; then
 	if ! command -v matugen >/dev/null 2>&1; then
 		echo "matugen is not installed; desktop keeps its default palette (sudo xbps-install -S matugen)"
 		exit 0
 	fi
-	wp=$(gsettings get org.asura.shell wallpaper-path 2>/dev/null | tr -d "'")
+	wp=$(gsettings get org.toren.shell wallpaper-path 2>/dev/null | tr -d "'")
 	case "$wp" in ''|*/galaxy.png|*/default_wallpaper.png) wp=$VIVID ;; esac
 	if [ ! -f "$wp" ]; then
-		for f in /usr/share/asura/backgrounds/*; do
+		for f in /usr/share/toren/backgrounds/*; do
 			[ -f "$f" ] && { wp=$f; break; }
 		done
 	fi

@@ -10,11 +10,11 @@ import (
 	"sync"
 	"syscall"
 
-	"asura/desktop/cmd/toren-hubd/internal/wm"
+	"toren/desktop/cmd/toren-hubd/internal/wm"
 )
 
-// asura-hubd desktop is the neutral window-manager settings backend. It owns
-// ~/.config/asura/desktop.json (the single writer) and drives the active
+// toren-hubd desktop is the neutral window-manager settings backend. It owns
+// ~/.config/toren/desktop.json (the single writer) and drives the active
 // compositor through the wm seam: apply authors the compositor config, act does
 // live changes. Nothing here knows which compositor is running.
 //
@@ -28,7 +28,7 @@ import (
 //	desktop variants <layout>   kb variants for a layout
 //	desktop plugins <verb>      the compositor plugin subsystem
 
-func desktopStorePath() string { return filepath.Join(asuraConfigDir(), "desktop.json") }
+func desktopStorePath() string { return filepath.Join(torenConfigDir(), "desktop.json") }
 
 var (
 	wmOnce   sync.Once
@@ -126,8 +126,8 @@ func runDesktop(args []string) error {
 			return printJSON(map[string]string{"scheme": currentScheme()})
 		}
 		return applyScheme(args[1])
-	case "asura-theme":
-		return applyAsuraTheme()
+	case "toren-theme":
+		return applyTorenTheme()
 	case "theme-apps":
 		if len(args) < 2 {
 			return printJSON(map[string]bool{"themeApps": currentThemeApps()})
@@ -251,7 +251,7 @@ func previewDesktop(raw string) error {
 	if m == nil {
 		return fmt.Errorf("desktop settings must be a JSON object")
 	}
-	f, err := os.CreateTemp("", "asura-desktop-preview-*.json")
+	f, err := os.CreateTemp("", "toren-desktop-preview-*.json")
 	if err != nil {
 		return err
 	}
@@ -272,7 +272,7 @@ func previewDesktop(raw string) error {
 	// reload drops the marker and reverts to disk -- an unsaved quit still
 	// means unsaved.
 	b, _ := json.Marshal(map[string]any{"pid": os.Getppid(), "draft": m})
-	_ = os.MkdirAll(asuraConfigDir(), 0o755)
+	_ = os.MkdirAll(torenConfigDir(), 0o755)
 	_ = os.WriteFile(desktopPreviewPath(), b, 0o600)
 	return nil
 }
@@ -282,7 +282,7 @@ func previewDesktop(raw string) error {
 // config, so a config-only reload re-reads disk and silently drops it. The
 // daemon re-asserts the draft after every such reload while the Hub that owns
 // it is alive.
-func desktopPreviewPath() string { return filepath.Join(asuraConfigDir(), ".desktop-preview.json") }
+func desktopPreviewPath() string { return filepath.Join(torenConfigDir(), ".desktop-preview.json") }
 
 // restoreDesktop reverts the live session to the saved config: a reload resets
 // every keyword, and the cursor is re-asserted since it is imperative state a
@@ -295,7 +295,7 @@ func restoreDesktop() {
 }
 
 // setRebind patches one entry of desktop.keybindRebinds under the file lock, then
-// applies, so a separate app (asura-shot) can change its launch chord without
+// applies, so a separate app (toren-shot) can change its launch chord without
 // becoming a second writer of the store.
 func setRebind(def, chosen string) error {
 	def = strings.TrimSpace(def)
@@ -552,8 +552,8 @@ func setHyprSections(sections map[string]any) error {
 // withDesktopLock serializes read-modify-write of desktop.json against the GUI
 // save, so a concurrent write cannot drop the other's change.
 func withDesktopLock(fn func() error) error {
-	_ = os.MkdirAll(asuraConfigDir(), 0o755)
-	f, err := os.OpenFile(filepath.Join(asuraConfigDir(), ".desktop.lock"), os.O_CREATE|os.O_RDWR, 0o644)
+	_ = os.MkdirAll(torenConfigDir(), 0o755)
+	f, err := os.OpenFile(filepath.Join(torenConfigDir(), ".desktop.lock"), os.O_CREATE|os.O_RDWR, 0o644)
 	if err != nil {
 		return fn()
 	}

@@ -33,7 +33,7 @@ hyprpicker
 # If a local void-packages directory wasn't provided, clone Toren-Linux/void-packages
 WORK_DIR=""
 if [ -z "$VOID_PACKAGES_DIR" ] || [ ! -d "$VOID_PACKAGES_DIR" ]; then
-	WORK_DIR=$(mktemp -d -t asura-void-packages-XXXXXX)
+	WORK_DIR=$(mktemp -d -t toren-void-packages-XXXXXX)
 	trap 'rm -rf "$WORK_DIR"' EXIT INT TERM
 	echo "build-stack: cloning Toren-Linux/void-packages at branch Toren..."
 	git clone --depth 1 -b Toren https://github.com/Toren-Linux/void-packages.git "$WORK_DIR"

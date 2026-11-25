@@ -2,7 +2,7 @@
 Name=Resource Monitor
 GenericName=System Monitor
 Comment=View live system telemetry, CPU, memory, disks, and active processes
-Exec=asura-app terminal -- btop
+Exec=toren-app terminal -- btop
 Icon=utilities-system-monitor
 Terminal=false
 Type=Application

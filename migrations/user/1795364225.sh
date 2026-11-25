@@ -1,10 +1,10 @@
 #!/bin/sh
 echo "Migrate legacy state files and profile formats to current names"
 
-# 1. State files: rename asura-ryowalls.json to asura-walls.json
-for dir in "${XDG_STATE_HOME:-$HOME/.local/state}" "${XDG_STATE_HOME:-$HOME/.local/state}/asura"; do
-    old="$dir/asura-ryowalls.json"
-    new="$dir/asura-walls.json"
+# 1. State files: rename toren-ryowalls.json to toren-walls.json
+for dir in "${XDG_STATE_HOME:-$HOME/.local/state}" "${XDG_STATE_HOME:-$HOME/.local/state}/toren"; do
+    old="$dir/toren-ryowalls.json"
+    new="$dir/toren-walls.json"
     if [ -f "$old" ]; then
         if [ ! -f "$new" ]; then
             mv "$old" "$new"
@@ -26,7 +26,7 @@ if [ -d "$old_decors" ]; then
     fi
 fi
 
-# 3. Profile files: convert *.ryoprofile to *.asuraprofile with "asuraprofile" key
+# 3. Profile files: convert *.ryoprofile to *.torenprofile with "torenprofile" key
 command -v python3 >/dev/null 2>&1 && python3 -I - <<'PY'
 import os, json
 
@@ -51,8 +51,8 @@ for real in matches:
             data = json.load(f)
         if isinstance(data, dict):
             if "ryoprofile" in data:
-                data["asuraprofile"] = data.pop("ryoprofile")
-            new_path = real[:-11] + ".asuraprofile"
+                data["torenprofile"] = data.pop("ryoprofile")
+            new_path = real[:-11] + ".torenprofile"
             with open(new_path, "w", encoding="utf-8") as f:
                 json.dump(data, f)
             os.remove(real)

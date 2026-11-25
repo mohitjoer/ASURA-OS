@@ -9,7 +9,7 @@ Singleton {
 
     FileView {
         id: hibernateReadyFile
-        path: "/run/asura/hibernate.ready"
+        path: "/run/toren/hibernate.ready"
     }
     readonly property bool canHibernate: hibernateReadyFile.loaded && hibernateReadyFile.text().trim() === "1"
 

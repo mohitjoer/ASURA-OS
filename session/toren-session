@@ -1,7 +1,7 @@
 #!/bin/sh
-# Asura session entry point.
+# Toren session entry point.
 #
-# Packaged at /usr/share/asura/session/asura-session. It is a shell script
+# Packaged at /usr/share/toren/session/toren-session. It is a shell script
 # because it runs before anything else exists and it must be readable when the
 # disk is having a bad day.
 #
@@ -12,12 +12,12 @@
 
 set -eu
 
-LOG="${XDG_STATE_HOME:-$HOME/.local/state}/asura/session.log"
+LOG="${XDG_STATE_HOME:-$HOME/.local/state}/toren/session.log"
 mkdir -p "$(dirname "$LOG")"
 exec >>"$LOG" 2>&1
 
 
-echo "--- asura-session $(date -Is) ${XDG_SESSION_ID:-no-session-id}"
+echo "--- toren-session $(date -Is) ${XDG_SESSION_ID:-no-session-id}"
 
 # Dismiss Plymouth boot splash with retain-splash so the splash holds until Hyprland page flips
 if command -v plymouth >/dev/null 2>&1 && plymouth --ping 2>/dev/null; then
@@ -26,11 +26,11 @@ fi
 
 # The two desktop names are different strings and both are deliberate.
 # XDG_CURRENT_DESKTOP is what the portal dispatcher lower-cases to derive its
-# per-desktop configuration file name, so "Asura" finds "asura-portals.conf".
+# per-desktop configuration file name, so "Toren" finds "toren-portals.conf".
 # XDG_SESSION_DESKTOP is the lower-case name the login manager records.
-export XDG_SESSION_DESKTOP=asura
-export XDG_CURRENT_DESKTOP=Asura
-export DESKTOP_SESSION=asura
+export XDG_SESSION_DESKTOP=toren
+export XDG_CURRENT_DESKTOP=Toren
+export DESKTOP_SESSION=toren
 export XDG_SESSION_TYPE=wayland
 
 # Ensure UTF-8 locale environment across desktop and terminal clients
@@ -88,8 +88,8 @@ if [ ! -d "$XDG_RUNTIME_DIR" ]; then
     chmod 0700 "$XDG_RUNTIME_DIR" 2>/dev/null || true
 fi
 if [ ! -d "$XDG_RUNTIME_DIR" ]; then
-    echo "asura-session: error: $XDG_RUNTIME_DIR does not exist and could not be created." >&2
-    echo "asura-session: the login creates it through elogind; check: sudo sv status elogind" >&2
+    echo "toren-session: error: $XDG_RUNTIME_DIR does not exist and could not be created." >&2
+    echo "toren-session: the login creates it through elogind; check: sudo sv status elogind" >&2
     exit 1
 fi
 
@@ -170,11 +170,11 @@ fi
 # Machine-level additions, then the user's overlay. Written as `if`, not as
 # `[ -r f ] && . f` — under `set -e` a false test in an AND-list aborts the
 # session before the compositor ever starts, which is a confusing way to fail.
-if [ -r /etc/asura/session/asura-session.env ]; then
-    . /etc/asura/session/asura-session.env
+if [ -r /etc/toren/session/toren-session.env ]; then
+    . /etc/toren/session/toren-session.env
 fi
-if [ -r "${XDG_CONFIG_HOME:-$HOME/.config}/asura/session/asura-session.env" ]; then
-    . "${XDG_CONFIG_HOME:-$HOME/.config}/asura/session/asura-session.env"
+if [ -r "${XDG_CONFIG_HOME:-$HOME/.config}/toren/session/toren-session.env" ]; then
+    . "${XDG_CONFIG_HOME:-$HOME/.config}/toren/session/toren-session.env"
 fi
 
 # Make dbus-activated user services and anything the compositor spawns see the
@@ -202,12 +202,12 @@ fi
 # configuration names it with `~` and Hyprland expands nothing else. The
 # session's own environment file is read from XDG_CONFIG_HOME, which is the
 # right place for it and the one place the two differ.
-USER_HYPRLAND_DIR="$HOME/.config/asura/hyprland"
-USER_HYPRLAND_CONF="$USER_HYPRLAND_DIR/asura.conf"
+USER_HYPRLAND_DIR="$HOME/.config/toren/hyprland"
+USER_HYPRLAND_CONF="$USER_HYPRLAND_DIR/toren.conf"
 if [ ! -e "$USER_HYPRLAND_CONF" ]; then
     mkdir -p "$USER_HYPRLAND_DIR"
     cat > "$USER_HYPRLAND_CONF" <<'USERCONF'
-# Asura's compositor configuration — yours.
+# Toren's compositor configuration — yours.
 #
 # This file is sourced after the packaged one, so anything here overrides it
 # and anything here is added to it. It was created empty when you first logged
@@ -218,35 +218,35 @@ fi
 for user_cfg in monitors-auto.conf monitors-user.conf settings.conf rebinds.conf user.conf vm-perf.conf; do
     [ -e "$USER_HYPRLAND_DIR/$user_cfg" ] || touch "$USER_HYPRLAND_DIR/$user_cfg"
 done
-for user_cfg_lua in monitors-auto.lua monitors-user.lua settings.lua rebinds.lua user.lua vm-perf.lua shell.lua asura.lua; do
+for user_cfg_lua in monitors-auto.lua monitors-user.lua settings.lua rebinds.lua user.lua vm-perf.lua shell.lua toren.lua; do
     [ -e "$USER_HYPRLAND_DIR/$user_cfg_lua" ] || touch "$USER_HYPRLAND_DIR/$user_cfg_lua"
 done
 
 # The desktop shell's half of the look. The desktop styles its frosted panels and
 # animations in the compositor, so while it is the shell its rules are sourced
-# (shell-desktop/asura/hyprland.conf and hyprland.lua); for ASURA's shell the file is empty.
+# (shell-desktop/toren/hyprland.conf and hyprland.lua); for ASURA's shell the file is empty.
 # Rewritten every login, so switching shells takes effect at the next one.
-SHELL_LOOK=/usr/share/asura/shell-desktop/toren/hyprland.conf
-SHELL_LOOK_LUA=/usr/share/asura/shell-desktop/toren/hyprland.lua
-DESKTOP_SHELL="${ASURA_DESKTOP_SHELL:-$(gsettings get org.asura.shell desktop-shell 2>/dev/null | tr -d "'")}"
+SHELL_LOOK=/usr/share/toren/shell-desktop/toren/hyprland.conf
+SHELL_LOOK_LUA=/usr/share/toren/shell-desktop/toren/hyprland.lua
+DESKTOP_SHELL="${ASURA_DESKTOP_SHELL:-$(gsettings get org.toren.shell desktop-shell 2>/dev/null | tr -d "'")}"
 if [ "${DESKTOP_SHELL:-desktop}" = desktop ]; then
     if [ -f "$SHELL_LOOK" ]; then
-        printf '# Written by asura-session at login; do not edit.\nsource = %s\n' "$SHELL_LOOK" >"$USER_HYPRLAND_DIR/shell.conf"
+        printf '# Written by toren-session at login; do not edit.\nsource = %s\n' "$SHELL_LOOK" >"$USER_HYPRLAND_DIR/shell.conf"
     fi
     if [ -f "$SHELL_LOOK_LUA" ]; then
         printf 'pcall(dofile, "%s")\n' "$SHELL_LOOK_LUA" >"$USER_HYPRLAND_DIR/shell.lua"
     fi
 else
-    printf '# Written by asura-session at login; do not edit.\n' >"$USER_HYPRLAND_DIR/shell.conf"
-    printf '-- Written by asura-session at login; do not edit.\n' >"$USER_HYPRLAND_DIR/shell.lua"
+    printf '# Written by toren-session at login; do not edit.\n' >"$USER_HYPRLAND_DIR/shell.conf"
+    printf '-- Written by toren-session at login; do not edit.\n' >"$USER_HYPRLAND_DIR/shell.lua"
 fi
 
 # First-boot wallpaper seed: establish the current/background fallback symlink
 # pointing to the default wallpaper. Idempotent — only creates when absent,
 # never clobbers a user's choice (which replaces the symlink).
-USER_WALLPAPER_DIR="$HOME/.config/asura/current"
+USER_WALLPAPER_DIR="$HOME/.config/toren/current"
 USER_WALLPAPER_LINK="$USER_WALLPAPER_DIR/background"
-DEFAULT_WALLPAPER="/usr/share/asura/backgrounds/eva-berserk.jpg"
+DEFAULT_WALLPAPER="/usr/share/toren/backgrounds/eva-berserk.jpg"
 if [ ! -e "$USER_WALLPAPER_LINK" ]; then
     mkdir -p "$USER_WALLPAPER_DIR"
     ln -sf "$DEFAULT_WALLPAPER" "$USER_WALLPAPER_LINK"
@@ -255,18 +255,18 @@ fi
 # Give every installed coding assistant (OpenCode ships with ASURA) the ASURA
 # skills, so it knows this desktop from the first question. Idempotent, and
 # assistants that are not installed get nothing.
-if command -v asura-agent >/dev/null 2>&1; then
-    asura-agent wire --installed >/dev/null 2>&1 || true
+if command -v toren-agent >/dev/null 2>&1; then
+    toren-agent wire --installed >/dev/null 2>&1 || true
 fi
 
 # Fire user post-login extension hooks in background
-if command -v asura >/dev/null 2>&1; then
-    asura hook run post-login >/dev/null 2>&1 &
+if command -v toren >/dev/null 2>&1; then
+    toren hook run post-login >/dev/null 2>&1 &
 fi
 
-echo "asura-session: env ok, starting Hyprland"
+echo "toren-session: env ok, starting Hyprland"
 
-# The compositor's configuration. Asura ships one — the keybinds are the only
+# The compositor's configuration. Toren ships one — the keybinds are the only
 # place the keyboard is described — and the session is what points Hyprland at
 # it. A compositor started without it runs on Hyprland's own defaults, which
 # is a desktop with no keybindings at all: a launcher nobody can open and a
@@ -275,7 +275,7 @@ echo "asura-session: env ok, starting Hyprland"
 if grep -qa "VirtualBox\|VMware\|QEMU\|KVM" /sys/class/dmi/id/product_name 2>/dev/null || \
    grep -qa "VirtualBox\|VMware\|QEMU\|KVM\|innotek" /sys/class/dmi/id/sys_vendor 2>/dev/null || \
    lspci 2>/dev/null | grep -qi "VMware\|VirtualBox\|QEMU"; then
-    echo "asura-session: VM hypervisor detected, applying high-performance VM defaults"
+    echo "toren-session: VM hypervisor detected, applying high-performance VM defaults"
     export ASURA_IS_VM=1
     export WLR_RENDERER_ALLOW_SOFTWARE=1
     export AQ_NO_MODIFIERS=1
@@ -284,7 +284,7 @@ if grep -qa "VirtualBox\|VMware\|QEMU\|KVM" /sys/class/dmi/id/product_name 2>/de
     CPU_CORES=$(nproc 2>/dev/null || echo 4)
     export LP_NUM_THREADS="$CPU_CORES"
     export LP_PERF=no_mipmap
-    USER_HYPR_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/asura/hyprland"
+    USER_HYPR_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/toren/hyprland"
     mkdir -p "$USER_HYPR_DIR"
     cat > "$USER_HYPR_DIR/vm-perf.conf" <<'VMCFG'
 decoration:blur:enabled = false
@@ -337,7 +337,7 @@ if [ -z "$COMPOSITOR" ]; then
 fi
 
 if [ -z "$COMPOSITOR" ] || ( ! command -v "$COMPOSITOR" >/dev/null 2>&1 && [ ! -x "$COMPOSITOR" ] ); then
-    echo "asura-session: error: Hyprland compositor binary not found on system!" >&2
+    echo "toren-session: error: Hyprland compositor binary not found on system!" >&2
     exit 127
 fi
 
@@ -351,12 +351,12 @@ hyprland_reads_lua() {
     [ -n "$hv" ] || return 1
     echo "$hv" | awk -F. '{ exit !($1 > 0 || ($1 == 0 && $2 >= 57)) }'
 }
-if [ -f "/usr/share/asura/hyprland/hyprland.lua" ] && hyprland_reads_lua; then
-    HYPR_CONF="${ASURA_HYPRLAND_CONFIG:-/usr/share/asura/hyprland/hyprland.lua}"
+if [ -f "/usr/share/toren/hyprland/hyprland.lua" ] && hyprland_reads_lua; then
+    HYPR_CONF="${ASURA_HYPRLAND_CONFIG:-/usr/share/toren/hyprland/hyprland.lua}"
 else
-    HYPR_CONF="${ASURA_HYPRLAND_CONFIG:-/usr/share/asura/hyprland/hyprland.conf}"
+    HYPR_CONF="${ASURA_HYPRLAND_CONFIG:-/usr/share/toren/hyprland/hyprland.conf}"
 fi
-echo "asura-session: Hyprland $(Hyprland --version 2>/dev/null | sed -n '1s/^Hyprland \([0-9][0-9.]*\).*/\1/p'), config $HYPR_CONF"
+echo "toren-session: Hyprland $(Hyprland --version 2>/dev/null | sed -n '1s/^Hyprland \([0-9][0-9.]*\).*/\1/p'), config $HYPR_CONF"
 
 # Launch Hyprland with automatic fallback if hardware EGL/DRM fails on VM
 if echo "$COMPOSITOR" | grep -q "start-hyprland"; then
@@ -367,9 +367,9 @@ else
     RC=${RC:-0}
     
     if [ "$RC" -ne 0 ]; then
-        echo "asura-session: compositor exited ($RC)" >&2
+        echo "toren-session: compositor exited ($RC)" >&2
         if [ -z "${ASURA_RETRY_DONE:-}" ]; then
-            echo "asura-session: compositor exited with error; attempting software llvmpipe fallback..." >&2
+            echo "toren-session: compositor exited with error; attempting software llvmpipe fallback..." >&2
             export ASURA_RETRY_DONE=1
             export LIBGL_ALWAYS_SOFTWARE=1
             export WLR_RENDERER_ALLOW_SOFTWARE=1

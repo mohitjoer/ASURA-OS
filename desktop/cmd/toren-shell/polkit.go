@@ -21,7 +21,7 @@ import (
 // bus, receives BeginAuthentication from polkitd, runs the PAM conversation
 // through the setuid (or socket-activated) polkit-agent-helper-1, streams the
 // prompt state to QML over the "polkit" state topic, and takes the typed secret
-// and the cancel intent back over control calls. QML (AsuraPolkitDialog) only
+// and the cancel intent back over control calls. QML (TorenPolkitDialog) only
 // renders and forwards keystrokes; the D-Bus and PAM plumbing lives here, keeping
 // the shell's state-in-daemon / render-in-QML split. Contract 13 sec 2b, 4, 6.
 //
@@ -178,26 +178,26 @@ func (d *daemon) startPolkit() {
 	})
 
 	if os.Getenv("ASURA_POLKIT_AGENT") != "1" {
-		log.Printf("asura-shell: polkit agent not registered (set ASURA_POLKIT_AGENT=1 to enable)")
+		log.Printf("toren-shell: polkit agent not registered (set ASURA_POLKIT_AGENT=1 to enable)")
 		return
 	}
 	if _, err := os.Stat(polkitHelperPath); err != nil {
-		log.Printf("asura-shell: polkit agent disabled: helper %s missing: %v", polkitHelperPath, err)
+		log.Printf("toren-shell: polkit agent disabled: helper %s missing: %v", polkitHelperPath, err)
 		return
 	}
 	conn, err := dbus.ConnectSystemBus()
 	if err != nil {
-		log.Printf("asura-shell: polkit agent disabled: %v", err)
+		log.Printf("toren-shell: polkit agent disabled: %v", err)
 		return
 	}
 	a.conn = conn
 	if err := conn.Export(a, dbus.ObjectPath(polkitAgentPath), polkitAgentIface); err != nil {
-		log.Printf("asura-shell: polkit agent export failed: %v", err)
+		log.Printf("toren-shell: polkit agent export failed: %v", err)
 		return
 	}
 	subject, err := polkitSessionSubject(conn)
 	if err != nil {
-		log.Printf("asura-shell: polkit agent disabled: no session subject: %v", err)
+		log.Printf("toren-shell: polkit agent disabled: no session subject: %v", err)
 		return
 	}
 	locale := polkitLocale()
@@ -205,11 +205,11 @@ func (d *daemon) startPolkit() {
 		polkitAuthorityIface+".RegisterAuthenticationAgent", 0, subject, locale, polkitAgentPath)
 	if call.Err != nil {
 		// Fails closed: another agent already holds the session's slot, so the
-		// existing agent keeps working and Asura does not fight it.
-		log.Printf("asura-shell: polkit agent not registered (slot held?): %v", call.Err)
+		// existing agent keeps working and Toren does not fight it.
+		log.Printf("toren-shell: polkit agent not registered (slot held?): %v", call.Err)
 		return
 	}
-	log.Printf("asura-shell: polkit agent registered")
+	log.Printf("toren-shell: polkit agent registered")
 }
 
 // BeginAuthentication is polkitd asking the user to authenticate. It blocks (in
@@ -244,7 +244,7 @@ func (a *polkitAgent) BeginAuthentication(actionID, message, iconName string, de
 			return dbus.NewError(polkitErrorFailed, []interface{}{polkitCancelled})
 		}
 		if err != nil {
-			log.Printf("asura-shell: polkit conversation: %v", err)
+			log.Printf("toren-shell: polkit conversation: %v", err)
 		}
 		if ok {
 			return nil
@@ -348,7 +348,7 @@ func (a *polkitAgent) converse(username, cookie string, p *polkitPrompt) (bool, 
 			default:
 				// Unrecognized lines are surfaced as info, matching the
 				// reference's tolerance, and logged for diagnosis.
-				log.Printf("asura-shell: polkit helper said %q", line)
+				log.Printf("toren-shell: polkit helper said %q", line)
 				a.setInfo(unescapeGStr(line))
 			}
 		case pw := <-respCh:

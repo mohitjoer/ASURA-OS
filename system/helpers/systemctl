@@ -30,7 +30,7 @@ while [ $# -gt 0 ]; do
             exit 0
             ;;
         daemon-reload)
-            echo "[asura-systemctl] daemon-reload intercepted: runit monitors dynamically"
+            echo "[toren-systemctl] daemon-reload intercepted: runit monitors dynamically"
             exit 0
             ;;
         start|stop|restart|status|enable|disable|is-active|is-enabled|reload)
@@ -100,11 +100,11 @@ generate_runit_from_service() {
     envfile="$(grep -E '^[[:space:]]*EnvironmentFile=' "$ufile" 2>/dev/null | sed -E 's/^[[:space:]]*EnvironmentFile=-?[[:space:]]*//' | tail -n 1)"
 
     if [ -z "$execstart" ]; then
-        echo "[asura-systemctl] error: no ExecStart found in $ufile" >&2
+        echo "[toren-systemctl] error: no ExecStart found in $ufile" >&2
         return 1
     fi
 
-    echo "[asura-systemctl] generating runit service for $sname from $ufile"
+    echo "[toren-systemctl] generating runit service for $sname from $ufile"
     mkdir -p "$svdir" "$svdir/log"
 
     cat >"$svdir/run" <<RUNEOF
@@ -144,7 +144,7 @@ LOGEOF
 case "$ACTION" in
     enable)
         if [ -z "$SVC" ]; then
-            echo "[asura-systemctl] error: no unit specified" >&2
+            echo "[toren-systemctl] error: no unit specified" >&2
             exit 1
         fi
         if [ ! -d "/etc/sv/$SVC" ]; then
@@ -152,13 +152,13 @@ case "$ACTION" in
             if [ -n "$UFILE" ]; then
                 generate_runit_from_service "$UFILE" "$SVC"
             else
-                echo "[asura-systemctl] error: service $SVC not found in /etc/sv or systemd paths" >&2
+                echo "[toren-systemctl] error: service $SVC not found in /etc/sv or systemd paths" >&2
                 exit 1
             fi
         fi
         mkdir -p /var/service
         ln -sf "/etc/sv/$SVC" "/var/service/$SVC"
-        echo "[asura-systemctl] enabled service $SVC (/var/service/$SVC -> /etc/sv/$SVC)"
+        echo "[toren-systemctl] enabled service $SVC (/var/service/$SVC -> /etc/sv/$SVC)"
         if [ "$NOW" -eq 1 ]; then
             sv up "$SVC" 2>/dev/null || true
         fi
@@ -167,20 +167,20 @@ case "$ACTION" in
 
     disable)
         if [ -z "$SVC" ]; then
-            echo "[asura-systemctl] error: no unit specified" >&2
+            echo "[toren-systemctl] error: no unit specified" >&2
             exit 1
         fi
         if [ "$NOW" -eq 1 ] && [ -L "/var/service/$SVC" ]; then
             sv down "$SVC" 2>/dev/null || true
         fi
         rm -f "/var/service/$SVC"
-        echo "[asura-systemctl] disabled service $SVC"
+        echo "[toren-systemctl] disabled service $SVC"
         exit 0
         ;;
 
     start)
         if [ -z "$SVC" ]; then
-            echo "[asura-systemctl] error: no unit specified" >&2
+            echo "[toren-systemctl] error: no unit specified" >&2
             exit 1
         fi
         if [ ! -d "/etc/sv/$SVC" ]; then
@@ -198,7 +198,7 @@ case "$ACTION" in
 
     stop)
         if [ -z "$SVC" ]; then
-            echo "[asura-systemctl] error: no unit specified" >&2
+            echo "[toren-systemctl] error: no unit specified" >&2
             exit 1
         fi
         exec sv down "$SVC"
@@ -206,7 +206,7 @@ case "$ACTION" in
 
     restart)
         if [ -z "$SVC" ]; then
-            echo "[asura-systemctl] error: no unit specified" >&2
+            echo "[toren-systemctl] error: no unit specified" >&2
             exit 1
         fi
         exec sv restart "$SVC"
@@ -214,7 +214,7 @@ case "$ACTION" in
 
     status)
         if [ -z "$SVC" ]; then
-            echo "[asura-systemctl] error: no unit specified" >&2
+            echo "[toren-systemctl] error: no unit specified" >&2
             exit 1
         fi
         if [ -L "/var/service/$SVC" ]; then
@@ -268,7 +268,7 @@ case "$ACTION" in
         ;;
 
     *)
-        echo "[asura-systemctl] unsupported action: $ACTION" >&2
+        echo "[toren-systemctl] unsupported action: $ACTION" >&2
         exit 0
         ;;
 esac

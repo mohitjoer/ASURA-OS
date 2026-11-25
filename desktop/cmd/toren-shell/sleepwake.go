@@ -80,7 +80,7 @@ func (i *login1Inhibitor) acquire(ctx context.Context) error {
 	).Store(&fd); err != nil {
 		return err
 	}
-	i.fd = os.NewFile(uintptr(fd), "asura-shell-sleep-"+i.mode)
+	i.fd = os.NewFile(uintptr(fd), "toren-shell-sleep-"+i.mode)
 	if i.fd == nil {
 		return os.ErrInvalid
 	}
@@ -324,11 +324,11 @@ func (s *sleepCycle) protect() bool {
 func (s *sleepCycle) protectLocked() bool {
 	active := s.sessionActive()
 	if err := acquireSleepInhibitor(s.block); err != nil {
-		s.logf("asura-shell: sleep block inhibitor unavailable: %v", err)
+		s.logf("toren-shell: sleep block inhibitor unavailable: %v", err)
 		return false
 	}
 	if err := acquireSleepInhibitor(s.delay); err != nil {
-		s.logf("asura-shell: sleep delay inhibitor unavailable: %v", err)
+		s.logf("toren-shell: sleep delay inhibitor unavailable: %v", err)
 		return false
 	}
 	if s.sessionActive() != active {
@@ -338,7 +338,7 @@ func (s *sleepCycle) protectLocked() bool {
 		return s.protected()
 	}
 	if err := s.lock(s.now().Add(lockBudget(s.delay.limit()))); err != nil {
-		s.logf("asura-shell: inactive session lock is not compositor-secure; retaining sleep block: %v", err)
+		s.logf("toren-shell: inactive session lock is not compositor-secure; retaining sleep block: %v", err)
 		return false
 	}
 
@@ -377,15 +377,15 @@ func (s *sleepCycle) handleLocked(sleeping bool) bool {
 			// A delay inhibitor has a finite ceiling. Recover the hard block as
 			// well, so failed re-verification cannot authorize insecure sleep.
 			if blockErr := acquireSleepInhibitor(s.block); blockErr != nil {
-				s.logf("asura-shell: suspend lock was not compositor-secure and sleep block recovery failed: %v (block: %v)", err, blockErr)
+				s.logf("toren-shell: suspend lock was not compositor-secure and sleep block recovery failed: %v (block: %v)", err, blockErr)
 			} else {
-				s.logf("asura-shell: suspend lock was not compositor-secure; retaining delay and block inhibitors: %v", err)
+				s.logf("toren-shell: suspend lock was not compositor-secure; retaining delay and block inhibitors: %v", err)
 			}
 			return false
 		}
 		s.delay.release()
 		s.block.release()
-		s.logf("asura-shell: suspend lock is compositor-secure")
+		s.logf("toren-shell: suspend lock is compositor-secure")
 		return true
 	}
 	s.setSleeping(false)
@@ -448,7 +448,7 @@ func (s *sleepCycle) requestSuspendContext(requestCtx context.Context) error {
 	defer cancel()
 	if err := s.suspend(ctx); err != nil {
 		if !s.protectLocked() {
-			s.logf("asura-shell: suspend failed and sleep protection could not be restored")
+			s.logf("toren-shell: suspend failed and sleep protection could not be restored")
 			s.requestProtectionRetry()
 		}
 		return fmt.Errorf("request suspend: %w", err)
@@ -658,7 +658,7 @@ func runSleepSignals(
 				retryC = retry.C
 				continue
 			}
-			cycle.logf("asura-shell: sleep protection restored")
+			cycle.logf("toren-shell: sleep protection restored")
 			retry = nil
 			retryC = nil
 		case sig, ok := <-sigs:
@@ -769,20 +769,20 @@ func (d *daemon) connectSleepGuard() (_ *connectedSleepGuard, err error) {
 	sigs := make(chan *dbus.Signal, 16)
 	conn.Signal(sigs)
 	// upstream holds a "block" inhibitor here, which makes logind refuse any
-	// suspend that does not go through its own daemon. Asura's lid, power key
+	// suspend that does not go through its own daemon. Toren's lid, power key
 	// and idle daemon call logind directly, so the hard block would stop the
 	// laptop sleeping at all: it is a second delay lock instead, released with the
 	// first once the session is locked.
 	block := &login1Inhibitor{
 		conn: conn,
 		mode: "delay",
-		name: "asura-shell",
+		name: "toren-shell",
 		why:  "lock the session before suspend",
 	}
 	delay := &login1SleepDelay{login1Inhibitor: &login1Inhibitor{
 		conn: conn,
 		mode: "delay",
-		name: "asura-shell",
+		name: "toren-shell",
 		why:  "finish securing the session lock before suspend",
 	}}
 	cycle := &sleepCycle{
@@ -890,7 +890,7 @@ func (d *daemon) superviseSleepWake() {
 				guard.release()
 			}
 			if time.Since(lastFailureLog) >= 2*time.Second {
-				log.Printf("asura-shell: sleep guard reconnect pending: %v", err)
+				log.Printf("toren-shell: sleep guard reconnect pending: %v", err)
 				lastFailureLog = time.Now()
 			}
 			timer := time.NewTimer(sleepReconnectStep)
@@ -916,7 +916,7 @@ func (d *daemon) superviseSleepWake() {
 			guard.release()
 			return
 		}
-		log.Printf("asura-shell: sleep guard reconnecting: %v", err)
+		log.Printf("toren-shell: sleep guard reconnecting: %v", err)
 		if errors.Is(err, errLogin1OwnerRestart) {
 			// The old FDs died with logind, but its phase and suspend-clock
 			// baseline still identify a missed resume on the replacement.
@@ -938,19 +938,19 @@ func (d *daemon) startSleepWake() {
 }
 
 func applyWakeLighting(ctx context.Context) {
-	if _, err := exec.LookPath("asura-hubd"); err != nil {
+	if _, err := exec.LookPath("toren-hubd"); err != nil {
 		return
 	}
-	if err := exec.CommandContext(ctx, "asura-hubd", "lighting", "apply").Run(); err != nil &&
+	if err := exec.CommandContext(ctx, "toren-hubd", "lighting", "apply").Run(); err != nil &&
 		ctx.Err() == nil {
-		log.Printf("asura-shell: restore lighting after wake: %v", err)
+		log.Printf("toren-shell: restore lighting after wake: %v", err)
 	}
 }
 
 func outputStatePaths() (string, string) {
-	dir := filepath.Join(os.Getenv("XDG_RUNTIME_DIR"), "asura-idle-output")
+	dir := filepath.Join(os.Getenv("XDG_RUNTIME_DIR"), "toren-idle-output")
 	if os.Getenv("XDG_RUNTIME_DIR") == "" {
-		dir = filepath.Join(os.TempDir(), "asura-idle-output")
+		dir = filepath.Join(os.TempDir(), "toren-idle-output")
 	}
 	return filepath.Join(dir, "lock"), filepath.Join(dir, "generation")
 }
@@ -983,7 +983,7 @@ func readOutputGeneration(path string) string {
 	return strings.TrimSpace(string(value))
 }
 
-// holdAwake shares asura-idle's lock and generation token. A newer idle-off
+// holdAwake shares toren-idle's lock and generation token. A newer idle-off
 // edge waits out at most one provider call, replaces the token, and cancels
 // every remaining resume retry before any stale output-on can run.
 func (d *daemon) holdAwake(ctx context.Context) {
@@ -992,7 +992,7 @@ func (d *daemon) holdAwake(ctx context.Context) {
 		generation = readOutputGeneration(path)
 		return nil
 	}); err != nil {
-		log.Printf("asura-shell: open output transition state: %v", err)
+		log.Printf("toren-shell: open output transition state: %v", err)
 		return
 	}
 
@@ -1034,7 +1034,7 @@ func (d *daemon) holdAwake(ctx context.Context) {
 			return
 		}
 		if err != nil {
-			log.Printf("asura-shell: wake output power: %v", err)
+			log.Printf("toren-shell: wake output power: %v", err)
 		}
 		remaining = time.Until(deadline)
 		if remaining <= 0 {
@@ -1065,6 +1065,6 @@ func (d *daemon) holdAwake(ctx context.Context) {
 		}
 		return nil
 	}); err != nil {
-		log.Printf("asura-shell: finish output transition: %v", err)
+		log.Printf("toren-shell: finish output transition: %v", err)
 	}
 }

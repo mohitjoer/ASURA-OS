@@ -1,6 +1,6 @@
 # {{NAME}}
 
-A Asura shell plugin (`{{ID}}`). This scaffold is a working demo: a counter that
+A Toren shell plugin (`{{ID}}`). This scaffold is a working demo: a counter that
 ticks once a second, a mark on the bar, and a panel with a RESET button. Edit it
 into your own widget.
 
@@ -39,12 +39,12 @@ catalogue shows it next to the plugin.
 ## Build, check, install
 
 ```
-asura plugin audit .
-asura plugin install . --bar --yes
+toren plugin audit .
+toren plugin install . --bar --yes
 ```
 
 It lists on the bar's Community page. Publish it only when you want to share it:
-`asura plugin share {{ID}}`.
+`toren plugin share {{ID}}`.
 
 ## Author
 

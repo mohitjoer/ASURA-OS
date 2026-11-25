@@ -218,10 +218,10 @@ QtObject {
         call("wall.preheat", {path: path})
     }
     // The system palette lives in the shell's matugen knob store
-    // (~/.config/asura/matugen.json), which asura-shell watches and retints on
-    // change. The asura-wallpaper daemon does not run matugen, so the old wall.retheme
+    // (~/.config/toren/matugen.json), which toren-shell watches and retints on
+    // change. The toren-wallpaper daemon does not run matugen, so the old wall.retheme
     // RPC was a no-op and light/dark never left the picker. Hand the knobs to
-    // the one writer the Hub also uses ("asura-hubd desktop matugen set", a merge),
+    // the one writer the Hub also uses ("toren-hubd desktop matugen set", a merge),
     // so mode/scheme/index retint the whole desktop.
     property var _rethemeProc: Process {}
     function retheme(scheme, mode, colorIndex, callback) {
@@ -234,7 +234,7 @@ QtObject {
         if (scheme) knobs.schemeType = scheme
         if (typeof colorIndex === "number") knobs.sourceColorIndex = colorIndex | 0
         _rethemeProc.running = false
-        _rethemeProc.command = ["asura-hubd", "desktop", "matugen", "set", JSON.stringify(knobs)]
+        _rethemeProc.command = ["toren-hubd", "desktop", "matugen", "set", JSON.stringify(knobs)]
         _rethemeProc.running = true
         if (callback) callback({ ok: true }, null)
     }
@@ -347,44 +347,44 @@ QtObject {
         client.eventReceived(event, data)
 
         switch (event) {
-        case "asura-wallpaper.wall.file_added":
+        case "toren-wallpaper.wall.file_added":
             client.fileAdded(data.name || "", data.path || "", data.type || "static"); break
-        case "asura-wallpaper.wall.file_removed":
+        case "toren-wallpaper.wall.file_removed":
             client.fileRemoved(data.name || "", data.type || "static"); break
-        case "asura-wallpaper.wall.file_renamed":
+        case "toren-wallpaper.wall.file_renamed":
             client.fileRenamed(data.old_name || "", data.new_name || ""); break
-        case "asura-wallpaper.wall.folder_removed":
+        case "toren-wallpaper.wall.folder_removed":
             client.folderRemoved(data.names || []); break
-        case "asura-wallpaper.wall.we_added":
+        case "toren-wallpaper.wall.we_added":
             client.weItemAdded(data.we_id || "", data.we_dir || ""); break
-        case "asura-wallpaper.wall.we_removed":
+        case "toren-wallpaper.wall.we_removed":
             client.weItemRemoved(data.we_id || ""); break
-        case "asura-wallpaper.wall.scan_done":
+        case "toren-wallpaper.wall.scan_done":
             client.scanDone(); break
-        case "asura-wallpaper.wall.cache":
+        case "toren-wallpaper.wall.cache":
             client.cacheRunning = (data.status === "started" || data.status === "progress")
             client.cacheProgress = data.progress || 0
             client.cacheTotal = data.total || 0
             if (data.status === "ready") client.cacheReady()
             break
-        case "asura-wallpaper.wall.cached":
+        case "toren-wallpaper.wall.cached":
             client.itemCached(data); break
-        case "asura-wallpaper.wall.applied":
+        case "toren-wallpaper.wall.applied":
             client.wallpaperApplied(data.type || "", data.name || "", data.path || "", data.we_id || "", data.key || "")
             client.refreshAudioState()
             break
-        case "asura-wallpaper.wall.toggle":
+        case "toren-wallpaper.wall.toggle":
             client.wallpaperToggle(); break
-        case "asura-wallpaper.wall.show":
+        case "toren-wallpaper.wall.show":
             client.wallpaperShow(); break
-        case "asura-wallpaper.wall.hide":
+        case "toren-wallpaper.wall.hide":
             client.wallpaperHide(); break
-        case "asura-wallpaper.wall.random_started":
+        case "toren-wallpaper.wall.random_started":
             client.randomRunning = true
             client.rotationActive = true
             client.randomInterval = data.interval || 0
             client.randomStarted(client.randomInterval); break
-        case "asura-wallpaper.wall.random_stopped":
+        case "toren-wallpaper.wall.random_stopped":
             client.randomRunning = false
             client.randomInterval = 0
             client.rotationStatus()
@@ -393,7 +393,7 @@ QtObject {
     }
 
     property var _socket: Socket {
-        path: (Quickshell.env("XDG_RUNTIME_DIR") || "/tmp") + "/asura-wallpaper.sock"
+        path: (Quickshell.env("XDG_RUNTIME_DIR") || "/tmp") + "/toren-wallpaper.sock"
 
         connected: false
 
@@ -404,7 +404,7 @@ QtObject {
         onConnectionStateChanged: {
             if (connected) {
                 console.log("DaemonClient: connected")
-                client.subscribe(["asura-wallpaper."])
+                client.subscribe(["toren-wallpaper."])
                 client.ready = true
                 client.randomStatus()
                 client.rotationStatus()

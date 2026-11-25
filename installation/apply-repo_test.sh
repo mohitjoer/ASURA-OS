@@ -2,7 +2,7 @@
 # Tests for installation/apply-repo.sh.
 #
 # 1. Coverage: every repository path build-iso-void.sh installs from must be
-#    installed by apply-repo.sh too, or `asura update` would leave that part of
+#    installed by apply-repo.sh too, or `toren update` would leave that part of
 #    an installed system behind. Paths only the live ISO needs are listed in
 #    LIVE_ONLY with the reason.
 # 2. A real run into a temporary root puts the key files where the ISO does.
@@ -16,13 +16,13 @@ sh -n "$APPLY"
 
 # Sources apply-repo.sh does not need to name:
 # - mklive's boot splash data and build tooling: the live ISO's.
-# - ../asura-store: the ISO may build that tool from
+# - ../toren-store: the ISO may build that tool from
 #   its standalone repository; apply-repo.sh builds it from ASURA's own
-#   copy (desktop/cmd/asura-store), which store-sync keeps byte-identical.
+#   copy (desktop/cmd/toren-store), which store-sync keeps byte-identical.
 LIVE_ONLY="
 public/branding/boot-splash.png
 installation/binary-checksums.txt
-../asura-store
+../toren-store
 "
 
 fail=0
@@ -46,21 +46,21 @@ T=$(mktemp -d)
 trap 'rm -rf "$T"' EXIT
 sh "$APPLY" --no-packages --no-build "$REPO_ROOT" "$T/root" >"$T/log" 2>&1 || { cat "$T/log"; exit 1; }
 for f in \
-	usr/share/asura/shell/shell.qml \
-	usr/share/asura/shell-desktop/shell.qml \
-	usr/share/asura/shell-desktop/toren/AsuraBridge.qml \
-	usr/share/asura/shell-desktop/matugen/config.toml \
-	usr/share/asura/hyprland/binds.conf \
-	usr/share/asura/runit/services/quickshell/run \
-	usr/share/asura/session/binds.json \
-	usr/share/asura/hardware/models/generic-laptop.yaml \
-	usr/share/glib-2.0/schemas/org.asura.shell.gschema.xml \
-	usr/bin/asura-session \
-	usr/bin/asura-installer \
+	usr/share/toren/shell/shell.qml \
+	usr/share/toren/shell-desktop/shell.qml \
+	usr/share/toren/shell-desktop/toren/TorenBridge.qml \
+	usr/share/toren/shell-desktop/matugen/config.toml \
+	usr/share/toren/hyprland/binds.conf \
+	usr/share/toren/runit/services/quickshell/run \
+	usr/share/toren/session/binds.json \
+	usr/share/toren/hardware/models/generic-laptop.yaml \
+	usr/share/glib-2.0/schemas/org.toren.shell.gschema.xml \
+	usr/bin/toren-session \
+	usr/bin/toren-installer \
 	etc/nftables.conf; do
 	[ -e "$T/root/$f" ] || { echo "apply-repo_test: $f was not installed" >&2; exit 1; }
 done
 # The desktop build tooling stays out of the system.
-[ ! -e "$T/root/usr/share/asura/shell-desktop/toren/vendor.sh" ] || { echo "apply-repo_test: vendor.sh was installed" >&2; exit 1; }
-[ -x "$T/root/usr/bin/asura-session" ] || { echo "apply-repo_test: asura-session is not executable" >&2; exit 1; }
+[ ! -e "$T/root/usr/share/toren/shell-desktop/toren/vendor.sh" ] || { echo "apply-repo_test: vendor.sh was installed" >&2; exit 1; }
+[ -x "$T/root/usr/bin/toren-session" ] || { echo "apply-repo_test: toren-session is not executable" >&2; exit 1; }
 echo "apply-repo_test: ok"

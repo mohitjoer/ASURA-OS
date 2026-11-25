@@ -12,30 +12,30 @@ Toren Linux is powered by a Void Linux x86_64 (glibc) base layer with runit serv
 
 ## Settled decisions
 
-| Decision | Choice | Reason |
-|---|---|---|
-| Base | Void Linux x86_64 (glibc) | Minimalist, stable glibc substrate providing complete compatibility for NVIDIA proprietary drivers, Steam, and modern runtimes without systemd overhead. |
-| Init System & Session Supervision | runit (system services) + `asura-user-services` (user desktop services) | Deterministic, lightweight service supervision. System services live in `/etc/sv/`, supervised user desktop daemons live in `~/.config/service/`. |
-| Seat Management | seatd (`LIBSEAT_BACKEND=seatd`) with fallback to elogind | Unprivileged Wayland session DRM master and input claiming without desktop environment bloat. |
-| Filesystem & Storage | Btrfs / ext4 with guided partitioning in installer | Robust root filesystem support with automated partitioning (`installation/toren-installer.sh`). |
-| Disk Encryption & /boot Layout | LUKS2 (argon2id) with unencrypted /boot | Standardized LUKS2 container unlocked during early boot via dracut crypt module. A dedicated unencrypted 1 GiB /boot partition prevents dual-passphrase prompts and allows GRUB to load kernel/initramfs without Argon2 limitations. Snapshot boot entries (`40_asura_snapshots`) boot the active kernel against the restored root snapshot. If a rollback is necessitated by a broken kernel update, the previous kernel package must be held or selected. |
-| Compositor | Hyprland | Toren draws its own shell and does not need a stock one. |
-| Desktop shell | Quickshell (QML) — bar, dock, launcher, popouts, widgets; the lock screen is `hyprlock` and the login screen an SDDM theme. The **engine** is built by Toren; the **surfaces** are vendored open-source Quickshell components, re-themed to Toren's monochrome design language | Compositor-agnostic, proven, and the design language already lives in QML/CSS. The surfaces are upstream's and the re-theme is Toren's. See [the shell](#the-shell) and [vendored upstream components](#vendored-upstream-components). |
-| Control plane & State | Go — `toren`; `toren-sysd` (root daemon at `/run/asura/sysd.sock`); `toren-userd` (user session daemon); `toren-shell`; `toren-hubd`; `toren-wallpaper`; `apm` | Static binaries, cross-compiles cleanly, fast startup, with strong typing and no CGo dependencies. |
-| GPU & Power | `toren gpu` + `prime-run` offload; `toren power` for CPU governor and NVIDIA RTX 3050 D3cold power management | Low power drain on Intel Iris Xe graphics while unlocking high performance discrete NVIDIA GPU on demand. |
-| Terminal | Ghostty, strictly supported and configured by Toren, never kitty | GPU-accelerated and client-side rendered. Zero kitty policy. See [terminal: Ghostty](#terminal-ghostty). |
-| User shell | zsh + starship | fish ships alongside as an alternative. |
-| Editor | Zed | High-performance, GPU-accelerated code editor. |
-| Boot chain | GRUB EFI | Reliable UEFI boot chain across NVMe/SATA drives. |
-| Login manager | `sddm` / tty1 autologin in Live ISO | Automated Wayland autologin on live boot and clean display manager integration. |
-| Desktop services | pipewire + wireplumber, tlp, NetworkManager, seatd | Modern Wayland audio/video routing, power tuning, and network management. |
-| Portals | `xdg-desktop-portal-hyprland` + `-gtk`, `-lxqt` for Secret interface | Hyprland-native portal backend with GTK fallback. |
-| Package manager | XBPS with first-party repository (`asura-xbps-repo`), plus `apm` package manager frontend | Ultra-fast native packaging via `xbps-create` and `xbps-rindex`. |
-| Agent layer | Resident OS agent with a local knowledge vault | Provides durable knowledge, self-diagnosis, and contextual assistance. |
-| Support model | Tiered, not universal | No distro supports every laptop; claiming otherwise is dishonest. |
-| Scope | Open source, all laptops | Hardware reach is the product. |
-| Identity | Toren is the distribution; the base OS is the substrate | See [the base-layer boundary](#the-base-layer-boundary). |
-| Free software | Free at the distribution level, non-free declared per machine | See [firmware and free software](#firmware-and-free-software). |
+| Decision                          | Choice                                                                                                                                                                                                                                                                         | Reason                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Base                              | Void Linux x86_64 (glibc)                                                                                                                                                                                                                                                      | Minimalist, stable glibc substrate providing complete compatibility for NVIDIA proprietary drivers, Steam, and modern runtimes without systemd overhead.                                                                                                                                                                                                                                                                                                    |
+| Init System & Session Supervision | runit (system services) + `toren-user-services` (user desktop services)                                                                                                                                                                                                        | Deterministic, lightweight service supervision. System services live in `/etc/sv/`, supervised user desktop daemons live in `~/.config/service/`.                                                                                                                                                                                                                                                                                                           |
+| Seat Management                   | seatd (`LIBSEAT_BACKEND=seatd`) with fallback to elogind                                                                                                                                                                                                                       | Unprivileged Wayland session DRM master and input claiming without desktop environment bloat.                                                                                                                                                                                                                                                                                                                                                               |
+| Filesystem & Storage              | Btrfs / ext4 with guided partitioning in installer                                                                                                                                                                                                                             | Robust root filesystem support with automated partitioning (`installation/toren-installer.sh`).                                                                                                                                                                                                                                                                                                                                                             |
+| Disk Encryption & /boot Layout    | LUKS2 (argon2id) with unencrypted /boot                                                                                                                                                                                                                                        | Standardized LUKS2 container unlocked during early boot via dracut crypt module. A dedicated unencrypted 1 GiB /boot partition prevents dual-passphrase prompts and allows GRUB to load kernel/initramfs without Argon2 limitations. Snapshot boot entries (`40_toren_snapshots`) boot the active kernel against the restored root snapshot. If a rollback is necessitated by a broken kernel update, the previous kernel package must be held or selected. |
+| Compositor                        | Hyprland                                                                                                                                                                                                                                                                       | Toren draws its own shell and does not need a stock one.                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Desktop shell                     | Quickshell (QML) — bar, dock, launcher, popouts, widgets; the lock screen is `hyprlock` and the login screen an SDDM theme. The **engine** is built by Toren; the **surfaces** are vendored open-source Quickshell components, re-themed to Toren's monochrome design language | Compositor-agnostic, proven, and the design language already lives in QML/CSS. The surfaces are upstream's and the re-theme is Toren's. See [the shell](#the-shell) and [vendored upstream components](#vendored-upstream-components).                                                                                                                                                                                                                      |
+| Control plane & State             | Go — `toren`; `toren-sysd` (root daemon at `/run/toren/sysd.sock`); `toren-userd` (user session daemon); `toren-shell`; `toren-hubd`; `toren-wallpaper`; `apm`                                                                                                                 | Static binaries, cross-compiles cleanly, fast startup, with strong typing and no CGo dependencies.                                                                                                                                                                                                                                                                                                                                                          |
+| GPU & Power                       | `toren gpu` + `prime-run` offload; `toren power` for CPU governor and NVIDIA RTX 3050 D3cold power management                                                                                                                                                                  | Low power drain on Intel Iris Xe graphics while unlocking high performance discrete NVIDIA GPU on demand.                                                                                                                                                                                                                                                                                                                                                   |
+| Terminal                          | Ghostty, strictly supported and configured by Toren, never kitty                                                                                                                                                                                                               | GPU-accelerated and client-side rendered. Zero kitty policy. See [terminal: Ghostty](#terminal-ghostty).                                                                                                                                                                                                                                                                                                                                                    |
+| User shell                        | zsh + starship                                                                                                                                                                                                                                                                 | fish ships alongside as an alternative.                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Editor                            | Zed                                                                                                                                                                                                                                                                            | High-performance, GPU-accelerated code editor.                                                                                                                                                                                                                                                                                                                                                                                                              |
+| Boot chain                        | GRUB EFI                                                                                                                                                                                                                                                                       | Reliable UEFI boot chain across NVMe/SATA drives.                                                                                                                                                                                                                                                                                                                                                                                                           |
+| Login manager                     | `sddm` / tty1 autologin in Live ISO                                                                                                                                                                                                                                            | Automated Wayland autologin on live boot and clean display manager integration.                                                                                                                                                                                                                                                                                                                                                                             |
+| Desktop services                  | pipewire + wireplumber, tlp, NetworkManager, seatd                                                                                                                                                                                                                             | Modern Wayland audio/video routing, power tuning, and network management.                                                                                                                                                                                                                                                                                                                                                                                   |
+| Portals                           | `xdg-desktop-portal-hyprland` + `-gtk`, `-lxqt` for Secret interface                                                                                                                                                                                                           | Hyprland-native portal backend with GTK fallback.                                                                                                                                                                                                                                                                                                                                                                                                           |
+| Package manager                   | XBPS with first-party repository (`toren-xbps-repo`), plus `apm` package manager frontend                                                                                                                                                                                      | Ultra-fast native packaging via `xbps-create` and `xbps-rindex`.                                                                                                                                                                                                                                                                                                                                                                                            |
+| Agent layer                       | Resident OS agent with a local knowledge vault                                                                                                                                                                                                                                 | Provides durable knowledge, self-diagnosis, and contextual assistance.                                                                                                                                                                                                                                                                                                                                                                                      |
+| Support model                     | Tiered, not universal                                                                                                                                                                                                                                                          | No distro supports every laptop; claiming otherwise is dishonest.                                                                                                                                                                                                                                                                                                                                                                                           |
+| Scope                             | Open source, all laptops                                                                                                                                                                                                                                                       | Hardware reach is the product.                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| Identity                          | Toren is the distribution; the base OS is the substrate                                                                                                                                                                                                                        | See [the base-layer boundary](#the-base-layer-boundary).                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Free software                     | Free at the distribution level, non-free declared per machine                                                                                                                                                                                                                  | See [firmware and free software](#firmware-and-free-software).                                                                                                                                                                                                                                                                                                                                                                                              |
 
 ### Rejected, and why
 
@@ -53,14 +53,14 @@ Toren Linux is powered by a Void Linux x86_64 (glibc) base layer with runit serv
   does. The archive carries Ghostty a version behind, and a version behind is a gap the user can
   see and the archive can close; a source pin is a liability that compounds every release cycle —
   build dependencies to carry and verify on each rebase, a rebuild when upstream's shader or SIMD
-  requirements move, a tag to resolve, and a `asura-terminal` release to ship. It also handed
+  requirements move, a tag to resolve, and a `toren-terminal` release to ship. It also handed
   Ghostty's "most recent LTS" floor a veto over `base.release`, which bought nothing. See
   [terminal: Ghostty](#terminal-ghostty).
 - **A unified version manager (mise and friends) for all three languages.** Each language's
   own official tool is what its ecosystem expects; Toren should not put its own opinion in the
   way. See [runtime stack](#runtime-stack).
 - **Claiming to be 100% free software.** Toren's own code and its own repository are free. The
-  *image* for a given machine may need firmware that is not. See
+  _image_ for a given machine may need firmware that is not. See
   [firmware and free software](#firmware-and-free-software).
 
 ---
@@ -70,7 +70,7 @@ Toren Linux is powered by a Void Linux x86_64 (glibc) base layer with runit serv
 Toren is the distribution. Void is its base layer — the substrate, not the identity. That
 distinction only stays true if it is enforced, and the enforcement is a single rule:
 
-> **Toren's packages write only to `/usr/share/asura/` and `/etc/asura/`. Never to another
+> **Toren's packages write only to `/usr/share/toren/` and `/etc/toren/`. Never to another
 > package's files.**
 
 The moment Toren edits `/etc/NetworkManager/`, or patches a file inside `/usr/lib/`, it is no
@@ -81,21 +81,21 @@ remembered touching, and the release train stops.
 Toren's packages follow from that rule:
 
 - A base-layer package with the wrong configuration gets a **Toren's own config package**, or a
-  drop-in shadowing it under a `asura-` name. It is never edited in place.
-- A base-layer package that is merely missing something gets a `asura-` package that depends on
+  drop-in shadowing it under a `toren-` name. It is never edited in place.
+- A base-layer package that is merely missing something gets a `toren-` package that depends on
   it and supplements it.
-- The only two directories Toren owns outright are `/usr/share/asura/` and `/etc/asura/`. Anything
+- The only two directories Toren owns outright are `/usr/share/toren/` and `/etc/toren/`. Anything
   Toren needs outside them is a runit service directory (`/etc/sv/` or `~/.config/service/`), a GSettings schema, or an overlay the user
   controls.
 - **Third-party content is content.** A vendored upstream tree, the patches on top of it and
-  its licence texts are content, and they live under `/usr/share/asura/` like every other
+  its licence texts are content, and they live under `/usr/share/toren/` like every other
   file Toren ships. They are not registrations and they are not exceptions: nothing in the
   vendored tree is written outside the two directories, and nothing outside them points at it
   except the shell's own entry point.
 - Ship only what Toren needs from the base layer. Every package in the image is a liability on
   the next rebase; the manifest of what Toren installs is itself a reviewed artefact.
 
-The vendored upstream tree is **content** under `/usr/share/asura/`, and that is the whole of
+The vendored upstream tree is **content** under `/usr/share/toren/`, and that is the whole of
 its boundary story. It is not a registration: a registration is a pointer a third-party binary
 must find in a fixed directory, and the vendored tree is in none of those directories — it is
 read by Toren's own shell, at a path Toren's own package lays down. The rule that applies to
@@ -108,8 +108,8 @@ slowly becomes an unmaintainable fork of it.
 
 ### The sanctioned list outside the boundary
 
-Two rules cannot both be absolute. A handful of files have to sit outside `/usr/share/asura/`
-and `/etc/asura/`, because the binaries that read them look nowhere else — a runit service
+Two rules cannot both be absolute. A handful of files have to sit outside `/usr/share/toren/`
+and `/etc/toren/`, because the binaries that read them look nowhere else — a runit service
 directory, a GLib schema directory, the login manager's fixed config directory. Those files are
 **registrations**: pointers a third-party binary must be able to find.
 
@@ -117,38 +117,38 @@ So the boundary rule is enforced as a closed list rather than an absolute. Every
 the two directories must appear here, and a path that is not on this list is a boundary
 violation until it is added:
 
-| Path | What it is | Why it cannot live under `/usr/share/asura/` |
-|---|---|---|
-| `/usr/share/wayland-sessions/asura.desktop` | Session registration | The login manager scans the fixed `wayland-sessions` directory and nowhere else |
-| `/usr/share/doc/asura/` | The copyright file and the licence texts | XBPS installs package documentation under `/usr/share/doc/<package>/`, and the copyright file is read from there |
-| `/usr/share/glib-2.0/schemas/org.asura.*.gschema.xml` | GSettings schemas | GLib compiles schemas from the fixed schema directory |
-| `/etc/sv/toren-sysd`, `/etc/sv/scx-lavd`, `/etc/sv/ananicy-cpp` (and user services under `~/.config/service/`) | runit service registration | runit supervises services from `/etc/sv/` (system) and `~/.config/service/` (user), and nowhere else |
-| `/usr/share/xdg-desktop-portal/toren-portals.conf` | Portal backend preference | The dispatcher reads it from a fixed directory |
-| `/etc/sddm.conf.d/10-asura.conf` | Login manager preferences, opt-in: no package installs it, and `toren greeter enable` prints the command that does | SDDM reads its drop-ins from a fixed directory beside `/etc/sddm.conf` |
-| `/boot/grub/grub.cfg` | Boot configuration | The boot loader reads its configuration from the boot volume, which the base layer's kernel packages already write to |
-| `/usr/bin/asura`, `/usr/bin/asura-*`, `/usr/bin/apm`, `/usr/bin/prime-run`, `/usr/bin/fan-profile`, and the helpers `/usr/bin/cliphist-thumbs.sh`, `localsend.sh`, `stash-cobalt-server.sh`, `stash-cobalt.sh`, `stash-compress.sh`, `stash-download.sh`, `stash-install.sh` | The executables: the control tools (`toren`, `toren-shell`, `toren-hubd`, `toren-wallpaper`, `toren-agent`, `toren-store`, `toren-vm`, `apm`, `prime-run`, `fan-profile`), the window launchers, and the helper scripts the shell and the compositor call by bare name | `PATH` resolution looks nowhere else, and the shell runs under a user-level runit supervisor whose `PATH` has no `~/.local/bin`. This is the same constraint the rest of this list describes — a fixed location some other thing looks in — reached from the other direction: the others are files a binary *reads*, these are files the loader *runs*. Nothing about it makes the binary a registration, and nothing about it makes it acceptable for the binaries to be owned by anything but a `toren` package. |
-| `/usr/share/applications/toren-hub.desktop`, `toren-store.desktop`, `btop.desktop`, `toren-vm.desktop` | Desktop entries for the windows Toren adds | The launcher and every other desktop-entry reader scan `XDG_DATA_DIRS/applications` and nowhere else |
-| `/usr/share/applications/asura-mimeapps.list` | Default applications for Toren sessions | The XDG mime-apps lookup reads `<desktop>-mimeapps.list` from the data directories. Named for the desktop, it applies to Toren sessions only, and the user's own `mimeapps.list` still wins |
-| `/etc/xbps.d/asura.conf` | First-party XBPS repo registration | XBPS reads repository declarations from `/etc/xbps.d/` and nowhere else |
-| `/etc/udev/rules.d/80-nvidia-pm.rules`, `/etc/udev/rules.d/99-battery-threshold.rules` | Hardware power management and battery udev rules | `udevd` reads hardware event and power management rules from `/etc/udev/rules.d/` |
-| `/etc/modprobe.d/nvidia-optimus.conf` | Kernel module options for NVIDIA power management | `modprobe` / `kmod` parses module configuration parameters from `/etc/modprobe.d/` |
-| `/etc/sysctl.d/99-asura-power.rules` | Kernel sysctl runtime power and responsiveness parameters | `sysctl` reads system tuning directives from `/etc/sysctl.d/` |
-| `/etc/ananicy.d/00-asura-rules.rules` | Process nice/scheduling autogroup rules for ananicy-cpp | `ananicy-cpp` reads process priority rules from `/etc/ananicy.d/` |
-| `/etc/crypttab` | LUKS disk mapping | The early-boot crypt module reads mapped container UUIDs from `/etc/crypttab` |
-| `/etc/dracut.conf.d/40-asura-crypt.conf` | Dracut crypt module configuration | dracut reads initramfs module inclusion drop-ins from `/etc/dracut.conf.d/` |
+| Path                                                                                                                                                                                                                                                                         | What it is                                                                                                                                                                                                                                                             | Why it cannot live under `/usr/share/toren/`                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/usr/share/wayland-sessions/toren.desktop`                                                                                                                                                                                                                                  | Session registration                                                                                                                                                                                                                                                   | The login manager scans the fixed `wayland-sessions` directory and nowhere else                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `/usr/share/doc/toren/`                                                                                                                                                                                                                                                      | The copyright file and the licence texts                                                                                                                                                                                                                               | XBPS installs package documentation under `/usr/share/doc/<package>/`, and the copyright file is read from there                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `/usr/share/glib-2.0/schemas/org.toren.*.gschema.xml`                                                                                                                                                                                                                        | GSettings schemas                                                                                                                                                                                                                                                      | GLib compiles schemas from the fixed schema directory                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `/etc/sv/toren-sysd`, `/etc/sv/scx-lavd`, `/etc/sv/ananicy-cpp` (and user services under `~/.config/service/`)                                                                                                                                                               | runit service registration                                                                                                                                                                                                                                             | runit supervises services from `/etc/sv/` (system) and `~/.config/service/` (user), and nowhere else                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `/usr/share/xdg-desktop-portal/toren-portals.conf`                                                                                                                                                                                                                           | Portal backend preference                                                                                                                                                                                                                                              | The dispatcher reads it from a fixed directory                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `/etc/sddm.conf.d/10-toren.conf`                                                                                                                                                                                                                                             | Login manager preferences, opt-in: no package installs it, and `toren greeter enable` prints the command that does                                                                                                                                                     | SDDM reads its drop-ins from a fixed directory beside `/etc/sddm.conf`                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `/boot/grub/grub.cfg`                                                                                                                                                                                                                                                        | Boot configuration                                                                                                                                                                                                                                                     | The boot loader reads its configuration from the boot volume, which the base layer's kernel packages already write to                                                                                                                                                                                                                                                                                                                                                                                              |
+| `/usr/bin/toren`, `/usr/bin/toren-*`, `/usr/bin/apm`, `/usr/bin/prime-run`, `/usr/bin/fan-profile`, and the helpers `/usr/bin/cliphist-thumbs.sh`, `localsend.sh`, `stash-cobalt-server.sh`, `stash-cobalt.sh`, `stash-compress.sh`, `stash-download.sh`, `stash-install.sh` | The executables: the control tools (`toren`, `toren-shell`, `toren-hubd`, `toren-wallpaper`, `toren-agent`, `toren-store`, `toren-vm`, `apm`, `prime-run`, `fan-profile`), the window launchers, and the helper scripts the shell and the compositor call by bare name | `PATH` resolution looks nowhere else, and the shell runs under a user-level runit supervisor whose `PATH` has no `~/.local/bin`. This is the same constraint the rest of this list describes — a fixed location some other thing looks in — reached from the other direction: the others are files a binary _reads_, these are files the loader _runs_. Nothing about it makes the binary a registration, and nothing about it makes it acceptable for the binaries to be owned by anything but a `toren` package. |
+| `/usr/share/applications/toren-hub.desktop`, `toren-store.desktop`, `btop.desktop`, `toren-vm.desktop`                                                                                                                                                                       | Desktop entries for the windows Toren adds                                                                                                                                                                                                                             | The launcher and every other desktop-entry reader scan `XDG_DATA_DIRS/applications` and nowhere else                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `/usr/share/applications/toren-mimeapps.list`                                                                                                                                                                                                                                | Default applications for Toren sessions                                                                                                                                                                                                                                | The XDG mime-apps lookup reads `<desktop>-mimeapps.list` from the data directories. Named for the desktop, it applies to Toren sessions only, and the user's own `mimeapps.list` still wins                                                                                                                                                                                                                                                                                                                        |
+| `/etc/xbps.d/toren.conf`                                                                                                                                                                                                                                                     | First-party XBPS repo registration                                                                                                                                                                                                                                     | XBPS reads repository declarations from `/etc/xbps.d/` and nowhere else                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `/etc/udev/rules.d/80-nvidia-pm.rules`, `/etc/udev/rules.d/99-battery-threshold.rules`                                                                                                                                                                                       | Hardware power management and battery udev rules                                                                                                                                                                                                                       | `udevd` reads hardware event and power management rules from `/etc/udev/rules.d/`                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `/etc/modprobe.d/nvidia-optimus.conf`                                                                                                                                                                                                                                        | Kernel module options for NVIDIA power management                                                                                                                                                                                                                      | `modprobe` / `kmod` parses module configuration parameters from `/etc/modprobe.d/`                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `/etc/sysctl.d/99-toren-power.rules`                                                                                                                                                                                                                                         | Kernel sysctl runtime power and responsiveness parameters                                                                                                                                                                                                              | `sysctl` reads system tuning directives from `/etc/sysctl.d/`                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `/etc/ananicy.d/00-toren-rules.rules`                                                                                                                                                                                                                                        | Process nice/scheduling autogroup rules for ananicy-cpp                                                                                                                                                                                                                | `ananicy-cpp` reads process priority rules from `/etc/ananicy.d/`                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `/etc/crypttab`                                                                                                                                                                                                                                                              | LUKS disk mapping                                                                                                                                                                                                                                                      | The early-boot crypt module reads mapped container UUIDs from `/etc/crypttab`                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `/etc/dracut.conf.d/40-toren-crypt.conf`                                                                                                                                                                                                                                     | Dracut crypt module configuration                                                                                                                                                                                                                                      | dracut reads initramfs module inclusion drop-ins from `/etc/dracut.conf.d/`                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 
 Content stays inside the two directories: the login surface's own files belong at
-`/usr/share/asura/session/`, and everything SDDM needs to point at belongs there too. The
-login theme is exactly that: it lives at `/usr/share/asura/session/sddm/themes/toren` and the
+`/usr/share/toren/session/`, and everything SDDM needs to point at belongs there too. The
+login theme is exactly that: it lives at `/usr/share/toren/session/sddm/themes/toren` and the
 opt-in drop-in reaches it through `ThemeDir`, so nothing is placed in SDDM's own theme
 directory. A registration is a pointer, never a place to put content — a file that grows past a
-few lines of pointer belongs under `/usr/share/asura/` with a registration pointing at it.
+few lines of pointer belongs under `/usr/share/toren/` with a registration pointing at it.
 
 The list used to carry `/usr/bin/toren-shell` and dropped it, because no such executable
 existed: the shell is a QML configuration read by Quickshell, started by the user-level
-runit supervisor as `quickshell -p /usr/share/asura/shell`, and the binary that runs
+runit supervisor as `quickshell -p /usr/share/toren/shell`, and the binary that runs
 it is Quickshell's. The name has since been given to something real. `/usr/bin/toren-shell` is
-the shell's Go daemon and its command line, covered by the `asura-*` entry above; it is not
+the shell's Go daemon and its command line, covered by the `toren-*` entry above; it is not
 the executable that runs the QML. See [the shell](#the-shell).
 
 **Runtime state is not a package file.** The daemon's socket lives at
@@ -168,19 +168,19 @@ way it reports drift everywhere else.
 
 Toren's layers, from bottom up.
 
-| Layer | Owner | Notes |
-|---|---|---|
-| Kernel, firmware, boot | `system/kernel/`, installer | Pinned fleet, not a single kernel |
-| Base system | Void packages | Unmodified; Toren adds only what it needs |
-| Desktop services | Toren + non-GNOME system services | power-profiles-daemon, pipewire, wireplumber, iwd |
-| Display | Hyprland | Behind a `toren wm` seam so it can be swapped |
-| Shell surfaces | Quickshell, over a ported shell tree and a vendored upstream component | Bar, dock, launcher, popouts, widgets, notifications, global shortcuts. The ported components are from the prior project ([`NOTICE.md`](../NOTICE.md)); the vendored ones are upstream's, at a pinned commit; the theme and the settings binding are Toren's. See [vendored upstream components](#vendored-upstream-components) |
-| Shell state & session daemons | `toren-userd` (`~/.config/service/toren-userd`), `toren-shell daemon` (`~/.config/service/toren-shell`) | The user session daemons. `toren-userd` acts as the unprivileged state authority, watching `shell.json` to synchronize GTK/Qt/GSettings/Hyprland themes and bridging calls to root; `toren-shell` provides streaming shell telemetry |
-| System daemon & root control | `toren-sysd` (`/etc/sv/toren-sysd`, socket at `/run/asura/sysd.sock`) | The privileged root daemon. One Unix socket, line-framed JSON: handles hardware profiles, power states, battery charging thresholds, backlight fallback, and XBPS package transactions without sudo |
-| Settings store | GSettings / dconf, and `shell.json` | One writer per setting (`toren config set`, `toren-userd`, `toren-shell`) |
-| Control tools | `toren`, `toren-shell`, `toren-hubd`, `toren-userd`, `toren-sysd` | The only writers |
-| Portals | `xdg-desktop-portal-hyprland` + `-gtk` | See below |
-| Updates | `toren update` · `rollback` · `doctor` | Overlay model |
+| Layer                         | Owner                                                                                                   | Notes                                                                                                                                                                                                                                                                                                                           |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Kernel, firmware, boot        | `system/kernel/`, installer                                                                             | Pinned fleet, not a single kernel                                                                                                                                                                                                                                                                                               |
+| Base system                   | Void packages                                                                                           | Unmodified; Toren adds only what it needs                                                                                                                                                                                                                                                                                       |
+| Desktop services              | Toren + non-GNOME system services                                                                       | power-profiles-daemon, pipewire, wireplumber, iwd                                                                                                                                                                                                                                                                               |
+| Display                       | Hyprland                                                                                                | Behind a `toren wm` seam so it can be swapped                                                                                                                                                                                                                                                                                   |
+| Shell surfaces                | Quickshell, over a ported shell tree and a vendored upstream component                                  | Bar, dock, launcher, popouts, widgets, notifications, global shortcuts. The ported components are from the prior project ([`NOTICE.md`](../NOTICE.md)); the vendored ones are upstream's, at a pinned commit; the theme and the settings binding are Toren's. See [vendored upstream components](#vendored-upstream-components) |
+| Shell state & session daemons | `toren-userd` (`~/.config/service/toren-userd`), `toren-shell daemon` (`~/.config/service/toren-shell`) | The user session daemons. `toren-userd` acts as the unprivileged state authority, watching `shell.json` to synchronize GTK/Qt/GSettings/Hyprland themes and bridging calls to root; `toren-shell` provides streaming shell telemetry                                                                                            |
+| System daemon & root control  | `toren-sysd` (`/etc/sv/toren-sysd`, socket at `/run/toren/sysd.sock`)                                   | The privileged root daemon. One Unix socket, line-framed JSON: handles hardware profiles, power states, battery charging thresholds, backlight fallback, and XBPS package transactions without sudo                                                                                                                             |
+| Settings store                | GSettings / dconf, and `shell.json`                                                                     | One writer per setting (`toren config set`, `toren-userd`, `toren-shell`)                                                                                                                                                                                                                                                       |
+| Control tools                 | `toren`, `toren-shell`, `toren-hubd`, `toren-userd`, `toren-sysd`                                       | The only writers                                                                                                                                                                                                                                                                                                                |
+| Portals                       | `xdg-desktop-portal-hyprland` + `-gtk`                                                                  | See below                                                                                                                                                                                                                                                                                                                       |
+| Updates                       | `toren update` · `rollback` · `doctor`                                                                  | Overlay model                                                                                                                                                                                                                                                                                                                   |
 
 ---
 
@@ -194,11 +194,11 @@ different ways, so it is worth getting right early.
 Toren's stack, with each backend's interfaces verified against what it actually exports rather
 than what its name suggests:
 
-| Component | Interfaces it implements |
-|---|---|
-| `xdg-desktop-portal` | the dispatcher every application talks to |
-| `xdg-desktop-portal-hyprland` | ScreenCast, Screenshot, **GlobalShortcuts**, **InputCapture** |
-| `xdg-desktop-portal-gtk` | FileChooser, AppChooser, Print, Notification, Inhibit, Access, Account, Email, DynamicLauncher, Lockdown, Settings |
+| Component                     | Interfaces it implements                                                                                           |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `xdg-desktop-portal`          | the dispatcher every application talks to                                                                          |
+| `xdg-desktop-portal-hyprland` | ScreenCast, Screenshot, **GlobalShortcuts**, **InputCapture**                                                      |
+| `xdg-desktop-portal-gtk`      | FileChooser, AppChooser, Print, Notification, Inhibit, Access, Account, Email, DynamicLauncher, Lockdown, Settings |
 
 There is no GNOME in this stack, and that is deliberate. Earlier drafts ran
 `xdg-desktop-portal-gnome`, which had to be convinced it was not on a GNOME session: it reads
@@ -213,7 +213,7 @@ the problem instead of working around it.
 
 **No backend in the stack implements `org.freedesktop.portal.Secret`, and `gnome-keyring` does
 not fix this.** `gnome-keyring` exposes `org.freedesktop.Secret.Service` on the session bus,
-but `xdg-desktop-portal` never asks it — the dispatcher looks for a *portal backend* that
+but `xdg-desktop-portal` never asks it — the dispatcher looks for a _portal backend_ that
 declares the interface, finds none, and returns success without exporting the portal at all.
 No error, no warning, no fallback.
 
@@ -264,7 +264,7 @@ Interfaces and portal capabilities:
 - **Notifications.** With no notification daemon in the image, the shell hosts the
   notification server.
 
-GlobalShortcuts and InputCapture *are* compositor-backend work and are handled by the Hyprland
+GlobalShortcuts and InputCapture _are_ compositor-backend work and are handled by the Hyprland
 backend, not by the shell.
 
 ### What the boot order and the permission store actually do
@@ -273,12 +273,12 @@ Two behaviours were only learned by watching the bus, and both are the kind that
 misconfiguration when they are working as designed.
 
 **The dispatcher never re-checks a backend.** At startup it builds its interface map from the
-backends that own their bus names *at that moment*; a backend that registers later is never
+backends that own their bus names _at that moment_; a backend that registers later is never
 added, and its interfaces simply do not exist for the whole session. The Hyprland backend
 crash-loops for a few seconds while the compositor's IPC socket appears, so `portal/run` waits
 — bounded — for the name the backend declares in `hyprland.portal` before starting the
 dispatcher. That name is read from the `.portal` file at runtime, not spelled in the script:
-the bus names are *not* `org.freedesktop.impl.portal.<name>` by pattern. The Hyprland backend
+the bus names are _not_ `org.freedesktop.impl.portal.<name>` by pattern. The Hyprland backend
 owns `org.freedesktop.impl.portal.desktop.hyprland`, and an older draft of the wait-loop that
 polled the pre-desktop form burned its whole budget every boot while protecting nothing. The
 GTK backend is deliberately not waited for: no runit service supervises it, and the dispatcher
@@ -289,7 +289,7 @@ the permission store (`screenshot`/`screenshot`). When the Access dialog is deni
 dispatcher writes that denial back — `SetPermission(table, create, id, app, permissions)` —
 and every later request from the same app id is refused without a dialog. For callers the
 dispatcher cannot identify, the app id is the empty string, so one denial from an
-unidentifiable caller denies *all* of them. The dialog is the desktop's consent flow and stays;
+unidentifiable caller denies _all_ of them. The dialog is the desktop's consent flow and stays;
 the store is per-user state, and clearing it (privacy settings, or `DeletePermission`) is what
 a future settings surface must expose.
 
@@ -297,40 +297,40 @@ a future settings surface must expose.
 
 ## Overlay and rollback
 
-Toren's packages write **only** to `/usr/share/asura/` and `/etc/asura/`. Never to `~`. That single
+Toren's packages write **only** to `/usr/share/toren/` and `/etc/toren/`. Never to `~`. That single
 rule is what makes rollback possible.
 
 ```
-/usr/share/asura/                     the packaged base; replaced on update
-/etc/asura/                           machine-level config; replaced on update
-~/.config/asura/                      materialized base, user's copy
-~/.config/asura/user_edits/           the user's overlay; wins at the mirrored path
-~/.local/share/asura/plugins/         installed plugins
-~/.local/state/asura/                 runtime state, revisions, snapshots
+/usr/share/toren/                     the packaged base; replaced on update
+/etc/toren/                           machine-level config; replaced on update
+~/.config/toren/                      materialized base, user's copy
+~/.config/toren/user_edits/           the user's overlay; wins at the mirrored path
+~/.local/share/toren/plugins/         installed plugins
+~/.local/state/toren/                 runtime state, revisions, snapshots
 ```
 
-| Command | Does |
-|---|---|
-| `toren update` | snapshot `~/.config` to git, pull `dev-unstable` and apply it with `installation/apply-repo.sh` (everything the ISO installs from the repo, the Go tools rebuilt, packages new in the manifest), update xbps packages, re-materialize base, repaint |
-| `toren refresh` | apply installed changes to the running session: re-sync user services, `hyprctl reload`, restart the shell and Toren's daemons (the last step of `toren update`) |
-| `asura migrate` | run the one-time fixes (`migrations/`) this machine and user have not run yet; `toren update` runs it after applying Toren (see `docs/migrations.md`) |
-| `toren rollback` | re-materialize the previous revision |
-| `asura snapshot` | list system (Btrfs) snapshots with their date, reason and Toren commit, or take one; taken automatically before system updates and before package installs (`asura-pkg-add`) |
-| `toren enable` / `disable` | switch an optional service (docker, bluetooth, printing, ssh, libvirt, tailscale) on or off: package, runit link, group |
-| `toren channel set` | pin what updates follow: `stable` (main) or `unstable` (dev-unstable, the default), in `/etc/asura/channel`, which updates keep |
-| `asura firmware` / `clean` | firmware updates through fwupd; remove orphaned packages and the package cache |
-| `asura notify-updates` | one check for the desktop notice (update available, reboot needed), run by the `toren-updates` user service every 6 hours |
-| `asura bundle` | curated app sets in one command (gaming, dev, editors, apps, creative, office), with a snapshot first |
-| `toren theme set` | switch the desktop to a named look (`shell-desktop/toren/themes.json`) |
-| `toren kernel` | list, set or remove Void Linux kernel series (`linux`, `linux-lts`, `linux-mainline`), update GRUB default, keep fallback entry, and verify NVIDIA DKMS headers |
-| `toren vm` | manage virtual machines via `toren-vmd` and quickemu, including guided Windows 11 setup (`toren vm windows`) with TPM 2.0 and UEFI |
-| `toren hook` | execute user extension scripts in `~/.config/asura/hooks/<event>/` (`pre-update`, `post-update`, `post-theme`, `post-login`), logged to `~/.local/state/asura/hooks.log` |
-| `toren share` | send and receive files across Tailscale network via Taildrop with desktop notification into `~/Downloads` |
-| `asura manual` | the user manual (`docs/manual`, installed at `/usr/share/doc/asura/manual`) |
-| `asura mirror` | choose the Void mirror (`list`, `fastest`, `set`, `reset`), written to `/etc/xbps.d/00-asura-mirror.conf`, which updates keep |
-| `toren materialize <path>` | re-lay the base file, clobbering shipped content |
-| `toren reset <path>` | drop one overlay file back to the base |
-| `toren doctor` | report drift between base and overlay |
+| Command                    | Does                                                                                                                                                                                                                                                |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `toren update`             | snapshot `~/.config` to git, pull `dev-unstable` and apply it with `installation/apply-repo.sh` (everything the ISO installs from the repo, the Go tools rebuilt, packages new in the manifest), update xbps packages, re-materialize base, repaint |
+| `toren refresh`            | apply installed changes to the running session: re-sync user services, `hyprctl reload`, restart the shell and Toren's daemons (the last step of `toren update`)                                                                                    |
+| `toren migrate`            | run the one-time fixes (`migrations/`) this machine and user have not run yet; `toren update` runs it after applying Toren (see `docs/migrations.md`)                                                                                               |
+| `toren rollback`           | re-materialize the previous revision                                                                                                                                                                                                                |
+| `toren snapshot`           | list system (Btrfs) snapshots with their date, reason and Toren commit, or take one; taken automatically before system updates and before package installs (`toren-pkg-add`)                                                                        |
+| `toren enable` / `disable` | switch an optional service (docker, bluetooth, printing, ssh, libvirt, tailscale) on or off: package, runit link, group                                                                                                                             |
+| `toren channel set`        | pin what updates follow: `stable` (main) or `unstable` (dev-unstable, the default), in `/etc/toren/channel`, which updates keep                                                                                                                     |
+| `toren firmware` / `clean` | firmware updates through fwupd; remove orphaned packages and the package cache                                                                                                                                                                      |
+| `toren notify-updates`     | one check for the desktop notice (update available, reboot needed), run by the `toren-updates` user service every 6 hours                                                                                                                           |
+| `toren bundle`             | curated app sets in one command (gaming, dev, editors, apps, creative, office), with a snapshot first                                                                                                                                               |
+| `toren theme set`          | switch the desktop to a named look (`shell-desktop/toren/themes.json`)                                                                                                                                                                              |
+| `toren kernel`             | list, set or remove Void Linux kernel series (`linux`, `linux-lts`, `linux-mainline`), update GRUB default, keep fallback entry, and verify NVIDIA DKMS headers                                                                                     |
+| `toren vm`                 | manage virtual machines via `toren-vmd` and quickemu, including guided Windows 11 setup (`toren vm windows`) with TPM 2.0 and UEFI                                                                                                                  |
+| `toren hook`               | execute user extension scripts in `~/.config/toren/hooks/<event>/` (`pre-update`, `post-update`, `post-theme`, `post-login`), logged to `~/.local/state/toren/hooks.log`                                                                            |
+| `toren share`              | send and receive files across Tailscale network via Taildrop with desktop notification into `~/Downloads`                                                                                                                                           |
+| `toren manual`             | the user manual (`docs/manual`, installed at `/usr/share/doc/toren/manual`)                                                                                                                                                                         |
+| `toren mirror`             | choose the Void mirror (`list`, `fastest`, `set`, `reset`), written to `/etc/xbps.d/00-toren-mirror.conf`, which updates keep                                                                                                                       |
+| `toren materialize <path>` | re-lay the base file, clobbering shipped content                                                                                                                                                                                                    |
+| `toren reset <path>`       | drop one overlay file back to the base                                                                                                                                                                                                              |
+| `toren doctor`             | report drift between base and overlay                                                                                                                                                                                                               |
 
 A user override always wins at its mirrored path, and `toren update` can never clobber it.
 This is the discipline that makes the rest of the system safe to automate.
@@ -345,9 +345,9 @@ Settings live in two stores, and each has one writer.
 dconf, and `gsettings list-recursively` for introspection — which is exactly what a widget
 catalogue needs.
 
-- `org.asura.desktop` — desktop-level behaviour; the idle timeouts are the keys the running
+- `org.toren.desktop` — desktop-level behaviour; the idle timeouts are the keys the running
   desktop reads
-- `org.asura.shell` — the keys adoption imports into, among them the wallpaper paths and the
+- `org.toren.shell` — the keys adoption imports into, among them the wallpaper paths and the
   favourites. The ported shell takes its look from `shell.json` instead, so every key of this
   schema is on the list of unread settings in `desktop/internal/hub`; `toren-wallpaper` reads
   the wallpaper paths once, to choose a fresh account's first wallpaper
@@ -356,7 +356,7 @@ catalogue needs.
 range and enum before it reaches dconf. Hand-editing dconf directly causes drift and
 `toren doctor` reports it.
 
-**`~/.config/asura/shell.json`** is the shell's look and desktop styling: the theme, icon theme,
+**`~/.config/toren/shell.json`** is the shell's look and desktop styling: the theme, icon theme,
 font and size, dark mode flag, corner radius, gaps, bar style, dock position, interface scale,
 and power mode.
 
@@ -369,7 +369,7 @@ The session and system daemons form a clear division of responsibility:
   appearance variables. It also serves as the IPC bridge between unprivileged shell components and
   the root system daemon.
 - **`toren-sysd`** runs as the privileged root daemon under `/etc/sv/toren-sysd`, supervised by runit.
-  It listens on the root Unix domain socket at `/run/asura/sysd.sock`. Whenever the user session
+  It listens on the root Unix domain socket at `/run/toren/sysd.sock`. Whenever the user session
   or the `toren` CLI requests privileged hardware operations (such as switching power profiles via
   sysfs/TLP/EPP, setting battery charge thresholds, driving backlight adjustments, or triggering
   package queries/transactions), the request is forwarded to `toren-sysd`. This allows secure,
@@ -384,7 +384,7 @@ The session and system daemons form a clear division of responsibility:
 ## The keybinding catalogue
 
 The keybinds are a list of lines in the compositor's configuration, and they are also a
-catalogue: `session/binds.json`, installed at `/usr/share/asura/session/binds.json`, with a
+catalogue: `session/binds.json`, installed at `/usr/share/toren/session/binds.json`, with a
 label and a category for every chord. The claim is the one the check exists to keep true:
 
 > Every chord in the catalogue is bound in the compositor's configuration, every bind in the
@@ -423,7 +423,7 @@ same way. The separator is the compositor's constraint and not a style choice.
 > no QML PAM API and that a shell-drawn lock would accept any password, was wrong.
 >
 > So the division is: **when** locking happens is `hypridle`'s, run by the user-level
-> `toren-idle` runit service from `org.asura.desktop`'s `idle-*` keys, and `toren-shell lock`
+> `toren-idle` runit service from `org.toren.desktop`'s `idle-*` keys, and `toren-shell lock`
 > is the one command every trigger runs; `hyprlock` does the locking; the shell only draws
 > the dim scrim (`Idle.qml`).
 > hyprlock is in the archive, which under the base-layer rule settles it — the base layer
@@ -433,7 +433,7 @@ same way. The separator is the compositor's constraint and not a style choice.
 Quickshell, and Toren builds it. The base layer carries no compositor-agnostic
 shell toolkit at all — verified rather than assumed: `quickshell`, `ags`, `eww` and
 `ironbar` are not in the package archive under those names. What the archive does carry is
-*panels* — `waybar`, `yambar`, `tint2`, `polybar`, `xfce4-panel` — and a panel is not a
+_panels_ — `waybar`, `yambar`, `tint2`, `polybar`, `xfce4-panel` — and a panel is not a
 substitute. A panel draws a bar. Toren's shell hosts the bar, dock, launcher,
 popouts, widget catalogue, notification server, idle screen, quick settings
 and status icons, and the Hub window as well, in one compositor-agnostic toolkit,
@@ -476,9 +476,9 @@ thing, which is the kind of collision that produces a bug report rather than a f
 was once the package that builds Quickshell; it now belongs to the shell's Go daemon.
 `/usr/bin/toren-shell` is that binary: `toren-shell daemon` is what the runit supervisor
 runs, and every other `toren-shell <verb>` (`lock`, `hub open`, `reload`, `icons`) is a
-client that sends one line to it. The shell's own configuration is `/usr/share/asura/shell/`,
-read by `quickshell -p /usr/share/asura/shell` from the runit service. So `toren-shell`
-serves the shell's state and Quickshell is the engine that draws it. The Ubuntu-era manifest's `asura_built:` key no longer exists: the Void manifest (`system/packages-void.yaml`) lists only repository packages, and `system/verify-packages.py` checks every one of them resolves in the configured XBPS repositories.
+client that sends one line to it. The shell's own configuration is `/usr/share/toren/shell/`,
+read by `quickshell -p /usr/share/toren/shell` from the runit service. So `toren-shell`
+serves the shell's state and Quickshell is the engine that draws it. The Ubuntu-era manifest's `toren_built:` key no longer exists: the Void manifest (`system/packages-void.yaml`) lists only repository packages, and `system/verify-packages.py` checks every one of them resolves in the configured XBPS repositories.
 
 The wire protocol the daemon speaks keeps the name `toren-shell/1`, after the shell it
 serves rather than after the process that implements it. A protocol name that changed with
@@ -491,12 +491,12 @@ The test matrix question stays open — see [open questions](#open-questions) �
 re-vendoring cost has joined it. A shell Toren builds is a shell Toren has to rebuild when
 upstream moves: a new Quickshell release is a new build, a new package version and a new
 binary to put through every kernel and every Hyprland in the matrix. A vendored component is
-a different kind of debt. It is not rebuilt — it is *re-vendored*, which is one command,
+a different kind of debt. It is not rebuilt — it is _re-vendored_, which is one command,
 `sh shell/vendor/vendor.sh update ii <commit>`, followed by a sync and a verify. The cost is
 not the move; it is what the move can break. A new upstream commit can rename the properties
 the vendored components read, and the bridges — the palette bridge and the settings bridge
 — are exactly the parts that would notice, because a QML binding to a property that no
-longer exists is a runtime warning and not a load error. So a re-vendor is a *re-theme*
+longer exists is a runtime warning and not a load error. So a re-vendor is a _re-theme_
 event as much as a code event, and it has to be checked against the same matrix the engine is
 checked against. That is why the matrix question now covers two things rather than one.
 
@@ -521,19 +521,19 @@ Four places declare it the default, and all four must be set or the desktop is i
 
 **Packaging consequence, stated plainly:** Ghostty is carried by Void's official XBPS package
 repository. Toren installs that package as-is. It does not build Ghostty, does not pin an out-of-tree
-source tag, and does not own a rebuild. `asura-terminal` is a configuration package, not a custom binary build.
+source tag, and does not own a rebuild. `toren-terminal` is a configuration package, not a custom binary build.
 
 This is the decision that most distinguishes Toren from a typical "I compile my dotfiles" setup,
 and it is worth stating as a trade rather than a virtue. Toren gives up a current terminal. It
 buys back every cost a source pin accrues: no build dependencies to carry and verify on each
 rebase, no breakage when Ghostty's shader or SIMD dependencies move, no source tag to resolve
-when upstream tags, and no `asura-terminal` release to ship when Ghostty patches a release. A
+when upstream tags, and no `toren-terminal` release to ship when Ghostty patches a release. A
 version behind is a gap the user can see and the archive can close. A build is a liability that
 compounds every release cycle and needs a maintainer forever. The gap is the cheaper one, and
 the terminal is not the surface that decides whether this desktop is usable.
 
-**The base version is not set by the terminal.** Ghostty's own version policy is *"minimum
-GTK/Adwaita in the most recent LTS at the time of a minor release."* A distribution that built
+**The base version is not set by the terminal.** Ghostty's own version policy is _"minimum
+GTK/Adwaita in the most recent LTS at the time of a minor release."_ A distribution that built
 Ghostty would adopt that policy and inherit a hard constraint: Ghostty 1.2.x needs GTK 4.14 and
 Adwaita 1.5, 1.1.x needs GTK 4.8 and Adwaita 1.2, so moving the base would move Ghostty's floor
 in the same release and `base.release` would stop being a free parameter. Toren does not build
@@ -543,18 +543,18 @@ chosen for hardware reach and nothing else constrains it.
 **No build dependencies, because there is no build.** Toren used to carry Ghostty's build
 requirements explicitly. That list is gone, and its absence is the record of the decision
 rather than an omission. This is also why the terminal is no longer an entry in the
-manifest's `asura_built:` key: a package the base layer carries is installed, not rebuilt.
+manifest's `toren_built:` key: a package the base layer carries is installed, not rebuilt.
 See [the rejected options](#rejected-and-why).
 
 What Ghostty brings that a stock terminal does not, and why it is the terminal:
 
-| | |
-|---|---|
-| GPU rendering | The whole grid is drawn client-side, so scrollback and redraw stay cheap on a Wayland session |
-| Shell integration | OSC 133 prompt marking, hyperlink handling, clickable paths |
-| Tab and split configuration | Tabs and splits configured declaratively, per config rather than per menu |
-| `ghostty +…` CLI | `ghostty +show-config`, `ghostty +list-fonts`, `ghostty +version` — the config is inspectable and scriptable rather than a GUI-only surface |
-| Single config file | `~/.config/ghostty/config`, which sits under Toren's overlay like everything else, so `toren update` cannot clobber it |
+|                             |                                                                                                                                             |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| GPU rendering               | The whole grid is drawn client-side, so scrollback and redraw stay cheap on a Wayland session                                               |
+| Shell integration           | OSC 133 prompt marking, hyperlink handling, clickable paths                                                                                 |
+| Tab and split configuration | Tabs and splits configured declaratively, per config rather than per menu                                                                   |
+| `ghostty +…` CLI            | `ghostty +show-config`, `ghostty +list-fonts`, `ghostty +version` — the config is inspectable and scriptable rather than a GUI-only surface |
+| Single config file          | `~/.config/ghostty/config`, which sits under Toren's overlay like everything else, so `toren update` cannot clobber it                      |
 
 Default font: **JetBrains Mono** — for the terminal's own text. A Nerd Font variant is
 bundled in `shell/assets/fonts/` for the devicon and powerline glyphs the shell's dock and
@@ -581,11 +581,11 @@ to `~/.zshrc` is a user's change and survives every update.
 
 ### Languages
 
-| | Ships | Managed by | Why |
-|---|---|---|---|
-| Rust | `rustup`, shared toolchain at `/opt/asura/rust` | rustup | The archive's `rustc` lags years behind. Never ship Rust via the archive. |
-| Node | `nodejs` + `npm` pinned to LTS, `corepack` enabled | fnm | System Node is the floor; per-project versions per repository. |
-| Python | `python3`, `python3-venv`, `python3-devel` | mise + `uv` | System Python stays pristine — it is an OS dependency and PEP 668 marks it externally managed. |
+|        | Ships                                              | Managed by  | Why                                                                                            |
+| ------ | -------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------- |
+| Rust   | `rustup`, shared toolchain at `/opt/toren/rust`    | rustup      | The archive's `rustc` lags years behind. Never ship Rust via the archive.                      |
+| Node   | `nodejs` + `npm` pinned to LTS, `corepack` enabled | fnm         | System Node is the floor; per-project versions per repository.                                 |
+| Python | `python3`, `python3-venv`, `python3-devel`         | mise + `uv` | System Python stays pristine — it is an OS dependency and PEP 668 marks it externally managed. |
 
 Preinstalled Rust tooling, because they are near-universal wins:
 `stable` toolchain, `cargo-edit`, `just`, `sccache`, `mold`, `cargo-nextest`, `ripgrep`, `fd`.
@@ -601,10 +601,10 @@ vendored, what is not, what may be changed, and who owns what.
 
 ### What is vendored, and at which commit
 
-| Component | Upstream | Licence | Pinned commit | Vendored as |
-|---|---|---|---|---|
-| The "ii" Quickshell configuration | [`end-4/dots-hyprland`](https://github.com/end-4/dots-hyprland), the `dots/.config/quickshell/ii` directory | GPL-3.0-only | `2f2a376fdb2ad738bf55f693dd0b474b64bb0ab8` | `shell/modules/`, `shell/services/` |
-| The rounded-polygon widget kit | [`end-4/rounded-polygon-qmljs`](https://github.com/end-4/rounded-polygon-qmljs) | Apache-2.0 | `e31ec4cb4ebf6a46b267f5c42eabf6874916fa16` | `shell/modules/common/widgets/shapes/` |
+| Component                         | Upstream                                                                                                    | Licence      | Pinned commit                              | Vendored as                            |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------- | ------------ | ------------------------------------------ | -------------------------------------- |
+| The "ii" Quickshell configuration | [`end-4/dots-hyprland`](https://github.com/end-4/dots-hyprland), the `dots/.config/quickshell/ii` directory | GPL-3.0-only | `2f2a376fdb2ad738bf55f693dd0b474b64bb0ab8` | `shell/modules/`, `shell/services/`    |
+| The rounded-polygon widget kit    | [`end-4/rounded-polygon-qmljs`](https://github.com/end-4/rounded-polygon-qmljs)                             | Apache-2.0   | `e31ec4cb4ebf6a46b267f5c42eabf6874916fa16` | `shell/modules/common/widgets/shapes/` |
 
 The second is upstream's own submodule, vendored as a component in its own right because
 `MaterialShape.qml` — one of the most used widgets in the kit — imports it.
@@ -620,15 +620,15 @@ would.
 The vendored tree is a **subset** of upstream's configuration, and the omissions are
 decisions rather than accidents.
 
-| Upstream | Why it is not here |
-|---|---|
-| The shell root — upstream's `shell.qml` | The shell root is Toren's. Toren's shell is a different shell that happens to draw some of the same surfaces, and upstream's root wires upstream's panels, upstream's services and upstream's state |
-| The settings window — upstream's `settings.qml` | The settings surface is the Hub, and the Hub is Toren's |
-| Upstream's `Config.qml` and `Appearance.qml` | Replaced by Toren's own at the same paths. See [the theme boundary](#the-theme-boundary) |
-| Upstream's `GlobalStates.qml` | Replaced by Toren's own at the same path, for the same reason and one more |
-| Upstream's assets, defaults, panel families, scripts, translations, welcome screen, kill dialog and reload popup | None of it is Toren's desktop. Upstream's icons and images are upstream's; Toren's are its own |
-| Upstream's compositor configuration, including its Hyprland Lua | Toren owns its own compositor configuration. The vendored tree is a Quickshell configuration and nothing else |
-| Upstream's licence files in place, and its examples | The licence texts are kept under `shell/vendor/` and the examples are not shipped. A file named `LICENSE` inside the tree would be caught by this repository's own licence rule, which is about Toren's licence. See [licence hygiene](../LICENSING.md#the-rule-for-vendored-licence-files) |
+| Upstream                                                                                                         | Why it is not here                                                                                                                                                                                                                                                                          |
+| ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The shell root — upstream's `shell.qml`                                                                          | The shell root is Toren's. Toren's shell is a different shell that happens to draw some of the same surfaces, and upstream's root wires upstream's panels, upstream's services and upstream's state                                                                                         |
+| The settings window — upstream's `settings.qml`                                                                  | The settings surface is the Hub, and the Hub is Toren's                                                                                                                                                                                                                                     |
+| Upstream's `Config.qml` and `Appearance.qml`                                                                     | Replaced by Toren's own at the same paths. See [the theme boundary](#the-theme-boundary)                                                                                                                                                                                                    |
+| Upstream's `GlobalStates.qml`                                                                                    | Replaced by Toren's own at the same path, for the same reason and one more                                                                                                                                                                                                                  |
+| Upstream's assets, defaults, panel families, scripts, translations, welcome screen, kill dialog and reload popup | None of it is Toren's desktop. Upstream's icons and images are upstream's; Toren's are its own                                                                                                                                                                                              |
+| Upstream's compositor configuration, including its Hyprland Lua                                                  | Toren owns its own compositor configuration. The vendored tree is a Quickshell configuration and nothing else                                                                                                                                                                               |
+| Upstream's licence files in place, and its examples                                                              | The licence texts are kept under `shell/vendor/` and the examples are not shipped. A file named `LICENSE` inside the tree would be caught by this repository's own licence rule, which is about Toren's licence. See [licence hygiene](../LICENSING.md#the-rule-for-vendored-licence-files) |
 
 ### What is vendored but not taken
 
@@ -641,7 +641,7 @@ shell.
 They are there because removing them would be an edit to the vendored tree, and an edit to the
 vendored tree is exactly what the byte-identical rule forbids. What Toren does instead is not
 wire them up. The lock is the clearest case: Toren's lock is `hyprlock`, the shell decides
-*when* to lock and never draws a lock surface, and upstream's lock components are vendored
+_when_ to lock and never draws a lock surface, and upstream's lock components are vendored
 because they live upstream's directory and not because Toren wanted them.
 
 ### The byte-identical rule
@@ -656,11 +656,11 @@ what changed — lie.
 
 ### The three homes for a change
 
-| Home | What it is | When it is the answer |
-|---|---|---|
-| A **configuration value** | A setting the component reads | The component reads the setting and the setting is what you want to change. Upstream's components read `Config.options.*` for exactly this, and Toren's bridge answers that shape |
-| An **overlay file** | An Toren-owned file at the path the component expects | The component's *interface* is the thing that has to change. The palette bridge, the settings bridge and the shell-state bridge are all overlays, because the file is the interface |
-| A **patch** in `shell/vendor/patches/` | A diff applied on top of the pinned tree | The component's behaviour is wrong and no setting reaches it. There is no patch there today, because no change has needed one yet |
+| Home                                   | What it is                                            | When it is the answer                                                                                                                                                               |
+| -------------------------------------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A **configuration value**              | A setting the component reads                         | The component reads the setting and the setting is what you want to change. Upstream's components read `Config.options.*` for exactly this, and Toren's bridge answers that shape   |
+| An **overlay file**                    | An Toren-owned file at the path the component expects | The component's _interface_ is the thing that has to change. The palette bridge, the settings bridge and the shell-state bridge are all overlays, because the file is the interface |
+| A **patch** in `shell/vendor/patches/` | A diff applied on top of the pinned tree              | The component's behaviour is wrong and no setting reaches it. There is no patch there today, because no change has needed one yet                                                   |
 
 ### The theme boundary
 
@@ -695,9 +695,9 @@ there are two colours on a desktop that has no colours in it. It is recorded her
 than left to be found in a screenshot.
 
 **Enforced by overlay.** Two things could not be reached by configuration, and both are cases
-where the file *is* the interface.
+where the file _is_ the interface.
 
-1. *The palette itself.* Upstream's `Appearance.qml` derives its colours from a Material 3
+1. _The palette itself._ Upstream's `Appearance.qml` derives its colours from a Material 3
    scheme and from the wallpaper, through `ColorQuantizer`, `MaterialThemeLoader.qml` and
    `AdaptedMaterialScheme.qml`, and it reads the wallpaper path out of the configuration.
    Toren's design system says the wallpaper does not drive the drawing — the token set is
@@ -705,7 +705,7 @@ where the file *is* the interface.
    That cannot be a setting, because the palette is the thing being set. It has to be a file.
    Hence `shell/modules/common/Appearance.qml`: a monochrome token bridge that answers
    upstream's property names with Toren's tokens.
-2. *The settings store.* Upstream's `Config.qml` is a JSON store — a `JsonAdapter` over a
+2. _The settings store._ Upstream's `Config.qml` is a JSON store — a `JsonAdapter` over a
    file in the shell's own configuration directory, written by the shell itself. Toren's
    settings live in GSettings and are written by one tool. That cannot be a setting either:
    the store is the thing being replaced. Hence `shell/modules/common/Config.qml`: a
@@ -727,10 +727,10 @@ The three overlays are therefore the entire re-theme and the entire re-bind.
 The chain is four links, and it has one writer.
 
 ```
-org.asura.shell  →  the settings bridge  →  upstream's Config.options.*  →  the surface
+org.toren.shell  →  the settings bridge  →  upstream's Config.options.*  →  the surface
 ```
 
-- The **store** is `org.asura.shell`, with `org.asura.desktop` beside it.
+- The **store** is `org.toren.shell`, with `org.toren.desktop` beside it.
 - The **bridge** is `shell/modules/common/Config.qml`: it answers upstream's `options.*`
   shape from the store, so a vendored component asks for a setting the way upstream taught it
   to and gets Toren's value.
@@ -791,21 +791,21 @@ against.
 
 ### Who owns what, capability by capability
 
-| Capability | Owner | Why |
-|---|---|---|
-| The notification server | **Toren** | `org.freedesktop.Notifications` is a session-scoped bus name and no daemon in the image holds it, so the shell draws it and hosts the server |
-| The lock screen | **Toren** owns when; `hyprlock` does the locking | `hypridle`, run by the user-level runit service `~/.config/service/toren-idle` from the `org.asura.desktop` `idle-*` keys, decides *when*, and `toren-shell lock` is the one command every trigger runs; the locker owns the surface and the PAM conversation. `hyprlock` is a decision (mature, in the archive, a process of its own), not a platform limit: Quickshell here has `Quickshell.Services.Pam` |
-| The idle policy | **Toren** | The timeouts live in `org.asura.desktop`, `toren config set` is their only writer, and `~/.config/service/toren-idle` hands them to hypridle |
-| The keybind catalogue | **Toren** | `session/binds.json`, installed at `/usr/share/asura/session/binds.json`, checked in both directions against the compositor's configuration by `toren doctor` |
-| The Hub | **Toren** | The settings application: a ported Hub (`shell/hub/`) — a grouped navigation rail, a global search and a page per area of the desktop. The look pages change `shell.json` by asking the `toren-shell` daemon, the compositor and machine pages go through `toren-hubd`, and the **Toren** group draws what `toren config export` hands it (the pages, the keys, their types, their permitted values, their ranges and their current values) and writes only through `toren config set`, never through GSettings. Its chrome is the shell's own component kit, so both windows are one design system |
-| The wallpaper | **Toren** | `toren-wallpaper` chooses it (the catalogue, the choice per output, playlists, the day/night schedule) and the shell's own surface draws what the daemon publishes. `org.asura.shell`'s `wallpaper-path` and `wallpaper-path-dark` only seed a fresh account's first wallpaper |
-| The palette, the settings binding, the shell's own state | **Toren** | The three overlays, at upstream's paths |
-| The bar, the dock, the launcher and the popover surfaces | **upstream** | The components, byte-identical to the pinned commit |
-| The overview, the media controls, the on-screen display, the cheatsheet | **upstream** | The components, byte-identical to the pinned commit |
-| The vertical bar, the background, the rounded-polygon widget kit | **upstream** | The components, byte-identical to the pinned commit |
-| The service graph — audio, network, bluetooth, battery, media, tray | **upstream** | The components, byte-identical to the pinned commit |
+| Capability                                                              | Owner                                            | Why                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ----------------------------------------------------------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The notification server                                                 | **Toren**                                        | `org.freedesktop.Notifications` is a session-scoped bus name and no daemon in the image holds it, so the shell draws it and hosts the server                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| The lock screen                                                         | **Toren** owns when; `hyprlock` does the locking | `hypridle`, run by the user-level runit service `~/.config/service/toren-idle` from the `org.toren.desktop` `idle-*` keys, decides _when_, and `toren-shell lock` is the one command every trigger runs; the locker owns the surface and the PAM conversation. `hyprlock` is a decision (mature, in the archive, a process of its own), not a platform limit: Quickshell here has `Quickshell.Services.Pam`                                                                                                                                                                                         |
+| The idle policy                                                         | **Toren**                                        | The timeouts live in `org.toren.desktop`, `toren config set` is their only writer, and `~/.config/service/toren-idle` hands them to hypridle                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| The keybind catalogue                                                   | **Toren**                                        | `session/binds.json`, installed at `/usr/share/toren/session/binds.json`, checked in both directions against the compositor's configuration by `toren doctor`                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| The Hub                                                                 | **Toren**                                        | The settings application: a ported Hub (`shell/hub/`) — a grouped navigation rail, a global search and a page per area of the desktop. The look pages change `shell.json` by asking the `toren-shell` daemon, the compositor and machine pages go through `toren-hubd`, and the **Toren** group draws what `toren config export` hands it (the pages, the keys, their types, their permitted values, their ranges and their current values) and writes only through `toren config set`, never through GSettings. Its chrome is the shell's own component kit, so both windows are one design system |
+| The wallpaper                                                           | **Toren**                                        | `toren-wallpaper` chooses it (the catalogue, the choice per output, playlists, the day/night schedule) and the shell's own surface draws what the daemon publishes. `org.toren.shell`'s `wallpaper-path` and `wallpaper-path-dark` only seed a fresh account's first wallpaper                                                                                                                                                                                                                                                                                                                      |
+| The palette, the settings binding, the shell's own state                | **Toren**                                        | The three overlays, at upstream's paths                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| The bar, the dock, the launcher and the popover surfaces                | **upstream**                                     | The components, byte-identical to the pinned commit                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| The overview, the media controls, the on-screen display, the cheatsheet | **upstream**                                     | The components, byte-identical to the pinned commit                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| The vertical bar, the background, the rounded-polygon widget kit        | **upstream**                                     | The components, byte-identical to the pinned commit                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| The service graph — audio, network, bluetooth, battery, media, tray     | **upstream**                                     | The components, byte-identical to the pinned commit                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
-A row says who owns the *capability*, not who draws the pixels. The rows that say *upstream*
+A row says who owns the _capability_, not who draws the pixels. The rows that say _upstream_
 describe the vendored desktop tree, which stays byte-identical to its pinned commit. The
 surfaces the running shell draws — the bar, the dock, the launcher, the overview, the
 on-screen display, the notifications and the wallpaper — and its service graph
@@ -828,7 +828,7 @@ tier is determined by whether a profile exists, not by marketing.
 
 ### The profile database
 
-`asura-machines` is a database of verified machine profiles in this repository. Nobody can test
+`toren-machines` is a database of verified machine profiles in this repository. Nobody can test
 every laptop, but every user can test one:
 
 1. A machine boots successfully
@@ -854,18 +854,18 @@ market.
 
 Every item here is a real support ticket someone will file:
 
-| Area | Requirement |
-|---|---|
-| GPU | `nvidia-open` vs proprietary vs nouveau, pinned per kernel; Intel `xe`/`i915`; AMD `amdgpu`; PRIME hybrid mux; vendor mux tools (`supergfxctl`, `envy`, `asusctl`) |
-| WiFi | `iwlwifi`, broadcom `brcmfmac` with non-free fallback, Realtek `rtl8xx8` → DKMS `rtl8821ce`, `mt76`, `ath10k`/`ath11k` |
-| Firmware | `linux-firmware` plus per-vendor `linux-firmware-<vendor>` packages, and `sof-firmware`. There is no `non-free-firmware` component on this base layer, and neither `firmware-nonfree` nor `linux-firmware-nonfree` exists. |
-| Microcode | `intel-ucode`, `linux-firmware-amd`. Both already hook into the initramfs, so no extra work is needed — only the correct names. |
-| Audio | pipewire + wireplumber, SOF firmware, Realtek codec quirks |
-| Suspend/resume | the most-reported laptop bug class; hybrid graphics makes it worse |
-| Fingerprint | `fprintd` + libfprint, with goodix quirks |
-| Displays | `ddcutil` for external-monitor brightness, docks, multi-GPU output routing |
-| Handhelds | Steam Deck, ROG Ally, Legion Go — gamescope session, gyro, controller mapping |
-| Secure Boot | shim + MOK, signed. Non-optional or nothing installs on a locked laptop. **Not implemented yet** — see [`system-services.md`](system-services.md#secure-boot) |
+| Area           | Requirement                                                                                                                                                                                                                |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GPU            | `nvidia-open` vs proprietary vs nouveau, pinned per kernel; Intel `xe`/`i915`; AMD `amdgpu`; PRIME hybrid mux; vendor mux tools (`supergfxctl`, `envy`, `asusctl`)                                                         |
+| WiFi           | `iwlwifi`, broadcom `brcmfmac` with non-free fallback, Realtek `rtl8xx8` → DKMS `rtl8821ce`, `mt76`, `ath10k`/`ath11k`                                                                                                     |
+| Firmware       | `linux-firmware` plus per-vendor `linux-firmware-<vendor>` packages, and `sof-firmware`. There is no `non-free-firmware` component on this base layer, and neither `firmware-nonfree` nor `linux-firmware-nonfree` exists. |
+| Microcode      | `intel-ucode`, `linux-firmware-amd`. Both already hook into the initramfs, so no extra work is needed — only the correct names.                                                                                            |
+| Audio          | pipewire + wireplumber, SOF firmware, Realtek codec quirks                                                                                                                                                                 |
+| Suspend/resume | the most-reported laptop bug class; hybrid graphics makes it worse                                                                                                                                                         |
+| Fingerprint    | `fprintd` + libfprint, with goodix quirks                                                                                                                                                                                  |
+| Displays       | `ddcutil` for external-monitor brightness, docks, multi-GPU output routing                                                                                                                                                 |
+| Handhelds      | Steam Deck, ROG Ally, Legion Go — gamescope session, gyro, controller mapping                                                                                                                                              |
+| Secure Boot    | shim + MOK, signed. Non-optional or nothing installs on a locked laptop. **Not implemented yet** — see [`system-services.md`](system-services.md#secure-boot)                                                              |
 
 **The prior project's machine tuning is deliberately not ported.** The desktop was ported from a distribution
 that tunes each machine under its own `system/hardware/` — udev rules, NetworkManager and
@@ -878,14 +878,14 @@ paths. Whether some of it should return as profile content is an open question f
 
 A laptop whose WiFi needs an unloaded driver cannot fetch that driver over the network it does
 not have. This is why every Linux ISO hits the same wall. Toren's answer is a broad firmware
-rescue bundle on the ISO plus `asura-firmware load` from a USB stick. Unglamorous, and the
+rescue bundle on the ISO plus `toren-firmware load` from a USB stick. Unglamorous, and the
 difference between "installs on my laptop" and "installs on most laptops".
 
 ---
 
 ## Firmware and free software
 
-Toren is free software. It cannot honestly claim to be free of proprietary code *on disk*, and
+Toren is free software. It cannot honestly claim to be free of proprietary code _on disk_, and
 the difference matters, so state it precisely.
 
 **The distribution level.** Toren's own code is GPL-3.0 and Toren's own XBPS repository
@@ -916,7 +916,7 @@ Three consequences, all deliberate:
    `linux-firmware-<vendor>` packages rather than carrying firmware in an Toren package. This
    keeps Toren's repository entirely free software and stops Toren taking on a redistribution it
    has no right to.
-2. **A hardware profile declares what it needs.** `firmware:` in a profile names *packages*.
+2. **A hardware profile declares what it needs.** `firmware:` in a profile names _packages_.
    That is the same mechanism a community profile already uses for its driver list, and it is
    why per-machine declaration scales — see [the hard list](#the-hard-list).
 3. **Nothing claims FSF eligibility.** Toren does not describe itself as a fully free
@@ -974,7 +974,7 @@ than desperate. In rough order of payoff:
    decade, it ships no `postinst`, and it is fundamentally incompatible with ASLR. There is
    nothing to measure because there is nothing to install.
 
-Measure before claiming a win. `asura benchmark` should record idle RSS, boot time and CPU so
+Measure before claiming a win. `toren benchmark` should record idle RSS, boot time and CPU so
 regressions are visible rather than anecdotal.
 
 ---
@@ -987,13 +987,13 @@ settled: **SDDM in Wayland greeter mode, with a Weston kiosk compositor hosted b
 
 The chain, in the order it happens at login:
 
-| Stage | Who | What |
-|---|---|---|
-| Login surface appears | SDDM | `DisplayServer=wayland`, launching `CompositorCommand` rather than starting an X server |
+| Stage                        | Who                     | What                                                                                                                                        |
+| ---------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Login surface appears        | SDDM                    | `DisplayServer=wayland`, launching `CompositorCommand` rather than starting an X server                                                     |
 | Something holds the DRM card | Toren's greeter wrapper | `weston --shell=kiosk`, run at each output's top mode so the login screen matches a high-refresh session instead of the EDID-preferred 60Hz |
-| Login form is drawn | Toren | Toren's own login surface, on the compositor above |
-| Authentication | the base layer | PAM, in `sddm-session`. Toren does not touch `/etc/pam.d/` |
-| Session starts | `toren-session` | `exec Hyprland`, then the runit service supervisor starts the shell |
+| Login form is drawn          | Toren                   | Toren's own login surface, on the compositor above                                                                                          |
+| Authentication               | the base layer          | PAM, in `sddm-session`. Toren does not touch `/etc/pam.d/`                                                                                  |
+| Session starts               | `toren-session`         | `exec Hyprland`, then the runit service supervisor starts the shell                                                                         |
 
 **Why SDDM and not `greetd`.** The greeter needs a Wayland compositor of its own, because
 there is no session to borrow one from. SDDM provides that seam — a `CompositorCommand` hook —
@@ -1042,7 +1042,7 @@ asks for the "Material Symbols Rounded" family. Toren bundles that family under
 and the archive's Font Awesome 4.7 and Powerline.
 
 The consequence is not that the icons look different. It is that they do not resolve. A
-Material Symbols *name* is a ligature, and Font Awesome 4.7 is a codepoint font with no
+Material Symbols _name_ is a ligature, and Font Awesome 4.7 is a codepoint font with no
 ligatures at all — so `battery_android_full` has nothing behind it in the font Toren
 carries, and the shell's own `Icons.qml` is the only place a codepoint may be declared.
 A vendored icon name that has no entry in that map is a hollow box, in exactly the way the
@@ -1075,17 +1075,17 @@ drop-in in `/etc/sddm.conf.d/` — because a shipped file is never edited in pla
 ## The mark
 
 <p align="center">
-  <img src="../public/asura-logo.svg" alt="Toren Linux" width="150">
+  <img src="../public/toren-logo.svg" alt="Toren Linux" width="150">
 </p>
 
-*Ten* is heaven, the highest point of the sky. An asura is that same point. The
+_Ten_ is heaven, the highest point of the sky. An toren is that same point. The
 mark and the name say one thing, and they say it about the architecture as much as about the
 project: this is the top of the stack, and it sits above everything it is built on.
 
-| File | Use |
-|---|---|
-| `public/asura-logo.svg` | Black, for light backgrounds |
-| `public/asura-logo-on-dark.svg` | White, for dark backgrounds |
+| File                            | Use                          |
+| ------------------------------- | ---------------------------- |
+| `public/toren-logo.svg`         | Black, for light backgrounds |
+| `public/toren-logo-on-dark.svg` | White, for dark backgrounds  |
 
 Both are the same drawing. That is enforced, not assumed: `ci.yml` fails if the two files'
 path geometry differs by a single character or if they differ by anything other than fill
@@ -1104,9 +1104,10 @@ The mark is drawn nowhere it is installed as a raster. Anything that needs it at
 the SVG.
 
 **Logo Variant Enforcement:**
-- `public/asura-logo-on-dark.svg` (pure white `#ffffff`) is used exclusively across all dark desktop surfaces, the Toren Settings Hub masthead, page eyebrows, bar modules, and the fallback brand mark seal.
+
+- `public/toren-logo-on-dark.svg` (pure white `#ffffff`) is used exclusively across all dark desktop surfaces, the Toren Settings Hub masthead, page eyebrows, bar modules, and the fallback brand mark seal.
 - Coloured and red logo variants are prohibited throughout the system to preserve Toren's strict monochrome design system.
-- `public/asura-logo.svg` (black `#000000`) is reserved strictly for light-on-white printable or light canvas exports.
+- `public/toren-logo.svg` (black `#000000`) is reserved strictly for light-on-white printable or light canvas exports.
 
 ---
 
@@ -1114,14 +1115,13 @@ the SVG.
 
 Toren specifies a strict, modern typographic hierarchy configured through fontconfig (`/etc/fonts/local.conf` and `/etc/fonts/fonts.conf`) and QML font tokens (`Tokens.qml`):
 
-| Role | Font Family | Purpose |
-|---|---|---|
-| **Display / Headings** | `Space Grotesk` | Rail masthead, page headers, section eyebrows, hero metrics |
-| **User Interface** | `Inter` | Buttons, navigation labels, forms, dialogs, body text |
+| Role                     | Font Family               | Purpose                                                        |
+| ------------------------ | ------------------------- | -------------------------------------------------------------- |
+| **Display / Headings**   | `Space Grotesk`           | Rail masthead, page headers, section eyebrows, hero metrics    |
+| **User Interface**       | `Inter`                   | Buttons, navigation labels, forms, dialogs, body text          |
 | **Monospace / Terminal** | `JetBrainsMono Nerd Font` | Ghostty terminal, CLI output, code listings, telemetry readout |
 
 Fontconfig explicitly prefers `Inter` and `Space Grotesk` for `sans-serif`/`sans`, and `JetBrainsMono Nerd Font` for `monospace`, avoiding legacy fallbacks to DejaVu.
-
 
 ## Writing a backlight
 
@@ -1137,9 +1137,9 @@ logind support. Reading works unprivileged, writing does not.
 When `elogind` is active, it writes it directly: `org.freedesktop.login1.Session.SetBrightness(subsystem, name, value)`
 sets the value, as root, for the owner of the active session, for both `backlight` and `leds`.
 When running under pure `seatd` (without `elogind`), `toren brightness` probes `brightnessctl`, then direct sysfs
-writes if writable, and falls back seamlessly to `toren-sysd` via `/run/asura/sysd.sock`. `toren-sysd` runs as root
+writes if writable, and falls back seamlessly to `toren-sysd` via `/run/toren/sysd.sock`. `toren-sysd` runs as root
 under runit and writes to the appropriate `/sys/class/backlight/<device>/brightness` file on behalf of the user session.
-The keys, the daemon, and the sliders all go through it as `asura-cmd-brightness`. It needs no group membership,
+The keys, the daemon, and the sliders all go through it as `toren-cmd-brightness`. It needs no group membership,
 no fragile desktop udev hacks, and no interactive authentication prompts on every brightness change. See [`hardware-keys.md`](hardware-keys.md).
 
 ## Window switching is the shell's job here, not Hyprland's
@@ -1154,7 +1154,7 @@ repository ships four plugins, none of them a switcher. The built-in `cycleNext`
 walks `m_state.windows()` — layout order, active workspace only. That is neither
 most-recently-used nor cross-workspace.
 
-Hyprland *has* the capability: `CWindowQuery::cycleHistory` walks
+Hyprland _has_ the capability: `CWindowQuery::cycleHistory` walks
 `windowTracker()->fullHistory()` with the floating and fullscreen filters, in
 both directions, and is correct. It has zero call sites in every version checked.
 So this is a capability upstream built and did not wire up, and the shell supplies
@@ -1163,10 +1163,10 @@ the wiring rather than the algorithm.
 Two version facts, both load-bearing and both verified against the archive rather
 than assumed:
 
-| Fact | Consequence |
-|---|---|
+| Fact                                          | Consequence                                                                                                                                                                                                          |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `hyprland 0.53.3`, the configuration's target | Pre-Lua. hyprlang `bind =` syntax, and `hyprctl dispatch focuswindow address:0x…` is used bare. From 0.55 a Lua config wraps dispatch in `hl.dispatch({window=…})`, which is a different argument and a quoting rule |
-| `focusHistoryID` is a rank, not a timestamp | Snapshot the list once on open. Focusing a window mutates the id immediately, so re-querying per keypress makes this press change what the next press means |
+| `focusHistoryID` is a rank, not a timestamp   | Snapshot the list once on open. Focusing a window mutates the id immediately, so re-querying per keypress makes this press change what the next press means                                                          |
 
 > **What the ISO ships today is older.** Void's own repository has no Hyprland package.
 > `installation/build-iso-void.sh` installs prebuilt **Hyprland 0.49.0** and its libraries
@@ -1178,8 +1178,8 @@ than assumed:
 
 `focusHistoryID` is also inverted relative to intuition, and this is the single
 easiest thing to get wrong in the whole feature. Hyprland's history vector is
-ordered oldest to newest (`WindowHistoryTracker.hpp`: *old -> new, .front() is
-oldest*) and the id is computed as `size - index - 1`, so the window you were
+ordered oldest to newest (`WindowHistoryTracker.hpp`: _old -> new, .front() is
+oldest_) and the id is computed as `size - index - 1`, so the window you were
 just in is `0` and **lower is more recent**. Sorting descending — the obvious
 thing — is least-recently-used, and looks correct until you press it twice. `-1`
 means never focused and is pushed to the end rather than the front.
@@ -1189,7 +1189,7 @@ Alt+Shift+Tab walks the list the other way, and the release closes it through `b
 the card kept up for 450 ms after the last press. Super+Tab is not the switcher; it opens the
 workspace overview, and Super+Alt+Tab steps the overview's desktops
 (`session/hyprland/binds.conf`). The switcher used to sit on Super+Tab and close on `bindl`,
-and `l` is Hyprland's *locked* flag and not "release", so the card opened and closed on the
+and `l` is Hyprland's _locked_ flag and not "release", so the card opened and closed on the
 same press ([the journal](journal/2026-10-23.md)).
 
 ## Why the shell subscribes to a daemon
@@ -1230,15 +1230,15 @@ where the document is drawn.
 
 ## Open questions
 
-| Question | Why it matters |
-|---|---|
-| ~~**What draws the login screen**~~ | **Settled** — SDDM's Wayland greeter mode, with a Weston kiosk compositor hosted by Toren. Written up in [what draws the login screen](#what-draws-the-login-screen). |
-| ~~**The Secret portal**~~ | **Settled** — `xdg-desktop-portal-lxqt`, named for Secret only. Password storage works in Flatpaks. The KDE backend also implements it but drags in a second notification daemon. See [the portal seam](#the-portal-seam). |
-| ~~**The Camera portal**~~ | **Settled** — and not the way it looked. No backend implements `org.freedesktop.portal.Camera`, which reads as "nobody wrote one". But Camera is not a backend interface: `desktop-portal/camera.c` is part of the `xdg-desktop-portal` binary, which implements it over PipeWire and asks an **Access** backend for consent first. Access was falling to `[default] use=hyprland`, and Hyprland does not implement Access, so the dispatcher's own Camera portal could never obtain consent. Naming `Access` → `gtk` is the whole fix. See [the portal seam](#the-portal-seam). |
-| ~~**The icon font**~~ | **Settled** — `font-awesome` (4.7, 1.4 MB, no dependencies) for the status area and settings surfaces, and `fonts-powerline` for bar separators. Both from the archive, so the boundary holds and Toren does not become the distributor of a font blob. No Nerd Font is involved. See the `fonts-and-icons` group in [`system/packages-void.yaml`](../system/packages-void.yaml). |
-| Repository hosting | Toren's XBPS repository and ISO hosting need a home. GitHub Pages serves static files; a package repo wants object storage. |
-| ~~**Plugin mechanism**~~ | **Settled** — a plugin is a folder with a `manifest.json`, a `service/Main.qml` for the logic and a `content/Widget.qml` for the one view, drawn through the `qs.PluginKit` kit. `toren plugin new`, `audit`, `install`, `enable`, `disable`, `remove` and `list` scaffold, check and place it, the plugin runtime in `shell/plugins/` loads it, and it lives in `~/.local/share/asura/plugins/`. See [`plugins.md`](plugins.md). A package index for plugins is not built. |
-| Hardware report scope | What `toren hardware report` captures, and how aggressively it strips PII before emitting. |
-| The prior project's hardware tuning | Toren ports none of the per-machine tuning (udev, NetworkManager, Bluetooth, GPU, power) that the desktop it was ported from ships under `system/hardware/`; the hardware profiles own that job. Whether some of it should return as profile content is the user's decision. See [the hard list](#the-hard-list). |
-| ISO firmware policy | Whether one ISO carries firmware or firmware is fetched at install time. See [firmware and free software](#firmware-and-free-software). |
-| Test matrix | Which Hyprland, Quickshell and kernel versions CI must pass before a release. |
+| Question                            | Why it matters                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ~~**What draws the login screen**~~ | **Settled** — SDDM's Wayland greeter mode, with a Weston kiosk compositor hosted by Toren. Written up in [what draws the login screen](#what-draws-the-login-screen).                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ~~**The Secret portal**~~           | **Settled** — `xdg-desktop-portal-lxqt`, named for Secret only. Password storage works in Flatpaks. The KDE backend also implements it but drags in a second notification daemon. See [the portal seam](#the-portal-seam).                                                                                                                                                                                                                                                                                                                                                       |
+| ~~**The Camera portal**~~           | **Settled** — and not the way it looked. No backend implements `org.freedesktop.portal.Camera`, which reads as "nobody wrote one". But Camera is not a backend interface: `desktop-portal/camera.c` is part of the `xdg-desktop-portal` binary, which implements it over PipeWire and asks an **Access** backend for consent first. Access was falling to `[default] use=hyprland`, and Hyprland does not implement Access, so the dispatcher's own Camera portal could never obtain consent. Naming `Access` → `gtk` is the whole fix. See [the portal seam](#the-portal-seam). |
+| ~~**The icon font**~~               | **Settled** — `font-awesome` (4.7, 1.4 MB, no dependencies) for the status area and settings surfaces, and `fonts-powerline` for bar separators. Both from the archive, so the boundary holds and Toren does not become the distributor of a font blob. No Nerd Font is involved. See the `fonts-and-icons` group in [`system/packages-void.yaml`](../system/packages-void.yaml).                                                                                                                                                                                                |
+| Repository hosting                  | Toren's XBPS repository and ISO hosting need a home. GitHub Pages serves static files; a package repo wants object storage.                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ~~**Plugin mechanism**~~            | **Settled** — a plugin is a folder with a `manifest.json`, a `service/Main.qml` for the logic and a `content/Widget.qml` for the one view, drawn through the `qs.PluginKit` kit. `toren plugin new`, `audit`, `install`, `enable`, `disable`, `remove` and `list` scaffold, check and place it, the plugin runtime in `shell/plugins/` loads it, and it lives in `~/.local/share/toren/plugins/`. See [`plugins.md`](plugins.md). A package index for plugins is not built.                                                                                                      |
+| Hardware report scope               | What `toren hardware report` captures, and how aggressively it strips PII before emitting.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| The prior project's hardware tuning | Toren ports none of the per-machine tuning (udev, NetworkManager, Bluetooth, GPU, power) that the desktop it was ported from ships under `system/hardware/`; the hardware profiles own that job. Whether some of it should return as profile content is the user's decision. See [the hard list](#the-hard-list).                                                                                                                                                                                                                                                                |
+| ISO firmware policy                 | Whether one ISO carries firmware or firmware is fetched at install time. See [firmware and free software](#firmware-and-free-software).                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Test matrix                         | Which Hyprland, Quickshell and kernel versions CI must pass before a release.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |

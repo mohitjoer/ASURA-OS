@@ -5,7 +5,7 @@ import qs.Ui
 import qs.Ui.Singletons
 import "Singletons"
 
-// asura-vm, the harbour: one console for every machine you command -- the local
+// toren-vm, the harbour: one console for every machine you command -- the local
 // iron in the yard (QEMU), and the distant ports reached over SSH. A hub shell:
 // the rail owns navigation, three plates fill the stage (the harbour dashboard,
 // the machine yard, the remote fleet). Paper and ink; the frame carries no accent,

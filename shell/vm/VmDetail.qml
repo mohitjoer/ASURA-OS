@@ -309,7 +309,7 @@ Item {
                                     onCommitted: (v) => {
                                         var u = v.trim();
                                         if (u.length > 0 && pane.det && u !== pane.det.sshUser) {
-                                            Vm.setConfig(pane.name, "asura_vm_ssh_user", u);
+                                            Vm.setConfig(pane.name, "toren_vm_ssh_user", u);
                                             Vm.reselect();
                                         }
                                     }
@@ -513,7 +513,7 @@ Item {
                                 width: parent.width
                                 wrapMode: Text.WordWrap
                                 visible: !powerBody.parent.live
-                                text: I18n.tr("Waiting for the machine's live monitor. If it never arrives, the asura-vm-mon helper may not be installed.")
+                                text: I18n.tr("Waiting for the machine's live monitor. If it never arrives, the toren-vm-mon helper may not be installed.")
                                 color: Tokens.inkMuted; font.family: Tokens.ui; font.pixelSize: 11
                             }
                         }
@@ -1022,7 +1022,7 @@ Item {
                         wrapMode: Text.WordWrap
                         text: pane.running
                             ? I18n.tr("Stop the machine to template it.")
-                            : I18n.tr("Freeze this machine (tools and all) into a golden base, then spawn instant clones off it (asura-vm spawn). A disposable spawn boots in seconds with everything already baked.")
+                            : I18n.tr("Freeze this machine (tools and all) into a golden base, then spawn instant clones off it (toren-vm spawn). A disposable spawn boots in seconds with everything already baked.")
                         color: Tokens.inkMuted
                         font.family: Tokens.ui
                         font.pixelSize: pane.running ? 12 : 11

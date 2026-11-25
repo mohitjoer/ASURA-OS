@@ -10,11 +10,11 @@ if [ ! -x "$INSTALLER" ]; then
 fi
 
 if ! sh -n "$INSTALLER"; then
-	echo "toren-installer_test: shell syntax check failed on asura-installer.sh" >&2
+	echo "toren-installer_test: shell syntax check failed on toren-installer.sh" >&2
 	exit 1
 fi
 
-TMP_DIR=$(mktemp -d 2>/dev/null || echo "/tmp/asura-test.$$")
+TMP_DIR=$(mktemp -d 2>/dev/null || echo "/tmp/toren-test.$$")
 cleanup() {
 	rm -rf "$TMP_DIR"
 }
@@ -42,8 +42,8 @@ grep -Fq "Format root partition with LUKS2 (argon2id, label ASURA_CRYPT)" "$OUT_
 	echo "toren-installer_test: missing LUKS2 formatting step in dry-run summary" >&2
 	exit 1
 }
-grep -Fq "Open LUKS container as /dev/mapper/asura_root" "$OUT_ENCRYPT" || {
-	echo "toren-installer_test: missing /dev/mapper/asura_root step in dry-run summary" >&2
+grep -Fq "Open LUKS container as /dev/mapper/toren_root" "$OUT_ENCRYPT" || {
+	echo "toren-installer_test: missing /dev/mapper/toren_root step in dry-run summary" >&2
 	exit 1
 }
 grep -Fq "Configure /etc/crypttab, dracut crypt module, fstab with persistent UUIDs, and GRUB rd.luks.uuid" "$OUT_ENCRYPT" || {
@@ -78,7 +78,7 @@ if grep -q "testpassphrase123" "$OUT_ENCRYPT"; then
 fi
 
 # Test 4: Unattended installation via --config answer file
-CONFIG_FILE="$TMP_DIR/asura-answer.yaml"
+CONFIG_FILE="$TMP_DIR/toren-answer.yaml"
 cat >"$CONFIG_FILE" <<'EOF'
 disk: /dev/sda
 mode: wipe
@@ -143,10 +143,10 @@ grep -Fq "without overwriting fallback EFI/BOOT/BOOTX64.EFI" "$OUT_ALONGSIDE" ||
 
 # The snapshot GRUB snippet is installed before the first grub-mkconfig, so
 # the installed system's first grub.cfg already carries it.
-snippet_line=$(grep -n '40_asura_snapshots' "$REPO_ROOT/installation/toren-installer.sh" | head -n1 | cut -d: -f1)
+snippet_line=$(grep -n '40_toren_snapshots' "$REPO_ROOT/installation/toren-installer.sh" | head -n1 | cut -d: -f1)
 mkconfig_line=$(grep -n 'grub-mkconfig -o' "$REPO_ROOT/installation/toren-installer.sh" | head -n1 | cut -d: -f1)
 if [ -z "$snippet_line" ] || [ -z "$mkconfig_line" ] || [ "$snippet_line" -gt "$mkconfig_line" ]; then
-	echo "toren-installer_test: 40_asura_snapshots is not installed before grub-mkconfig" >&2
+	echo "toren-installer_test: 40_toren_snapshots is not installed before grub-mkconfig" >&2
 	exit 1
 fi
 

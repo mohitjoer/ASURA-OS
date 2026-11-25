@@ -33,7 +33,7 @@ func TestProfileRoundTrip(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	dst := filepath.Join(t.TempDir(), "share.asuraprofile")
+	dst := filepath.Join(t.TempDir(), "share.torenprofile")
 	if err := exportProfile(dst); err != nil {
 		t.Fatalf("exportProfile: %v", err)
 	}
@@ -70,13 +70,13 @@ func TestProfileImportRejectsGarbage(t *testing.T) {
 	dir := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", dir)
 
-	garbage := filepath.Join(t.TempDir(), "bad.asuraprofile")
+	garbage := filepath.Join(t.TempDir(), "bad.torenprofile")
 	if err := os.WriteFile(garbage, []byte(`{"profile":{"preset":"full"}}`), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
 	if err := importProfile(garbage); err == nil {
-		t.Fatal("importProfile accepted a file lacking asuraprofile:1")
+		t.Fatal("importProfile accepted a file lacking torenprofile:1")
 	}
 	if _, err := os.Stat(profileConfigPath()); !os.IsNotExist(err) {
 		t.Fatalf("profile.json must not exist after a rejected import, stat err = %v", err)

@@ -57,7 +57,7 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Top
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
-    WlrLayershell.namespace: "asura-camera"
+    WlrLayershell.namespace: "toren-camera"
 
     anchors { top: true; bottom: true; left: true; right: true }
 

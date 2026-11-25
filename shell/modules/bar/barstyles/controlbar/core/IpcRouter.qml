@@ -90,7 +90,7 @@ Item {
     }
 
     IpcHandler {
-        target: "asura.system-update"
+        target: "toren.system-update"
         function refresh(): void { router.systemRefresh() }
     }
 

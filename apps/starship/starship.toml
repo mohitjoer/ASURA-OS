@@ -110,8 +110,8 @@ teal = "#A1A1A1"
 yellow = "#F5A524"
 error = "#E5484D"
 
-# Monochrome Asura terminal palette for backwards compatibility
-[palettes.asura]
+# Monochrome Toren terminal palette for backwards compatibility
+[palettes.toren]
 ink = "#F2F2F2"
 ink_dim = "#CCCCCC"
 ink_faint = "#A1A1A1"

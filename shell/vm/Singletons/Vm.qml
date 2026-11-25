@@ -5,7 +5,7 @@ import Quickshell.Io
 import qs.Ui.Singletons
 
 // The app's state: host readiness, the local VM library, the quickget OS
-// catalogue, and the lifecycle pipeline, all driven through the `asura-vm` engine.
+// catalogue, and the lifecycle pipeline, all driven through the `toren-vm` engine.
 // One quickemu .conf per VM, so the library is naturally multi-VM.
 Singleton {
     id: root
@@ -112,7 +112,7 @@ Singleton {
     property var dlJobs: dlJobsModel
     ListModel { id: dlJobsModel }
 
-    // ---- settings (persisted to ~/.config/asura/asura-vm.json) -----------------
+    // ---- settings (persisted to ~/.config/toren/toren-vm.json) -----------------
     readonly property var settings: cfg
 
     function refresh() {
@@ -152,7 +152,7 @@ Singleton {
             detail = null;
         selectedName = name;
         if (name.length > 0) {
-            getProc.command = ["asura-vm", "get", name];
+            getProc.command = ["toren-vm", "get", name];
             getProc.running = true;
             root.loadUsb(name);
             root.loadPortfwd(name);
@@ -165,7 +165,7 @@ Singleton {
             return;
         busy = true;
         status = disposable ? I18n.tr("Starting %1 (disposable)").arg(name) : I18n.tr("Starting %1").arg(name);
-        var cmd = ["asura-vm", "launch", name, mode || "window"];
+        var cmd = ["toren-vm", "launch", name, mode || "window"];
         if (disposable === true)
             cmd.push("--disposable");
         runProc.exec(cmd);
@@ -176,14 +176,14 @@ Singleton {
             return;
         busy = true;
         status = I18n.tr("Sealing %1").arg(name);
-        runProc.exec(["asura-vm", "seal", name]);
+        runProc.exec(["toren-vm", "seal", name]);
     }
     function restoreSeal(name) {
         if (busy)
             return;
         busy = true;
         status = I18n.tr("Restoring the seal on %1").arg(name);
-        runProc.exec(["asura-vm", "restore-seal", name]);
+        runProc.exec(["toren-vm", "restore-seal", name]);
     }
     // template = freeze this machine (tools + all) into a reusable golden base;
     // spawn = a thin clone off it that boots in seconds with everything baked.
@@ -191,54 +191,54 @@ Singleton {
         if (busy) return;
         busy = true;
         status = I18n.tr("Saving %1 as a template").arg(name);
-        runProc.exec(["asura-vm", "template", name, name]);
+        runProc.exec(["toren-vm", "template", name, name]);
     }
     function stop(name) {
         if (busy)
             return;
         busy = true;
         status = I18n.tr("Stopping %1").arg(name);
-        runProc.exec(["asura-vm", "stop", name]);
+        runProc.exec(["toren-vm", "stop", name]);
     }
-    function openConsole(name) { runProc.exec(["asura-vm", "console", name]); }
+    function openConsole(name) { runProc.exec(["toren-vm", "console", name]); }
     function deleteVm(name) {
         if (busy)
             return;
         busy = true;
         status = I18n.tr("Deleting %1").arg(name);
-        runProc.exec(["asura-vm", "delete", name]);
+        runProc.exec(["toren-vm", "delete", name]);
     }
-    function setConfig(name, key, value) { runProc.exec(["asura-vm", "config", name, key, "" + value]); }
+    function setConfig(name, key, value) { runProc.exec(["toren-vm", "config", name, key, "" + value]); }
     function snapshot(name, sub, tag) {
         if (busy)
             return;
         busy = true;
         status = ({ "create": I18n.tr("Saving snapshot"), "restore": I18n.tr("Restoring snapshot"), "delete": I18n.tr("Deleting snapshot") })[sub] || I18n.tr("Working");
-        runProc.exec(["asura-vm", "snapshot", name, sub].concat(tag ? [tag] : []));
+        runProc.exec(["toren-vm", "snapshot", name, sub].concat(tag ? [tag] : []));
     }
     function openFolder(name) {
-        folderProc.command = ["asura-vm", "folder"].concat(name ? [name] : []);
+        folderProc.command = ["toren-vm", "folder"].concat(name ? [name] : []);
         folderProc.running = true;
     }
     function openSsh(name) {
         sshProc.vmName = name;
-        sshProc.command = ["asura-vm", "ssh", name];
+        sshProc.command = ["toren-vm", "ssh", name];
         sshProc.running = true;
     }
     // copy the ready-to-paste ssh command for a running VM.
     function copySsh(name) {
-        copyProc.command = ["asura-vm", "ssh", name];
+        copyProc.command = ["toren-vm", "ssh", name];
         copyProc.running = true;
     }
     // host USB devices + this VM's assignments (usb_devices in its conf).
     property var usb: []
     function loadUsb(name) {
         if (!name || name.length === 0) { usb = []; return; }
-        usbProc.command = ["asura-vm", "usb", "list", name];
+        usbProc.command = ["toren-vm", "usb", "list", name];
         usbProc.running = true;
     }
     function setUsb(name, id, on) {
-        usbSetProc.command = ["asura-vm", "usb", "set", name, id, on ? "on" : "off"];
+        usbSetProc.command = ["toren-vm", "usb", "set", name, id, on ? "on" : "off"];
         usbSetProc.running = true;
     }
 
@@ -246,15 +246,15 @@ Singleton {
     property var portfwds: []
     function loadPortfwd(name) {
         if (!name || name.length === 0) { portfwds = []; return; }
-        portfwdProc.command = ["asura-vm", "portfwd", "list", name];
+        portfwdProc.command = ["toren-vm", "portfwd", "list", name];
         portfwdProc.running = true;
     }
     function addPortfwd(name, spec) {
-        portfwdProc2.command = ["asura-vm", "portfwd", "add", name, spec];
+        portfwdProc2.command = ["toren-vm", "portfwd", "add", name, spec];
         portfwdProc2.running = true;
     }
     function removePortfwd(name, spec) {
-        portfwdProc2.command = ["asura-vm", "portfwd", "remove", name, spec];
+        portfwdProc2.command = ["toren-vm", "portfwd", "remove", name, spec];
         portfwdProc2.running = true;
     }
     // rename repoints the conf, dir and relative paths, then reselects the new
@@ -265,14 +265,14 @@ Singleton {
         busy = true;
         status = I18n.tr("Renaming to %1").arg(next);
         pendingSelect = next;
-        runProc.exec(["asura-vm", "rename", name, next]);
+        runProc.exec(["toren-vm", "rename", name, next]);
     }
     function resizeDisk(name, size) {
         if (busy)
             return;
         busy = true;
         status = I18n.tr("Resizing %1 disk").arg(name);
-        runProc.exec(["asura-vm", "resize", name, "" + size]);
+        runProc.exec(["toren-vm", "resize", name, "" + size]);
     }
     // reclaim frees the disk image (and re-installable media) but keeps the
     // machine's config, so it can be reinstalled later.
@@ -281,10 +281,10 @@ Singleton {
             return;
         busy = true;
         status = I18n.tr("Reclaiming %1 disk").arg(name);
-        runProc.exec(["asura-vm", "delete", name, "--disk-only"]);
+        runProc.exec(["toren-vm", "delete", name, "--disk-only"]);
     }
 
-    // ---- live control of a running VM (via the `asura-vm mon` verb) -----------
+    // ---- live control of a running VM (via the `toren-vm mon` verb) -----------
     // Pause, resume, reset, reballoon and pin a running machine live, and read
     // its host-side cost and guest IP, through the sockets quickemu already
     // opens. monStats is the last reading of the selected machine.
@@ -294,12 +294,12 @@ Singleton {
     onSelectedNameChanged: monStats = ({})
     function monRefresh() {
         if (!monRunning || selectedName.length === 0) { monStats = ({}); return; }
-        monProc.command = ["asura-vm", "mon", selectedName, "stats"];
+        monProc.command = ["toren-vm", "mon", selectedName, "stats"];
         monProc.running = true;
     }
-    function power(name, action) { monActProc.command = ["asura-vm", "mon", name, "power", action]; monActProc.running = true; }
-    function balloon(name, mb) { monActProc.command = ["asura-vm", "mon", name, "balloon", "" + Math.round(mb)]; monActProc.running = true; }
-    function pin(name, mode) { monActProc.command = ["asura-vm", "mon", name, "pin", mode || "auto"]; monActProc.running = true; }
+    function power(name, action) { monActProc.command = ["toren-vm", "mon", name, "power", action]; monActProc.running = true; }
+    function balloon(name, mb) { monActProc.command = ["toren-vm", "mon", name, "balloon", "" + Math.round(mb)]; monActProc.running = true; }
+    function pin(name, mode) { monActProc.command = ["toren-vm", "mon", name, "pin", mode || "auto"]; monActProc.running = true; }
 
     // ---- catalogue ----------------------------------------------------------
     function loadCatalog(force) {
@@ -307,12 +307,12 @@ Singleton {
             return;
         catalogLoading = true;
         catalogError = "";
-        catProc.command = force ? ["asura-vm", "catalog", "--refresh"] : ["asura-vm", "catalog"];
+        catProc.command = force ? ["toren-vm", "catalog", "--refresh"] : ["toren-vm", "catalog"];
         catProc.running = true;
     }
     function selectOs(entry) { selectedOs = entry; }
 
-    // ---- instant (prebuilt cloud image + asura burn account) ----------------
+    // ---- instant (prebuilt cloud image + toren burn account) ----------------
     property var cloudList: []
     property bool cloudLoading
     function loadCloud() {
@@ -404,7 +404,7 @@ Singleton {
     function importVm(name, iso, guest, os) {
         busy = true;
         status = I18n.tr("Creating %1").arg(name);
-        runProc.exec(["asura-vm", "import", name, iso, guest || "linux", os || guest || "linux"]);
+        runProc.exec(["toren-vm", "import", name, iso, guest || "linux", os || guest || "linux"]);
         // Windows has no in-box virtio driver: pull the shared driver CD now (a
         // visible download) so it's cached before the machine first boots.
         if (guest === "windows" || guest === "windows-server")
@@ -449,17 +449,17 @@ Singleton {
     // ---- processes ----------------------------------------------------------
     Process {
         id: capsProc
-        command: ["asura-vm", "caps"]
+        command: ["toren-vm", "caps"]
         stdout: StdioCollector {
             onStreamFinished: {
                 try { root.caps = JSON.parse(this.text); }
-                catch (e) { console.log("asura-vm: caps parse failed: " + e); }
+                catch (e) { console.log("toren-vm: caps parse failed: " + e); }
             }
         }
     }
     Process {
         id: listProc
-        command: ["asura-vm", "list"]
+        command: ["toren-vm", "list"]
         property string last: ""
         stdout: StdioCollector {
             onStreamFinished: {
@@ -531,7 +531,7 @@ Singleton {
     // iconRev so cards already showing a monogram pick up a newly cached logo.
     Process {
         id: prefetchProc
-        command: ["asura-vm", "prefetch"]
+        command: ["toren-vm", "prefetch"]
         stdout: StdioCollector {
             onStreamFinished: {
                 try {
@@ -551,7 +551,7 @@ Singleton {
     }
     Process {
         id: cloudProc
-        command: ["asura-vm", "cloud-catalog"]
+        command: ["toren-vm", "cloud-catalog"]
         stdout: StdioCollector {
             onStreamFinished: {
                 root.cloudLoading = false;
@@ -561,7 +561,7 @@ Singleton {
     }
     Process {
         id: pathsProc
-        command: ["asura-vm", "paths"]
+        command: ["toren-vm", "paths"]
         stdout: StdioCollector {
             onStreamFinished: { try { root.paths = JSON.parse(this.text); } catch (e) {} }
         }
@@ -582,15 +582,15 @@ Singleton {
             Component.onCompleted: {
                 var c;
                 if (model.kind === "instant") {
-                    c = ["asura-vm", "instant", model.os];
+                    c = ["toren-vm", "instant", model.os];
                     if (model.cmdName.length > 0 && model.cmdName !== model.os + "-instant") c.push(model.cmdName);
                     if (model.disposable) c.push("--disposable");
                     if (model.tools.length > 0) c.push("--tools=" + model.tools);
                     if (model.pkgs.length > 0) c.push("--pkgs=" + model.pkgs);
                 } else if (model.kind === "virtio") {
-                    c = ["asura-vm", "virtio"];
+                    c = ["toren-vm", "virtio"];
                 } else {
-                    c = ["asura-vm", "create", model.os, model.release];
+                    c = ["toren-vm", "create", model.os, model.release];
                     if (model.edition.length > 0) c.push(model.edition);
                 }
                 jobProc.command = c;
@@ -735,7 +735,7 @@ Singleton {
                 var c = this.text.trim();
                 if (c.length === 0)
                     return;
-                // asura-app opens the user's terminal. QEMU's user-net accepts
+                // toren-app opens the user's terminal. QEMU's user-net accepts
                 // the TCP connect while the guest is still booting, so a bare ssh
                 // sits in a pitch-black window with no sign of life (and a plain
                 // timeout would kill a session the user IS logged into). Narrate
@@ -752,7 +752,7 @@ Singleton {
                 var script = [
                     "cmd=$1; port=$2; vm=$3; user=$4; burn=$5",
                     "printf '  %s, ssh to localhost:%s as \\033[1m%s\\033[0m\\n' \"$vm\" \"$port\" \"$user\"",
-                    "printf '  wrong account? set it once:  asura-vm config %s asura_vm_ssh_user <guest user>\\n\\n' \"$vm\"",
+                    "printf '  wrong account? set it once:  toren-vm config %s toren_vm_ssh_user <guest user>\\n\\n' \"$vm\"",
                     "hinted=",
                     "until b=$(timeout 3 bash -c \"exec 3<>/dev/tcp/127.0.0.1/$port && head -c4 <&3\" 2>/dev/null); [ \"$b\" = \"SSH-\" ]; do",
                     "  printf '\\r  waiting for the guest to answer: %ss (first boot can take a minute; Ctrl+C aborts) ' \"$SECONDS\"",
@@ -783,10 +783,10 @@ Singleton {
                     "printf '\\n  connecting.\\n\\n'",
                     "$cmd",
                     "ec=$?",
-                    "if [ $ec -ne 0 ]; then echo; echo \"ssh exited $ec, a password you never set means the guest has no '$user' account: asura-vm config $vm asura_vm_ssh_user <guest user>\"; echo 'press Enter to close'; read _; fi"
+                    "if [ $ec -ne 0 ]; then echo; echo \"ssh exited $ec, a password you never set means the guest has no '$user' account: toren-vm config $vm toren_vm_ssh_user <guest user>\"; echo 'press Enter to close'; read _; fi"
                 ].join("\n");
-                Quickshell.execDetached(["asura-app", "terminal", "--", "bash", "-c", script,
-                    "asura-vm-ssh", c, pm ? pm[1] : "", sshProc.vmName, um ? um[1] : "", burn]);
+                Quickshell.execDetached(["toren-app", "terminal", "--", "bash", "-c", script,
+                    "toren-vm-ssh", c, pm ? pm[1] : "", sshProc.vmName, um ? um[1] : "", burn]);
             }
         }
     }
@@ -826,7 +826,7 @@ Singleton {
 
     FileView {
         id: cfgFile
-        path: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/asura/asura-vm.json"
+        path: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/toren/toren-vm.json"
         watchChanges: true
         printErrors: false
         onLoadFailed: cfgFile.writeAdapter()

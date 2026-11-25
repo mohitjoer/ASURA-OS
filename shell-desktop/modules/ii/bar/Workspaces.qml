@@ -9,7 +9,7 @@ import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Widgets
 
-// ASURA overlay (shell-desktop/asura/vendor.sh OVERLAYS): the bar's workspaces,
+// ASURA overlay (shell-desktop/toren/vendor.sh OVERLAYS): the bar's workspaces,
 // showing only the workspaces that exist, the active one and those with
 // windows, in order. end-4's widget draws a fixed row of slots
 // (bar.workspaces.shown, 10) and marks the empty ones with dots; Hyprland
@@ -69,7 +69,7 @@ ButtonMouseArea {
 
         // ASURA Logo Button
         Rectangle {
-            id: asuraLogoBtn
+            id: torenLogoBtn
             readonly property bool hovered: logoMouse.containsMouse
             implicitWidth: root.workspaceButtonWidth + 2
             implicitHeight: root.workspaceButtonWidth
@@ -84,8 +84,8 @@ ButtonMouseArea {
                 width: 18
                 height: 18
                 source: Appearance.m3colors.darkmode 
-                    ? Quickshell.shellPath("assets/icons/asura-logo.svg") 
-                    : Quickshell.shellPath("assets/icons/asura-logo-dark.svg")
+                    ? Quickshell.shellPath("assets/icons/toren-logo.svg") 
+                    : Quickshell.shellPath("assets/icons/toren-logo-dark.svg")
                 fillMode: Image.PreserveAspectFit
                 smooth: true
             }
@@ -98,7 +98,7 @@ ButtonMouseArea {
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 onClicked: event => {
                     if (event.button === Qt.RightButton) {
-                        Quickshell.execDetached(["asura-shell", "hub", "open"]);
+                        Quickshell.execDetached(["toren-shell", "hub", "open"]);
                     } else {
                         GlobalStates.overviewOpen = !GlobalStates.overviewOpen;
                     }

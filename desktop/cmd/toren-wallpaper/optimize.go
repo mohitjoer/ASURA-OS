@@ -428,9 +428,9 @@ func (o *Optimizer) emitProgress(kind string, js *jobState) {
 		return
 	}
 	if kind == kindOptimize {
-		o.emit("asura-wallpaper.wall.optimize.progress", statusPayload(kind, js))
+		o.emit("toren-wallpaper.wall.optimize.progress", statusPayload(kind, js))
 	} else {
-		o.emit("asura-wallpaper.wall.convert.progress", statusPayload(kind, js))
+		o.emit("toren-wallpaper.wall.convert.progress", statusPayload(kind, js))
 	}
 }
 
@@ -439,10 +439,10 @@ func (o *Optimizer) emitFinished(kind string, js *jobState) {
 		return
 	}
 	successKey := "optimized"
-	event := "asura-wallpaper.wall.optimize.finished"
+	event := "toren-wallpaper.wall.optimize.finished"
 	if kind == kindConvert {
 		successKey = "converted"
-		event = "asura-wallpaper.wall.convert.finished"
+		event = "toren-wallpaper.wall.convert.finished"
 	}
 	o.emit(event, map[string]interface{}{
 		successKey: js.succeeded,

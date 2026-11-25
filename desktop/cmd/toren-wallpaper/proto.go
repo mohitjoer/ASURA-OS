@@ -7,7 +7,7 @@ import (
 )
 
 // The wire mirrors the Rust daemon this Go port replaces, which itself mirrored
-// asura-shell's line pub/sub: one unix socket serves plain verb lines, JSON-RPC
+// toren-shell's line pub/sub: one unix socket serves plain verb lines, JSON-RPC
 // request lines, `subscribe <topic>` streams, and pushed events after a JSON
 // `subscribe` request.
 
@@ -89,5 +89,5 @@ func socketPath() string {
 	if dir == "" {
 		dir = "/tmp"
 	}
-	return filepath.Join(dir, "asura-wallpaper.sock")
+	return filepath.Join(dir, "toren-wallpaper.sock")
 }

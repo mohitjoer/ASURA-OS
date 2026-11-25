@@ -68,30 +68,30 @@ run_session
 [ -f "$WORK/seen.env" ]
 check "the script reaches the compositor" $?
 
-# The compositor is given Asura's configuration, because a compositor started
+# The compositor is given Toren's configuration, because a compositor started
 # without it runs on Hyprland's own defaults — a desktop with no keybindings
 # at all, where the launcher cannot be opened and the switcher cannot be driven.
 grep -qx -- '-c' "$WORK/seen.args"
 check "the compositor is started with a config" $?
 
-grep -qE -- '/usr/share/asura/hyprland/hyprland\.(lua|conf)' "$WORK/seen.args"
-check "the compositor is started with Asura's configuration" $?
+grep -qE -- '/usr/share/toren/hyprland/hyprland\.(lua|conf)' "$WORK/seen.args"
+check "the compositor is started with Toren's configuration" $?
 
 # The user's own configuration is created, because Hyprland treats a source
 # that resolves to nothing as a configuration error and refuses to start.
-[ -f "$WORK/.config/asura/hyprland/asura.conf" ]
+[ -f "$WORK/.config/toren/hyprland/toren.conf" ]
 check "the user's compositor configuration is created" $?
 
 # The two desktop names are different strings on purpose: the dispatcher
 # lower-cases XDG_CURRENT_DESKTOP to derive its config file name, and the login
 # manager records the lower-case session name.
-grep -qx 'XDG_CURRENT_DESKTOP=Asura' "$WORK/seen.env"
-check "XDG_CURRENT_DESKTOP is Asura, capitalised" $?
+grep -qx 'XDG_CURRENT_DESKTOP=Toren' "$WORK/seen.env"
+check "XDG_CURRENT_DESKTOP is Toren, capitalised" $?
 
-grep -qx 'XDG_SESSION_DESKTOP=asura' "$WORK/seen.env"
-check "XDG_SESSION_DESKTOP is asura, lower-case" $?
+grep -qx 'XDG_SESSION_DESKTOP=toren' "$WORK/seen.env"
+check "XDG_SESSION_DESKTOP is toren, lower-case" $?
 
-grep -qx 'DESKTOP_SESSION=asura' "$WORK/seen.env"
+grep -qx 'DESKTOP_SESSION=toren' "$WORK/seen.env"
 check "DESKTOP_SESSION is set" $?
 
 grep -qx 'XDG_SESSION_TYPE=wayland' "$WORK/seen.env"
@@ -125,16 +125,16 @@ fi
 
 # ------------------------------------------------ the overlay is actually read
 echo "--- checking that the overlay is sourced when it exists"
-mkdir -p "$WORK/config/asura/session"
+mkdir -p "$WORK/config/toren/session"
 printf 'export ASURA_OVERLAY_WAS_READ=yes\n' \
-    > "$WORK/config/asura/session/asura-session.env"
+    > "$WORK/config/toren/session/toren-session.env"
 rm -f "$WORK/seen.env"
 run_session
 grep -qx 'ASURA_OVERLAY_WAS_READ=yes' "$WORK/seen.env"
 check "the user's session overlay is sourced" $?
 
 # An overlay that fails must fail loudly rather than being swallowed.
-printf 'exit 3\n' > "$WORK/config/asura/session/asura-session.env"
+printf 'exit 3\n' > "$WORK/config/toren/session/toren-session.env"
 rm -f "$WORK/seen.env"
 if run_session >/dev/null 2>&1; then
     check "a failing overlay aborts the session before the compositor" 1
@@ -148,7 +148,7 @@ else
 fi
 
 # --------------------------------------------------------------- the log line
-grep -q 'asura-session' "$WORK/state/asura/session.log"
+grep -q 'toren-session' "$WORK/state/toren/session.log"
 check "the session logs what it did" $?
 
 # ------------------------------------------------------------------- units
@@ -173,7 +173,7 @@ if command -v systemd-analyze >/dev/null 2>&1 && [ -d "$REPO_ROOT/session/units"
         # references resolve there.
         PROBLEMS=$(systemd-analyze --user verify "$unit" 2>&1 \
             | grep -F "$(basename "$unit")" \
-            | grep -vE "(asura-session|graphical-session)\.target not found|not executable" || true)
+            | grep -vE "(toren-session|graphical-session)\.target not found|not executable" || true)
 
         rc=0; [ -z "$PROBLEMS" ] || rc=$?
         check "$(basename "$unit") has no unknown keys or bad directives" $rc
@@ -207,16 +207,16 @@ if command -v systemd-analyze >/dev/null 2>&1 && [ -d "$REPO_ROOT/session/units"
     after() { has_dep "$1" After "$2"; }
     requires() { has_dep "$1" Requires "$2"; }
 
-    SHELL_UNIT="$REPO_ROOT/session/units/asura-shell.service"
-    PORTAL_UNIT="$REPO_ROOT/session/units/asura-portal.service"
+    SHELL_UNIT="$REPO_ROOT/session/units/toren-shell.service"
+    PORTAL_UNIT="$REPO_ROOT/session/units/toren-portal.service"
 
     # The shell waits for the dispatcher: the dispatcher resolves its backends
     # once at startup and never re-reads them, so a shell that starts first asks
     # the bus for a portal that has not been decided on yet.
-    rc=0; after "$SHELL_UNIT" asura-portal.service || rc=$?
+    rc=0; after "$SHELL_UNIT" toren-portal.service || rc=$?
     check "the shell is ordered after the portal dispatcher" $rc
 
-    rc=0; after "$SHELL_UNIT" asura-session.target || rc=$?
+    rc=0; after "$SHELL_UNIT" toren-session.target || rc=$?
     check "the shell is ordered after the session" $rc
 
     # Audio: the shell's volume widget has nothing to talk to without it.
@@ -225,10 +225,10 @@ if command -v systemd-analyze >/dev/null 2>&1 && [ -d "$REPO_ROOT/session/units"
 
     # Requires, not just After. Ordered-only leaves the shell running against a
     # display that is no longer there.
-    rc=0; requires "$SHELL_UNIT" asura-session.target || rc=$?
+    rc=0; requires "$SHELL_UNIT" toren-session.target || rc=$?
     check "the shell requires the session's target" $rc
 
-    rc=0; after "$PORTAL_UNIT" asura-session.target || rc=$?
+    rc=0; after "$PORTAL_UNIT" toren-session.target || rc=$?
     check "the portal dispatcher is ordered after the session" $rc
 
     # Type=dbus is what makes "started" mean the bus name is held, which is the
@@ -240,31 +240,31 @@ if command -v systemd-analyze >/dev/null 2>&1 && [ -d "$REPO_ROOT/session/units"
     rc=0; grep -q '^BusName=org.freedesktop.portal.Desktop$' "$PORTAL_UNIT" || rc=$?
     check "the portal dispatcher claims the portal bus name" $rc
 
-    for unit in asura-shell asura-portal; do
+    for unit in toren-shell toren-portal; do
         rc=0; grep -q '^PartOf=graphical-session.target$' \
             "$REPO_ROOT/session/units/$unit.service" || rc=$?
         check "$unit is part of the graphical session" $rc
 
         # WantedBy the session's own target, not graphical-session.target: the
         # session target is what the session actually pulls up.
-        rc=0; grep -q '^WantedBy=asura-session.target$' \
+        rc=0; grep -q '^WantedBy=toren-session.target$' \
             "$REPO_ROOT/session/units/$unit.service" || rc=$?
         check "$unit is wanted by the session's target" $rc
     done
 
     # The session's target is what pulls either unit up at all, and it is
-    # Asura's own because Ubuntu's Hyprland ships no systemd units: a unit
+    # Toren's own because Ubuntu's Hyprland ships no systemd units: a unit
     # that requires a target nobody has cannot start.
-    rc=0; grep -q 'asura-shell.service' \
-        "$REPO_ROOT/session/units/asura-session.target" || rc=$?
+    rc=0; grep -q 'toren-shell.service' \
+        "$REPO_ROOT/session/units/toren-session.target" || rc=$?
     check "the session target wants the shell" $rc
 
-    rc=0; grep -q 'asura-portal.service' \
-        "$REPO_ROOT/session/units/asura-session.target" || rc=$?
+    rc=0; grep -q 'toren-portal.service' \
+        "$REPO_ROOT/session/units/toren-session.target" || rc=$?
     check "the session target wants the portal dispatcher" $rc
 
     # And something has to start it, at a moment when the display exists.
-    rc=0; grep -q 'exec-once = /usr/share/asura/session/asura-activate' \
+    rc=0; grep -q 'exec-once = /usr/share/toren/session/toren-activate' \
         "$REPO_ROOT/session/hyprland/hyprland.conf" || rc=$?
     check "the compositor's configuration starts the session" $rc
 
@@ -279,7 +279,7 @@ if command -v systemd-analyze >/dev/null 2>&1 && [ -d "$REPO_ROOT/session/units"
     # job — which means the portal dispatcher silently does not start.
     CYCLES=$(systemd-analyze --user verify \
         "$REPO_ROOT"/session/units/*.service "$REPO_ROOT"/session/units/*.target 2>&1 \
-        | grep -E "ordering cycle" | grep -E "asura" || true)
+        | grep -E "ordering cycle" | grep -E "toren" || true)
     rc=0; [ -z "$CYCLES" ] || rc=$?
     check "the units have no ordering cycle" $rc
     if [ -n "$CYCLES" ]; then
@@ -291,7 +291,7 @@ fi
 
 # ------------------------------------------------------------- the settings app
 #
-# asura-hub lives in this directory and has no test of its own, and the one
+# toren-hub lives in this directory and has no test of its own, and the one
 # thing it exists to do is export ASURA_SCHEMA_DIR — which settingsCatalogue
 # reads. It pointed at $PREFIX/schemas, a directory the package never creates,
 # so the wrapper set an override onto a path that resolves nowhere, and the Hub
@@ -305,15 +305,15 @@ tool_schema=$(grep -o 'const settingsDir = "[^"]*"'     "$REPO_ROOT/desktop/cmd/
 rc=0
 if [ -z "$hub_schema" ] || [ "$hub_schema" != "$tool_schema" ]; then
     echo "  hub exports:   ${hub_schema:-<none>}"
-    echo "  asura reads:  ${tool_schema:-<none>}"
+    echo "  toren reads:  ${tool_schema:-<none>}"
     rc=1
 fi
-check "the hub exports the schema directory asura reads" $rc
+check "the hub exports the schema directory toren reads" $rc
 
 # ------------------------------------------------------- the compositor's files
 # The configuration is several files that hyprland.conf sources. Hyprland's own
 # parser is the only judge of a rule's syntax, so it is asked, with an empty home
-# so none of the optional state files under ~/.config/asura/hyprland exist.
+# so none of the optional state files under ~/.config/toren/hyprland exist.
 if command -v Hyprland >/dev/null 2>&1; then
     rc=0
     HOME="$WORK/empty-home" mkdir -p "$WORK/empty-home"
@@ -322,7 +322,7 @@ if command -v Hyprland >/dev/null 2>&1; then
         rc=0
     else
         # Hyprland >= 0.50 deprecated windowrulev2 and changed layerrule fields,
-        # while Asura OS ships native Hyprland 0.49 from Makrennel repo.
+        # while Toren OS ships native Hyprland 0.49 from Makrennel repo.
         # Ensure that on newer host test environments, only expected 0.50+ deprecations occur.
         errors=$(echo "$out" | grep -E '^Config error' | grep -v 'windowrulev2 is deprecated' | grep -v 'invalid field' || true)
         if [ -z "$errors" ]; then

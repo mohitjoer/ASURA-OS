@@ -57,9 +57,9 @@ check_binary() {
 }
 
 check_binary "/usr/bin/Hyprland"
-check_binary "/usr/bin/asura"
-check_binary "/usr/bin/asura-shell"
-check_binary "/usr/bin/asura-sysd"
+check_binary "/usr/bin/toren"
+check_binary "/usr/bin/toren-shell"
+check_binary "/usr/bin/toren-sysd"
 if [ -f "$TARGET_ROOT/usr/bin/quickshell" ]; then
 	check_binary "/usr/bin/quickshell"
 fi

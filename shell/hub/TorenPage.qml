@@ -1,10 +1,10 @@
 pragma ComponentBehavior: Bound
 
-// The Asura group: the settings the GSettings schemas declare
-// (org.asura.shell, org.asura.desktop), drawn from the page registry that
-// `asura config export` writes, and changed only through `asura config set`.
+// The Toren group: the settings the GSettings schemas declare
+// (org.toren.shell, org.toren.desktop), drawn from the page registry that
+// `toren config export` writes, and changed only through `toren config set`.
 //
-// This is the Hub's Asura group, kept as the dedicated
+// This is the Hub's Toren group, kept as the dedicated
 // page because the rule in docs/architecture.md still holds: every setting that
 // has a command also has a page. The pages are not listed here. A page added to
 // the registry in Go (desktop/internal/hub) shows up below with nothing in this
@@ -56,7 +56,7 @@ Item {
 
     Process {
         id: registry
-        command: ["asura", "config", "export"]
+        command: ["toren", "config", "export"]
         running: true
 
         stdout: StdioCollector {
@@ -85,8 +85,8 @@ Item {
         // That is a failure to read the settings, reported as one.
         onRunningChanged: if (!running && root.registryCode < 0) {
             root.registryError =
-                "asura could not be started, and the settings are read with "
-                + "`asura config export`."
+                "toren could not be started, and the settings are read with "
+                + "`toren config export`."
             root.registryErr = true
             root.registryCode = 1
             root.finishRegistry()

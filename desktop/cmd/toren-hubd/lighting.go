@@ -1,6 +1,6 @@
 package main
 
-// `asura-hubd lighting ...`, the control plane for RGB devices: the Hub's
+// `toren-hubd lighting ...`, the control plane for RGB devices: the Hub's
 // Lighting tab drives it, the shell calls `accent` on a palette change, the
 // Hyprland autostart calls `apply` once a session.
 //
@@ -8,7 +8,7 @@ package main
 // and native providers write firmware-backed laptop lighting directly. Off means
 // no detection and no writes; a device is written only once adopted; the mode it
 // was found on is recorded so handing it back restores it; and its own memory is
-// written only on request. Settings live in ~/.config/asura/lighting.json, which
+// written only on request. Settings live in ~/.config/toren/lighting.json, which
 // no update or shell restart touches.
 
 import (
@@ -27,8 +27,8 @@ import (
 )
 
 const (
-	lightingUnit = "asura-openrgb"
-	// a device with no accent of its own falls back to the Asura signature.
+	lightingUnit = "toren-openrgb"
+	// a device with no accent of its own falls back to the Toren signature.
 	lightingFallback = "#E6E6E6"
 	// a palette this dark reads as "off" on a keyboard, so the accent is lifted
 	// until its brightest channel clears this.
@@ -49,7 +49,7 @@ const (
 	lightingAll = lightingOpenRGB | lightingAura
 )
 
-// ── state: ~/.config/asura/lighting.json ────────────────────────────────────
+// ── state: ~/.config/toren/lighting.json ────────────────────────────────────
 
 // lightingSettings = what the user chose for one device. Percentages are stored
 // device-independently and scaled into whatever range the mode advertises; -1
@@ -58,8 +58,8 @@ const (
 type lightingSettings struct {
 	Name    string `json:"name"`
 	Managed bool   `json:"managed"`
-	// exactly one of these drives the device: Effect is one Asura paints (and
-	// needs Asura running), Mode is one of the device's own (which keeps running
+	// exactly one of these drives the device: Effect is one Toren paints (and
+	// needs Toren running), Mode is one of the device's own (which keeps running
 	// without it). Picking one clears the other.
 	Mode       string            `json:"mode"`
 	Effect     string            `json:"effect,omitempty"`
@@ -82,7 +82,7 @@ func lightingPath() string {
 	if base == "" {
 		base = filepath.Join(os.Getenv("HOME"), ".config")
 	}
-	return filepath.Join(base, "asura", "lighting.json")
+	return filepath.Join(base, "toren", "lighting.json")
 }
 
 // loadLighting: a missing or unreadable file is the off state, never an error.
@@ -168,7 +168,7 @@ type lightZone struct {
 	LEDs int    `json:"leds"`
 }
 
-// lightFx = one effect Asura paints, listed only for devices that can be
+// lightFx = one effect Toren paints, listed only for devices that can be
 // painted at all.
 type lightFx struct {
 	ID    string `json:"id"`
@@ -422,7 +422,7 @@ func mergeViews(live []orgbDevice, st lightingState) []lightDevice {
 		for _, z := range d.Zones {
 			v.Zones = append(v.Zones, lightZone{Name: z.Name, LEDs: int(z.LEDs)})
 		}
-		// Asura's own effects, but only where the device can be painted at all.
+		// Toren's own effects, but only where the device can be painted at all.
 		if canPaint(d) {
 			for _, e := range fxEffects {
 				v.Effects = append(v.Effects, lightFx{ID: e.ID, Label: e.Label, Speed: e.Speed})
@@ -476,8 +476,8 @@ func sortDevices(ds []lightDevice) {
 }
 
 // lightingEnable flips the master switch. Turning it off hands every adopted
-// device back to the mode it was on before Asura touched it and stops the
-// server Asura started, so "off" means the desktop is not in the loop at all.
+// device back to the mode it was on before Toren touched it and stops the
+// server Toren started, so "off" means the desktop is not in the loop at all.
 // The per-device choices are kept, so turning it back on restores the look.
 func lightingEnable(on bool) error {
 	st := loadLighting()
@@ -535,8 +535,8 @@ func lightingSet(key, patch string) error {
 	if p.Managed != nil {
 		s.Managed = *p.Managed
 	}
-	// a device runs one thing at a time: picking its own effect drops Asura's,
-	// and picking Asura's leaves the device mode as what to fall back to.
+	// a device runs one thing at a time: picking its own effect drops Toren's,
+	// and picking Toren's leaves the device mode as what to fall back to.
 	if p.Mode != nil {
 		s.Mode = *p.Mode
 		s.Effect = ""
@@ -572,7 +572,7 @@ func lightingSet(key, patch string) error {
 	if err := saveLighting(st); err != nil {
 		return err
 	}
-	// a Asura-painted effect needs the painter running; it exits by itself once
+	// a Toren-painted effect needs the painter running; it exits by itself once
 	// no device wants one, so this is the only place that has to ask.
 	ensureAnimator(st)
 	// one connection: apply, then answer from the device list already in hand.
@@ -649,7 +649,7 @@ func lightingSaveToDevice(key string) error {
 	st := loadLighting()
 	s := st.Devices[key]
 	if s == nil || !s.Managed {
-		return printJSON(failed(lightingStateReport(), fmt.Errorf("%s is not under Asura control", key)))
+		return printJSON(failed(lightingStateReport(), fmt.Errorf("%s is not under Toren control", key)))
 	}
 	rep := lightingStateReport()
 	err := access(true, false, providersForKey(key), func(o *orgbConn, live []orgbDevice) error {
@@ -686,7 +686,7 @@ func failed(rep lightReport, cause error) lightReport {
 	return rep
 }
 
-// lightingRelease hands one device back: the mode it was on before Asura ever
+// lightingRelease hands one device back: the mode it was on before Toren ever
 // wrote to it, then out of the managed set. Its settings stay on disk, so
 // adopting it again restores the look the user built.
 func lightingRelease(key string) error {
@@ -807,7 +807,7 @@ func applyOne(o *orgbConn, live []orgbDevice, key string, s *lightingSettings, a
 	}
 	if d.Provider == auraProvider {
 		if s.Effect != "" {
-			return fmt.Errorf("%s offers its firmware effects, not Asura per-key effects", d.Name)
+			return fmt.Errorf("%s offers its firmware effects, not Toren per-key effects", d.Name)
 		}
 		_, mode, ok := resolveMode(d, s.Mode)
 		if !ok {
@@ -818,13 +818,13 @@ func applyOne(o *orgbConn, live []orgbDevice, key string, s *lightingSettings, a
 	if o == nil {
 		return fmt.Errorf("OpenRGB is not running")
 	}
-	// a Asura effect: sit the device in its per-LED mode and paint. An animated
+	// a Toren effect: sit the device in its per-LED mode and paint. An animated
 	// one is then drawn frame by frame by the painter; a still one is this one
 	// write, so a fixed colour needs no process behind it.
 	if s.Effect != "" {
 		idx, m, ok := paintMode(d)
 		if !ok {
-			return fmt.Errorf("%s cannot be painted by Asura; pick one of its own effects", d.Name)
+			return fmt.Errorf("%s cannot be painted by Toren; pick one of its own effects", d.Name)
 		}
 		if m.has(modeHasBrightness) {
 			m.Bri = m.BriMax // the effect scales the colour itself
@@ -1037,7 +1037,7 @@ func normalizeHex(s string) (string, bool) {
 
 // palettePath: the desktop palette the daemon rewrites on every wallpaper change
 // (docs/theming.md). The painter watches it too, so a retint reaches the keyboard.
-func palettePath() string { return filepath.Join(asuraCacheDir(), "colors.json") }
+func palettePath() string { return filepath.Join(torenCacheDir(), "colors.json") }
 
 // accentColor: the desktop's accent, color4 of the palette, lifted to something a
 // keyboard can actually show. A missing or unreadable palette gives the neutral
@@ -1127,7 +1127,7 @@ func punchColor(hex string) string {
 // ── the OpenRGB server ──────────────────────────────────────────────────────
 
 // serverUp: is an SDK server listening now? A user running the OpenRGB GUI has
-// one, and Asura uses it rather than starting a second.
+// one, and Toren uses it rather than starting a second.
 func serverUp() bool {
 	c, err := net.DialTimeout("tcp", orgbAddr, 400*time.Millisecond)
 	if err != nil {
@@ -1137,9 +1137,9 @@ func serverUp() bool {
 	return true
 }
 
-// connectServer: use the running server, or start Asura's own as a transient
+// connectServer: use the running server, or start Toren's own as a transient
 // systemd unit so it is supervised, logged, and stoppable by name. The second
-// return says Asura started it, which matters: OpenRGB accepts connections
+// return says Toren started it, which matters: OpenRGB accepts connections
 // before it has finished finding devices, so a cold start needs a moment more
 // before the empty device list can be believed.
 var openrgbDial = orgbDial
@@ -1174,7 +1174,7 @@ func startServer() error {
 	}
 	out, err := exec.Command("systemd-run", "--user", "--collect",
 		"--unit="+lightingUnit,
-		"--description=OpenRGB SDK server for Asura lighting",
+		"--description=OpenRGB SDK server for Toren lighting",
 		"--setenv=QT_QPA_PLATFORM=offscreen",
 		"openrgb", "--server", "--server-host", "127.0.0.1").CombinedOutput()
 	if err != nil {
@@ -1183,8 +1183,8 @@ func startServer() error {
 	return nil
 }
 
-// stopServer stops only the unit Asura starts. A server the user runs themselves
-// is theirs; Asura never takes it down.
+// stopServer stops only the unit Toren starts. A server the user runs themselves
+// is theirs; Toren never takes it down.
 func stopServer() {
 	_ = exec.Command("systemctl", "--user", "stop", lightingUnit+".service").Run()
 }
@@ -1258,7 +1258,7 @@ func lightingLock(wait bool) (func(), error) {
 	if dir == "" {
 		dir = os.TempDir()
 	}
-	f, err := os.OpenFile(filepath.Join(dir, "asura-lighting.lock"), os.O_CREATE|os.O_RDWR, 0o600)
+	f, err := os.OpenFile(filepath.Join(dir, "toren-lighting.lock"), os.O_CREATE|os.O_RDWR, 0o600)
 	if err != nil {
 		return func() {}, err
 	}

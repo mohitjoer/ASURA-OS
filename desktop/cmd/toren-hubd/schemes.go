@@ -27,8 +27,8 @@ func loadScheme(mode string) (map[string]string, error) {
 // Quickshell singleton reads) and hands that same palette to matugen, which
 // renders every external app config from it.
 func writePalette(pal map[string]string) {
-	_ = os.MkdirAll(asuraCacheDir(), 0o755)
-	_ = atomicWrite(filepath.Join(asuraCacheDir(), "colors.json"), mustJSON(pal), 0o644)
+	_ = os.MkdirAll(torenCacheDir(), 0o755)
+	_ = atomicWrite(filepath.Join(torenCacheDir(), "colors.json"), mustJSON(pal), 0o644)
 	renderApps(pal)
 }
 
@@ -70,8 +70,8 @@ func gtkThemeChoice(s themeState) string {
 func gnomeAccentOn(s themeState) bool { return s.GnomeAccent == nil || *s.GnomeAccent }
 
 // gtkOff is written to the generated GTK stylesheets when app theming is off, so
-// GTK / libadwaita apps drop the Asura palette and use their own stock colours.
-const gtkOff = "/* Asura: app theming is off; apps use their own colours. */\n"
+// GTK / libadwaita apps drop the Toren palette and use their own stock colours.
+const gtkOff = "/* Toren: app theming is off; apps use their own colours. */\n"
 
 func blankGtk() {
 	for _, rel := range []string{"gtk-3.0/gtk.css", "gtk-4.0/gtk.css"} {
@@ -105,14 +105,14 @@ func currentScheme() string {
 // theme.json write below still persists the choice and the daemon syncs at
 // its next load.
 func selectShellTheme(name string) {
-	_ = exec.Command("asura-shell", "theme", name).Run()
+	_ = exec.Command("toren-shell", "theme", name).Run()
 }
 
 // applyScheme sets the desktop palette mode. follow re-derives from the current
 // wallpaper (the reset); light/dark lock a curated preset that survives wallpaper
 // changes (themePaletteLocked keeps it). Reused by the Appearance control.
 func applyScheme(mode string) error {
-	// Mono and the Asura-default brand palette are retired as fixed looks: the
+	// Mono and the Toren-default brand palette are retired as fixed looks: the
 	// desktop follows the wallpaper by default now, so a mono request lands on
 	// the follow path instead of pinning a palette that never tracks the wall.
 	if mode == "mono" {
@@ -131,7 +131,7 @@ func applyScheme(mode string) error {
 		// the daemon derives (honouring the per-image tune); no re-animation.
 		// Explicit, not left to the theme patch: when theme.theme already read
 		// Wallpaper the patch is a no-op and nothing else would repaint.
-		_ = exec.Command("asura-wallpaper", "wallpaper", "repaint").Run()
+		_ = exec.Command("toren-wallpaper", "wallpaper", "repaint").Run()
 	case "light", "dark":
 		pal, err := loadScheme(mode)
 		if err != nil {
@@ -158,7 +158,7 @@ func applyScheme(mode string) error {
 		if mode == "light" {
 			gtkMode = "light"
 		}
-		_ = exec.Command("asura-shell", "gtk", "apply", gtkMode).Run()
+		_ = exec.Command("toren-shell", "gtk", "apply", gtkMode).Run()
 	default:
 		return fmt.Errorf("unknown scheme %q (want follow|light|dark)", mode)
 	}
@@ -186,7 +186,7 @@ func applyThemeApps(on bool) error {
 	st := loadThemeState()
 	st.ThemeApps = &on
 	saveThemeState(st)
-	if pal := readPalette(filepath.Join(asuraCacheDir(), "colors.json")); pal != nil {
+	if pal := readPalette(filepath.Join(torenCacheDir(), "colors.json")); pal != nil {
 		renderApps(pal)
 	} else if !on {
 		blankGtk()
@@ -234,19 +234,19 @@ func applyGnomeAccent(on bool) error {
 // theme.json is the durable truth, and a box with no live daemon picks the
 // choice up at the next login; the setters lean on this only for the live nudge.
 func repaintPalette() {
-	_ = exec.Command("asura-wallpaper", "wallpaper", "repaint").Run()
+	_ = exec.Command("toren-wallpaper", "wallpaper", "repaint").Run()
 }
 
 // themeState persists the palette master: whether colours follow the wallpaper
 // and, when they don't, which curated scheme is locked. Lives at
-// ~/.config/asura/theme.json.
+// ~/.config/toren/theme.json.
 type themeState struct {
 	FollowWallpaper bool   `json:"followWallpaper"`
 	Scheme          string `json:"scheme"`
 	ThemeApps       *bool  `json:"themeApps,omitempty"`
 	// GtkTheme is the GTK base-theme choice: "adw" (default; the
 	// libadwaita-consistent GTK3 theme that follows the palette), "adwaita" (the
-	// stock GNOME look) or "system" (Asura never writes gtk-theme). Absent reads
+	// stock GNOME look) or "system" (Toren never writes gtk-theme). Absent reads
 	// as "adw".
 	GtkTheme string `json:"gtkTheme,omitempty"`
 	// GnomeAccent, when on (the default), syncs org.gnome.desktop.interface
@@ -260,7 +260,7 @@ func themeStatePath() string {
 	if base == "" {
 		base = filepath.Join(os.Getenv("HOME"), ".config")
 	}
-	return filepath.Join(base, "asura", "theme.json")
+	return filepath.Join(base, "toren", "theme.json")
 }
 
 // loadThemeState defaults to following the wallpaper on a missing or blank file
@@ -278,12 +278,12 @@ func saveThemeState(s themeState) {
 	_ = atomicWrite(themeStatePath(), mustJSON(s), 0o644)
 }
 
-func asuraCacheDir() string {
+func torenCacheDir() string {
 	base := os.Getenv("XDG_CACHE_HOME")
 	if base == "" {
 		base = filepath.Join(os.Getenv("HOME"), ".cache")
 	}
-	return filepath.Join(base, "asura")
+	return filepath.Join(base, "toren")
 }
 
 func kittyThemePath() string {
@@ -309,16 +309,16 @@ func mustJSON(v any) []byte {
 	return b
 }
 
-// applyAsuraTheme resets the desktop to the Asura signature in one move: the
+// applyTorenTheme resets the desktop to the Toren signature in one move: the
 // frame-bars style, square corners everywhere, Space Grotesk type across the
 // shell and apps, and the grainy-mono palette. Wired to the Appearance and Rices pages.
-func applyAsuraTheme() error {
+func applyTorenTheme() error {
 	// Merge so sizing, weather and preserved sidebar content choices survive.
 	frameBars, ok := readJSONMap(shellStorePath())["frameBars"].(map[string]any)
 	if !ok {
 		frameBars = map[string]any{}
 	}
-	frameBars["style"] = "asura-frame"
+	frameBars["style"] = "toren-frame"
 	mergeShellJSON(map[string]any{
 		"frameBars":   frameBars,
 		"roundness":   0,
@@ -337,8 +337,8 @@ func applyAsuraTheme() error {
 	// clear any active-rice marker: the signature is a fresh look, not a rice,
 	// so the Rices page must not keep showing the last rice as applied.
 	setActiveRice("")
-	// the Asura mark: the A glyph, no custom logo, tinted to the accent, so the
-	// signature brand reads as Asura (the desktop name is left as the user set it).
+	// the Toren mark: the A glyph, no custom logo, tinted to the accent, so the
+	// signature brand reads as Toren (the desktop name is left as the user set it).
 	mergeBrandJSON(map[string]any{"markText": "A", "markImage": "", "markTint": true})
 	// colours follow the wallpaper (mono is retired) + regen the border lua,
 	// reload hypr and kitty.
@@ -350,7 +350,7 @@ func applyAsuraTheme() error {
 func mergeShellJSON(keys map[string]any) { mergeStore("shell.json", keys) }
 func mergeBrandJSON(keys map[string]any) { mergeStore("brand.json", keys) }
 func mergeStore(name string, keys map[string]any) {
-	p := filepath.Join(configHome(), "asura", name)
+	p := filepath.Join(configHome(), "toren", name)
 	m := map[string]any{}
 	if b, err := os.ReadFile(p); err == nil {
 		_ = json.Unmarshal(b, &m)

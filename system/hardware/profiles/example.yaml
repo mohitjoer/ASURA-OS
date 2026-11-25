@@ -4,7 +4,7 @@
 # not apply, and keep the structure: the installer reads every key here, and a
 # profile that guesses is worse than a profile that admits it does not know.
 #
-# Submit a real profile from `asura hardware report` — see
+# Submit a real profile from `toren hardware report` — see
 # system/hardware/README.md.
 
 version: 1
@@ -47,7 +47,7 @@ match:
 kernel: hwe
 
 gpu:
-  # What Asura should install for each device.
+  # What Toren should install for each device.
   #   discrete: nouveau | nvidia | nvidia-open | auto
   #   integrated: auto
   discrete: nvidia-open
@@ -55,9 +55,9 @@ gpu:
   # Hybrid graphics. Remove the block if this machine has one GPU.
   hybrid_mux:
     enabled: true
-    mechanism: supergfxctl   # supergfxctl | envy | none
+    mechanism: supergfxctl # supergfxctl | envy | none
     # Which mode the machine is expected to boot in.
-    default: hybrid          # hybrid | dGPU | optimus
+    default: hybrid # hybrid | dGPU | optimus
 
 network:
   # Kernel module for each wireless device. Empty for wired-only machines.
@@ -86,7 +86,7 @@ firmware:
   # The names are in system/kernel/fleet.yaml.
   microcode: []
 
-# Things only a human on the machine can answer. This is the part `asura hardware
+# Things only a human on the machine can answer. This is the part `toren hardware
 # report` cannot produce, and the part that makes a profile worth reading.
 verified:
   suspend_resume: works

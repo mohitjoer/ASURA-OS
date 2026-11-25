@@ -4,10 +4,10 @@
 #
 # A command belongs here only when the caller really degrades visibly without it.
 # A command that is simply needed belongs in release/deps.d/<lane>.deps instead.
-asura-clamshell       # gated by command -v in session/hyprland/lid.conf
-asura-power           # unbuilt helper, gated by PATH check in cputune.go and CONTRACT.md
-asura-docker          # gated by Stash.dockerState and stash-cobalt-server.sh
-asura-cursor-track    # gated by command -v in asura-cmd-studiorecord
+toren-clamshell       # gated by command -v in session/hyprland/lid.conf
+toren-power           # unbuilt helper, gated by PATH check in cputune.go and CONTRACT.md
+toren-docker          # gated by Stash.dockerState and stash-cobalt-server.sh
+toren-cursor-track    # gated by command -v in toren-cmd-studiorecord
 snapper                # Btrfs/snapper rollback in import_apply.go
 steamcmd               # Steam workshop downloads in wallpaper-ui
 checkupdates           # Arch checkupdates fallback in Updates.qml
@@ -19,8 +19,8 @@ ydotool                # virtual keyboard daemon in Ydotool.qml
 easyeffects            # audio effects quick toggle in EasyEffectsToggle.qml
 inxi                   # hardware info tool in qsbar Theme.qml
 loadkeys               # gated by command -v in shell/hub/pages/InputPage.qml; ships in kbd, a base-system dependency
-uv                     # Python package runner in asura-stage
-usbreset               # USB audio reset helper in asura-restart-audio
+uv                     # Python package runner in toren-stage
+usbreset               # USB audio reset helper in toren-restart-audio
 docker                 # Docker engine in stash-cobalt-server.sh
 makoctl                # Mako notification daemon fallback in qsbar
 matugen                # Material theme generator fallback in schemes.go
@@ -29,40 +29,40 @@ nvibrant               # NVIDIA digital vibrance tool in Devices.qml
 nvidia-smi             # NVIDIA System Management Interface in StatsFeed/LiveStats/GpuPage
 openssl                # SSL/TLS toolkit in localsend.sh
 pavucontrol            # PulseAudio/PipeWire volume control GUI fallback in VolumePanel.qml
-plymouth               # boot splash daemon, gated by command -v in session/asura-session
-runsvdir               # runit user process supervisor, gated by command -v in asura-user-services
-sv                     # runit service control tool, gated by command -v in asura-user-services
-swayidle               # idle management daemon in session/runit/services/asura-idle
+plymouth               # boot splash daemon, gated by command -v in session/toren-session
+runsvdir               # runit user process supervisor, gated by command -v in toren-user-services
+sv                     # runit service control tool, gated by command -v in toren-user-services
+swayidle               # idle management daemon in session/runit/services/toren-idle
 swaybg                 # Wayland wallpaper client, gated by command -v in session/hyprland/autostart.conf
-tlp                    # TLP power management utility, gated by LookPath in asura-sysd
-xbps-install           # Void Linux package installer, gated by LookPath in asura-sysd
+tlp                    # TLP power management utility, gated by LookPath in toren-sysd
+xbps-install           # Void Linux package installer, gated by LookPath in toren-sysd
 xbps-query             # Void Linux package query tool, gated in pkg.go
-zed                    # code editor, gated in asura-app
-asura-vm-fetch         # fast-path VM downloader, gated by have in asura-vmd
+zed                    # code editor, gated in toren-app
+toren-vm-fetch         # fast-path VM downloader, gated by have in toren-vmd
 bsdtar                 # archive extraction fallback, gated in stash-install.sh
 cava                   # audio visualizer, gated by command -v in QML
 hypridle               # idle management daemon, optional on Void
 hyprpicker             # color picker tool, gated by have/command -v
 ddcutil                # external monitor DDC/CI control, gated in Devices.qml
-genisoimage            # ISO creation tool fallback in asura-vmd
-gtk-update-icon-cache  # icon cache updater, gated in asura-cmd-folders
-mkisofs                # ISO creation tool fallback in asura-vmd
+genisoimage            # ISO creation tool fallback in toren-vmd
+gtk-update-icon-cache  # icon cache updater, gated in toren-cmd-folders
+mkisofs                # ISO creation tool fallback in toren-vmd
 openrgb                # RGB lighting controller, gated by LookPath in lighting.go
 plocate                # fast file search, gated in Find.qml
-powerprofilesctl       # power profiles daemon client, gated in asura-cmd-game-mode
-qalc                   # calculator engine, gated in asura-cmd-calc
-qemu-img               # QEMU disk image utility in asura-vmd
-quickemu               # quickemu VM runtime in asura-vmd
-quickget               # quickget VM image downloader in asura-vmd
-asura-motion          # recording motion helper, gated in scripts
+powerprofilesctl       # power profiles daemon client, gated in toren-cmd-game-mode
+qalc                   # calculator engine, gated in toren-cmd-calc
+qemu-img               # QEMU disk image utility in toren-vmd
+quickemu               # quickemu VM runtime in toren-vmd
+quickget               # quickget VM image downloader in toren-vmd
+toren-motion          # recording motion helper, gated in scripts
 secret-tool            # Secret service credential helper, gated in ssh.go
-songrec                # song recognition utility, gated in asura-cmd-songrec
-tesseract              # OCR engine in asura-cmd-ocr
+songrec                # song recognition utility, gated in toren-cmd-songrec
+tesseract              # OCR engine in toren-cmd-ocr
 voxtype                # speech recognition engine, gated by voiceEngine
 xdg-terminal-exec      # desktop terminal execution fallback in Dock/Launcher
-xorriso                # ISO creation utility in asura-vmd
+xorriso                # ISO creation utility in toren-vmd
 yt-dlp                 # media downloader in stash
-zbarimg                # QR barcode reader in asura-cmd-qr-scan
+zbarimg                # QR barcode reader in toren-cmd-qr-scan
 zenity                 # graphical dialog fallback in chat/shot/vm
-prepare_grub_to_access_device  # session/grub/40_asura_snapshots: a grub-mkconfig_lib function, sourced and checked with command -v
-make_system_path_relative_to_its_root  # session/grub/40_asura_snapshots: a grub-mkconfig_lib function, sourced and checked with command -v
+prepare_grub_to_access_device  # session/grub/40_toren_snapshots: a grub-mkconfig_lib function, sourced and checked with command -v
+make_system_path_relative_to_its_root  # session/grub/40_toren_snapshots: a grub-mkconfig_lib function, sourced and checked with command -v

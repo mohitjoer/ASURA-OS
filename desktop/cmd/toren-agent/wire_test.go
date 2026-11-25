@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-// setupTestEnv sets up an isolated temporary HOME and mock asura skills directory.
+// setupTestEnv sets up an isolated temporary HOME and mock toren skills directory.
 func setupTestEnv(t *testing.T) (string, string) {
 	t.Helper()
 
@@ -15,23 +15,23 @@ func setupTestEnv(t *testing.T) (string, string) {
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(tempHome, ".config"))
 
 	skillsDir := t.TempDir()
-	asuraSkillDir := filepath.Join(skillsDir, "asura")
-	if err := os.MkdirAll(asuraSkillDir, 0o755); err != nil {
+	torenSkillDir := filepath.Join(skillsDir, "toren")
+	if err := os.MkdirAll(torenSkillDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
 
 	skillMD := `---
-name: asura
-description: Asura OS agent skill
+name: toren
+description: Toren OS agent skill
 ---
-# Asura
+# Toren
 `
-	if err := os.WriteFile(filepath.Join(asuraSkillDir, "SKILL.md"), []byte(skillMD), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(torenSkillDir, "SKILL.md"), []byte(skillMD), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
-	t.Setenv("ASURA_SKILLS_DIR", asuraSkillDir)
-	return tempHome, asuraSkillDir
+	t.Setenv("ASURA_SKILLS_DIR", torenSkillDir)
+	return tempHome, torenSkillDir
 }
 
 func assertSymlink(t *testing.T, linkPath, expectedTarget string) {
@@ -63,10 +63,10 @@ func TestWireAllAgents(t *testing.T) {
 		t.Fatalf("Wire(\"\") wired %d agents, want 4", n)
 	}
 
-	assertSymlink(t, filepath.Join(h, ".config", "opencode", "skills", "asura"), skillDir)
-	assertSymlink(t, filepath.Join(h, ".pi", "agent", "skills", "asura"), skillDir)
-	assertSymlink(t, filepath.Join(h, ".claude", "skills", "asura"), skillDir)
-	assertSymlink(t, filepath.Join(h, ".gemini", "skills", "asura"), skillDir)
+	assertSymlink(t, filepath.Join(h, ".config", "opencode", "skills", "toren"), skillDir)
+	assertSymlink(t, filepath.Join(h, ".pi", "agent", "skills", "toren"), skillDir)
+	assertSymlink(t, filepath.Join(h, ".claude", "skills", "toren"), skillDir)
+	assertSymlink(t, filepath.Join(h, ".gemini", "skills", "toren"), skillDir)
 
 	// Test idempotency: wiring again must succeed without error
 	n2, err := Wire("")
@@ -76,7 +76,7 @@ func TestWireAllAgents(t *testing.T) {
 	if n2 != 4 {
 		t.Fatalf("second Wire(\"\") returned %d, want 4", n2)
 	}
-	assertSymlink(t, filepath.Join(h, ".claude", "skills", "asura"), skillDir)
+	assertSymlink(t, filepath.Join(h, ".claude", "skills", "toren"), skillDir)
 }
 
 func TestWireSingleAgent(t *testing.T) {
@@ -90,10 +90,10 @@ func TestWireSingleAgent(t *testing.T) {
 		t.Fatalf("Wire(\"claude\") wired %d, want 1", n)
 	}
 
-	assertSymlink(t, filepath.Join(h, ".claude", "skills", "asura"), skillDir)
+	assertSymlink(t, filepath.Join(h, ".claude", "skills", "toren"), skillDir)
 
 	// Other agents should not be wired yet
-	if _, err := os.Lstat(filepath.Join(h, ".config", "opencode", "skills", "asura")); !os.IsNotExist(err) {
+	if _, err := os.Lstat(filepath.Join(h, ".config", "opencode", "skills", "toren")); !os.IsNotExist(err) {
 		t.Fatalf("opencode skill should not exist yet")
 	}
 }
@@ -114,12 +114,12 @@ func TestUnwireAgents(t *testing.T) {
 		t.Fatalf("Unwire(\"opencode\") unwired %d, want 1", n)
 	}
 
-	if _, err := os.Lstat(filepath.Join(h, ".config", "opencode", "skills", "asura")); !os.IsNotExist(err) {
+	if _, err := os.Lstat(filepath.Join(h, ".config", "opencode", "skills", "toren")); !os.IsNotExist(err) {
 		t.Fatalf("opencode skill was not removed")
 	}
 
 	// Claude should still be wired
-	if _, err := os.Lstat(filepath.Join(h, ".claude", "skills", "asura")); err != nil {
+	if _, err := os.Lstat(filepath.Join(h, ".claude", "skills", "toren")); err != nil {
 		t.Fatalf("claude skill should still exist")
 	}
 
@@ -140,7 +140,7 @@ func TestSymlinkSafetyWithForeignLink(t *testing.T) {
 
 	// Create a foreign directory and symlink
 	foreignDir := t.TempDir()
-	claudeSkill := filepath.Join(h, ".claude", "skills", "asura")
+	claudeSkill := filepath.Join(h, ".claude", "skills", "toren")
 	if err := os.MkdirAll(filepath.Dir(claudeSkill), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -166,7 +166,7 @@ func TestSymlinkSafetyWithForeignLink(t *testing.T) {
 func TestSymlinkSafetyWithRealDir(t *testing.T) {
 	h, _ := setupTestEnv(t)
 
-	claudeSkill := filepath.Join(h, ".claude", "skills", "asura")
+	claudeSkill := filepath.Join(h, ".claude", "skills", "toren")
 	if err := os.MkdirAll(claudeSkill, 0o755); err != nil {
 		t.Fatal(err)
 	}

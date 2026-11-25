@@ -4,7 +4,7 @@
 set -euo pipefail
 
 app="QR Code"
-prog="asura-cmd-qr-scan"
+prog="toren-cmd-qr-scan"
 # A missing tool is a notification, because the shell runs this with nowhere to
 # print, plus exit 127 (the shell's "command not found") with the apt package
 # named. notify-send is checked first and on its own: it is the one tool whose
@@ -39,7 +39,7 @@ tmp="$input_file"
 if [[ -z $tmp ]]; then
   need grim
   need slurp
-  shot="$(mktemp "${XDG_RUNTIME_DIR:-/tmp}/asura-qr.XXXXXX.png")"
+  shot="$(mktemp "${XDG_RUNTIME_DIR:-/tmp}/toren-qr.XXXXXX.png")"
   tmp="$shot"
 fi
 

@@ -8,7 +8,7 @@ hl.layer_rule({
     ignore_alpha = 0.05,
 })
 hl.layer_rule({
-    match = { namespace = "^asura-notifications$" },
+    match = { namespace = "^toren-notifications$" },
     no_anim = true,
 })
 hl.layer_rule({
@@ -17,7 +17,7 @@ hl.layer_rule({
     no_anim = true,
 })
 hl.layer_rule({
-    match = { namespace = "^(asura-wallpaper|awww-daemon|asura-livewall|mpvpaper|phonto)$" },
+    match = { namespace = "^(toren-wallpaper|awww-daemon|toren-livewall|mpvpaper|phonto)$" },
     animation = "fade",
 })
 hl.layer_rule({
@@ -27,7 +27,7 @@ hl.layer_rule({
     ignore_alpha = 0.05,
 })
 hl.layer_rule({
-    match = { namespace = "^(quickshell|bar.*|dock.*|asura-.*)$" },
+    match = { namespace = "^(quickshell|bar.*|dock.*|toren-.*)$" },
     blur = true,
     ignore_alpha = 0.05,
 })

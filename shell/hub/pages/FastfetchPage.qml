@@ -9,8 +9,8 @@ import qs.Ui.Singletons
 
 // Fastfetch (DESIGN.md section 8, DESKTOP). The branded terminal readout, edited
 // end to end. config.jsonc stays the source of truth (the head's EDIT CONFIG
-// opens it raw); this reads it via `asura-hubd fastfetch get`, edits a model,
-// live-previews the readout via `asura-hubd fastfetch preview <json>` (parsing its
+// opens it raw); this reads it via `toren-hubd fastfetch get`, edits a model,
+// live-previews the readout via `toren-hubd fastfetch preview <json>` (parsing its
 // truecolor SGR into coloured runs), and writes back with `fastfetch save <json>`
 // on Save. The emblem takes an image (an SVG rasterized on import), an ASCII art
 // file, a built-in, or none; info rows toggle, reorder, and rename.
@@ -49,26 +49,26 @@ Item {
             var item = pg.installedStoreStyles[i];
             if (item.name === label) {
                 pg.storeStyleError = "";
-                applyStoreStyleProc.command = ["asura-store", "internal", "apply-fastfetch", item.id];
+                applyStoreStyleProc.command = ["toren-store", "internal", "apply-fastfetch", item.id];
                 applyStoreStyleProc.running = true;
                 return;
             }
         }
     }
-    // `asura-store remove` takes the category and id positionally, not as a flag.
+    // `toren-store remove` takes the category and id positionally, not as a flag.
     function removeStoreStyle(label) {
         for (var i = 0; i < pg.installedStoreStyles.length; i++) {
             var item = pg.installedStoreStyles[i];
             if (item.name === label) {
                 pg.storeStyleError = "";
-                removeStoreStyleProc.command = ["asura-store", "remove", "fastfetch", item.id];
+                removeStoreStyleProc.command = ["toren-store", "remove", "fastfetch", item.id];
                 removeStoreStyleProc.running = true;
                 return;
             }
         }
     }
 
-    // A store-installed emblem is one flat PNG in ~/Pictures/asura-emblems, so its
+    // A store-installed emblem is one flat PNG in ~/Pictures/toren-emblems, so its
     // id is the file's stem and removing it is the store's own remove. The
     // repoint happens after the file is gone, not before: a commit racing the
     // delete let the reload read the dangling source, and a missing source
@@ -83,9 +83,9 @@ Item {
         // with no brand mark to fall back on, the source is left dangling and the
         // backend reads a missing source as the built-in logo
         pg.repointAfterRemove =
-            (pg.brandArt.length > 0 && String(pg.model.logo.source).indexOf("/asura-emblems/" + file) >= 0)
+            (pg.brandArt.length > 0 && String(pg.model.logo.source).indexOf("/toren-emblems/" + file) >= 0)
                 ? pg.brandArt[0].path : "";
-        removeEmblemProc.command = ["asura-store", "remove", "fastfetch-emblems", id];
+        removeEmblemProc.command = ["toren-store", "remove", "fastfetch-emblems", id];
         removeEmblemProc.running = true;
     }
     function resetToDefault() { resetProc.running = true; }
@@ -99,7 +99,7 @@ Item {
     // file the Hub writes on Save so hand-edits and the GUI share one source.
     readonly property string configPath: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/fastfetch/config.jsonc"
     function browseFastfetch() {
-        Quickshell.execDetached(["asura-store", "open", "fastfetch"]);
+        Quickshell.execDetached(["toren-store", "open", "fastfetch"]);
     }
 
     // info modules the Add menu offers, beyond the brand lines already present.
@@ -131,7 +131,7 @@ Item {
     // ---- load ---------------------------------------------------------------
     Process {
         id: getProc
-        command: ["asura-hubd", "fastfetch", "get"]
+        command: ["toren-hubd", "fastfetch", "get"]
         running: true
         stdout: StdioCollector {
             onStreamFinished: {
@@ -156,7 +156,7 @@ Item {
     property bool storeReady: false
     Process {
         id: storeStylesProc
-        command: ["asura-store", "catalog", "--category", "fastfetch"]
+        command: ["toren-store", "catalog", "--category", "fastfetch"]
         running: true
         stdout: StdioCollector {
             onStreamFinished: {
@@ -218,7 +218,7 @@ Item {
     }
     Process {
         id: resetProc
-        command: ["asura-hubd", "fastfetch", "reset"]
+        command: ["toren-hubd", "fastfetch", "reset"]
         onExited: function (code) { if (code === 0) getProc.running = true; }
     }
     // ---- edit helpers (reassign model so bindings + dirty re-evaluate) -------
@@ -279,8 +279,8 @@ Item {
         return "file://" + s;
     }
 
-    // ready-made emblems for the picker: the Asura brand marks the package
-    // ships, and whatever the store has installed into asura-emblems. Picking one
+    // ready-made emblems for the picker: the Toren brand marks the package
+    // ships, and whatever the store has installed into toren-emblems. Picking one
     // sets the source directly (no copy); "Your image" imports a file since it can
     // live anywhere. Paths keep a leading ~ so the config stays portable. A brand
     // mark the package does not carry is not offered, because a tile for a missing
@@ -297,7 +297,7 @@ Item {
     Process {
         id: brandScan
         running: true
-        command: ["sh", "-c", "for f in fastfetch-emblem.png logo-mark.png; do if [ -r \"$HOME/.config/asura/branding/$f\" ]; then echo \"$f:$HOME/.config/asura/branding/$f\"; elif [ -r \"/usr/share/asura/branding/$f\" ]; then echo \"$f:/usr/share/asura/branding/$f\"; elif [ -r \"$HOME/.local/share/asura/assets/brand/$f\" ]; then echo \"$f:$HOME/.local/share/asura/assets/brand/$f\"; elif [ -r \"public/branding/$f\" ]; then echo \"$f:public/branding/$f\"; fi; done; true"]
+        command: ["sh", "-c", "for f in fastfetch-emblem.png logo-mark.png; do if [ -r \"$HOME/.config/toren/branding/$f\" ]; then echo \"$f:$HOME/.config/toren/branding/$f\"; elif [ -r \"/usr/share/toren/branding/$f\" ]; then echo \"$f:/usr/share/toren/branding/$f\"; elif [ -r \"$HOME/.local/share/toren/assets/brand/$f\" ]; then echo \"$f:$HOME/.local/share/toren/assets/brand/$f\"; elif [ -r \"public/branding/$f\" ]; then echo \"$f:public/branding/$f\"; fi; done; true"]
         stdout: StdioCollector {
             onStreamFinished: {
                 var lines = String(this.text || "").split("\n");
@@ -320,12 +320,12 @@ Item {
         }
     }
 
-    // Emblems installed from the store land in ~/Pictures/asura-emblems as one
+    // Emblems installed from the store land in ~/Pictures/toren-emblems as one
     // flat PNG each, so listing that folder is the whole discovery step.
     Process {
         id: emblemScan
         running: true
-        command: ["sh", "-c", "ls -1 \"$HOME/Pictures/asura-emblems\" 2>/dev/null | grep -i '\\.png$' || true"]
+        command: ["sh", "-c", "ls -1 \"$HOME/Pictures/toren-emblems\" 2>/dev/null | grep -i '\\.png$' || true"]
         stdout: StdioCollector {
             onStreamFinished: {
                 var out = [];
@@ -336,7 +336,7 @@ Item {
                         continue;
                     var stem = file.replace(/\.png$/i, "");
                     out.push({ "name": stem.replace(/-/g, " ").toUpperCase(),
-                               "path": "~/Pictures/asura-emblems/" + file });
+                               "path": "~/Pictures/toren-emblems/" + file });
                 }
                 pg.installedArt = out;
             }
@@ -379,8 +379,8 @@ Item {
         source: {
             if (pg.model.logo.kind === "builtin") {
                 return (Tokens && Tokens.isLight)
-                    ? Qt.resolvedUrl("../../assets/asura-logo.svg")
-                    : Qt.resolvedUrl("../../assets/asura-logo-on-dark.svg");
+                    ? Qt.resolvedUrl("../../assets/toren-logo.svg")
+                    : Qt.resolvedUrl("../../assets/toren-logo-on-dark.svg");
             }
             return (pg.model.logo.kind === "image" && pg.model.logo.source.length > 0) ? pg.logoUrl(pg.model.logo.source) : "";
         }
@@ -425,7 +425,7 @@ Item {
         }
     }
     function previewNow() {
-        previewProc.command = ["asura-hubd", "fastfetch", "preview", JSON.stringify(pg.model)];
+        previewProc.command = ["toren-hubd", "fastfetch", "preview", JSON.stringify(pg.model)];
         previewProc.running = true;
     }
     Process {
@@ -471,7 +471,7 @@ Item {
     function save() {
         throttle.stop();
         pg.previewPending = false;
-        saveProc.command = ["asura-hubd", "fastfetch", "save", JSON.stringify(pg.model)];
+        saveProc.command = ["toren-hubd", "fastfetch", "save", JSON.stringify(pg.model)];
         saveProc.running = true;
         pg.committed = pg.clone();
         pg.rev++;
@@ -508,21 +508,21 @@ Item {
     }
     function importLogo(path, kind) {
         importProc.pendingKind = kind;
-        importProc.command = ["asura-hubd", "fastfetch", "import-logo", path];
+        importProc.command = ["toren-hubd", "fastfetch", "import-logo", path];
         importProc.running = true;
     }
     function openLogoFile() {
         var s = pg.model.logo.source;
         if (!s || s.length === 0)
             return;
-        Spawn.run(["asura-app", "editor", "--", s]);
+        Spawn.run(["toren-app", "editor", "--", s]);
     }
     // fastfetch reads the config the Hub writes, so the bare command is the real
     // readout. The hold keeps the window open to look at it.
     function previewInTerminal() {
-        Spawn.run(["asura-app", "terminal", "--", "sh", "-c", "fastfetch; printf '\\npress enter to close '; read -r _"]);
+        Spawn.run(["toren-app", "terminal", "--", "sh", "-c", "fastfetch; printf '\\npress enter to close '; read -r _"]);
     }
-    function openConfig() { Spawn.run(["asura-app", "editor", "--", pg.configPath]); }
+    function openConfig() { Spawn.run(["toren-app", "editor", "--", pg.configPath]); }
 
     // ---- emblem dither + imported-emblem removal ----------------------------
     // the 1-bit bake toggles through the backend so it can read/write the sibling
@@ -551,12 +551,12 @@ Item {
     function setDither(v) {
         pg.storeStyleError = "";
         ditherProc.pendingOn = v;
-        ditherProc.command = ["asura-hubd", "fastfetch", "dither-logo", v ? "on" : "off", pg.model.logo.source];
+        ditherProc.command = ["toren-hubd", "fastfetch", "dither-logo", v ? "on" : "off", pg.model.logo.source];
         ditherProc.running = true;
     }
-    // an imported emblem is the asura-logo.* the backend wrote into the fastfetch
+    // an imported emblem is the toren-logo.* the backend wrote into the fastfetch
     // dir; only those (and their bake) can be removed here.
-    function isImportedEmblem(src) { return /\/fastfetch\/asura-logo\./.test(String(src || "")); }
+    function isImportedEmblem(src) { return /\/fastfetch\/toren-logo\./.test(String(src || "")); }
     Process {
         id: removeLogoProc
         stderr: StdioCollector { id: removeLogoError }
@@ -570,7 +570,7 @@ Item {
     }
     function removeLogo() {
         pg.storeStyleError = "";
-        removeLogoProc.command = ["asura-hubd", "fastfetch", "remove-logo"];
+        removeLogoProc.command = ["toren-hubd", "fastfetch", "remove-logo"];
         removeLogoProc.running = true;
     }
 
@@ -710,7 +710,7 @@ Item {
             Image {
                 width: 12; height: 12
                 anchors.verticalCenter: parent.verticalCenter
-                source: Qt.resolvedUrl("../../assets/asura-logo-on-dark.svg")
+                source: Qt.resolvedUrl("../../assets/toren-logo-on-dark.svg")
                 sourceSize.width: 24; sourceSize.height: 24
                 fillMode: Image.PreserveAspectFit
                 smooth: true
@@ -893,8 +893,8 @@ Item {
                                 source: {
                                     if (pg.model.logo.kind === "builtin") {
                                         return (Tokens && Tokens.isLight)
-                                            ? Qt.resolvedUrl("../../assets/asura-logo.svg")
-                                            : Qt.resolvedUrl("../../assets/asura-logo-on-dark.svg");
+                                            ? Qt.resolvedUrl("../../assets/toren-logo.svg")
+                                            : Qt.resolvedUrl("../../assets/toren-logo-on-dark.svg");
                                     }
                                     return (pg.model.logo.kind === "image" && pg.model.logo.source.length > 0) ? pg.logoUrl(pg.model.logo.source) : "";
                                 }
@@ -1015,7 +1015,7 @@ Item {
                         }
                     }
 
-                    // your art: a gallery of ready emblems (the Asura brand marks
+                    // your art: a gallery of ready emblems (the Toren brand marks
                     // and what the store installed) plus a browse/drop tile for your own
                     // image. Click a tile to set it; drop a file to import it.
                     DropArea {
@@ -1095,7 +1095,7 @@ Item {
                                     // only a store emblem can be removed: the
                                     // brand marks are the package's
                                     readonly property bool removable:
-                                        String(artTile.modelData.path).indexOf("/asura-emblems/") >= 0
+                                        String(artTile.modelData.path).indexOf("/toren-emblems/") >= 0
                                     Rectangle {
                                         id: dropMark
                                         visible: artTile.removable && (artHov.hovered || dropHov.hovered)
@@ -1150,7 +1150,7 @@ Item {
                         }
                     }
 
-                    // remove an imported emblem (asura-logo.*) from the fastfetch
+                    // remove an imported emblem (toren-logo.*) from the fastfetch
                     // dir; the readout falls back to the shipped emblem.
                     Item {
                         width: parent.width; height: 26

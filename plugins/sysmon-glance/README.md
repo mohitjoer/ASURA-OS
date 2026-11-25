@@ -1,6 +1,6 @@
 # Sysmon Glance
 
-A Asura shell plugin (`sysmon-glance`). This scaffold is a working demo: a counter that
+A Toren shell plugin (`sysmon-glance`). This scaffold is a working demo: a counter that
 ticks once a second, a mark on the bar, and a panel with a RESET button. Edit it
 into your own widget.
 
@@ -39,13 +39,13 @@ catalogue shows it next to the plugin.
 ## Build, check, install
 
 ```
-asura plugin audit .
-asura plugin install . --bar --yes
+toren plugin audit .
+toren plugin install . --bar --yes
 ```
 
 It lists on the bar's Community page. Publish it only when you want to share it:
-`asura plugin share sysmon-glance`.
+`toren plugin share sysmon-glance`.
 
 ## Author
 
-ASURA OS Core Team <core@asura-os.org>: this plugin is community-made (`official` is false).
+ASURA OS Core Team <core@toren-os.org>: this plugin is community-made (`official` is false).

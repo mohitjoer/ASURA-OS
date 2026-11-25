@@ -12,10 +12,10 @@ import (
 )
 
 // osd.go feeds the brightness OSD. The volume and mic OSDs read PipeWire
-// directly in QML, where Asura already owns the audio graph, so their change
+// directly in QML, where Toren already owns the audio graph, so their change
 // events and value are observable without the daemon. Brightness has no such
 // QML-observable source: the media keys and the `brightness` verb both drive
-// asura-cmd-brightness straight to the backlight, so the daemon watches the
+// toren-cmd-brightness straight to the backlight, so the daemon watches the
 // primary backlight and pushes a fraction plus a monotonically rising sequence
 // to the `osd` topic. QML shows the brightness OSD when the sequence advances
 // and binds `value` to the slider; the bucket->icon mapping lives once in QML
@@ -33,13 +33,13 @@ type osdState struct {
 // the brightness verb) converges, so it owns both halves: save on change,
 // restore before the session's first read.
 func backlightLevelPath() string {
-	return filepath.Join(stateDir(), "asura", "backlight")
+	return filepath.Join(stateDir(), "toren", "backlight")
 }
 
 // saveBacklight records the raw sysfs level. Best-effort: a read-only state
 // dir costs persistence, not the session.
 func saveBacklight(level int) {
-	dir := filepath.Join(stateDir(), "asura")
+	dir := filepath.Join(stateDir(), "toren")
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return
 	}
@@ -70,14 +70,14 @@ func restoreBacklight(dev string, max int) {
 	_ = os.WriteFile(filepath.Join(dev, "brightness"), []byte(strconv.Itoa(want)), 0o644)
 }
 
-// backlightDevice picks the primary backlight through asura-hw-backlight, the
+// backlightDevice picks the primary backlight through toren-hw-backlight, the
 // one selector that names the device driving the connected panel: a first-entry
 // pick can land on a phantom nvidia_0 beside the real EC or amdgpu device, and
 // then the OSD watches a device the key handler never writes (#176). Falls
 // back to the first entry when the helper is missing or names nothing.
 func backlightDevice() string {
 	const base = "/sys/class/backlight"
-	if out, err := exec.Command("asura-hw-backlight").Output(); err == nil {
+	if out, err := exec.Command("toren-hw-backlight").Output(); err == nil {
 		if name := strings.TrimSpace(string(out)); name != "" {
 			if _, err := os.Stat(filepath.Join(base, name)); err == nil {
 				return filepath.Join(base, name)

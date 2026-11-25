@@ -104,7 +104,7 @@ func recordRevision(paths Paths) (Revision, error) {
 	// The record is written twice on purpose: once at the state root as the
 	// "which revision is current" pointer, and once inside the revision's own
 	// directory so the history is walkable. Without the second copy, `rollback`
-	// and `asura status --revisions` both find nothing, because the preserved
+	// and `toren status --revisions` both find nothing, because the preserved
 	// base and its metadata would be an archive with no index.
 	recordPath := filepath.Join(preserved, revisionFile)
 	if err := writeRevisionFile(recordPath, revision); err != nil {
@@ -114,7 +114,7 @@ func recordRevision(paths Paths) (Revision, error) {
 	if err := writeRevision(paths, revision); err != nil {
 		return Revision{}, err
 	}
-	// Run as root (sudo asura update) the state directory is still the
+	// Run as root (sudo toren update) the state directory is still the
 	// user's: hand what was just written to its owner, or the user's own
 	// update can never remove it.
 	if err := giveToStateOwner(paths.State, preserved, filepath.Join(paths.State, revisionsDir)); err != nil {
@@ -379,7 +379,7 @@ var KeepRevisions = 3
 
 // pruneRevisions removes all but the newest keep revisions. Revision IDs are
 // UTC timestamps, so their names sort by age. The current revision and the
-// one it points back to (what `asura rollback` restores) are always kept.
+// one it points back to (what `toren rollback` restores) are always kept.
 func pruneRevisions(paths Paths, keep int) error {
 	dir := filepath.Join(paths.State, revisionsDir)
 	entries, err := os.ReadDir(dir)
@@ -406,11 +406,11 @@ func pruneRevisions(paths Paths, keep int) error {
 			continue
 		}
 		// Removing an old revision is housekeeping: one that cannot go (made
-		// by an earlier `sudo asura update`, so root's) is left, never a
+		// by an earlier `sudo toren update`, so root's) is left, never a
 		// reason to fail the update.
 		target := filepath.Join(dir, name)
 		if err := os.RemoveAll(target); err != nil {
-			fmt.Fprintf(os.Stderr, "asura update: could not remove the old revision %s (%v); remove it with: sudo rm -r %s\n", name, err, target)
+			fmt.Fprintf(os.Stderr, "toren update: could not remove the old revision %s (%v); remove it with: sudo rm -r %s\n", name, err, target)
 		}
 	}
 	return nil

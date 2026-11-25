@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-// writeStageStub installs a fake asura-stage engine (via ASURA_STAGE_ENGINE) that
+// writeStageStub installs a fake toren-stage engine (via ASURA_STAGE_ENGINE) that
 // records every invocation and, for cut/inpaint, writes the requested output.
 // Behaviour is steered per-test through STAGE_STUB_* env vars the daemon
 // inherits when it spawns the child. Returns the call-log path.
@@ -20,7 +20,7 @@ func writeStageStub(t *testing.T) string {
 	t.Helper()
 	dir := t.TempDir()
 	logf := filepath.Join(dir, "calls.log")
-	bin := filepath.Join(dir, "asura-stage-stub")
+	bin := filepath.Join(dir, "toren-stage-stub")
 	const script = `#!/usr/bin/env bash
 echo "$*" >> "$STAGE_STUB_LOG"
 cmd="${1:-}"; shift || true
@@ -73,7 +73,7 @@ func stageHome(t *testing.T) string {
 	t.Setenv("XDG_STATE_HOME", filepath.Join(home, ".local", "state"))
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(home, ".cache"))
-	// An empty runtime dir: no asura-wallpaper socket, so depthClear/publish fail fast
+	// An empty runtime dir: no toren-wallpaper socket, so depthClear/publish fail fast
 	// and harmlessly instead of reaching the live daemon.
 	t.Setenv("XDG_RUNTIME_DIR", t.TempDir())
 	return home
@@ -176,14 +176,14 @@ func TestStageSwitchReusesWithoutGenerating(t *testing.T) {
 
 // TestStageSetEffectDepth pins the enable path: turning Depth on for an uncut
 // wallpaper runs exactly one cut, publishes the subject in the topic frame, and
-// folds it to asura-wallpaper over the unchanged `depth set` wire.
+// folds it to toren-wallpaper over the unchanged `depth set` wire.
 func TestStageSetEffectDepth(t *testing.T) {
 	home := stageHome(t)
 	logf := writeStageStub(t)
 
-	// A fake asura-wallpaper to capture the pixel-lock fold.
+	// A fake toren-wallpaper to capture the pixel-lock fold.
 	rt := os.Getenv("XDG_RUNTIME_DIR")
-	ln, err := net.Listen("unix", filepath.Join(rt, "asura-wallpaper.sock"))
+	ln, err := net.Listen("unix", filepath.Join(rt, "toren-wallpaper.sock"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -231,10 +231,10 @@ func TestStageSetEffectDepth(t *testing.T) {
 	case got := <-lines:
 		body, ok := strings.CutPrefix(got, "depth set ")
 		if !ok || !strings.Contains(body, subj) {
-			t.Fatalf("asura-wallpaper fold = %q, want `depth set` carrying %s", got, subj)
+			t.Fatalf("toren-wallpaper fold = %q, want `depth set` carrying %s", got, subj)
 		}
 	case <-time.After(2 * time.Second):
-		t.Fatal("subject was never folded to asura-wallpaper")
+		t.Fatal("subject was never folded to toren-wallpaper")
 	}
 }
 
@@ -378,14 +378,14 @@ func TestStageQualityTiers(t *testing.T) {
 // TestStageEngineBinSeam pins the resolution order: the ASURA_STAGE_ENGINE seam
 // wins, and a bad ASURA_SHELL_DIR falls back to the PATH name.
 func TestStageEngineBinSeam(t *testing.T) {
-	t.Setenv("ASURA_STAGE_ENGINE", "/opt/asura-stage")
-	if got := stageEngineBin(); got != "/opt/asura-stage" {
+	t.Setenv("ASURA_STAGE_ENGINE", "/opt/toren-stage")
+	if got := stageEngineBin(); got != "/opt/toren-stage" {
 		t.Fatalf("engine bin = %q, want the ASURA_STAGE_ENGINE seam", got)
 	}
 	t.Setenv("ASURA_STAGE_ENGINE", "")
 	t.Setenv("ASURA_SHELL_DIR", "/dev/null")
-	if got := stageEngineBin(); got != "asura-stage" {
-		t.Fatalf("engine bin with bad ASURA_SHELL_DIR = %q, want asura-stage", got)
+	if got := stageEngineBin(); got != "toren-stage" {
+		t.Fatalf("engine bin with bad ASURA_SHELL_DIR = %q, want toren-stage", got)
 	}
 }
 
@@ -495,7 +495,7 @@ func TestStageRemoveLayerRejectsSubject(t *testing.T) {
 // start is a no-op.
 func TestStageRegistryMigrationV1toV2(t *testing.T) {
 	home := stageHome(t)
-	if err := os.MkdirAll(filepath.Join(stateDir(), "asura"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(stateDir(), "toren"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	wpA := filepath.Join(home, "a.png") // depth (was "subject") + one manual layer
@@ -588,7 +588,7 @@ func TestStageRegistryMigrationV1toV2(t *testing.T) {
 // default, quality/shadow/front carry, and an already-v2 file is left alone.
 func TestStageSettingsFoldV1toV2(t *testing.T) {
 	home := stageHome(t)
-	cfg := filepath.Join(home, ".config", "asura")
+	cfg := filepath.Join(home, ".config", "toren")
 	if err := os.MkdirAll(cfg, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -687,10 +687,10 @@ func TestStageWallpaperFrameWake(t *testing.T) {
 // second start is a no-op.
 func TestStageLegacyMigrationV2(t *testing.T) {
 	home := stageHome(t)
-	if err := os.MkdirAll(filepath.Join(stateDir(), "asura"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(stateDir(), "toren"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	cfg := filepath.Join(home, ".config", "asura")
+	cfg := filepath.Join(home, ".config", "toren")
 	if err := os.MkdirAll(cfg, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -830,7 +830,7 @@ func TestStageLegacyMigrationV2(t *testing.T) {
 // quality (fine), with the user's shadow 0.85 intact.
 func TestStageLegacySettingsFoldV2(t *testing.T) {
 	home := stageHome(t)
-	cfg := filepath.Join(home, ".config", "asura")
+	cfg := filepath.Join(home, ".config", "toren")
 	if err := os.MkdirAll(cfg, 0o755); err != nil {
 		t.Fatal(err)
 	}

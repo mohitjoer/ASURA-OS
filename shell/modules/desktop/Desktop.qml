@@ -22,7 +22,7 @@ import "../wallpaper" as WallpaperMod
 // monitor by the main shell, carrying the clock. only clicks on bare wallpaper
 // land here, so windows above keep their input. drag = move (snaps to the
 // fade-in grid), right-click a widget = its menu, right-click empty = global
-// menu. every knob is live from Config; drag, menus and Asura Settings all
+// menu. every knob is live from Config; drag, menus and Toren Settings all
 // write the same file, so surfaces retune with no reload.
 Scope {
     id: root
@@ -41,7 +41,7 @@ Scope {
     // backdrop's player: muted by default, volume 0-100.
     property bool videoMuted: true
     property int videoVolume: 100
-    // The asura-wallpaper-live yield flag (the external-player engine): hide the painter
+    // The toren-wallpaper-live yield flag (the external-player engine): hide the painter
     // while the C player owns the background layer.
     property bool wallpaperLive: false
 
@@ -293,7 +293,7 @@ Scope {
     // wherever the shell was loaded and needs nothing on PATH (the user manager's
     // PATH has no ~/.local/bin, and a bare name that does not resolve silently
     // loses every drag / resize / lock / hide / settings write).
-    readonly property string placeTool: Quickshell.shellPath("scripts/asura-plugins-place")
+    readonly property string placeTool: Quickshell.shellPath("scripts/toren-plugins-place")
 
     // hand the keyboard back after a widget text field releases its grab. the
     // widget layer never unmaps, and dropping an exclusive grab on a mapped
@@ -333,7 +333,7 @@ Scope {
         // Editing lifts the desktop above open windows so the stage is never
         // obscured by whatever was in front; Done drops it back under them.
         WlrLayershell.layer: root.stageComposing ? WlrLayer.Top : WlrLayer.Bottom
-        WlrLayershell.namespace: "asura-widgets"
+        WlrLayershell.namespace: "toren-widgets"
         // None while nothing on this layer wants the keyboard, so this
         // full-screen Bottom layer never holds focus on an empty workspace
         // (which would otherwise leave the next-opened window unfocused).
@@ -419,7 +419,7 @@ Scope {
             id: backdrop
             anchors.fill: parent
             // The base wallpaper draws under the stage (Depth locks the still cut over it), and
-            // yields to the asura-wallpaper-live player on its own `live` rule: forcing
+            // yields to the toren-wallpaper-live player on its own `live` rule: forcing
             // it visible painted the still over every video wallpaper.
             readonly property real screenDpr: (root.screen && root.screen.devicePixelRatio) ? root.screen.devicePixelRatio : 1
             dpr: screenDpr
@@ -1057,7 +1057,7 @@ Scope {
                     const x = (dw.x !== undefined) ? dw.x : 80;
                     const y = (dw.y !== undefined) ? dw.y : 80;
                     const lk = (dw.locked === true);
-                    // scale only: opacity arg omitted -> asura-plugins-place keeps it.
+                    // scale only: opacity arg omitted -> toren-plugins-place keeps it.
                     sizeProc.command = [root.placeTool, id, "desktopWidget",
                         "" + x, "" + y, "" + sc, "" + lk];
                     sizeProc.running = true;
@@ -1163,7 +1163,7 @@ Scope {
 
         }
 
-        // position/scale writeback for plugin tiles. asura-plugins-place
+        // position/scale writeback for plugin tiles. toren-plugins-place
         // merges free x/y (+ optional scale/locked) into plugins.json;
         // Registry's file-watch then retunes every surface.
         Process { id: persist }

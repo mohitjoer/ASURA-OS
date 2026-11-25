@@ -5,15 +5,15 @@
 // The replace directive points at that module in-tree rather than resolving it
 // from a registry. There is no published module to resolve, and a build that
 // needed one could not be reproduced from a checkout.
-module asura/desktop
+module toren/desktop
 
 go 1.26
 
 require (
-	asura/hardware v0.0.0
+	toren/hardware v0.0.0
 	github.com/BurntSushi/toml v1.6.0
 	github.com/godbus/dbus/v5 v5.2.2
 	golang.org/x/sys v0.27.0
 )
 
-replace asura/hardware => ../system/hardware
+replace toren/hardware => ../system/hardware

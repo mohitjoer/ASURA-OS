@@ -29,14 +29,14 @@ import (
 	"regexp"
 	"strings"
 
-	"asura/hardware/probe"
+	"toren/hardware/probe"
 )
 
 // tokenDomain is the fixed prefix in every MAC input. It exists so that a token
 // computed here cannot collide with a hash computed for some other purpose on
 // the same machine, and so that rotating the format later is a one-line change
 // rather than a migration.
-const tokenDomain = "asura/hardware-report/v1\x00"
+const tokenDomain = "toren/hardware-report/v1\x00"
 
 // Salt holds the key that makes tokens stable per machine and unresolvable by
 // anyone who does not hold it.
@@ -44,10 +44,10 @@ type Salt [32]byte
 
 // LoadOrCreateSalt reads the report salt, creating it if absent.
 //
-// The two locations are both ones Asura already owns: a user-state path under
-// XDG_STATE_HOME, and /etc/asura/ for the installer running as root. Nothing is
+// The two locations are both ones Toren already owns: a user-state path under
+// XDG_STATE_HOME, and /etc/toren/ for the installer running as root. Nothing is
 // written to a home directory by a package and nothing is written outside
-// /usr/share/asura/ and /etc/asura/ by anything shipped.
+// /usr/share/toren/ and /etc/toren/ by anything shipped.
 func LoadOrCreateSalt(path string) (Salt, error) {
 	var salt Salt
 
@@ -83,7 +83,7 @@ func LoadOrCreateSalt(path string) (Salt, error) {
 
 // Token produces the stable per-machine token for one field.
 //
-//	input = "asura/hardware-report/v1\0" || field_name || "\0" || raw_value
+//	input = "toren/hardware-report/v1\0" || field_name || "\0" || raw_value
 //	token = "sha256:" || lowercase hex of the first 8 bytes of HMAC-SHA256(key, input)
 //
 // Including the field name means a token cannot be lifted from one field into

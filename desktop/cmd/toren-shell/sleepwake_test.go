@@ -12,16 +12,16 @@ import (
 	"testing"
 	"time"
 
-	"asura/desktop/internal/wm"
+	"toren/desktop/internal/wm"
 )
 
-// fakePowerProvider drops a `asura-wm-testwm` on PATH that reports the
+// fakePowerProvider drops a `toren-wm-testwm` on PATH that reports the
 // outputPower capability and appends every act invocation to a log file, so
 // the wake guard's calls are observable without a compositor.
 func fakePowerProvider(t *testing.T, logPath string) {
 	t.Helper()
 	bin := t.TempDir()
-	provider := filepath.Join(bin, "asura-wm-testwm")
+	provider := filepath.Join(bin, "toren-wm-testwm")
 	script := "#!/usr/bin/env bash\n" +
 		"if [[ \"$1\" == caps ]]; then printf '%s' '{\"name\":\"testwm\",\"supports\":[\"outputPower\"]}'; exit 0; fi\n" +
 		"printf '%s\\n' \"$*\" >>\"" + logPath + "\"\n" +
@@ -36,7 +36,7 @@ func fakeFlakyPowerProvider(t *testing.T, logPath string) {
 	t.Helper()
 	bin := t.TempDir()
 	countPath := filepath.Join(bin, "count")
-	provider := filepath.Join(bin, "asura-wm-testwm")
+	provider := filepath.Join(bin, "toren-wm-testwm")
 	script := "#!/usr/bin/env bash\n" +
 		"if [[ \"$1\" == caps ]]; then printf '%s' '{\"name\":\"testwm\",\"supports\":[\"outputPower\"]}'; exit 0; fi\n" +
 		"n=0; [[ -r \"" + countPath + "\" ]] && n=$(<\"" + countPath + "\"); n=$((n+1)); printf '%s' \"$n\" >\"" + countPath + "\"\n" +
@@ -51,7 +51,7 @@ func fakeFlakyPowerProvider(t *testing.T, logPath string) {
 func fakeInitiallyHungPowerProvider(t *testing.T, countPath string) {
 	t.Helper()
 	bin := t.TempDir()
-	provider := filepath.Join(bin, "asura-wm-testwm")
+	provider := filepath.Join(bin, "toren-wm-testwm")
 	script := "#!/usr/bin/env bash\n" +
 		"if [[ \"$1\" == caps ]]; then printf '%s' '{\"name\":\"testwm\",\"supports\":[\"outputPower\"]}'; exit 0; fi\n" +
 		"n=0; [[ -r \"" + countPath + "\" ]] && n=$(<\"" + countPath + "\"); n=$((n+1))\n" +
@@ -198,7 +198,7 @@ func TestHoldAwakeStopsWithoutCapability(t *testing.T) {
 	isolateOutputState(t)
 	logPath := filepath.Join(t.TempDir(), "acts.log")
 	bin := t.TempDir()
-	provider := filepath.Join(bin, "asura-wm-testwm")
+	provider := filepath.Join(bin, "toren-wm-testwm")
 	script := "#!/usr/bin/env bash\n" +
 		"if [[ \"$1\" == caps ]]; then printf '%s' '{\"name\":\"testwm\",\"supports\":[]}'; exit 0; fi\n" +
 		"printf '%s\\n' \"$*\" >>\"" + logPath + "\"\n" +

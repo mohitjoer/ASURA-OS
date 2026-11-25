@@ -8,11 +8,11 @@ import (
 	"strings"
 	"time"
 
-	"asura/desktop/internal/hub"
-	"asura/desktop/internal/overlay"
-	"asura/desktop/internal/portal"
-	"asura/desktop/internal/runner"
-	"asura/desktop/internal/shell"
+	"toren/desktop/internal/hub"
+	"toren/desktop/internal/overlay"
+	"toren/desktop/internal/portal"
+	"toren/desktop/internal/runner"
+	"toren/desktop/internal/shell"
 )
 
 // overlayPaths resolves the overlay model against the running user.
@@ -35,17 +35,17 @@ func overlayPaths(rootOverride string) (overlay.Paths, error) {
 
 	paths := overlay.DefaultPaths(home)
 	if rootOverride != "" {
-		paths.Base = filepath.Join(rootOverride, "usr", "share", "asura")
-		paths.Etc = filepath.Join(rootOverride, "etc", "asura")
-		paths.Config = filepath.Join(rootOverride, "home", ".config", "asura")
+		paths.Base = filepath.Join(rootOverride, "usr", "share", "toren")
+		paths.Etc = filepath.Join(rootOverride, "etc", "toren")
+		paths.Config = filepath.Join(rootOverride, "home", ".config", "toren")
 		paths.Edits = filepath.Join(paths.Config, overlay.EditsDir)
-		paths.State = filepath.Join(rootOverride, "home", ".local", "state", "asura")
+		paths.State = filepath.Join(rootOverride, "home", ".local", "state", "toren")
 	}
 	return paths, nil
 }
 
-// asuraMaterialize re-lays the base, clobbering shipped content.
-func asuraMaterialize(args []string) int {
+// torenMaterialize re-lays the base, clobbering shipped content.
+func torenMaterialize(args []string) int {
 	set := newFlags("materialize", materializeUsage)
 	var root = set.String("root", "", "operate on a tree under this directory")
 	positional, err := parseFlags(set, args)
@@ -53,31 +53,31 @@ func asuraMaterialize(args []string) int {
 		return exitUsage
 	}
 	if len(positional) > 0 {
-		fmt.Fprintln(os.Stderr, "asura materialize: takes no path; it re-lays "+
-			"the whole base. Use `asura reset <path>` for one file.")
+		fmt.Fprintln(os.Stderr, "toren materialize: takes no path; it re-lays "+
+			"the whole base. Use `toren reset <path>` for one file.")
 		return exitUsage
 	}
 
 	paths, err := overlayPaths(*root)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura materialize:", err)
+		fmt.Fprintln(os.Stderr, "toren materialize:", err)
 		return exitFail
 	}
 	if err := overlay.Materialize(paths); err != nil {
-		fmt.Fprintln(os.Stderr, "asura materialize:", err)
+		fmt.Fprintln(os.Stderr, "toren materialize:", err)
 		return exitFail
 	}
 	fmt.Println("base materialized; user edits preserved")
 	return exitOK
 }
 
-// asuraDoctor reports drift between base and overlay.
+// torenDoctor reports drift between base and overlay.
 //
 // It changes nothing, unless it is asked to with --fix, and then only what the
 // config section below names. A diagnostic that repairs on its own is not a
 // diagnostic, and the moment it repairs, a user cannot tell what was wrong
 // before they changed it.
-func asuraDoctor(args []string) int {
+func torenDoctor(args []string) int {
 	set := newFlags("doctor", doctorUsage)
 	var (
 		root   = set.String("root", "", "operate on a tree under this directory")
@@ -93,13 +93,13 @@ func asuraDoctor(args []string) int {
 
 	paths, err := overlayPaths(*root)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura doctor:", err)
+		fmt.Fprintln(os.Stderr, "toren doctor:", err)
 		return exitFail
 	}
 
 	findings, err := overlay.Doctor(paths)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura doctor:", err)
+		fmt.Fprintln(os.Stderr, "toren doctor:", err)
 		return exitFail
 	}
 	// The portal assertion runs whatever this finds. An early return here would
@@ -120,7 +120,7 @@ func asuraDoctor(args []string) int {
 	fmt.Println()
 	for _, reason := range []string{overlay.DriftStale, overlay.DriftMissing, overlay.DriftOrphan} {
 		if counts[reason] > 0 {
-			fmt.Printf("%d %s file(s) — `asura materialize` fixes them, and "+
+			fmt.Printf("%d %s file(s) — `toren materialize` fixes them, and "+
 				"your edits are preserved\n", counts[reason], reason)
 		}
 	}
@@ -248,7 +248,7 @@ func reportShell(root string) int {
 	// `hub.qml` for the Hub — are two configurations and one tree.
 	//
 	// The desktop shell owns the schemas and is checked against them. The Hub does
-	// not: it renders what `asura config export` hands it and never reads a
+	// not: it renders what `toren config export` hands it and never reads a
 	// schema, so running the shell's settings checks over it would report every
 	// property only the shell uses as an unused setting — true of the wrong tree.
 	// A tree cannot be split by directory when both windows are one directory, and
@@ -263,16 +263,16 @@ func reportShell(root string) int {
 	// machine doctor is run on.
 	// The paths are absolute, and they are still relative to the root: the
 	// root is the tree being checked and the path is where the file is in
-	// it, so a root of /usr and a path of /usr/share/asura/shell are the
+	// it, so a root of /usr and a path of /usr/share/toren/shell are the
 	// same directory. Written without the leading slash they are relative to
 	// the working directory instead, and the checks read nothing at all on
 	// the one machine they are meant for: a doctor that silently checks
 	// nothing looks exactly like a doctor that found nothing.
 	trees := []shell.Env{
-		{Root: root, Dir: "/usr/share/asura/shell", EntryPoint: "shell.qml",
+		{Root: root, Dir: "/usr/share/toren/shell", EntryPoint: "shell.qml",
 			OwnsSettings: true, SchemaDir: settingsDir,
-			HyprlandConfig: "/usr/share/asura/hyprland/hyprland.conf",
-			BindsCatalogue: "/usr/share/asura/session/binds.json"},
+			HyprlandConfig: "/usr/share/toren/hyprland/hyprland.conf",
+			BindsCatalogue: "/usr/share/toren/session/binds.json"},
 	}
 
 	problems := 0
@@ -285,7 +285,7 @@ func reportShell(root string) int {
 
 	// The vendored tree, reported on its own.
 	//
-	// The rules above are about Asura's own code. The vendored tree is
+	// The rules above are about Toren's own code. The vendored tree is
 	// upstream's: it is a shipped file that is never edited in place, so it
 	// is checked against the manifest instead — every file byte for byte
 	// against the commit it was pinned to — and its state is a line of its
@@ -395,7 +395,7 @@ func reportSession(root string) int {
 	// The script the compositor's configuration runs. It has to be there and
 	// it has to be executable: a script that is not executable is a compositor
 	// that runs nothing, and the compositor says nothing about it.
-	const activate = "/usr/share/asura/session/asura-activate"
+	const activate = "/usr/share/toren/session/toren-activate"
 	activatePath := filepath.Join(root, activate)
 	info, err := os.Stat(activatePath)
 	switch {
@@ -414,7 +414,7 @@ func reportSession(root string) int {
 	// The compositor's configuration has to run it. A configuration that does
 	// not mention the script is a session that starts a compositor and
 	// nothing else.
-	const compositorConfig = "/usr/share/asura/hyprland/hyprland.conf"
+	const compositorConfig = "/usr/share/toren/hyprland/hyprland.conf"
 	config, err := installedCompositorConfig(root, compositorConfig)
 	if err != nil {
 		fmt.Printf("  %-22s %s is not installed\n", "compositor", compositorConfig)
@@ -427,13 +427,13 @@ func reportSession(root string) int {
 		fmt.Printf("  %-22s %s starts the session\n", "compositor", compositorConfig)
 	}
 
-	// The keybinds call the shell through the asura CLI, which finds the
+	// The keybinds call the shell through the toren CLI, which finds the
 	// running instance rather than naming one, because the shell the login
 	// manager runs and the shell a development tree runs are different trees
 	// and the compositor cannot tell them apart. The older form of the call
 	// names the installed path plainly; both of them are the keybinds
 	// reaching a shell, and a configuration that reaches neither is the fault.
-	const shellDir = "/usr/share/asura/shell"
+	const shellDir = "/usr/share/toren/shell"
 	shellPath := filepath.Join(root, shellDir)
 	if _, err := os.Stat(filepath.Join(shellPath, "shell.qml")); err != nil {
 		fmt.Printf("  %-22s %s is not installed\n", "keybinds", shellDir)
@@ -447,8 +447,8 @@ func reportSession(root string) int {
 		} else {
 			body := ipc
 			switch {
-			case strings.Contains(body, "asura ipc call"):
-				fmt.Printf("  %-22s call the shell through the asura CLI, which "+
+			case strings.Contains(body, "toren ipc call"):
+				fmt.Printf("  %-22s call the shell through the toren CLI, which "+
 					"finds it running\n", "keybinds")
 			case strings.Contains(body, "--path "+shellDir):
 				fmt.Printf("  %-22s call %s\n", "keybinds", shellDir)
@@ -560,8 +560,8 @@ func homeDir() string {
 	return home
 }
 
-// asuraStatus is the one-glance answer.
-func asuraStatus(args []string) int {
+// torenStatus is the one-glance answer.
+func torenStatus(args []string) int {
 	set := newFlags("status", statusUsage)
 	var (
 		root   = set.String("root", "", "operate on a tree under this directory")
@@ -580,13 +580,13 @@ func asuraStatus(args []string) int {
 
 	paths, err := overlayPaths(*root)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura status:", err)
+		fmt.Fprintln(os.Stderr, "toren status:", err)
 		return exitFail
 	}
 
 	status, err := overlay.StatusOf(paths)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura status:", err)
+		fmt.Fprintln(os.Stderr, "toren status:", err)
 		return exitFail
 	}
 
@@ -623,10 +623,10 @@ func gitSnapshot(paths overlay.Paths) error {
 
 	for _, args := range [][]string{
 		{"init", "--quiet"},
-		{"config", "user.email", "asura@localhost"},
-		{"config", "user.name", "asura"},
+		{"config", "user.email", "toren@localhost"},
+		{"config", "user.name", "toren"},
 		{"add", "--all", "."},
-		{"commit", "--allow-empty", "--quiet", "-m", "asura: snapshot before update"},
+		{"commit", "--allow-empty", "--quiet", "-m", "toren: snapshot before update"},
 	} {
 		command := exec.Command("git", args...)
 		command.Dir = paths.Config
@@ -636,7 +636,7 @@ func gitSnapshot(paths overlay.Paths) error {
 		command.Env = append(os.Environ(),
 			"GIT_DIR="+filepath.Join(paths.Config, ".git"))
 		if output, err := command.CombinedOutput(); err != nil {
-			fmt.Fprintf(os.Stderr, "asura update: git %v: %v\n%s\n",
+			fmt.Fprintf(os.Stderr, "toren update: git %v: %v\n%s\n",
 				args, err, output)
 			return nil
 		}

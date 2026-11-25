@@ -29,20 +29,20 @@ esac`)
 		t.Fatalf("reload = %q, want ok", got)
 	}
 	calls, _ := os.ReadFile(log)
-	if !strings.Contains(string(calls), "--user reload asura-shell.service") {
+	if !strings.Contains(string(calls), "--user reload toren-shell.service") {
 		t.Fatalf("the unit was never reloaded; systemctl saw:\n%s", calls)
 	}
 }
 
 func TestReloadReportsAUnitThatWillNotReload(t *testing.T) {
 	bin := t.TempDir()
-	writeShim(t, filepath.Join(bin, "systemctl"), `echo "Unit asura-shell.service not loaded." >&2; exit 5`)
+	writeShim(t, filepath.Join(bin, "systemctl"), `echo "Unit toren-shell.service not loaded." >&2; exit 5`)
 	t.Setenv("PATH", bin+string(os.PathListSeparator)+os.Getenv("PATH"))
 	oldCover := reloadCoverBegin
 	reloadCoverBegin = func() string { return "" }
 	defer func() { reloadCoverBegin = oldCover }()
 
-	if got := (&daemon{}).reload(); !strings.HasPrefix(got, "err reload: systemctl --user reload asura-shell.service: ") {
+	if got := (&daemon{}).reload(); !strings.HasPrefix(got, "err reload: systemctl --user reload toren-shell.service: ") {
 		t.Fatalf("reload = %q, want an error naming the failed command", got)
 	}
 }

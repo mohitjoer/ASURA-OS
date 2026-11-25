@@ -8,33 +8,33 @@ import (
 	"syscall"
 )
 
-const installUsage = `Usage: asura install [target-disk]
+const installUsage = `Usage: toren install [target-disk]
 
 Launches the Toren Linux system installer to partition and install
 Toren Linux onto a specified drive (e.g. /dev/nvme0n1 or /dev/vda).
 `
 
 func init() {
-	register("install", "launch guided Toren Linux system installer", asuraInstall)
+	register("install", "launch guided Toren Linux system installer", torenInstall)
 }
 
-func asuraInstall(args []string) int {
+func torenInstall(args []string) int {
 	if len(args) > 0 && (args[0] == "-h" || args[0] == "--help" || args[0] == "help") {
 		fmt.Fprint(os.Stdout, installUsage)
 		return exitOK
 	}
 
 	candidates := []string{
-		"/usr/bin/asura-installer",
-		"/usr/share/asura/installation/asura-installer.sh",
-		"installation/asura-installer.sh",
+		"/usr/bin/toren-installer",
+		"/usr/share/toren/installation/toren-installer.sh",
+		"installation/toren-installer.sh",
 	}
 	if exe, err := os.Executable(); err == nil {
 		exeDir := filepath.Dir(exe)
 		candidates = append(candidates,
-			filepath.Join(exeDir, "asura-installer"),
-			filepath.Join(exeDir, "..", "installation", "asura-installer.sh"),
-			filepath.Join(exeDir, "..", "..", "installation", "asura-installer.sh"),
+			filepath.Join(exeDir, "toren-installer"),
+			filepath.Join(exeDir, "..", "installation", "toren-installer.sh"),
+			filepath.Join(exeDir, "..", "..", "installation", "toren-installer.sh"),
 		)
 	}
 
@@ -47,7 +47,7 @@ func asuraInstall(args []string) int {
 	}
 
 	if installerPath == "" {
-		fmt.Fprintf(os.Stderr, "asura install: installer binary not found\n")
+		fmt.Fprintf(os.Stderr, "toren install: installer binary not found\n")
 		return exitFail
 	}
 
@@ -58,7 +58,7 @@ func asuraInstall(args []string) int {
 	if os.Geteuid() != 0 {
 		sudoPath, err := exec.LookPath("sudo")
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "asura install: root privileges required but sudo not found\n")
+			fmt.Fprintf(os.Stderr, "toren install: root privileges required but sudo not found\n")
 			return exitFail
 		}
 		cmd = exec.Command(sudoPath, cmdArgs...)

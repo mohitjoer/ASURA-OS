@@ -6,10 +6,10 @@ import (
 	"testing"
 )
 
-// TestDoctorContractIpcTargets checks that every `asura ipc call <target>` in
+// TestDoctorContractIpcTargets checks that every `toren ipc call <target>` in
 // the compositor configuration names a target the shell actually exposes.
 //
-// The shell registers three IPC handlers: "asura" (the legacy keybind bridge),
+// The shell registers three IPC handlers: "toren" (the legacy keybind bridge),
 // "shell" (the daemon-facing surface channel), and "qsbar" (the quick-settings
 // bar surface). A bind that calls anything else succeeds at the command level
 // but reaches no listener, so the key does nothing.
@@ -20,11 +20,11 @@ func TestDoctorContractIpcTargets(t *testing.T) {
 	root := repoRoot(t)
 	config := compositorConfig(t, root)
 
-	const pattern = `asura ipc call (\S+)`
+	const pattern = `toren ipc call (\S+)`
 	re := regexp.MustCompile(pattern)
 
 	validTargets := map[string]bool{
-		"asura": true,
+		"toren": true,
 		"shell": true,
 		"qsbar": true,
 	}
@@ -37,7 +37,7 @@ func TestDoctorContractIpcTargets(t *testing.T) {
 		}
 		target := matches[1]
 		if !validTargets[target] {
-			t.Errorf("line %d: asura ipc call target %q is not a registered handler; valid targets are asura, shell, qsbar", i+1, target)
+			t.Errorf("line %d: toren ipc call target %q is not a registered handler; valid targets are toren, shell, qsbar", i+1, target)
 		}
 	}
 }
@@ -50,16 +50,16 @@ func TestDoctorContractIpcTargets(t *testing.T) {
 func TestDoctorContractFlagsInvalidTarget(t *testing.T) {
 	const badConfig = `
 # Valid line
-bind = SUPER, Space, exec, asura ipc call asura togglePopover launcher
+bind = SUPER, Space, exec, toren ipc call toren togglePopover launcher
 # Invalid line — "nosuch" is not a registered handler
-bind = SUPER, X, exec, asura ipc call nosuch doSomething
+bind = SUPER, X, exec, toren ipc call nosuch doSomething
 `
 
-	const pattern = `asura ipc call (\S+)`
+	const pattern = `toren ipc call (\S+)`
 	re := regexp.MustCompile(pattern)
 
 	validTargets := map[string]bool{
-		"asura": true,
+		"toren": true,
 		"shell": true,
 		"qsbar": true,
 	}
@@ -85,28 +85,28 @@ bind = SUPER, X, exec, asura ipc call nosuch doSomething
 }
 
 // TestDoctorContractLiveConfigHasExpectedCalls ensures the live configuration
-// still contains the CLI binds the session depends on, all targeting "asura".
+// still contains the CLI binds the session depends on, all targeting "toren".
 // This is a regression guard against accidental removal of them.
 func TestDoctorContractLiveConfigHasExpectedCalls(t *testing.T) {
 	root := repoRoot(t)
 	config := compositorConfig(t, root)
 
 	for _, call := range []string{
-		"asura ipc call asura togglePopover launcher",
-		"asura ipc call asura toggleCheatsheet",
-		"asura ipc call asura toggleOverview",
-		"asura ipc call asura advanceSwitcher",
-		"asura ipc call asura closeSwitcher",
+		"toren ipc call toren togglePopover launcher",
+		"toren ipc call toren toggleCheatsheet",
+		"toren ipc call toren toggleOverview",
+		"toren ipc call toren advanceSwitcher",
+		"toren ipc call toren closeSwitcher",
 	} {
 		if !strings.Contains(config, call) {
 			t.Errorf("the live config does not call %q", call)
 		}
 	}
 
-	const pattern = `asura ipc call (\S+) ?(\S*)`
+	const pattern = `toren ipc call (\S+) ?(\S*)`
 	for _, m := range regexp.MustCompile(pattern).FindAllStringSubmatch(config, -1) {
-		if m[1] != "asura" {
-			t.Errorf("bind calls target %q; the live config's chords all target \"asura\"", m[1])
+		if m[1] != "toren" {
+			t.Errorf("bind calls target %q; the live config's chords all target \"toren\"", m[1])
 		}
 	}
 }

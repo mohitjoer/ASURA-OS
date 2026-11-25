@@ -14,9 +14,7 @@
     "pct": true,
     "page": "windowmanager",
     "when": {
-      "desktop.appearance.layout": [
-        "scrolling"
-      ]
+      "desktop.appearance.layout": ["scrolling"]
     }
   },
   {
@@ -30,9 +28,7 @@
     "caps": "tiledLayout",
     "page": "windowmanager",
     "when": {
-      "desktop.appearance.layout": [
-        "scrolling"
-      ]
+      "desktop.appearance.layout": ["scrolling"]
     }
   },
   {
@@ -47,9 +43,7 @@
     "adv": true,
     "page": "windowmanager",
     "when": {
-      "desktop.appearance.layout": [
-        "dwindle"
-      ]
+      "desktop.appearance.layout": ["dwindle"]
     }
   },
   {
@@ -64,9 +58,7 @@
     "adv": true,
     "page": "windowmanager",
     "when": {
-      "desktop.appearance.layout": [
-        "dwindle"
-      ]
+      "desktop.appearance.layout": ["dwindle"]
     }
   },
   {
@@ -81,9 +73,7 @@
     "adv": true,
     "page": "windowmanager",
     "when": {
-      "desktop.appearance.layout": [
-        "dwindle"
-      ]
+      "desktop.appearance.layout": ["dwindle"]
     }
   },
   {
@@ -100,9 +90,7 @@
     "adv": true,
     "page": "windowmanager",
     "when": {
-      "desktop.appearance.layout": [
-        "dwindle"
-      ]
+      "desktop.appearance.layout": ["dwindle"]
     }
   },
   {
@@ -114,17 +102,11 @@
     "ctl": "seg",
     "src": "desktop.json",
     "caps": "tiledLayout",
-    "opts": [
-      "follow",
-      "left/top",
-      "right/bottom"
-    ],
+    "opts": ["follow", "left/top", "right/bottom"],
     "adv": true,
     "page": "windowmanager",
     "when": {
-      "desktop.appearance.layout": [
-        "dwindle"
-      ]
+      "desktop.appearance.layout": ["dwindle"]
     }
   },
   {
@@ -139,9 +121,7 @@
     "adv": true,
     "page": "windowmanager",
     "when": {
-      "desktop.appearance.layout": [
-        "dwindle"
-      ]
+      "desktop.appearance.layout": ["dwindle"]
     }
   },
   {
@@ -158,9 +138,7 @@
     "adv": true,
     "page": "windowmanager",
     "when": {
-      "desktop.appearance.layout": [
-        "master"
-      ]
+      "desktop.appearance.layout": ["master"]
     }
   },
   {
@@ -172,17 +150,11 @@
     "ctl": "seg",
     "src": "desktop.json",
     "caps": "tiledLayout",
-    "opts": [
-      "master",
-      "slave",
-      "inherit"
-    ],
+    "opts": ["master", "slave", "inherit"],
     "adv": true,
     "page": "windowmanager",
     "when": {
-      "desktop.appearance.layout": [
-        "master"
-      ]
+      "desktop.appearance.layout": ["master"]
     }
   },
   {
@@ -197,9 +169,7 @@
     "adv": true,
     "page": "windowmanager",
     "when": {
-      "desktop.appearance.layout": [
-        "master"
-      ]
+      "desktop.appearance.layout": ["master"]
     }
   },
   {
@@ -211,19 +181,11 @@
     "ctl": "seg",
     "src": "desktop.json",
     "caps": "tiledLayout",
-    "opts": [
-      "left",
-      "right",
-      "top",
-      "bottom",
-      "center"
-    ],
+    "opts": ["left", "right", "top", "bottom", "center"],
     "adv": true,
     "page": "windowmanager",
     "when": {
-      "desktop.appearance.layout": [
-        "master"
-      ]
+      "desktop.appearance.layout": ["master"]
     }
   },
   {
@@ -238,9 +200,7 @@
     "adv": true,
     "page": "windowmanager",
     "when": {
-      "desktop.appearance.layout": [
-        "master"
-      ]
+      "desktop.appearance.layout": ["master"]
     }
   },
   {
@@ -267,9 +227,7 @@
     "hi": 48,
     "unit": "px",
     "when": {
-      "wm.hyprland.plugins.hyprbars.enabled": [
-        true
-      ]
+      "wm.hyprland.plugins.hyprbars.enabled": [true]
     },
     "page": "plugins"
   },
@@ -286,9 +244,7 @@
     "hi": 20,
     "unit": "px",
     "when": {
-      "wm.hyprland.plugins.hyprbars.enabled": [
-        true
-      ]
+      "wm.hyprland.plugins.hyprbars.enabled": [true]
     },
     "page": "plugins"
   },
@@ -302,9 +258,7 @@
     "src": "desktop.json",
     "caps": "plugins",
     "when": {
-      "wm.hyprland.plugins.hyprbars.enabled": [
-        true
-      ]
+      "wm.hyprland.plugins.hyprbars.enabled": [true]
     },
     "page": "plugins"
   },
@@ -318,9 +272,7 @@
     "src": "desktop.json",
     "caps": "plugins",
     "when": {
-      "wm.hyprland.plugins.hyprbars.enabled": [
-        true
-      ]
+      "wm.hyprland.plugins.hyprbars.enabled": [true]
     },
     "page": "plugins"
   },
@@ -344,15 +296,9 @@
     "ctl": "seg",
     "src": "desktop.json",
     "caps": "plugins",
-    "opts": [
-      "flash",
-      "bounce",
-      "slide"
-    ],
+    "opts": ["flash", "bounce", "slide"],
     "when": {
-      "wm.hyprland.plugins.hyprfocus.enabled": [
-        true
-      ]
+      "wm.hyprland.plugins.hyprfocus.enabled": [true]
     },
     "page": "plugins"
   },
@@ -370,12 +316,8 @@
     "unit": "%",
     "pct": true,
     "when": {
-      "wm.hyprland.plugins.hyprfocus.enabled": [
-        true
-      ],
-      "wm.hyprland.plugins.hyprfocus.mode": [
-        "flash"
-      ]
+      "wm.hyprland.plugins.hyprfocus.enabled": [true],
+      "wm.hyprland.plugins.hyprfocus.mode": ["flash"]
     },
     "page": "plugins"
   },
@@ -393,12 +335,8 @@
     "unit": "%",
     "pct": true,
     "when": {
-      "wm.hyprland.plugins.hyprfocus.enabled": [
-        true
-      ],
-      "wm.hyprland.plugins.hyprfocus.mode": [
-        "bounce"
-      ]
+      "wm.hyprland.plugins.hyprfocus.enabled": [true],
+      "wm.hyprland.plugins.hyprfocus.mode": ["bounce"]
     },
     "page": "plugins"
   },
@@ -415,12 +353,8 @@
     "hi": 150,
     "unit": "px",
     "when": {
-      "wm.hyprland.plugins.hyprfocus.enabled": [
-        true
-      ],
-      "wm.hyprland.plugins.hyprfocus.mode": [
-        "slide"
-      ]
+      "wm.hyprland.plugins.hyprfocus.enabled": [true],
+      "wm.hyprland.plugins.hyprfocus.mode": ["slide"]
     },
     "page": "plugins"
   },
@@ -553,12 +487,12 @@
     "src": "desktop.json",
     "caps": "animations",
     "opts": [
-      "asuraWobble",
+      "torenWobble",
       "dynamic-cursors-magnification",
-      "asuraTheme",
-      "asuraBloom",
+      "torenTheme",
+      "torenBloom",
       "almostLinear",
-      "asuraSettle",
+      "torenSettle",
       "quick",
       "easeOutQuint",
       "linear",
@@ -600,12 +534,12 @@
     "src": "desktop.json",
     "caps": "animations",
     "opts": [
-      "asuraWobble",
+      "torenWobble",
       "dynamic-cursors-magnification",
-      "asuraTheme",
-      "asuraBloom",
+      "torenTheme",
+      "torenBloom",
       "almostLinear",
-      "asuraSettle",
+      "torenSettle",
       "quick",
       "easeOutQuint",
       "linear",
@@ -622,12 +556,7 @@
     "ctl": "seg",
     "src": "desktop.json",
     "caps": "animations",
-    "opts": [
-      "",
-      "slide",
-      "popin",
-      "gnomed"
-    ],
+    "opts": ["", "slide", "popin", "gnomed"],
     "page": "animations"
   },
   {
@@ -664,12 +593,12 @@
     "src": "desktop.json",
     "caps": "animations",
     "opts": [
-      "asuraWobble",
+      "torenWobble",
       "dynamic-cursors-magnification",
-      "asuraTheme",
-      "asuraBloom",
+      "torenTheme",
+      "torenBloom",
       "almostLinear",
-      "asuraSettle",
+      "torenSettle",
       "quick",
       "easeOutQuint",
       "linear",
@@ -711,12 +640,12 @@
     "src": "desktop.json",
     "caps": "animations",
     "opts": [
-      "asuraWobble",
+      "torenWobble",
       "dynamic-cursors-magnification",
-      "asuraTheme",
-      "asuraBloom",
+      "torenTheme",
+      "torenBloom",
       "almostLinear",
-      "asuraSettle",
+      "torenSettle",
       "quick",
       "easeOutQuint",
       "linear",
@@ -758,12 +687,12 @@
     "src": "desktop.json",
     "caps": "animations",
     "opts": [
-      "asuraWobble",
+      "torenWobble",
       "dynamic-cursors-magnification",
-      "asuraTheme",
-      "asuraBloom",
+      "torenTheme",
+      "torenBloom",
       "almostLinear",
-      "asuraSettle",
+      "torenSettle",
       "quick",
       "easeOutQuint",
       "linear",
@@ -805,12 +734,12 @@
     "src": "desktop.json",
     "caps": "animations",
     "opts": [
-      "asuraWobble",
+      "torenWobble",
       "dynamic-cursors-magnification",
-      "asuraTheme",
-      "asuraBloom",
+      "torenTheme",
+      "torenBloom",
       "almostLinear",
-      "asuraSettle",
+      "torenSettle",
       "quick",
       "easeOutQuint",
       "linear",
@@ -827,14 +756,7 @@
     "ctl": "chips",
     "src": "desktop.json",
     "caps": "animations",
-    "opts": [
-      "",
-      "slide",
-      "slidevert",
-      "fade",
-      "slidefade",
-      "slidefadevert"
-    ],
+    "opts": ["", "slide", "slidevert", "fade", "slidefade", "slidefadevert"],
     "page": "animations"
   },
   {
@@ -871,12 +793,12 @@
     "src": "desktop.json",
     "caps": "animations",
     "opts": [
-      "asuraWobble",
+      "torenWobble",
       "dynamic-cursors-magnification",
-      "asuraTheme",
-      "asuraBloom",
+      "torenTheme",
+      "torenBloom",
       "almostLinear",
-      "asuraSettle",
+      "torenSettle",
       "quick",
       "easeOutQuint",
       "linear",
@@ -918,12 +840,12 @@
     "src": "desktop.json",
     "caps": "animations",
     "opts": [
-      "asuraWobble",
+      "torenWobble",
       "dynamic-cursors-magnification",
-      "asuraTheme",
-      "asuraBloom",
+      "torenTheme",
+      "torenBloom",
       "almostLinear",
-      "asuraSettle",
+      "torenSettle",
       "quick",
       "easeOutQuint",
       "linear",
@@ -940,12 +862,7 @@
     "ctl": "seg",
     "src": "desktop.json",
     "caps": "animations",
-    "opts": [
-      "",
-      "slide",
-      "popin",
-      "gnomed"
-    ],
+    "opts": ["", "slide", "popin", "gnomed"],
     "page": "animations"
   },
   {
@@ -982,12 +899,12 @@
     "src": "desktop.json",
     "caps": "animations",
     "opts": [
-      "asuraWobble",
+      "torenWobble",
       "dynamic-cursors-magnification",
-      "asuraTheme",
-      "asuraBloom",
+      "torenTheme",
+      "torenBloom",
       "almostLinear",
-      "asuraSettle",
+      "torenSettle",
       "quick",
       "easeOutQuint",
       "linear",
@@ -1004,12 +921,7 @@
     "ctl": "seg",
     "src": "desktop.json",
     "caps": "animations",
-    "opts": [
-      "",
-      "slide",
-      "popin",
-      "fade"
-    ],
+    "opts": ["", "slide", "popin", "fade"],
     "page": "animations"
   },
   {
@@ -1046,12 +958,12 @@
     "src": "desktop.json",
     "caps": "animations",
     "opts": [
-      "asuraWobble",
+      "torenWobble",
       "dynamic-cursors-magnification",
-      "asuraTheme",
-      "asuraBloom",
+      "torenTheme",
+      "torenBloom",
       "almostLinear",
-      "asuraSettle",
+      "torenSettle",
       "quick",
       "easeOutQuint",
       "linear",
@@ -1093,12 +1005,12 @@
     "src": "desktop.json",
     "caps": "animations",
     "opts": [
-      "asuraWobble",
+      "torenWobble",
       "dynamic-cursors-magnification",
-      "asuraTheme",
-      "asuraBloom",
+      "torenTheme",
+      "torenBloom",
       "almostLinear",
-      "asuraSettle",
+      "torenSettle",
       "quick",
       "easeOutQuint",
       "linear",
@@ -1115,14 +1027,7 @@
     "ctl": "chips",
     "src": "desktop.json",
     "caps": "animations",
-    "opts": [
-      "",
-      "slide",
-      "slidevert",
-      "fade",
-      "slidefade",
-      "slidefadevert"
-    ],
+    "opts": ["", "slide", "slidevert", "fade", "slidefade", "slidefadevert"],
     "page": "animations"
   },
   {
@@ -1159,12 +1064,12 @@
     "src": "desktop.json",
     "caps": "animations",
     "opts": [
-      "asuraWobble",
+      "torenWobble",
       "dynamic-cursors-magnification",
-      "asuraTheme",
-      "asuraBloom",
+      "torenTheme",
+      "torenBloom",
       "almostLinear",
-      "asuraSettle",
+      "torenSettle",
       "quick",
       "easeOutQuint",
       "linear",
@@ -1181,12 +1086,7 @@
     "ctl": "seg",
     "src": "desktop.json",
     "caps": "animations",
-    "opts": [
-      "",
-      "slide",
-      "popin",
-      "gnomed"
-    ],
+    "opts": ["", "slide", "popin", "gnomed"],
     "page": "animations"
   },
   {
@@ -1223,12 +1123,12 @@
     "src": "desktop.json",
     "caps": "animations",
     "opts": [
-      "asuraWobble",
+      "torenWobble",
       "dynamic-cursors-magnification",
-      "asuraTheme",
-      "asuraBloom",
+      "torenTheme",
+      "torenBloom",
       "almostLinear",
-      "asuraSettle",
+      "torenSettle",
       "quick",
       "easeOutQuint",
       "linear",
@@ -1270,12 +1170,12 @@
     "src": "desktop.json",
     "caps": "animations",
     "opts": [
-      "asuraWobble",
+      "torenWobble",
       "dynamic-cursors-magnification",
-      "asuraTheme",
-      "asuraBloom",
+      "torenTheme",
+      "torenBloom",
       "almostLinear",
-      "asuraSettle",
+      "torenSettle",
       "quick",
       "easeOutQuint",
       "linear",
@@ -1317,12 +1217,12 @@
     "src": "desktop.json",
     "caps": "animations",
     "opts": [
-      "asuraWobble",
+      "torenWobble",
       "dynamic-cursors-magnification",
-      "asuraTheme",
-      "asuraBloom",
+      "torenTheme",
+      "torenBloom",
       "almostLinear",
-      "asuraSettle",
+      "torenSettle",
       "quick",
       "easeOutQuint",
       "linear",
@@ -1339,12 +1239,7 @@
     "ctl": "seg",
     "src": "desktop.json",
     "caps": "animations",
-    "opts": [
-      "",
-      "slide",
-      "popin",
-      "gnomed"
-    ],
+    "opts": ["", "slide", "popin", "gnomed"],
     "page": "animations"
   },
   {

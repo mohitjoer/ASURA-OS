@@ -43,7 +43,7 @@ func TestMirrorSetWritesTheFileAndResetRemovesIt(t *testing.T) {
 	dir := t.TempDir()
 	oldConf, oldASURA, oldWrite := mirrorConf, mirrorASURAConf, mirrorWrite
 	t.Cleanup(func() { mirrorConf, mirrorASURAConf, mirrorWrite = oldConf, oldASURA, oldWrite })
-	mirrorConf, mirrorASURAConf = filepath.Join(dir, "00-asura-mirror.conf"), filepath.Join(dir, "asura.conf")
+	mirrorConf, mirrorASURAConf = filepath.Join(dir, "00-toren-mirror.conf"), filepath.Join(dir, "toren.conf")
 	mirrorWrite = func(path, content string) error {
 		if content == "" {
 			return os.RemoveAll(path)
@@ -56,13 +56,13 @@ func TestMirrorSetWritesTheFileAndResetRemovesIt(t *testing.T) {
 	if currentMirror() != "https://repo-fastly.voidlinux.org" {
 		t.Fatalf("current %q", currentMirror())
 	}
-	if code := asuraMirror([]string{"set", "de"}); code != exitOK || currentMirror() != "https://repo-de.voidlinux.org" {
+	if code := torenMirror([]string{"set", "de"}); code != exitOK || currentMirror() != "https://repo-de.voidlinux.org" {
 		t.Fatalf("set: %d %q", code, currentMirror())
 	}
-	if code := asuraMirror([]string{"set", "http://insecure.example"}); code != exitUsage {
+	if code := torenMirror([]string{"set", "http://insecure.example"}); code != exitUsage {
 		t.Fatalf("plain http accepted: %d", code)
 	}
-	if code := asuraMirror([]string{"reset"}); code != exitOK || currentMirror() != "https://repo-fastly.voidlinux.org" {
+	if code := torenMirror([]string{"reset"}); code != exitOK || currentMirror() != "https://repo-fastly.voidlinux.org" {
 		t.Fatalf("reset: %d %q", code, currentMirror())
 	}
 }

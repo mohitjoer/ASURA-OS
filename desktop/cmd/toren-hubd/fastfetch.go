@@ -257,7 +257,7 @@ func ffNormalizeLogo(l map[string]any) ffLogo {
 	if s, ok := l["source"].(string); ok {
 		out.Source = s
 	}
-	if out.Kind == "ascii" && isShippedAsuraLogo(out.Source) {
+	if out.Kind == "ascii" && isShippedTorenLogo(out.Source) {
 		out.Kind = "builtin"
 	}
 	if w, ok := l["width"].(float64); ok {
@@ -434,7 +434,7 @@ func ffBuildLogo(l ffLogo) ffOutLogo {
 		out.Type = "file"
 		out.Source = l.Source
 	case "builtin":
-		src := asuraBuiltinLogoSource()
+		src := torenBuiltinLogoSource()
 		if src != "" {
 			if strings.HasSuffix(src, ".txt") {
 				out.Type = "file"
@@ -514,7 +514,7 @@ func previewFastfetch(m ffModel) error {
 	if err != nil {
 		return err
 	}
-	tmp, err := os.CreateTemp("", "asura-ff-*.jsonc")
+	tmp, err := os.CreateTemp("", "toren-ff-*.jsonc")
 	if err != nil {
 		return err
 	}
@@ -543,13 +543,13 @@ func importFastfetchLogo(src string) (string, error) {
 		return "", err
 	}
 	if strings.EqualFold(filepath.Ext(src), ".svg") {
-		out := filepath.Join(dir, "asura-logo.png")
+		out := filepath.Join(dir, "toren-logo.png")
 		if err := ffRasterizeSVG(src, out); err != nil {
 			return "", err
 		}
 		return out, nil
 	}
-	dst := filepath.Join(dir, "asura-logo"+strings.ToLower(filepath.Ext(src)))
+	dst := filepath.Join(dir, "toren-logo"+strings.ToLower(filepath.Ext(src)))
 	if err := ffCopyFile(src, dst); err != nil {
 		return "", err
 	}
@@ -563,7 +563,7 @@ func importFastfetchLogo(src string) (string, error) {
 // in it is known to be baked (so a re-bake is a no-op, not a double bake).
 const ffDitherSuffix = ".1bit.png"
 
-// ffBone and ffBayer4 reproduce bin/art/asura-dither: the decor set's single ink,
+// ffBone and ffBayer4 reproduce bin/art/toren-dither: the decor set's single ink,
 // bone, carried on a transparent ground by an ordered Bayer 4x4 dither.
 var (
 	ffBone   = color.NRGBA{R: 0xe8, G: 0xd8, B: 0xc9, A: 0xff}
@@ -637,14 +637,14 @@ func ffBakeDither(src, dst string) error {
 	return png.Encode(w, out)
 }
 
-// removeFastfetchLogo deletes the imported emblem (asura-logo.*, including any
+// removeFastfetchLogo deletes the imported emblem (toren-logo.*, including any
 // bake) from the fastfetch dir and reports what it removed. It only touches
-// asura-logo.* inside that dir, so the shipped fastfetch-emblem.png is never in
+// toren-logo.* inside that dir, so the shipped fastfetch-emblem.png is never in
 // range. If config.jsonc still points at a deleted file, it repoints the source at
 // the shipped emblem so the live readout does not reference a file that is gone.
 func removeFastfetchLogo() (string, error) {
 	dir := fastfetchDir()
-	matches, err := filepath.Glob(filepath.Join(dir, "asura-logo.*"))
+	matches, err := filepath.Glob(filepath.Join(dir, "toren-logo.*"))
 	if err != nil {
 		return "", err
 	}
@@ -668,10 +668,10 @@ func removeFastfetchLogo() (string, error) {
 }
 
 // applyFastfetchEmblem installs src as the readout's emblem the way the Hub's
-// import does: copied to asura-logo.<ext> in the fastfetch dir, a user-owned
+// import does: copied to toren-logo.<ext> in the fastfetch dir, a user-owned
 // name no package ships, and config.jsonc repointed at it. It returns the
 // stored source. A rice used to copy its emblem over the SHIPPED
-// fastfetch-emblem.png instead, which `asura materialize` re-lays on every
+// fastfetch-emblem.png instead, which `toren materialize` re-lays on every
 // update, so the rice's logo reset to the brand mark each time (docs/updates.md:
 // never write into a shipped path).
 func applyFastfetchEmblem(src string) (string, error) {
@@ -692,7 +692,7 @@ func applyFastfetchEmblem(src string) (string, error) {
 }
 
 // fastfetchOnShippedEmblem reports whether the readout draws the package's own
-// fastfetch-emblem.png (or nothing Asura wrote): the state a rice emblem lands in
+// fastfetch-emblem.png (or nothing Toren wrote): the state a rice emblem lands in
 // after materialize clobbered it, and the only state `rice emblem` repairs.
 func fastfetchOnShippedEmblem() bool {
 	m, err := loadFastfetch()
@@ -770,22 +770,22 @@ func ffTitleCase(s string) string {
 	return strings.ToUpper(s[:1]) + s[1:]
 }
 
-func isShippedAsuraLogo(src string) bool {
+func isShippedTorenLogo(src string) bool {
 	base := filepath.Base(src)
-	return base == "asura-logo.txt" || base == "fastfetch-ascii.txt" ||
-		src == "/usr/share/asura/branding/asura-logo.txt" ||
-		src == "/usr/share/asura/branding/fastfetch-ascii.txt"
+	return base == "toren-logo.txt" || base == "fastfetch-ascii.txt" ||
+		src == "/usr/share/toren/branding/toren-logo.txt" ||
+		src == "/usr/share/toren/branding/fastfetch-ascii.txt"
 }
 
-func asuraBuiltinLogoSource() string {
+func torenBuiltinLogoSource() string {
 	home := os.Getenv("HOME")
 	candidates := []string{
-		"/usr/share/asura/branding/asura-logo.txt",
-		"/usr/share/asura/branding/fastfetch-ascii.txt",
-		filepath.Join(home, ".config/asura/branding/asura-logo.txt"),
-		"/usr/share/asura/branding/fastfetch-emblem.png",
-		filepath.Join(home, ".config/asura/branding/fastfetch-emblem.png"),
-		filepath.Join(home, ".local/share/asura/assets/brand/fastfetch-emblem.png"),
+		"/usr/share/toren/branding/toren-logo.txt",
+		"/usr/share/toren/branding/fastfetch-ascii.txt",
+		filepath.Join(home, ".config/toren/branding/toren-logo.txt"),
+		"/usr/share/toren/branding/fastfetch-emblem.png",
+		filepath.Join(home, ".config/toren/branding/fastfetch-emblem.png"),
+		filepath.Join(home, ".local/share/toren/assets/brand/fastfetch-emblem.png"),
 		"public/branding/toren-logo.txt",
 		"public/branding/fastfetch-emblem.png",
 	}
@@ -798,7 +798,7 @@ func asuraBuiltinLogoSource() string {
 }
 
 // defaultFastfetchModel: a rich branded readout for a box with no config.jsonc yet,
-// matching the branded Asura layout with section headers, tagline, hardware/system info, and swatches.
+// matching the branded Toren layout with section headers, tagline, hardware/system info, and swatches.
 func defaultFastfetchModel() ffModel {
 	mk := func(t, k string) ffRow {
 		raw, _ := json.Marshal(map[string]string{"type": t, "key": k})
@@ -811,9 +811,9 @@ func defaultFastfetchModel() ffModel {
 	logoSrc := ""
 
 	candidates := []string{
-		filepath.Join(home, ".config/asura/branding/fastfetch-emblem.png"),
-		filepath.Join(home, ".local/share/asura/assets/brand/fastfetch-emblem.png"),
-		"/usr/share/asura/branding/fastfetch-emblem.png",
+		filepath.Join(home, ".config/toren/branding/fastfetch-emblem.png"),
+		filepath.Join(home, ".local/share/toren/assets/brand/fastfetch-emblem.png"),
+		"/usr/share/toren/branding/fastfetch-emblem.png",
 		"public/branding/fastfetch-emblem.png",
 	}
 	for _, c := range candidates {
@@ -825,9 +825,9 @@ func defaultFastfetchModel() ffModel {
 	}
 	if logoKind != "image" {
 		asciiCandidates := []string{
-			"/usr/share/asura/branding/asura-logo.txt",
-			"/usr/share/asura/branding/fastfetch-ascii.txt",
-			filepath.Join(home, ".config/asura/branding/asura-logo.txt"),
+			"/usr/share/toren/branding/toren-logo.txt",
+			"/usr/share/toren/branding/fastfetch-ascii.txt",
+			filepath.Join(home, ".config/toren/branding/toren-logo.txt"),
 			"public/branding/toren-logo.txt",
 		}
 		for _, c := range asciiCandidates {

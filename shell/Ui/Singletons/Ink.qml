@@ -285,7 +285,7 @@ Singleton {
     }
 
     readonly property string cacheDir: (Quickshell.env("XDG_CACHE_HOME")
-        || (Quickshell.env("HOME") + "/.cache")) + "/asura/"
+        || (Quickshell.env("HOME") + "/.cache")) + "/toren/"
 
     FileView {
         id: wallFile

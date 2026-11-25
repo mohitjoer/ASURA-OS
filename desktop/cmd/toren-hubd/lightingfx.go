@@ -1,11 +1,11 @@
 package main
 
-// The effects Asura paints itself, through a device's per-LED mode.
+// The effects Toren paints itself, through a device's per-LED mode.
 //
 // A keyboard often ignores half the effects its firmware advertises (an ASUS
 // N-KEY board runs Static, Breathing, Flashing and Spectrum Cycle and nothing
 // else), and OpenRGB's own client sends the same bytes, so drawing them is the
-// only way to make them work. `asura-hubd lighting animate` renders until nothing
+// only way to make them work. `toren-hubd lighting animate` renders until nothing
 // wants painting, then exits.
 
 import (
@@ -19,11 +19,11 @@ import (
 )
 
 const (
-	fxUnit = "asura-lighting-fx"
+	fxUnit = "toren-lighting-fx"
 	fxFPS  = 30
 )
 
-// fxEffect = one effect Asura can draw. `spatial` marks the ones that travel
+// fxEffect = one effect Toren can draw. `spatial` marks the ones that travel
 // across the device, so they are only offered where the LEDs have positions.
 type fxEffect struct {
 	ID    string
@@ -51,7 +51,7 @@ func fxByID(id string) (fxEffect, bool) {
 	return fxEffect{}, false
 }
 
-// paintMode: the mode to sit a device in while Asura paints it. Named the way
+// paintMode: the mode to sit a device in while Toren paints it. Named the way
 // OpenRGB names them, most direct first.
 func paintMode(d orgbDevice) (int, orgbMode, bool) {
 	for _, want := range []string{"Direct", "Custom", "Static"} {
@@ -67,7 +67,7 @@ func paintMode(d orgbDevice) (int, orgbMode, bool) {
 	return 0, orgbMode{}, false
 }
 
-// canPaint reports whether Asura's own effects are available on this device.
+// canPaint reports whether Toren's own effects are available on this device.
 func canPaint(d orgbDevice) bool {
 	_, _, ok := paintMode(d)
 	return ok
@@ -237,7 +237,7 @@ func packHSV(h, s, v float64) uint32 {
 
 // ── the animator ────────────────────────────────────────────────────────────
 
-// runAnimate paints every managed device that asked for a Asura effect, and
+// runAnimate paints every managed device that asked for a Toren effect, and
 // exits once none do (the user picked device effects again, handed the devices
 // back, or switched lighting off). One process for every device, so a keyboard
 // and a mouse stay in step.
@@ -336,7 +336,7 @@ func fxStamp() string {
 	return out
 }
 
-// ensureAnimator starts the painter when a device wants a Asura effect, and
+// ensureAnimator starts the painter when a device wants a Toren effect, and
 // leaves it alone otherwise: it exits by itself once nothing needs painting.
 func ensureAnimator(st lightingState) {
 	want := false
@@ -351,7 +351,7 @@ func ensureAnimator(st lightingState) {
 	}
 	self, err := os.Executable()
 	if err != nil {
-		self = "asura-hubd"
+		self = "toren-hubd"
 	}
 	if _, err := exec.LookPath("systemd-run"); err != nil {
 		cmd := exec.Command(self, "lighting", "animate")
@@ -361,7 +361,7 @@ func ensureAnimator(st lightingState) {
 	}
 	_ = exec.Command("systemd-run", "--user", "--collect",
 		"--unit="+fxUnit,
-		"--description=Asura lighting effects",
+		"--description=Toren lighting effects",
 		self, "lighting", "animate").Run()
 }
 

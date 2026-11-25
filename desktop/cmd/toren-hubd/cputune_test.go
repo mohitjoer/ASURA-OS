@@ -171,8 +171,8 @@ func TestBatteryKnobsIgnoreProfileDef(t *testing.T) {
 	}
 }
 
-// asura-power may still report an idle block; nothing reads power.json any more
-// (hypridle runs from the org.asura.desktop idle keys), so the page must never be
+// toren-power may still report an idle block; nothing reads power.json any more
+// (hypridle runs from the org.toren.desktop idle keys), so the page must never be
 // handed an idle tunable.
 func TestCpuTunablesNeverIdle(t *testing.T) {
 	caps := mustCaps(t, `{

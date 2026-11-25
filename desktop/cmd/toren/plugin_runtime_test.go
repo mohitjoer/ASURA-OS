@@ -12,7 +12,7 @@ import (
 
 // TestPluginRoundTrip is the one check of how the CLI and the shell's runtime
 // fit: it installs a scaffold, turns it on, runs the real discover.sh and
-// asura-plugins-place, and takes the plugin off again. It needs bash, jq and
+// toren-plugins-place, and takes the plugin off again. It needs bash, jq and
 // flock, which the placement scripts need too, and skips without them.
 func TestPluginRoundTrip(t *testing.T) {
 	for _, tool := range []string{"bash", "jq", "flock"} {
@@ -22,7 +22,7 @@ func TestPluginRoundTrip(t *testing.T) {
 	}
 	shell := filepath.Join("..", "..", "..", "shell")
 	discover := filepath.Join(shell, "plugins", "discover.sh")
-	place := filepath.Join(shell, "scripts", "asura-plugins-place")
+	place := filepath.Join(shell, "scripts", "toren-plugins-place")
 	for _, script := range []string{discover, place} {
 		if !pluginFileThere(script) {
 			t.Skipf("%s is not in this checkout", script)
@@ -40,7 +40,7 @@ func TestPluginRoundTrip(t *testing.T) {
 		t.Helper()
 		var out, errOut bytes.Buffer
 		if code := pluginDispatch(args, pluginIO{out: &out, err: &errOut}); code != exitOK {
-			t.Fatalf("asura plugin %v: exit %d: %s%s", args, code, out.String(), errOut.String())
+			t.Fatalf("toren plugin %v: exit %d: %s%s", args, code, out.String(), errOut.String())
 		}
 		return out.String()
 	}

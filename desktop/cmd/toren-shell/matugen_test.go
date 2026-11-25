@@ -104,10 +104,10 @@ func TestStoredSchemeTypeIsHonored(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
-	if err := os.MkdirAll(filepath.Join(home, ".config", "asura"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(home, ".config", "toren"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	writeFile(t, filepath.Join(home, ".config", "asura", "matugen.json"),
+	writeFile(t, filepath.Join(home, ".config", "toren", "matugen.json"),
 		`{"schemeType":"scheme-vibrant","mode":"dark","prefer":"saturation"}`)
 	args, err := matugenArgs("/w.png", readMatugenKnobs(), "dark")
 	if err != nil {
@@ -132,26 +132,26 @@ func TestReadMatugenKnobs(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
-	asura := filepath.Join(home, ".config", "asura")
-	if err := os.MkdirAll(asura, 0o755); err != nil {
+	toren := filepath.Join(home, ".config", "toren")
+	if err := os.MkdirAll(toren, 0o755); err != nil {
 		t.Fatal(err)
 	}
 
 	// Missing file -> defaults.
 	k := readMatugenKnobs()
-	if k.Mode != "smart" || k.Prefer != "saturation" || !k.ThemeAsuraApps || k.SchemeType != "scheme-monochrome" {
+	if k.Mode != "smart" || k.Prefer != "saturation" || !k.ThemeTorenApps || k.SchemeType != "scheme-monochrome" {
 		t.Errorf("defaults: got %+v", k)
 	}
 
 	// Full file -> every field mapped.
-	writeFile(t, filepath.Join(asura, "matugen.json"),
+	writeFile(t, filepath.Join(toren, "matugen.json"),
 		`{"engine":"matugen","schemeType":"scheme-vibrant","mode":"dark","contrast":0.2,`+
 			`"lightnessDark":0.1,"lightnessLight":-0.1,"prefer":"value","sourceColorIndex":3,`+
-			`"themeAsuraApps":false,"templates":{"kitty":true,"btop":false,"gtk":true}}`)
+			`"themeTorenApps":false,"templates":{"kitty":true,"btop":false,"gtk":true}}`)
 	k = readMatugenKnobs()
 	if k.Mode != "dark" ||
 		k.Contrast != 0.2 || k.LightnessDark != 0.1 || k.LightnessLight != -0.1 ||
-		k.Prefer != "value" || k.SchemeType != "scheme-vibrant" || k.SourceColorIndex != 3 || k.ThemeAsuraApps {
+		k.Prefer != "value" || k.SchemeType != "scheme-vibrant" || k.SourceColorIndex != 3 || k.ThemeTorenApps {
 		t.Errorf("full file: got %+v", k)
 	}
 	if k.Templates["kitty"] != true || k.Templates["btop"] != false || k.Templates["gtk"] != true {
@@ -345,7 +345,7 @@ activeBackground=#202020
 		"font=Comic Sans,11", // the user's font
 		"Theme=breeze-dark",  // the user's icon theme
 		"widgetStyle=Darkly", // the user's widget style
-		"ColorScheme=Asura",  // the one General key the palette owns
+		"ColorScheme=Toren",  // the one General key the palette owns
 		"BackgroundNormal=#101010",
 		"BackgroundAlternate=#181818",
 		"[Colors:Header][Inactive]",
@@ -395,7 +395,7 @@ func TestApplyKdeColorsWithoutKdeglobals(t *testing.T) {
 }
 
 // TestApplyKdeColorsForeignSectionSurvives proves the merge only claims the
-// colour groups: a section Asura knows nothing about, and the user's font,
+// colour groups: a section Toren knows nothing about, and the user's font,
 // come through byte for byte while the palette lands.
 func TestApplyKdeColorsForeignSectionSurvives(t *testing.T) {
 	home := t.TempDir()
@@ -597,11 +597,11 @@ func TestResolveGtkTheme(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
-	asura := filepath.Join(home, ".config", "asura")
-	if err := os.MkdirAll(asura, 0o755); err != nil {
+	toren := filepath.Join(home, ".config", "toren")
+	if err := os.MkdirAll(toren, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	path := filepath.Join(asura, "theme.json")
+	path := filepath.Join(toren, "theme.json")
 	cases := []struct {
 		theme       string // "" means write no theme.json at all
 		dark, light string
@@ -708,8 +708,8 @@ func TestMatugenFollows(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
-	asura := filepath.Join(home, ".config", "asura")
-	if err := os.MkdirAll(asura, 0o755); err != nil {
+	toren := filepath.Join(home, ".config", "toren")
+	if err := os.MkdirAll(toren, 0o755); err != nil {
 		t.Fatal(err)
 	}
 	cases := []struct {
@@ -725,10 +725,10 @@ func TestMatugenFollows(t *testing.T) {
 		{"match on + static named theme -> idle", true, "Nord Dark", false},
 	}
 	for _, c := range cases {
-		if err := os.WriteFile(filepath.Join(asura, "theme.json"), fmt.Appendf(nil, `{"followWallpaper":%v}`, c.follow), 0o644); err != nil {
+		if err := os.WriteFile(filepath.Join(toren, "theme.json"), fmt.Appendf(nil, `{"followWallpaper":%v}`, c.follow), 0o644); err != nil {
 			t.Fatal(err)
 		}
-		if err := os.WriteFile(filepath.Join(asura, "shell.json"), fmt.Appendf(nil, `{"theme":{"theme":%q}}`, c.theme), 0o644); err != nil {
+		if err := os.WriteFile(filepath.Join(toren, "shell.json"), fmt.Appendf(nil, `{"theme":{"theme":%q}}`, c.theme), 0o644); err != nil {
 			t.Fatal(err)
 		}
 		if got := matugenFollows(); got != c.want {
@@ -738,7 +738,7 @@ func TestMatugenFollows(t *testing.T) {
 }
 
 // TestMatugenApplyInvokesBinary drives matugenApply against a PATH-shimmed
-// asura that records its argv and emits a canned palette. It proves the knobs
+// toren that records its argv and emits a canned palette. It proves the knobs
 // come from matugen.json, that smart mode resolves the --mode value from the
 // wallpaper's luminance (both branches), that the mode selects the colour
 // bucket, and that the shell palette lands with the base16 keys plus the
@@ -768,28 +768,28 @@ for a in "$@"; do case "$prev" in --mode) mode="$a";; esac; prev="$a"; done
 case "$2" in
   generate) if [ "$mode" = light ]; then cat "` + jsonLight + `"; else cat "` + jsonDark + `"; fi ;;
 esac`
-	writeShim(t, filepath.Join(bin, "asura"), shim)
+	writeShim(t, filepath.Join(bin, "toren"), shim)
 	writeShim(t, filepath.Join(bin, "gsettings"), ":")
 	writeShim(t, filepath.Join(bin, "pkill"), ":")
 
 	// Deploy a minimal template config where the daemon reads it (the
 	// materialised copy) so the render pass has configs to run.
-	mgDir := filepath.Join(home, ".config", "asura", "shell", "matugen")
+	mgDir := filepath.Join(home, ".config", "toren", "shell", "matugen")
 	if err := os.MkdirAll(mgDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
 	writeFile(t, filepath.Join(mgDir, "config.toml"), "[config]\n")
 	writeFile(t, filepath.Join(mgDir, "apps.toml"), "[config]\n")
 
-	asura := filepath.Join(home, ".config", "asura")
-	if err := os.MkdirAll(asura, 0o755); err != nil {
+	toren := filepath.Join(home, ".config", "toren")
+	if err := os.MkdirAll(toren, 0o755); err != nil {
 		t.Fatal(err)
 	}
 	darkWall := filepath.Join(home, "dark-wall.png")
 	lightWall := filepath.Join(home, "light-wall.png")
 	writeSolidPNG(t, darkWall, 12)
 	writeSolidPNG(t, lightWall, 240)
-	colorsPath := filepath.Join(home, ".cache", "asura", "colors.json")
+	colorsPath := filepath.Join(home, ".cache", "toren", "colors.json")
 
 	combos := []struct {
 		name, mode, prefer, img string
@@ -816,8 +816,8 @@ esac`
 	for _, c := range combos {
 		_ = os.Remove(logFile)
 		_ = os.Remove(colorsPath)
-		writeFile(t, filepath.Join(asura, "matugen.json"),
-			fmt.Sprintf(`{"engine":"matugen","mode":%q,"prefer":%q,"contrast":%v,"themeAsuraApps":true}`,
+		writeFile(t, filepath.Join(toren, "matugen.json"),
+			fmt.Sprintf(`{"engine":"matugen","mode":%q,"prefer":%q,"contrast":%v,"themeTorenApps":true}`,
 				c.mode, c.prefer, c.contrast))
 
 		if err := (&daemon{}).matugenApply(c.img); err != nil {
@@ -833,9 +833,9 @@ esac`
 		}
 		// And the templating pass goes through the renderer, on the staged,
 		// roster-filtered config and the carrier.
-		cacheAsura := filepath.Join(home, ".cache", "asura")
-		wantRender := "theme render --config " + filepath.Join(cacheAsura, "active-config.toml") +
-			" --palette " + filepath.Join(cacheAsura, "matugen-carrier.json")
+		cacheToren := filepath.Join(home, ".cache", "toren")
+		wantRender := "theme render --config " + filepath.Join(cacheToren, "active-config.toml") +
+			" --palette " + filepath.Join(cacheToren, "matugen-carrier.json")
 		if !strings.Contains(string(logged), wantRender) {
 			t.Errorf("%s: argv log missing the render call\n want line: %s\n got:\n%s", c.name, wantRender, logged)
 		}
@@ -916,8 +916,8 @@ func gtkReloadEnv(t *testing.T, themeJSON, colorsJSON string) *[][]string {
 	t.Setenv("HOME", home)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(home, ".cache"))
-	cfg := filepath.Join(home, ".config", "asura")
-	cache := filepath.Join(home, ".cache", "asura")
+	cfg := filepath.Join(home, ".config", "toren")
+	cache := filepath.Join(home, ".cache", "toren")
 	if err := os.MkdirAll(cfg, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -1023,11 +1023,11 @@ func TestSyncFollowWallpaper(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
-	asura := filepath.Join(home, ".config", "asura")
-	if err := os.MkdirAll(asura, 0o755); err != nil {
+	toren := filepath.Join(home, ".config", "toren")
+	if err := os.MkdirAll(toren, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	path := filepath.Join(asura, "theme.json")
+	path := filepath.Join(toren, "theme.json")
 	writeFile(t, path, `{"followWallpaper":false,"themeApps":true}`)
 
 	read := func() map[string]any {
@@ -1155,7 +1155,7 @@ func TestMatugenApplyNeutralizesAchromaticWallpaper(t *testing.T) {
 	// tonal ramps -- exactly as it does for a picture it cannot seed from.
 	blue := filepath.Join(home, "blue.json")
 	writeFile(t, blue, blueMatugenJSON())
-	writeShim(t, filepath.Join(bin, "asura"), `case "$2" in generate) cat "`+blue+`";; esac`)
+	writeShim(t, filepath.Join(bin, "toren"), `case "$2" in generate) cat "`+blue+`";; esac`)
 	writeShim(t, filepath.Join(bin, "gsettings"), ":")
 	writeShim(t, filepath.Join(bin, "pkill"), ":")
 
@@ -1166,14 +1166,14 @@ func TestMatugenApplyNeutralizesAchromaticWallpaper(t *testing.T) {
 	writeFile(t, filepath.Join(mgDir, "config.toml"), "[config]\n")
 	writeFile(t, filepath.Join(mgDir, "apps.toml"), "[config]\n")
 
-	asura := filepath.Join(home, ".config", "asura")
-	if err := os.MkdirAll(asura, 0o755); err != nil {
+	toren := filepath.Join(home, ".config", "toren")
+	if err := os.MkdirAll(toren, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	writeFile(t, filepath.Join(asura, "matugen.json"), `{"mode":"dark","prefer":"saturation","themeAsuraApps":true}`)
+	writeFile(t, filepath.Join(toren, "matugen.json"), `{"mode":"dark","prefer":"saturation","themeTorenApps":true}`)
 
-	colorsPath := filepath.Join(home, ".cache", "asura", "colors.json")
-	tonesPath := filepath.Join(home, ".cache", "asura", "tones.json")
+	colorsPath := filepath.Join(home, ".cache", "toren", "colors.json")
+	tonesPath := filepath.Join(home, ".cache", "toren", "tones.json")
 
 	gray := filepath.Join(home, "gray.png")
 	writeSolidPNG(t, gray, 30) // achromatic + dark
@@ -1324,7 +1324,7 @@ func TestResolveModeSunFollowsTheWindow(t *testing.T) {
 }
 
 // The template configs are read from the materialised copy, where a user edit
-// wins, and from the packaged shell tree until `asura materialize` has run.
+// wins, and from the packaged shell tree until `toren materialize` has run.
 func TestMatugenTemplateDir(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
@@ -1336,7 +1336,7 @@ func TestMatugenTemplateDir(t *testing.T) {
 	if got, want := matugenTemplateDir(), filepath.Join(home, "packaged", "matugen"); got != want {
 		t.Fatalf("before materialize: %s, want the packaged %s", got, want)
 	}
-	materialised := filepath.Join(home, ".config", "asura", "shell", "matugen")
+	materialised := filepath.Join(home, ".config", "toren", "shell", "matugen")
 	if err := os.MkdirAll(materialised, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -1346,15 +1346,15 @@ func TestMatugenTemplateDir(t *testing.T) {
 	}
 }
 
-// TestThemeRoundTripWithRealCLI drives matugenApply against a built `asura`, so
+// TestThemeRoundTripWithRealCLI drives matugenApply against a built `toren`, so
 // the daemon's half of the palette contract is checked against the generator and
 // the renderer it really calls: the flags are accepted, the JSON parses into a
 // complete shell palette, and the templates land. It is gated on ASURA_BIN
-// (a built desktop/cmd/asura) so the default suite stays hermetic.
+// (a built desktop/cmd/toren) so the default suite stays hermetic.
 func TestThemeRoundTripWithRealCLI(t *testing.T) {
 	bin := os.Getenv("ASURA_BIN")
 	if bin == "" {
-		t.Skip("set ASURA_BIN to a built asura to run the palette round trip")
+		t.Skip("set ASURA_BIN to a built toren to run the palette round trip")
 	}
 	home := t.TempDir()
 	t.Setenv("HOME", home)
@@ -1363,15 +1363,15 @@ func TestThemeRoundTripWithRealCLI(t *testing.T) {
 	t.Setenv("XDG_RUNTIME_DIR", t.TempDir())
 
 	bins := t.TempDir()
-	if err := os.Symlink(bin, filepath.Join(bins, "asura")); err != nil {
+	if err := os.Symlink(bin, filepath.Join(bins, "toren")); err != nil {
 		t.Fatal(err)
 	}
 	t.Setenv("PATH", bins+string(os.PathListSeparator)+os.Getenv("PATH"))
 	writeShim(t, filepath.Join(bins, "gsettings"), ":")
 	writeShim(t, filepath.Join(bins, "pkill"), ":")
 
-	// The templates the package ships, laid where `asura materialize` puts them.
-	if err := os.CopyFS(filepath.Join(home, ".config", "asura", "shell", "matugen"), os.DirFS("../../../shell/matugen")); err != nil {
+	// The templates the package ships, laid where `toren materialize` puts them.
+	if err := os.CopyFS(filepath.Join(home, ".config", "toren", "shell", "matugen"), os.DirFS("../../../shell/matugen")); err != nil {
 		t.Fatalf("deploy templates: %v", err)
 	}
 	img := filepath.Join(home, "wall.png")
@@ -1381,7 +1381,7 @@ func TestThemeRoundTripWithRealCLI(t *testing.T) {
 		t.Fatalf("matugenApply: %v", err)
 	}
 
-	b, err := os.ReadFile(filepath.Join(home, ".cache", "asura", "colors.json"))
+	b, err := os.ReadFile(filepath.Join(home, ".cache", "toren", "colors.json"))
 	if err != nil {
 		t.Fatalf("colors.json: %v", err)
 	}
@@ -1399,12 +1399,12 @@ func TestThemeRoundTripWithRealCLI(t *testing.T) {
 			t.Errorf("colors.json missing base16 key %q", k)
 		}
 	}
-	if _, err := os.Stat(filepath.Join(home, ".cache", "asura", "tones.json")); err != nil {
+	if _, err := os.Stat(filepath.Join(home, ".cache", "toren", "tones.json")); err != nil {
 		t.Errorf("tones.json not written: %v", err)
 	}
 	for _, rendered := range []string{
-		filepath.Join(home, ".config", "asura", "apps", "ghostty", "colors"),
-		filepath.Join(home, ".config", "btop", "themes", "asura.theme"),
+		filepath.Join(home, ".config", "toren", "apps", "ghostty", "colors"),
+		filepath.Join(home, ".config", "btop", "themes", "toren.theme"),
 		filepath.Join(home, ".config", "gtk-4.0", "gtk.css"),
 	} {
 		if st, err := os.Stat(rendered); err != nil || st.Size() == 0 {

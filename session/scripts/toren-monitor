@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# asura-monitor: per-display scale from DPI, for Hyprland.
+# toren-monitor: per-display scale from DPI, for Hyprland.
 #
 # `autoscale` = scale per output from real px density (px / physical mm), so a
 # high-DPI panel zooms and a low-DPI external sits at 1x. applied live via
@@ -18,27 +18,27 @@ set -euo pipefail
 
 # the drop-in hyprland.conf sources (hyprlang has no optional source, so it is read
 # under `noerror`). always rewritten in full, never skip-if-exists.
-monitors_conf="${ASURA_MONITORS_CONF:-${XDG_CONFIG_HOME:-$HOME/.config}/asura/hyprland/monitors-auto.conf}"
+monitors_conf="${ASURA_MONITORS_CONF:-${XDG_CONFIG_HOME:-$HOME/.config}/toren/hyprland/monitors-auto.conf}"
 
-# Named monitor profiles (Asura Settings). keyed by hardware identity, not the
+# Named monitor profiles (Toren Settings). keyed by hardware identity, not the
 # connector, so the layout follows the physical displays across reshuffles.
-monitors_dir="${ASURA_MONITORS_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/asura/monitors}"
+monitors_dir="${ASURA_MONITORS_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/toren/monitors}"
 
-# manual overrides. ~/.config/asura/hyprland/monitors-user.conf is hand-written and
+# manual overrides. ~/.config/toren/hyprland/monitors-user.conf is hand-written and
 # sourced after the generated monitors-auto.conf, so anything in there wins.
 # autoscale skips any output named there: a fake / generic EDID that needs a
 # forced mode or modeline, or a layout you want kept, never fights detection.
-monitors_user="${ASURA_MONITORS_USER:-${XDG_CONFIG_HOME:-$HOME/.config}/asura/hyprland/monitors-user.conf}"
+monitors_user="${ASURA_MONITORS_USER:-${XDG_CONFIG_HOME:-$HOME/.config}/toren/hyprland/monitors-user.conf}"
 
 # autoscale at login is opt-in; this marker is the switch (`autoscale on|off|status`).
-autoscale_flag="${ASURA_MONITOR_AUTOSCALE_FLAG:-${XDG_STATE_HOME:-$HOME/.local/state}/asura/autoscale}"
+autoscale_flag="${ASURA_MONITOR_AUTOSCALE_FLAG:-${XDG_STATE_HOME:-$HOME/.local/state}/toren/autoscale}"
 
-# last layout from Asura Settings (Apply, not a named profile). autoscale
+# last layout from Toren Settings (Apply, not a named profile). autoscale
 # recalls it for the connected display set so an explicit choice (hand-set
 # scale above all) survives a relogin instead of being recomputed from DPI.
 # hardware-keyed like a profile but implicit + singular (latest Apply); a
 # forced DPI pass wipes it.
-applied_layout="${ASURA_MONITORS_APPLIED:-${XDG_CONFIG_HOME:-$HOME/.config}/asura/monitors-applied.json}"
+applied_layout="${ASURA_MONITORS_APPLIED:-${XDG_CONFIG_HOME:-$HOME/.config}/toren/monitors-applied.json}"
 
 # jq prelude for every scale-touching path. Hyprland only accepts a scale that
 # is a 1/120 multiple AND divides the mode's pixel width and height into whole
@@ -129,7 +129,7 @@ pinned_outputs() {
     | sed -E 's/[[:space:]]+$//' | grep -v '^$' || true
 }
 
-# connector names of currently-connected displays the last applied layout (Asura
+# connector names of currently-connected displays the last applied layout (Toren
 # Settings Apply) already configured, matched by hardware identity. A hotplug
 # autoscale skips these in the DPI pass, so plugging in a new monitor never
 # resets a display you already tuned. Empty when nothing was applied.
@@ -149,14 +149,14 @@ require_hyprctl() {
   # fixtures (tests) skip the live compositor.
   [[ -n ${ASURA_MONITOR_JSON:-} ]] && return 0
   command -v hyprctl >/dev/null 2>&1 || {
-    echo "asura-monitor: hyprctl not found" >&2
+    echo "toren-monitor: hyprctl not found" >&2
     exit 1
   }
 }
 
 require_jq() {
   command -v jq >/dev/null 2>&1 || {
-    echo "asura-monitor: jq not found" >&2
+    echo "toren-monitor: jq not found" >&2
     exit 1
   }
 }
@@ -255,11 +255,11 @@ write_monitors_conf() {
   pinned_json="$(pinned_outputs | jq -R . | jq -s .)"
   mkdir -p "$(dirname "$monitors_conf")"
   {
-    printf '%s\n' "# Managed by asura-monitor. Scale and position are captured from the live"
+    printf '%s\n' "# Managed by toren-monitor. Scale and position are captured from the live"
     printf '%s\n' "# session (DPI-derived, never hardcoded); refresh is always highrr so a"
     printf '%s\n' "# slow-training link cannot pin a low rate. This file is regenerated on"
     printf '%s\n' "# every login and hotplug, so edits here are lost: put durable manual"
-    printf '%s\n' "# overrides in ~/.config/asura/hyprland/monitors-user.conf, which is sourced"
+    printf '%s\n' "# overrides in ~/.config/toren/hyprland/monitors-user.conf, which is sourced"
     printf '%s\n' "# after this file, wins, and is never rewritten."
     printf '\n'
     monitors_json | jq -r --argjson pinned "$pinned_json" "$jq_rule_lib"'
@@ -311,7 +311,7 @@ intended_modes_json() {
 # outputs whose live mode sits below intent, as "name<TAB>mode" (mode = the
 # intended one to re-assert). highrr/preferred is "below" when the panel
 # advertises a bigger res (or higher refresh at top res) than is live; an
-# explicit Asura Settings mode is "below" only while the panel still advertises
+# explicit Toren Settings mode is "below" only while the panel still advertises
 # it and the live mode differs. disabled / mirrored / monitors_user-pinned
 # outputs skipped. $1 = intent obj, $2 = pinned-name array; monitor JSON on stdin.
 drift_specs() {
@@ -347,7 +347,7 @@ drift_specs() {
 # relogin. re-asserting (highrr re-resolves to the now-available top mode; an
 # explicit pick is restored) recovers it in place. respects explicit modes and
 # any monitors-user.conf pin. --check reports drift (exit 1) and changes nothing;
-# that's the read-only signal `asura doctor` consumes.
+# that's the read-only signal `toren doctor` consumes.
 settle_modes() {
   local check_only=0
   [[ "${1:-}" == "--check" ]] && check_only=1
@@ -373,8 +373,8 @@ settle_modes() {
 
 cmd_autoscale() {
   case "${1:-}" in
-    on) mkdir -p "$(dirname "$autoscale_flag")"; : >"$autoscale_flag"; echo "asura-monitor: autoscale at login is on"; return 0 ;;
-    off) rm -f "$autoscale_flag"; echo "asura-monitor: autoscale at login is off"; return 0 ;;
+    on) mkdir -p "$(dirname "$autoscale_flag")"; : >"$autoscale_flag"; echo "toren-monitor: autoscale at login is on"; return 0 ;;
+    off) rm -f "$autoscale_flag"; echo "toren-monitor: autoscale at login is off"; return 0 ;;
     status) if [[ -e $autoscale_flag ]]; then echo on; else echo off; fi; return 0 ;;
     --at-login) [[ -e $autoscale_flag ]] || return 0; shift ;;
   esac
@@ -386,7 +386,7 @@ cmd_autoscale() {
     rm -f "$applied_layout"
   else
     # login/hotplug: an explicit choice for this display set wins over DPI
-    # (named profile first, then last Asura Settings Apply), so a hand-set
+    # (named profile first, then last Toren Settings Apply), so a hand-set
     # scale isn't reset on relogin.
     local prof
     if prof="$(matching_profile)" && [[ -n $prof ]]; then
@@ -395,13 +395,13 @@ cmd_autoscale() {
     fi
     if applied_matches; then
       load_layout_file "$applied_layout"
-      echo "asura-monitor: recalled the applied layout -> $monitors_conf"
+      echo "toren-monitor: recalled the applied layout -> $monitors_conf"
       return
     fi
   fi
   local pinned
   pinned="$(pinned_outputs)"
-  # a display already tuned in Asura Settings (present in the applied layout) keeps
+  # a display already tuned in Toren Settings (present in the applied layout) keeps
   # its scale when another monitor hotplugs; only genuinely new displays are
   # DPI-scaled, so connecting a monitor never resets the one you already set up.
   local known
@@ -418,7 +418,7 @@ cmd_autoscale() {
     if awk -v a="$current" -v b="$wanted" 'BEGIN { exit (a == b) ? 1 : 0 }'; then
       tf=""; [[ ${transform:-0} != 0 ]] && tf=",transform,$transform"
       apply_monitor "$name,$mode,$pos,$wanted$tf"
-      echo "asura-monitor: $name -> scale $wanted"
+      echo "toren-monitor: $name -> scale $wanted"
     fi
   done < <(monitors_json | dpi_specs)
 
@@ -441,7 +441,7 @@ cmd_autoscale() {
   local gdk
   gdk="$(sync_gdk_scale)"
   write_monitors_conf "$gdk"
-  echo "asura-monitor: wrote $monitors_conf (GDK_SCALE=$gdk)"
+  echo "toren-monitor: wrote $monitors_conf (GDK_SCALE=$gdk)"
 }
 
 cmd_persist() {
@@ -450,12 +450,12 @@ cmd_persist() {
   local gdk
   gdk="$(sync_gdk_scale)"
   write_monitors_conf "$gdk"
-  echo "asura-monitor: wrote $monitors_conf (GDK_SCALE=$gdk)"
+  echo "toren-monitor: wrote $monitors_conf (GDK_SCALE=$gdk)"
 }
 
 # re-assert each output's intended mode so a display that came up at a fallback
 # resolution recovers without a relogin. run at the end of an update and by
-# `asura doctor`. --check = report drift (exit 1), no change.
+# `toren doctor`. --check = report drift (exit 1), no change.
 cmd_settle() {
   require_hyprctl
   require_jq
@@ -470,16 +470,16 @@ cmd_mirror() {
   local src="${1:-}"
   [[ -n $src ]] || src="$(monitors_json | jq -r 'first(.[] | select(.focused) | .name) // empty')"
   [[ -n $src ]] || src="$(monitors_json | jq -r 'first(.[] | select(.disabled | not) | .name) // empty')"
-  [[ -n $src ]] || { echo "asura-monitor: no monitor to mirror" >&2; return 1; }
+  [[ -n $src ]] || { echo "toren-monitor: no monitor to mirror" >&2; return 1; }
   local name n=0
   while IFS= read -r name; do
     [[ -n $name && $name != "$src" ]] || continue
     if apply_monitor "$name,preferred,auto,1,mirror,$src"; then
-      echo "asura-monitor: $name mirrors $src"
+      echo "toren-monitor: $name mirrors $src"
       n=$((n + 1))
     fi
   done < <(monitors_json | jq -r '.[] | select(.disabled | not) | .name')
-  if (( n > 0 )); then cmd_persist >/dev/null; else echo "asura-monitor: only one display; nothing to mirror"; fi
+  if (( n > 0 )); then cmd_persist >/dev/null; else echo "toren-monitor: only one display; nothing to mirror"; fi
 }
 
 # clear mirroring, lay them side by side again, DPI-scaled.
@@ -505,7 +505,7 @@ cmd_toggle() {
   fi
 }
 
-# --- GUI / profile support (Asura Settings) ---
+# --- GUI / profile support (Toren Settings) ---
 #
 # the hub reads the live layout with `list`, applies a user-chosen one with
 # `apply` (live only) or `save NAME` (live + named profile), recalls one with
@@ -635,10 +635,10 @@ write_monitors_explicit() {
   fi
   mkdir -p "$(dirname "$monitors_conf")"
   {
-    printf '%s\n' "# Managed by asura-monitor (Asura Settings layout). The per-output modes are"
+    printf '%s\n' "# Managed by toren-monitor (Toren Settings layout). The per-output modes are"
     printf '%s\n' "# the ones chosen in the Displays section. This file is regenerated, so edits"
     printf '%s\n' "# here are lost: put durable manual overrides in"
-    printf '%s\n' "# ~/.config/asura/hyprland/monitors-user.conf, which is sourced after this file and wins."
+    printf '%s\n' "# ~/.config/toren/hyprland/monitors-user.conf, which is sourced after this file and wins."
     printf '\n'
     printf '%s' "$specs" | jq -r "$jq_rule_lib"'.[] | (if .disabled then disabled_rule else hub_rule end) | "monitor = " + .'
     printf '\n'
@@ -668,7 +668,7 @@ cmd_apply() {
   printf '%s' "$json" | write_monitors_explicit
   mkdir -p "$(dirname "$applied_layout")"
   printf '%s' "$json" | jq '{monitors: .}' >"$applied_layout"
-  echo "asura-monitor: applied layout -> $monitors_conf"
+  echo "toren-monitor: applied layout -> $monitors_conf"
 }
 
 # save the layout as a named, hardware-keyed profile and apply it now. JSON as
@@ -677,7 +677,7 @@ cmd_save() {
   require_hyprctl
   require_jq
   local name="${1:-}" json="${2:-}"
-  [[ -n $name ]] || { echo "asura-monitor: save needs a profile name" >&2; return 1; }
+  [[ -n $name ]] || { echo "toren-monitor: save needs a profile name" >&2; return 1; }
   [[ -n $json ]] || json="$(cat)"
   json="$(printf '%s' "$json" | sanitize_layout)"
   json="$(printf '%s' "$json" | expand_custom_modes)"
@@ -686,7 +686,7 @@ cmd_save() {
   printf '%s' "$json" | jq '{monitors: .}' >"$monitors_dir/$name.json"
   printf '%s' "$json" | apply_specs
   printf '%s' "$json" | write_monitors_explicit
-  echo "asura-monitor: saved profile $name"
+  echo "toren-monitor: saved profile $name"
 }
 
 # resolve a saved layout ({monitors:[...]}) against the live outputs. $1 = live
@@ -763,9 +763,9 @@ cmd_load() {
   require_jq
   local name="${1:-}" file
   file="$monitors_dir/$name.json"
-  [[ -f $file ]] || { echo "asura-monitor: no such profile: $name" >&2; return 1; }
+  [[ -f $file ]] || { echo "toren-monitor: no such profile: $name" >&2; return 1; }
   load_layout_file "$file"
-  echo "asura-monitor: loaded profile $name"
+  echo "toren-monitor: loaded profile $name"
 }
 
 # true when the implicit applied layout still governs the connected set (absent
@@ -796,17 +796,17 @@ cmd_profiles() {
 
 cmd_rm() {
   local name="${1:-}"
-  [[ -n $name ]] || { echo "asura-monitor: rm needs a profile name" >&2; return 1; }
+  [[ -n $name ]] || { echo "toren-monitor: rm needs a profile name" >&2; return 1; }
   rm -f "$monitors_dir/$name.json"
-  echo "asura-monitor: removed profile $name"
+  echo "toren-monitor: removed profile $name"
 }
 
 usage() {
   cat <<'EOF'
-Usage: asura-monitor <command>
+Usage: toren-monitor <command>
 
   autoscale   Derive each monitor's scale from its DPI, apply it live, and write
-              the monitors drop-in (default ~/.config/asura/hyprland/monitors-auto.conf).
+              the monitors drop-in (default ~/.config/toren/hyprland/monitors-auto.conf).
               `autoscale on|off|status` switch the run at login, which is off by
               default; `autoscale --at-login` is what the login runs.
   persist     Write the monitors drop-in from the current live layout (no rescale).
@@ -815,7 +815,7 @@ Usage: asura-monitor <command>
   mirror [SRC] Mirror every other display onto SRC (default: the focused one).
   extend      Clear mirroring and lay displays side by side, DPI-scaled.
   toggle      Switch between mirror and extend.
-  list        Print the connected monitors as JSON (for Asura Settings).
+  list        Print the connected monitors as JSON (for Toren Settings).
   apply JSON  Apply an explicit layout live (JSON array of monitor specs).
               Scales snap to the nearest Hyprland-valid value for each mode.
   save NAME JSON  Apply a layout and save it as a hardware-keyed profile.

@@ -1,4 +1,4 @@
-// Command asura is Asura's control tool.
+// Command toren is Toren's control tool.
 //
 // It is a small binary on purpose. Every subcommand here does one thing, prints
 // something a human or a script can act on, and exits non-zero when it could not
@@ -13,7 +13,7 @@
 //	2  bad usage — an unknown flag, a missing argument
 //	3  the machine does not match a profile, or two profiles conflict
 //
-// Code 3 is distinct from 1 on purpose. "Asura does not know this machine" is
+// Code 3 is distinct from 1 on purpose. "Toren does not know this machine" is
 // not a failure of the tool; it is an answer, and a caller that treats it as an
 // error will retry a machine that will never be recognised.
 package main
@@ -37,19 +37,19 @@ func main() {
 // text, and one source for it cannot drift from the other.
 var commands = map[string]func(args []string) int{
 	"hardware":    runHardware,
-	"update":      asuraUpdate,
-	"rollback":    asuraRollback,
-	"materialize": asuraMaterialize,
-	"reset":       asuraReset,
-	"config":      asuraConfig,
+	"update":      torenUpdate,
+	"rollback":    torenRollback,
+	"materialize": torenMaterialize,
+	"reset":       torenReset,
+	"config":      torenConfig,
 	"apps":        configApps,
-	"binds":       asuraBinds,
-	"ipc":         asuraIpc,
-	"theme":       asuraTheme,
-	"doctor":      asuraDoctor,
-	"status":      asuraStatus,
-	"state":       asuraState,
-	"windows":     asuraWindows,
+	"binds":       torenBinds,
+	"ipc":         torenIpc,
+	"theme":       torenTheme,
+	"doctor":      torenDoctor,
+	"status":      torenStatus,
+	"state":       torenState,
+	"windows":     torenWindows,
 	"version":     runVersion,
 }
 
@@ -76,7 +76,7 @@ func run(args []string) int {
 		return runVersion(nil)
 	}
 
-	// `asura <command> --help` prints that command's usage and succeeds, the
+	// `toren <command> --help` prints that command's usage and succeeds, the
 	// same for every command, whether or not it parses flags of its own.
 	if len(args) == 2 && (args[1] == "-h" || args[1] == "--help" || args[1] == "help") {
 		if text, ok := helpText[args[0]]; ok {
@@ -98,8 +98,8 @@ func run(args []string) int {
 }
 
 func toolName() string {
-	if len(os.Args) > 0 && filepath.Base(os.Args[0]) == "asura" {
-		return "asura"
+	if len(os.Args) > 0 && filepath.Base(os.Args[0]) == "toren" {
+		return "toren"
 	}
 	return "toren"
 }
@@ -132,24 +132,24 @@ Commands:
 	fmt.Fprintf(w, "\nRun \"%s <command> --help\" for that command's own usage.\n", name)
 }
 
-// helpText is each command's usage, for `asura <command> --help`. A command
+// helpText is each command's usage, for `toren <command> --help`. A command
 // that is missing here still answers --help itself.
 var helpText = map[string]string{
-	"hardware":    "Usage: asura hardware report|match|lint-profiles|capture [flags]\n",
+	"hardware":    "Usage: toren hardware report|match|lint-profiles|capture [flags]\n",
 	"update":      updateUsage,
 	"rollback":    rollbackUsage,
 	"materialize": materializeUsage,
 	"reset":       resetUsage,
 	"config":      configUsage,
-	"apps":        "Usage: asura apps\n       asura apps defaults [--check]\n\nPrints the applications on this machine as JSON, for the launcher.\n",
+	"apps":        "Usage: toren apps\n       toren apps defaults [--check]\n\nPrints the applications on this machine as JSON, for the launcher.\n",
 	"binds":       bindsUsage,
 	"ipc":         ipcUsage,
 	"theme":       themeUsage,
 	"doctor":      doctorUsage,
 	"status":      statusUsage,
-	"state":       "Usage: asura state\n\nPrints the live desktop state as JSON, for the sidebar.\n",
-	"windows":     "Usage: asura windows\n\nPrints the switchable windows as JSON, most recently focused first.\n",
-	"version":     "Usage: asura version [--commit | -v]\n\n  (none)    the edition, e.g. 0.1.0-beta.1\n  --commit  the dev-unstable commit applied to this system\n  -v        both\n",
+	"state":       "Usage: toren state\n\nPrints the live desktop state as JSON, for the sidebar.\n",
+	"windows":     "Usage: toren windows\n\nPrints the switchable windows as JSON, most recently focused first.\n",
+	"version":     "Usage: toren version [--commit | -v]\n\n  (none)    the edition, e.g. 0.1.0-beta.1\n  --commit  the dev-unstable commit applied to this system\n  -v        both\n",
 	"brightness":  brightnessUsage,
 	"channel":     channelUsage,
 	"gpu":         gpuUsage,
@@ -180,12 +180,12 @@ func runVersion(args []string) int {
 		fmt.Println(version)
 	case args[0] == "--commit":
 		if commit == "" {
-			fmt.Fprintln(os.Stderr, "asura version: no applied commit recorded; asura update records one")
+			fmt.Fprintln(os.Stderr, "toren version: no applied commit recorded; toren update records one")
 			return exitFail
 		}
 		fmt.Println(commit)
 	case args[0] == "-v" || args[0] == "--verbose":
-		fmt.Printf("asura %s\n", version)
+		fmt.Printf("toren %s\n", version)
 		fmt.Printf("commit %s\n", orUnknown(commit))
 	default:
 		fmt.Fprint(os.Stderr, helpText["version"])
@@ -194,7 +194,7 @@ func runVersion(args []string) int {
 	return exitOK
 }
 
-// hardwareSubcommands is the dispatch table for "asura hardware".
+// hardwareSubcommands is the dispatch table for "toren hardware".
 var hardwareSubcommands = map[string]func(args []string) int{
 	"report":        hardwareReport,
 	"match":         hardwareMatch,
@@ -217,7 +217,7 @@ func runHardware(args []string) int {
 
 	subcommand, known := hardwareSubcommands[args[0]]
 	if !known {
-		fmt.Fprintf(os.Stderr, "asura hardware: unknown subcommand %q\n\n", args[0])
+		fmt.Fprintf(os.Stderr, "toren hardware: unknown subcommand %q\n\n", args[0])
 		hardwareUsage(os.Stderr)
 		return exitUsage
 	}
@@ -225,7 +225,7 @@ func runHardware(args []string) int {
 }
 
 func hardwareUsage(w *os.File) {
-	fmt.Fprint(w, `Usage: asura hardware <subcommand> [flags]
+	fmt.Fprint(w, `Usage: toren hardware <subcommand> [flags]
 
   report           this machine, redacted; safe to paste into an issue
   match            which profile claims this machine, and at what tier
@@ -246,7 +246,7 @@ Exit codes:
 // newFlags builds a flag set that reports a usage error the way this tool does:
 // the message on stderr and exit 2, never a panic.
 func newFlags(name string, usageText string) *flag.FlagSet {
-	set := flag.NewFlagSet("asura "+name, flag.ContinueOnError)
+	set := flag.NewFlagSet("toren "+name, flag.ContinueOnError)
 	set.Usage = func() { fmt.Fprint(os.Stderr, usageText) }
 	return set
 }
@@ -254,7 +254,7 @@ func newFlags(name string, usageText string) *flag.FlagSet {
 // parseFlags parses arguments and returns the positional ones.
 //
 // The standard flag package stops at the first non-flag argument, which makes
-// "asura reset ghostty/config --root DIR" silently drop the --root flag: the
+// "toren reset ghostty/config --root DIR" silently drop the --root flag: the
 // path becomes the only positional and the flag is never seen. That is a trap in
 // a tool a person types by hand, so flags after a positional are honoured too.
 //

@@ -1,8 +1,8 @@
 import QtQuick
 import QtQuick.Effects
 
-// Live 1-bit ordered dither, the runtime twin of bin/art/asura-dither: a source
-// image reduced to Asura bone on a transparent ground through a Bayer 4x4
+// Live 1-bit ordered dither, the runtime twin of bin/art/toren-dither: a source
+// image reduced to Toren bone on a transparent ground through a Bayer 4x4
 // stipple, so a user's own photo reads like the baked decor set the moment it is
 // dropped in (the Profile hero). Backed by shaders/dither.frag.qsb (compiled with
 // qsb; recompile when dither.frag changes, the same way the blob shader is built).
@@ -12,7 +12,7 @@ Item {
     id: root
 
     property url source
-    property color bone: "#e8d8c9"     // the decor bone, matching asura-dither + the set
+    property color bone: "#e8d8c9"     // the decor bone, matching toren-dither + the set
     property real dotScale: 1.0        // dither cell scale; 1 = fine, larger = coarser
     property bool invert: false        // ink dark tones instead of light
     property int fillMode: Image.PreserveAspectCrop

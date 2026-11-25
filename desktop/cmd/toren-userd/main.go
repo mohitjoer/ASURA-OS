@@ -1,10 +1,10 @@
-// Command asura-userd is the unprivileged user-level daemon for Asura OS.
+// Command toren-userd is the unprivileged user-level daemon for Toren OS.
 //
-// It runs as the user under ~/.config/service/asura-userd and acts as:
-//  1. State Authority: watches ~/.config/asura/shell.json and applies themes/fonts
+// It runs as the user under ~/.config/service/toren-userd and acts as:
+//  1. State Authority: watches ~/.config/toren/shell.json and applies themes/fonts
 //     to GTK3/4, Qt6, GSettings, and Hyprland.
 //  2. IPC Bridge: streams telemetry to Quickshell and forwards privileged calls
-//     to /run/asura/sysd.sock (asura-sysd).
+//     to /run/toren/sysd.sock (toren-sysd).
 package main
 
 import (
@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	sysSocketPath = "/run/asura/sysd.sock"
+	sysSocketPath = "/run/toren/sysd.sock"
 	version       = "0.1-beta"
 )
 
@@ -65,10 +65,10 @@ func main() {
 	if len(os.Args) > 1 {
 		switch os.Args[1] {
 		case "-h", "--help", "help":
-			fmt.Println("Usage: asura-userd\n\nASURA's per-user settings daemon, run by the session's runit service\n(~/.config/service/asura-userd). It listens on $XDG_RUNTIME_DIR/asura-user.sock.\nIt takes no arguments.")
+			fmt.Println("Usage: toren-userd\n\nASURA's per-user settings daemon, run by the session's runit service\n(~/.config/service/toren-userd). It listens on $XDG_RUNTIME_DIR/toren-user.sock.\nIt takes no arguments.")
 			return
 		default:
-			fmt.Fprintf(os.Stderr, "asura-userd: takes no arguments (got %q); --help explains\n", os.Args[1])
+			fmt.Fprintf(os.Stderr, "toren-userd: takes no arguments (got %q); --help explains\n", os.Args[1])
 			os.Exit(2)
 		}
 	}
@@ -93,7 +93,7 @@ func getUserSocketPath() string {
 	if runtimeDir == "" {
 		runtimeDir = fmt.Sprintf("/run/user/%d", os.Getuid())
 	}
-	return filepath.Join(runtimeDir, "asura-user.sock")
+	return filepath.Join(runtimeDir, "toren-user.sock")
 }
 
 func (d *UserDaemon) initPaths() {
@@ -101,7 +101,7 @@ func (d *UserDaemon) initPaths() {
 	if configHome == "" {
 		configHome = filepath.Join(os.Getenv("HOME"), ".config")
 	}
-	d.configDir = filepath.Join(configHome, "asura")
+	d.configDir = filepath.Join(configHome, "toren")
 	d.configPath = filepath.Join(d.configDir, "shell.json")
 	_ = os.MkdirAll(d.configDir, 0755)
 }
@@ -186,7 +186,7 @@ func (d *UserDaemon) applyAllSettings() {
 		}
 	}
 
-	// 4. Forward power mode to asura-sysd if needed
+	// 4. Forward power mode to toren-sysd if needed
 	go func() {
 		_, _ = forwardToSysd(map[string]interface{}{
 			"action":  "set_power_profile",
@@ -199,7 +199,7 @@ func (d *UserDaemon) runServer() {
 	_ = os.Remove(d.userSocket)
 	listener, err := net.Listen("unix", d.userSocket)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "asura-userd: failed to listen on %s: %v\n", d.userSocket, err)
+		fmt.Fprintf(os.Stderr, "toren-userd: failed to listen on %s: %v\n", d.userSocket, err)
 		os.Exit(1)
 	}
 	defer os.Remove(d.userSocket)
@@ -216,7 +216,7 @@ func (d *UserDaemon) runServer() {
 		os.Exit(0)
 	}()
 
-	fmt.Printf("asura-userd: listening on %s\n", d.userSocket)
+	fmt.Printf("toren-userd: listening on %s\n", d.userSocket)
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
@@ -350,7 +350,7 @@ func (d *UserDaemon) broadcastEvent(event string, payload interface{}) {
 func forwardToSysd(req interface{}) (interface{}, error) {
 	conn, err := net.Dial("unix", sysSocketPath)
 	if err != nil {
-		return nil, fmt.Errorf("cannot connect to asura-sysd: %w", err)
+		return nil, fmt.Errorf("cannot connect to toren-sysd: %w", err)
 	}
 	defer conn.Close()
 

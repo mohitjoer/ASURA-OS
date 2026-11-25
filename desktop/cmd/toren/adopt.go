@@ -17,17 +17,17 @@ import (
 // bootloader, or user data.
 //
 // Usage:
-//   asura adopt [--check | --plan]   run preflight pre-checks and print report
-//   asura adopt                      adopt ASURA session with atomic backup
-//   asura adopt --verify             verify adopted state and file integrity
-//   asura adopt --undo               completely roll back adoption byte-for-byte
-//   asura adopt --prune              report or clean up obsolete desktop files
+//   toren adopt [--check | --plan]   run preflight pre-checks and print report
+//   toren adopt                      adopt ASURA session with atomic backup
+//   toren adopt --verify             verify adopted state and file integrity
+//   toren adopt --undo               completely roll back adoption byte-for-byte
+//   toren adopt --prune              report or clean up obsolete desktop files
 
 var (
 	adoptRoot = "/" // overridden in unit tests
 )
 
-const adoptUsage = `Usage: asura adopt [options]
+const adoptUsage = `Usage: toren adopt [options]
 
 Adopt ASURA shell onto an existing Void Linux (glibc x86_64) machine.
 Installs the ASURA desktop session, portal graph, and shell services
@@ -64,10 +64,10 @@ type preflightReport struct {
 }
 
 func init() {
-	register("adopt", "adopt ASURA shell on existing Void Linux glibc installation", asuraAdopt)
+	register("adopt", "adopt ASURA shell on existing Void Linux glibc installation", torenAdopt)
 }
 
-func asuraAdopt(args []string) int {
+func torenAdopt(args []string) int {
 	mode := "execute"
 	jsonOutput := false
 
@@ -87,7 +87,7 @@ func asuraAdopt(args []string) int {
 		case "--json":
 			jsonOutput = true
 		default:
-			fmt.Fprintf(os.Stderr, "asura adopt: unknown argument %q\n", arg)
+			fmt.Fprintf(os.Stderr, "toren adopt: unknown argument %q\n", arg)
 			return exitFail
 		}
 	}
@@ -116,7 +116,7 @@ func checkAdoptPreflight(root string) preflightReport {
 
 	// 1. Architecture check: x86_64 (amd64) only
 	if runtime.GOARCH != "amd64" {
-		rep.Error = fmt.Sprintf("unsupported architecture %q: asura adopt strictly requires x86_64", runtime.GOARCH)
+		rep.Error = fmt.Sprintf("unsupported architecture %q: toren adopt strictly requires x86_64", runtime.GOARCH)
 		return rep
 	}
 
@@ -130,7 +130,7 @@ func checkAdoptPreflight(root string) preflightReport {
 	osText := string(content)
 	if !strings.Contains(osText, `ID=void`) && !strings.Contains(osText, `ID="void"`) &&
 		!strings.Contains(osText, `ID_LIKE=void`) && !strings.Contains(osText, `ID_LIKE="void"`) {
-		rep.Error = "unsupported distribution: asura adopt strictly requires Void Linux"
+		rep.Error = "unsupported distribution: toren adopt strictly requires Void Linux"
 		rep.OS = "non-void"
 		return rep
 	}
@@ -140,13 +140,13 @@ func checkAdoptPreflight(root string) preflightReport {
 	muslPattern := filepath.Join(root, "lib", "ld-musl*")
 	if matches, _ := filepath.Glob(muslPattern); len(matches) > 0 {
 		rep.Libc = "musl"
-		rep.Error = "unsupported C library (musl detected): asura adopt strictly requires Void Linux glibc"
+		rep.Error = "unsupported C library (musl detected): toren adopt strictly requires Void Linux glibc"
 		return rep
 	}
 	muslUsrPattern := filepath.Join(root, "usr", "lib", "ld-musl*")
 	if matches, _ := filepath.Glob(muslUsrPattern); len(matches) > 0 {
 		rep.Libc = "musl"
-		rep.Error = "unsupported C library (musl detected): asura adopt strictly requires Void Linux glibc"
+		rep.Error = "unsupported C library (musl detected): toren adopt strictly requires Void Linux glibc"
 		return rep
 	}
 	rep.Libc = "glibc"
@@ -213,21 +213,21 @@ func runAdoptPreflight(root string, jsonOut bool) int {
 
 func runAdoptExecute(root string) int {
 	if os.Geteuid() != 0 && root == "/" {
-		fmt.Fprintln(os.Stderr, "asura adopt: root privileges required (run with sudo)")
+		fmt.Fprintln(os.Stderr, "toren adopt: root privileges required (run with sudo)")
 		return exitFail
 	}
 
 	rep := checkAdoptPreflight(root)
 	if !rep.Passed {
-		fmt.Fprintf(os.Stderr, "asura adopt: preflight checks failed: %s\n", rep.Error)
+		fmt.Fprintf(os.Stderr, "toren adopt: preflight checks failed: %s\n", rep.Error)
 		return exitFail
 	}
 
 	ts := time.Now().Format("20060102-150405")
-	adoptDir := filepath.Join(root, "etc", "asura", "adopt")
+	adoptDir := filepath.Join(root, "etc", "toren", "adopt")
 	backupDir := filepath.Join(adoptDir, "backup", ts)
 	if err := os.MkdirAll(backupDir, 0755); err != nil {
-		fmt.Fprintf(os.Stderr, "asura adopt: failed to create backup directory: %v\n", err)
+		fmt.Fprintf(os.Stderr, "toren adopt: failed to create backup directory: %v\n", err)
 		return exitFail
 	}
 
@@ -236,7 +236,7 @@ func runAdoptExecute(root string) int {
 		currentUser = os.Getenv("USER")
 	}
 	if currentUser == "" || currentUser == "root" {
-		currentUser = "asura"
+		currentUser = "toren"
 	}
 
 	state := adoptState{
@@ -257,7 +257,7 @@ func runAdoptExecute(root string) int {
 		"/etc/issue",
 		"/etc/motd",
 		"/usr/share/wayland-sessions/toren.desktop",
-		"/usr/share/xdg-desktop-portal/asura-portals.conf",
+		"/usr/share/xdg-desktop-portal/toren-portals.conf",
 	}
 
 	fmt.Println("Creating atomic backup of existing configurations...")
@@ -266,17 +266,17 @@ func runAdoptExecute(root string) int {
 		if fi, err := os.Stat(src); err == nil && !fi.IsDir() {
 			data, err := os.ReadFile(src)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "asura adopt: failed to read %s: %v\n", src, err)
+				fmt.Fprintf(os.Stderr, "toren adopt: failed to read %s: %v\n", src, err)
 				return exitFail
 			}
 			rel := strings.TrimPrefix(target, "/")
 			bakDst := filepath.Join(backupDir, rel)
 			if err := os.MkdirAll(filepath.Dir(bakDst), 0755); err != nil {
-				fmt.Fprintf(os.Stderr, "asura adopt: failed to create directory %s: %v\n", filepath.Dir(bakDst), err)
+				fmt.Fprintf(os.Stderr, "toren adopt: failed to create directory %s: %v\n", filepath.Dir(bakDst), err)
 				return exitFail
 			}
 			if err := os.WriteFile(bakDst, data, fi.Mode()); err != nil {
-				fmt.Fprintf(os.Stderr, "asura adopt: failed to back up %s: %v\n", src, err)
+				fmt.Fprintf(os.Stderr, "toren adopt: failed to back up %s: %v\n", src, err)
 				return exitFail
 			}
 			state.BackedUp = append(state.BackedUp, target)
@@ -288,7 +288,7 @@ func runAdoptExecute(root string) int {
 	restoreScriptPath := filepath.Join(backupDir, "restore.sh")
 	restoreScriptContent := generateRestoreScript(backupDir, state.BackedUp)
 	if err := os.WriteFile(restoreScriptPath, []byte(restoreScriptContent), 0755); err != nil {
-		fmt.Fprintf(os.Stderr, "asura adopt: failed to write restore script: %v\n", err)
+		fmt.Fprintf(os.Stderr, "toren adopt: failed to write restore script: %v\n", err)
 		return exitFail
 	}
 
@@ -299,13 +299,13 @@ func runAdoptExecute(root string) int {
 	sessionDesktop := `[Desktop Entry]
 Name=Toren
 Comment=Kinetic, ultra-responsive Wayland desktop shell
-Exec=/usr/share/asura/session/asura-session
+Exec=/usr/share/toren/session/toren-session
 Type=Application
 DesktopNames=ASURA:Hyprland
-Keywords=wayland;hyprland;desktop;asura;toren;
+Keywords=wayland;hyprland;desktop;toren;toren;
 `
 	if err := os.WriteFile(sessionDesktopPath, []byte(sessionDesktop), 0644); err != nil {
-		fmt.Fprintf(os.Stderr, "asura adopt: failed to write %s: %v\n", sessionDesktopPath, err)
+		fmt.Fprintf(os.Stderr, "toren adopt: failed to write %s: %v\n", sessionDesktopPath, err)
 		return exitFail
 	}
 	state.CreatedFiles = append(state.CreatedFiles, "/usr/share/wayland-sessions/toren.desktop")
@@ -313,20 +313,20 @@ Keywords=wayland;hyprland;desktop;asura;toren;
 	// 4. Deploy XDG Desktop Portal configuration
 	portalDir := filepath.Join(root, "usr", "share", "xdg-desktop-portal")
 	_ = os.MkdirAll(portalDir, 0755)
-	portalConfPath := filepath.Join(portalDir, "asura-portals.conf")
+	portalConfPath := filepath.Join(portalDir, "toren-portals.conf")
 	portalConf := `[preferred]
 default=hyprland;gtk
 org.freedesktop.impl.portal.Screenshot=hyprland
 org.freedesktop.impl.portal.ScreenCast=hyprland
 `
 	if err := os.WriteFile(portalConfPath, []byte(portalConf), 0644); err != nil {
-		fmt.Fprintf(os.Stderr, "asura adopt: failed to write %s: %v\n", portalConfPath, err)
+		fmt.Fprintf(os.Stderr, "toren adopt: failed to write %s: %v\n", portalConfPath, err)
 		return exitFail
 	}
-	state.CreatedFiles = append(state.CreatedFiles, "/usr/share/xdg-desktop-portal/asura-portals.conf")
+	state.CreatedFiles = append(state.CreatedFiles, "/usr/share/xdg-desktop-portal/toren-portals.conf")
 
 	// 5. Run apply-repo.sh if available
-	applyScript := filepath.Join(root, "usr", "share", "asura", "installation", "apply-repo.sh")
+	applyScript := filepath.Join(root, "usr", "share", "toren", "installation", "apply-repo.sh")
 	if _, err := os.Stat(applyScript); err != nil {
 		// Try local workspace
 		applyScript = "installation/apply-repo.sh"
@@ -342,14 +342,14 @@ org.freedesktop.impl.portal.ScreenCast=hyprland
 	// 6. Record all migrations as complete so adopted machine starts clean
 	if root == "/" {
 		fmt.Println("Marking migrations as completed...")
-		_ = asuraMigrate([]string{"--mark-done"})
+		_ = torenMigrate([]string{"--mark-done"})
 	}
 
 	// 7. Write state.json
 	statePath := filepath.Join(adoptDir, "state.json")
 	stateBytes, _ := json.MarshalIndent(state, "", "  ")
 	if err := os.WriteFile(statePath, stateBytes, 0644); err != nil {
-		fmt.Fprintf(os.Stderr, "asura adopt: failed to record state in %s: %v\n", statePath, err)
+		fmt.Fprintf(os.Stderr, "toren adopt: failed to record state in %s: %v\n", statePath, err)
 		return exitFail
 	}
 
@@ -357,22 +357,22 @@ org.freedesktop.impl.portal.ScreenCast=hyprland
 	fmt.Println("✓ ASURA adoption completed successfully.")
 	fmt.Printf("  State record:   %s\n", statePath)
 	fmt.Printf("  Backup folder:  %s\n", backupDir)
-	fmt.Printf("  Rollback:       'sudo asura adopt --undo' or '%s'\n", restoreScriptPath)
+	fmt.Printf("  Rollback:       'sudo toren adopt --undo' or '%s'\n", restoreScriptPath)
 	fmt.Println("  Next step:      Select 'ASURA' session from your login greeter.")
 	return exitOK
 }
 
 func runAdoptVerify(root string, jsonOut bool) int {
-	statePath := filepath.Join(root, "etc", "asura", "adopt", "state.json")
+	statePath := filepath.Join(root, "etc", "toren", "adopt", "state.json")
 	data, err := os.ReadFile(statePath)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura adopt --verify: no adoption state found (/etc/asura/adopt/state.json)")
+		fmt.Fprintln(os.Stderr, "toren adopt --verify: no adoption state found (/etc/toren/adopt/state.json)")
 		return exitFail
 	}
 
 	var state adoptState
 	if err := json.Unmarshal(data, &state); err != nil {
-		fmt.Fprintf(os.Stderr, "asura adopt --verify: failed to parse state.json: %v\n", err)
+		fmt.Fprintf(os.Stderr, "toren adopt --verify: failed to parse state.json: %v\n", err)
 		return exitFail
 	}
 
@@ -421,20 +421,20 @@ func runAdoptVerify(root string, jsonOut bool) int {
 
 func runAdoptUndo(root string) int {
 	if os.Geteuid() != 0 && root == "/" {
-		fmt.Fprintln(os.Stderr, "asura adopt --undo: root privileges required (run with sudo)")
+		fmt.Fprintln(os.Stderr, "toren adopt --undo: root privileges required (run with sudo)")
 		return exitFail
 	}
 
-	statePath := filepath.Join(root, "etc", "asura", "adopt", "state.json")
+	statePath := filepath.Join(root, "etc", "toren", "adopt", "state.json")
 	data, err := os.ReadFile(statePath)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura adopt --undo: no active adoption state found")
+		fmt.Fprintln(os.Stderr, "toren adopt --undo: no active adoption state found")
 		return exitFail
 	}
 
 	var state adoptState
 	if err := json.Unmarshal(data, &state); err != nil {
-		fmt.Fprintf(os.Stderr, "asura adopt --undo: failed to parse state: %v\n", err)
+		fmt.Fprintf(os.Stderr, "toren adopt --undo: failed to parse state: %v\n", err)
 		return exitFail
 	}
 
@@ -508,7 +508,7 @@ func generateRestoreScript(backupDir string, backedUp []string) string {
 
 	b.WriteString("# 1. Remove ASURA session registrations\n")
 	b.WriteString("rm -f /usr/share/wayland-sessions/toren.desktop\n")
-	b.WriteString("rm -f /usr/share/xdg-desktop-portal/asura-portals.conf\n\n")
+	b.WriteString("rm -f /usr/share/xdg-desktop-portal/toren-portals.conf\n\n")
 
 	b.WriteString("# 2. Restore original files\n")
 	for _, f := range backedUp {
@@ -519,7 +519,7 @@ func generateRestoreScript(backupDir string, backedUp []string) string {
 		b.WriteString("fi\n")
 	}
 
-	b.WriteString("\nrm -f /etc/asura/adopt/state.json 2>/dev/null || true\n")
+	b.WriteString("\nrm -f /etc/toren/adopt/state.json 2>/dev/null || true\n")
 	b.WriteString("echo \"ASURA adoption reverted successfully.\"\n")
 	return b.String()
 }

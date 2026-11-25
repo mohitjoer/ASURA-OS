@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"asura/desktop/cmd/toren-hubd/internal/wm"
+	"toren/desktop/cmd/toren-hubd/internal/wm"
 )
 
 // autostart manages login-time user commands in desktop.json,

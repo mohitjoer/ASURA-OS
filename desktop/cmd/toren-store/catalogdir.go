@@ -7,7 +7,7 @@ import (
 
 // catalogDirFor finds the local catalogue directory for a product kind
 // (plugins, themes, barstyles). The binary is installed under
-// /usr/share/asura/store/catalog/<kind>, while a checkout keeps it at
+// /usr/share/toren/store/catalog/<kind>, while a checkout keeps it at
 // <repo>/catalog/<kind>; `go test` runs in the package directory, so a walk up
 // from both the working directory and the executable covers every case. A
 // CWD-relative "catalog/<kind>" alone misses all of them, which is why the
@@ -21,19 +21,19 @@ func catalogDirFor(kind string) string {
 		return ""
 	}
 	candidates := []string{
-		filepath.Join("/usr/share/asura/store/catalog", kind),
+		filepath.Join("/usr/share/toren/store/catalog", kind),
 	}
 	if exe, err := os.Executable(); err == nil {
 		dir := filepath.Dir(exe)
 		candidates = append(candidates,
-			filepath.Join(dir, "..", "share", "asura", "store", "catalog", kind),
+			filepath.Join(dir, "..", "share", "toren", "store", "catalog", kind),
 			filepath.Join(dir, "..", "..", "catalog", kind),
 			filepath.Join(dir, "..", "..", "..", "catalog", kind),
 		)
 	}
 	for base, err := os.Getwd(); err == nil && base != filepath.Dir(base); base = filepath.Dir(base) {
 		candidates = append(candidates, filepath.Join(base, "catalog", kind))
-		if filepath.Base(base) == "asura-store" && len(candidates) > 20 {
+		if filepath.Base(base) == "toren-store" && len(candidates) > 20 {
 			break
 		}
 		if filepath.Dir(base) == base {

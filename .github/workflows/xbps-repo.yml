@@ -1,12 +1,12 @@
 name: xbps-repo
 
-# ASURA's XBPS repository: the `asura` package (everything apply-repo.sh
+# ASURA's XBPS repository: the `toren` package (everything apply-repo.sh
 # installs) and its index.
 #
 # - Every pull request and push builds the package and installs it in a clean
 #   Void container, so a change that breaks the package fails here.
 # - A dev-unstable commit is published only after the ci workflow passed on it
-#   (the rule asura update follows): ci calls this workflow as its last stage,
+#   (the rule toren update follows): ci calls this workflow as its last stage,
 #   after every required job succeeded. Only when the XBPS_SIGNING_KEY secret
 #   exists: an unsigned repository is never published. It is served by GitHub
 #   Pages at https://<owner>.github.io/<repo>/current (docs/package-repo.md).
@@ -19,9 +19,9 @@ on:
   pull_request:
     branches: [main, dev-unstable]
     paths:
-      - 'packaging/xbps/**'
-      - 'installation/apply-repo.sh'
-      - '.github/workflows/xbps-repo.yml'
+      - "packaging/xbps/**"
+      - "installation/apply-repo.sh"
+      - ".github/workflows/xbps-repo.yml"
   # Called by ci.yml as its last stage, after every required job passed on a
   # dev-unstable push.
   workflow_call:
@@ -47,7 +47,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           ref: ${{ github.sha }}
-          fetch-depth: 0   # the package version counts the branch's commits
+          fetch-depth: 0 # the package version counts the branch's commits
 
       - name: Setup Go
         uses: actions/setup-go@v6
@@ -58,7 +58,7 @@ jobs:
       - name: Stage everything an update installs
         run: |
           sh installation/apply-repo.sh --no-packages . build/stage
-          test -x build/stage/usr/bin/asura
+          test -x build/stage/usr/bin/toren
 
       - name: Write the signing key
         if: env.HAS_KEY == 'true'
@@ -94,16 +94,16 @@ jobs:
               xbps-install -Syu xbps >/dev/null && xbps-install -yu >/dev/null
               xbps-install -Sy \
                 --repository=/repo \
-                asura
-              xbps-query asura | sed -n "s/^pkgver: //p"
-              test -x /usr/bin/asura
-              test -f /usr/share/asura/shell-desktop/shell.qml
-              /usr/bin/asura version' 2>&1 | tee build/install.log
+                toren
+              xbps-query toren | sed -n "s/^pkgver: //p"
+              test -x /usr/bin/toren
+              test -f /usr/share/toren/shell-desktop/shell.qml
+              /usr/bin/toren version' 2>&1 | tee build/install.log
 
       - name: Upload the repository
         uses: actions/upload-artifact@v6
         with:
-          name: asura-xbps-repo
+          name: toren-xbps-repo
           path: build/repo/
           if-no-files-found: error
           retention-days: 7

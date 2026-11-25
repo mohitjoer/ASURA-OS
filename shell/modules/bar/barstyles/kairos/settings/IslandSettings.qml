@@ -79,7 +79,7 @@ Scope {
     }
 
     readonly property string _sockPath:
-        (Quickshell.env("XDG_RUNTIME_DIR") || "/tmp") + "/asura-shell.sock"
+        (Quickshell.env("XDG_RUNTIME_DIR") || "/tmp") + "/toren-shell.sock"
 
     Socket {
         id: _ctl

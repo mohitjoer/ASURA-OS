@@ -103,7 +103,7 @@ func everything() Overrides {
 
 func TestGeneratedSettingsAreValidHyprlang(t *testing.T) {
 	dir := sandbox(t)
-	if err := os.MkdirAll(filepath.Join(dir, "asura"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(dir, "toren"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(AnimPresetPath(), []byte("bounce\n"), 0o644); err != nil {
@@ -123,7 +123,7 @@ func TestGeneratedSettingsAreValidHyprlang(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, want := range []string{
-		"gaps_in = 13", "tap-to-click", "env = FOO,a##b", "windowrule {", "name = asura-user-1",
+		"gaps_in = 13", "tap-to-click", "env = FOO,a##b", "windowrule {", "name = toren-user-1",
 		"match:title = ^(x, y)$", "layerrule {", "bezier = mine, 0.1, 0.2, 0.3, 0.4",
 		"bindr = SUPER, Y, exec, true", "bind = SUPER, KP_End, killactive,", "unbind = SUPER, Z",
 		"exec-once = nm-applet --indicator", "monitor = eDP-1, 1920x1080@144, 0x0, 1.25, vrr, 1",
@@ -157,9 +157,9 @@ func TestRebindsUnbindAndRebind(t *testing.T) {
 	base := filepath.Join(dir, "hyprland.conf")
 	conf := "$mod = SUPER\n" +
 		"bind = $mod, Q, killactive,\n" +
-		"bind = SUPER, Tab, exec, asura ipc call asura advanceSwitcher\n" +
-		"bindr = SUPER, Tab, exec, asura ipc call asura closeSwitcher\n" +
-		"source = ~/.config/asura/hyprland/rebinds.conf\n"
+		"bind = SUPER, Tab, exec, toren ipc call toren advanceSwitcher\n" +
+		"bindr = SUPER, Tab, exec, toren ipc call toren closeSwitcher\n" +
+		"source = ~/.config/toren/hyprland/rebinds.conf\n"
 	for n := 1; n <= 10; n++ {
 		conf += "bind = SUPER, " + string(rune('0'+n%10)) + ", workspace, " + itoa(n) + "\n"
 	}
@@ -186,7 +186,7 @@ func TestRebindsUnbindAndRebind(t *testing.T) {
 	got := string(renderRebinds(o))
 	for _, want := range []string{
 		"unbind = SUPER, Q\nbind = SUPER, W, killactive,",
-		"unbind = SUPER, Tab\nbind = ALT, Tab, exec, asura ipc call asura advanceSwitcher\nbindr = ALT, Tab, exec, asura ipc call asura closeSwitcher",
+		"unbind = SUPER, Tab\nbind = ALT, Tab, exec, toren ipc call toren advanceSwitcher\nbindr = ALT, Tab, exec, toren ipc call toren closeSwitcher",
 		"unbind = SUPER, 0\nbind = SUPER CTRL, 0, workspace, 10",
 	} {
 		if !strings.Contains(got, want) {

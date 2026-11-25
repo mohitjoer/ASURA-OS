@@ -62,7 +62,7 @@ else
 fi
 check "$(cat "$work/pkexec.log")" "apt-get install -y $s1/foo.deb" \
   ".deb handed to pkexec apt-get install"
-absent "$work/home/.local/share/asura-apps/foo" ".deb NOT extracted into ~/.local"
+absent "$work/home/.local/share/toren-apps/foo" ".deb NOT extracted into ~/.local"
 absent "$s1/foo.deb" "source removed from the stash after a successful install"
 if grep -qx "@AUTH" "$work/out"; then
   echo "  ok: .deb install signals the deck to step aside (@AUTH)"

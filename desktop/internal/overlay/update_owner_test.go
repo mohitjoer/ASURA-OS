@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-// `sudo asura update` writes revisions into the user's state directory; they
+// `sudo toren update` writes revisions into the user's state directory; they
 // must end up the user's, or the user's own update cannot remove them.
 func TestRevisionsMadeAsRootGoToTheStateOwner(t *testing.T) {
 	if os.Geteuid() != 0 {

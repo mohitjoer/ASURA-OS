@@ -18,8 +18,8 @@ func TestChannelSetPinsTheBranchUpdatesFollow(t *testing.T) {
 	if code := channelSet(root, "nightly"); code != exitUsage {
 		t.Fatalf("an unknown channel was accepted: %d", code)
 	}
-	if code := asuraChannel([]string{"set", "unstable", "--root", root}); code != exitOK || pinnedChannel(root) != "unstable" {
-		t.Fatalf("asura channel set: %d %q", code, pinnedChannel(root))
+	if code := torenChannel([]string{"set", "unstable", "--root", root}); code != exitOK || pinnedChannel(root) != "unstable" {
+		t.Fatalf("toren channel set: %d %q", code, pinnedChannel(root))
 	}
 	if err := os.WriteFile(filepath.Join(root, channelFile), []byte("garbage\n"), 0o644); err != nil {
 		t.Fatal(err)
@@ -71,18 +71,18 @@ func TestNotifyUpdatesAnnouncesEachUpdateOnce(t *testing.T) {
 	check := "update available: aaaaaaaa -> bbbbbbbb\n"
 	updateCheckOutput = func() (string, int) { return check, exitNoMatch }
 
-	asuraNotifyUpdates(nil)
-	asuraNotifyUpdates(nil)
+	torenNotifyUpdates(nil)
+	torenNotifyUpdates(nil)
 	if len(sent) != 1 || !strings.Contains(sent[0], "bbbbbbbb") {
 		t.Fatalf("sent %v", sent)
 	}
 	check = "update available: aaaaaaaa -> cccccccc\n"
-	asuraNotifyUpdates(nil)
+	torenNotifyUpdates(nil)
 	if len(sent) != 2 {
 		t.Fatalf("a newer update was not announced: %v", sent)
 	}
 	updateCheckOutput = func() (string, int) { return "up to date\n", exitOK }
-	asuraNotifyUpdates(nil)
+	torenNotifyUpdates(nil)
 	if len(sent) != 2 {
 		t.Fatalf("announced while up to date: %v", sent)
 	}

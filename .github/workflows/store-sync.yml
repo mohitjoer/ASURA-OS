@@ -1,6 +1,6 @@
 # The store's two trees must never drift.
 #
-# The standalone asura-store repository (github.com/Toren-Linux/asura-store,
+# The standalone toren-store repository (github.com/Toren-Linux/toren-store,
 # public) owns the backend and the window: the ISO builder builds the binary
 # from it whenever it is available (`ASURA_STORE_SRC`, with the checkout under
 # the tree next to this one winning), and `desktop/cmd/toren-store/` and
@@ -17,21 +17,21 @@ on:
   push:
     branches: [main, dev-unstable]
     paths:
-      - 'desktop/cmd/toren-store/**'
-      - 'shell/store/**'
-      - 'shell/store.qml'
-      - 'desktop/catalog/**'
-      - '.github/workflows/store-sync.yml'
+      - "desktop/cmd/toren-store/**"
+      - "shell/store/**"
+      - "shell/store.qml"
+      - "desktop/catalog/**"
+      - ".github/workflows/store-sync.yml"
   pull_request:
     branches: [main, dev-unstable]
     paths:
-      - 'desktop/cmd/toren-store/**'
-      - 'shell/store/**'
-      - 'shell/store.qml'
-      - 'desktop/catalog/**'
-      - '.github/workflows/store-sync.yml'
+      - "desktop/cmd/toren-store/**"
+      - "shell/store/**"
+      - "shell/store.qml"
+      - "desktop/catalog/**"
+      - ".github/workflows/store-sync.yml"
   schedule:
-    - cron: '23 3 * * *'
+    - cron: "23 3 * * *"
   workflow_dispatch:
 
 concurrency:
@@ -50,7 +50,7 @@ jobs:
       - name: Check out the standalone store repository
         uses: actions/checkout@v5
         with:
-          repository: Toren-Linux/asura-store
+          repository: Toren-Linux/toren-store
           ref: main
           path: store-upstream
           fetch-depth: 1
@@ -64,7 +64,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: '22'
+          node-version: "22"
 
       - name: The embedded backend passes the standalone repo's checks as-is
         run: |
@@ -86,7 +86,7 @@ jobs:
           if [ -d store-upstream/cmd/toren-store ]; then
             diff -r desktop/cmd/toren-store store-upstream/cmd/toren-store
           else
-            diff -r desktop/cmd/toren-store store-upstream/cmd/asura-store
+            diff -r desktop/cmd/toren-store store-upstream/cmd/toren-store
           fi
 
       - name: The window is byte-identical (store.qml, the entry file, resolved below)

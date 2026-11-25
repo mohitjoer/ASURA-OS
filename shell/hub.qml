@@ -4,11 +4,11 @@ import Quickshell.Io
 import "hub"
 import qs.Ui.Singletons
 
-// Asura Settings entry point. A normal
+// Toren Settings entry point. A normal
 // floating window (not a layer-shell surface); the Hyprland window rule floats
 // and centres it. The file is at the shell root because a Quickshell
 // configuration's root is the directory of its entry file, and `qs.*` only
-// resolves from there. `session/asura-hub` starts it; `ASURA_HUB_PAGE` names
+// resolves from there. `session/toren-hub` starts it; `ASURA_HUB_PAGE` names
 // the page to open on.
 ShellRoot {
     FloatingWindow {
@@ -16,7 +16,7 @@ ShellRoot {
         // The literal, not I18n.tr: the compositor's window rule matches this
         // exact title, and a translated one would not match.
         title: "Toren Settings"
-        // Asura Settings is a page, not a dialog: it opens at 99% of the screen
+        // Toren Settings is a page, not a dialog: it opens at 99% of the screen
         // width, filling the height the shell bar leaves, so the settings get the
         // room the layout is designed for instead of a fixed 1200px strip. The
         // size is requested here and honoured by the Hyprland rule, which floats
@@ -70,7 +70,7 @@ ShellRoot {
         }
     }
 
-    // `asura-hub PAGE` hands the page over in the environment: Quickshell takes
+    // `toren-hub PAGE` hands the page over in the environment: Quickshell takes
     // no arguments of its own for a configuration.
     Component.onCompleted: {
         const page = Quickshell.env("ASURA_HUB_PAGE");

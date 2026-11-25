@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"asura/desktop/internal/shell"
+	"toren/desktop/internal/shell"
 )
 
 // The keybinding catalogue, printed as JSON.
@@ -22,9 +22,9 @@ import (
 // the machine and the windows behind the switcher. The tool is the thing
 // that knows the formats, and the catalogue is one more format it knows.
 //
-// The same answer is for a person: `asura binds` at a terminal is the
+// The same answer is for a person: `toren binds` at a terminal is the
 // catalogue, and it is the same catalogue the compositor's configuration is
-// checked against by `asura doctor`.
+// checked against by `toren doctor`.
 
 // bindsPath is where the keybinding catalogue is installed.
 //
@@ -32,7 +32,7 @@ import (
 // catalogue is not the compositor's: it is the list of what the keyboard
 // does, and the compositor's configuration is one of the two things that
 // have to agree with it.
-const bindsPath = "/usr/share/asura/session/binds.json"
+const bindsPath = "/usr/share/toren/session/binds.json"
 
 // bindsCatalogue finds the catalogue, installed or in a checkout.
 //
@@ -50,7 +50,7 @@ func bindsCatalogue(root string) (shell.Catalogue, error) {
 	if override == "" {
 		return shell.Catalogue{}, fmt.Errorf(
 			"the keybinding catalogue is not installed in %s; install the "+
-				"asura package, or set ASURA_BINDS to the catalogue's "+
+				"toren package, or set ASURA_BINDS to the catalogue's "+
 				"path", path)
 	}
 	catalogue, err := shell.LoadCatalogue(override)
@@ -60,8 +60,8 @@ func bindsCatalogue(root string) (shell.Catalogue, error) {
 	return catalogue, nil
 }
 
-// asuraBinds prints the keybinding catalogue as JSON.
-func asuraBinds(args []string) int {
+// torenBinds prints the keybinding catalogue as JSON.
+func torenBinds(args []string) int {
 	set := newFlags("binds", bindsUsage)
 	var root = set.String("root", "", "operate on a tree under this directory")
 	if err := set.Parse(args); err != nil {
@@ -70,14 +70,14 @@ func asuraBinds(args []string) int {
 
 	catalogue, err := bindsCatalogue(*root)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura binds:", err)
+		fmt.Fprintln(os.Stderr, "toren binds:", err)
 		return exitFail
 	}
 
 	encoder := json.NewEncoder(os.Stdout)
 	encoder.SetIndent("", "  ")
 	if err := encoder.Encode(catalogue); err != nil {
-		fmt.Fprintln(os.Stderr, "asura binds:", err)
+		fmt.Fprintln(os.Stderr, "toren binds:", err)
 		return exitFail
 	}
 	return exitOK

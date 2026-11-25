@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
-	"asura/hardware/probe"
-	"asura/hardware/quirks"
-	"asura/hardware/redact"
+	"toren/hardware/probe"
+	"toren/hardware/quirks"
+	"toren/hardware/redact"
 )
 
 func resolveMachinesDir() string {

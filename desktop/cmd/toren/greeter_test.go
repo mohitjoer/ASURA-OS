@@ -45,7 +45,7 @@ func TestGreeterEnableChecksThenOnlyPrints(t *testing.T) {
 	if err := os.Remove(filepath.Join(root, "/usr/bin/weston")); err != nil {
 		t.Fatal(err)
 	}
-	if code := asuraGreeter([]string{"enable"}); code != exitFail {
+	if code := torenGreeter([]string{"enable"}); code != exitFail {
 		t.Fatalf("enable without weston exited %d, want %d", code, exitFail)
 	}
 	if !strings.Contains(errOut.String(), "sudo xbps-install -S weston") || out.Len() != 0 {
@@ -56,7 +56,7 @@ func TestGreeterEnableChecksThenOnlyPrints(t *testing.T) {
 		t.Fatal(err)
 	}
 	out.Reset()
-	if code := asuraGreeter([]string{"enable"}); code != exitOK {
+	if code := torenGreeter([]string{"enable"}); code != exitOK {
 		t.Fatalf("enable on a ready machine exited %d, want %d", code, exitOK)
 	}
 	want := "sudo install -D -m 0644 " + greeterDropIn + " " + greeterInstalled
@@ -71,7 +71,7 @@ func TestGreeterEnableChecksThenOnlyPrints(t *testing.T) {
 func TestGreeterDisablePrintsRemovalOnlyWhenEnabled(t *testing.T) {
 	root, out, _ := greeterMachine(t)
 
-	asuraGreeter([]string{"disable"})
+	torenGreeter([]string{"disable"})
 	if strings.Contains(out.String(), "sudo rm") {
 		t.Errorf("nothing is enabled, yet disable printed a removal:\n%s", out)
 	}
@@ -84,7 +84,7 @@ func TestGreeterDisablePrintsRemovalOnlyWhenEnabled(t *testing.T) {
 		t.Fatal(err)
 	}
 	out.Reset()
-	asuraGreeter([]string{"disable"})
+	torenGreeter([]string{"disable"})
 	if !strings.Contains(out.String(), "sudo rm "+greeterInstalled) {
 		t.Errorf("disable did not print the removal:\n%s", out)
 	}
@@ -104,7 +104,7 @@ func TestGreeterTestRunsTheThemeInTestMode(t *testing.T) {
 	greeterTestTime = 10 * time.Second
 	t.Cleanup(func() { greeterTestTime = old })
 
-	if code := asuraGreeter([]string{"test"}); code != exitOK {
+	if code := torenGreeter([]string{"test"}); code != exitOK {
 		t.Fatalf("test exited %d, want %d", code, exitOK)
 	}
 	got, err := os.ReadFile(args)

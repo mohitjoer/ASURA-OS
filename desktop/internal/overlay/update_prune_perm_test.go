@@ -7,7 +7,7 @@ import (
 )
 
 // An old revision the update cannot remove (root's, made by an earlier
-// `sudo asura update`) is skipped with a hint; it never fails the update.
+// `sudo toren update`) is skipped with a hint; it never fails the update.
 // Run as a normal user against ASURA_TEST_PRUNE_STATE, a state directory
 // whose oldest revision root owns (set up by the caller).
 func TestPruneSkipsARevisionItCannotRemove(t *testing.T) {

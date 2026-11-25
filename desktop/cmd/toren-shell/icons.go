@@ -19,8 +19,8 @@ import (
 // to the theme's own SVG/PNG keeps the ordinary image plugin in the loop, which
 // is size-stable across DPR changes.
 //
-// `asura-shell icons` prints one JSON object indexing every icon name reachable
-// through the current theme's inheritance chain; `asura-shell icons <name>...`
+// `toren-shell icons` prints one JSON object indexing every icon name reachable
+// through the current theme's inheritance chain; `toren-shell icons <name>...`
 // prints one resolved absolute path per line ("" for none). Both are served
 // client-side (main.go), like `theme catalog`: the index is far larger than the
 // daemon socket's reply and needs no running daemon, so it is built on demand in
@@ -65,7 +65,7 @@ func runIcons(args []string) int {
 	if len(args) == 0 {
 		b, err := json.Marshal(idx)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "asura-shell: icons:", err)
+			fmt.Fprintln(os.Stderr, "toren-shell: icons:", err)
 			return 1
 		}
 		fmt.Println(string(b))

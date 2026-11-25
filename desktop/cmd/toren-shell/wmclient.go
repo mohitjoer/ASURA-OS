@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"asura/desktop/internal/wm"
+	"toren/desktop/internal/wm"
 )
 
 // The daemon reaches the compositor only through d.wmc and the state its watcher

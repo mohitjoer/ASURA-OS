@@ -1,4 +1,4 @@
-// Command "asura ipc" calls the running shell's IPC surface.
+// Command "toren ipc" calls the running shell's IPC surface.
 //
 // The compositor's keybinds round the loop through here, and the reason is
 // that only the session knows which instance of the shell is running: the one
@@ -20,18 +20,18 @@ import (
 )
 
 // ipcUsage is the command's own usage text.
-const ipcUsage = `Usage: asura ipc call TARGET [FUNCTION [ARGS...]]
+const ipcUsage = `Usage: toren ipc call TARGET [FUNCTION [ARGS...]]
 
 Calls the running shell's IPC surface. The shell is found, not named: the
 instance that is running is the one the call goes to, whatever tree it was
 started from.
 
-  TARGET       the shell's IPC handler, e.g. asura
+  TARGET       the shell's IPC handler, e.g. toren
   FUNCTION     the function to call, e.g. togglePopover
   ARGS...      the function's arguments, in order
 `
 
-// asuraIpc forwards one IPC call to the running shell.
+// torenIpc forwards one IPC call to the running shell.
 //
 // The call is spelled exactly as quickshell spells it — target, then
 // function, then the function's arguments — and is handed to quickshell's
@@ -39,7 +39,7 @@ started from.
 // refused here rather than by quickshell, because the compositor's
 // configuration is read by the bind checks and a call whose shape is wrong
 // should be called out the same way its target and function are.
-func asuraIpc(args []string) int {
+func torenIpc(args []string) int {
 	if len(args) == 0 || args[0] != "call" {
 		fmt.Fprint(os.Stderr, ipcUsage)
 		return exitUsage
@@ -47,13 +47,13 @@ func asuraIpc(args []string) int {
 	rest := args[1:]
 	if len(rest) < 2 {
 		fmt.Fprintln(os.Stderr,
-			"asura ipc call: needs TARGET and FUNCTION")
+			"toren ipc call: needs TARGET and FUNCTION")
 		return exitUsage
 	}
 
 	path, err := findShellConfig()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura ipc:", err)
+		fmt.Fprintln(os.Stderr, "toren ipc:", err)
 		return exitFail
 	}
 
@@ -66,7 +66,7 @@ func asuraIpc(args []string) int {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
-		fmt.Fprintln(os.Stderr, "asura ipc:",
+		fmt.Fprintln(os.Stderr, "toren ipc:",
 			"the call did not reach the shell:", err)
 		return exitFail
 	}
@@ -184,10 +184,10 @@ func quickshellPathArg(fields []string) (string, bool) {
 // rather than a coin to toss.
 //
 // Only an instance started on a directory is the shell. The unit runs
-// `quickshell -p /usr/share/asura/shell`; every other window the desktop
+// `quickshell -p /usr/share/toren/shell`; every other window the desktop
 // opens (the Hub, the screenshot tool, the wallpaper picker ...) is a
 // quickshell of its own started on one entry file, `-p .../hub.qml`, and has
-// no `asura` IPC target. Counting those made one open window look like a
+// no `toren` IPC target. Counting those made one open window look like a
 // second shell, so every keybind refused to fire until it was closed.
 func pickShellInstance(paths []string) (string, error) {
 	shells := make([]string, 0, len(paths))
@@ -216,7 +216,7 @@ func pickShellInstance(paths []string) (string, error) {
 
 	var preferred []string
 	for _, path := range paths {
-		if strings.Contains(strings.ToLower(path), "/asura") {
+		if strings.Contains(strings.ToLower(path), "/toren") {
 			preferred = append(preferred, path)
 		}
 	}
@@ -225,10 +225,10 @@ func pickShellInstance(paths []string) (string, error) {
 		return preferred[0], nil
 	case 0:
 		return "", fmt.Errorf("several shells are running, and none of them is "+
-			"under a Asura tree; refusing to guess: %s",
+			"under a Toren tree; refusing to guess: %s",
 			strings.Join(paths, ", "))
 	default:
-		return "", fmt.Errorf("several Asura trees are running, and refusing "+
+		return "", fmt.Errorf("several Toren trees are running, and refusing "+
 			"to guess: %s", strings.Join(preferred, ", "))
 	}
 }

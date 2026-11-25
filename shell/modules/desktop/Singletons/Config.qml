@@ -3,7 +3,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// Live config for the wallpaper clock. Asura Settings, desktop dragging and the
+// Live config for the wallpaper clock. Toren Settings, desktop dragging and the
 // right-click menu share widgets.json; FileView watches it so every surface
 // follows the next write. Placement is a compass anchor or free monitor pixels.
 Singleton {
@@ -138,12 +138,12 @@ Singleton {
     property alias batteryColor2: adapter.batteryColor2
     property alias batteryGradient: adapter.batteryGradient
 
-    // brand: the desktop's mark + name, user-overridable from Asura Settings ->
+    // brand: the desktop's mark + name, user-overridable from Toren Settings ->
     // Shell -> Global. a small cross-cutting identity master (like theme.json).
     // markText is the glyph/short-text seal (default A); markImage an optional
     // image path that wins over the text; markTint recolours a single-colour
-    // image to the accent; name is the wordmark ("Asura") shown in chrome copy.
-    // Asura's own apps (the Hub, related apps) never read this and keep the Asura brand.
+    // image to the accent; name is the wordmark ("Toren") shown in chrome copy.
+    // Toren's own apps (the Hub, related apps) never read this and keep the Toren brand.
     property alias markText:  brandAdapter.markText
     property alias markImage: brandAdapter.markImage
     property alias markTint:  brandAdapter.markTint
@@ -189,7 +189,7 @@ Singleton {
 
     FileView {
         id: file
-        path: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/asura/widgets.json"
+        path: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/toren/widgets.json"
         blockLoading: true
         watchChanges: true
         printErrors: false
@@ -318,7 +318,7 @@ Singleton {
     // pill seeds it; these defaults cover its absence, so no seed is written here.
     FileView {
         id: brandFile
-        path: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/asura/brand.json"
+        path: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/toren/brand.json"
         blockLoading: true
         watchChanges: true
         printErrors: false
@@ -329,7 +329,7 @@ Singleton {
             property string markText: "A"
             property string markImage: ""
             property bool markTint: true
-            property string name: "Asura"
+            property string name: "Toren"
         }
     }
 

@@ -25,7 +25,7 @@ files:
       source: "system/modprobe.d/nvidia-optimus.conf"
       reason: "Configure NVreg_DynamicPowerManagement=0x02 for dynamic hybrid power off (NVIDIA Driver README Appendix B)"
   sysctl:
-    - target: "/etc/environment.d/10-asura-nvidia.conf"
+    - target: "/etc/environment.d/10-toren-nvidia.conf"
       content: |
         # Wayland and hardware video acceleration environment for NVIDIA GPUs
         LIBVA_DRIVER_NAME=nvidia
@@ -40,4 +40,4 @@ notes:
   - "Knowledge source: Linux kernel Documentation/power/pci.rst and NVIDIA Driver Documentation on Runtime Power Management."
   - "PCIe RTD3 dynamic power management shuts down GPU power rails (D3cold) when display server and compute are idle."
   - "nvidia-drm.modeset=1 and fbdev=1 enable atomic kernel modesetting required for Wayland compositors (Hyprland)."
-  - "Run applications offloaded to discrete NVIDIA GPU with 'asura gpu run <command>'."
+  - "Run applications offloaded to discrete NVIDIA GPU with 'toren gpu run <command>'."

@@ -12,11 +12,11 @@ import (
 )
 
 // ASURA's own shell still has a quick-ask panel (launcher), a chat panel (bar)
-// and a chat service that run `asura-agent ask` and `asura-agent chat`. They
+// and a chat service that run `toren-agent ask` and `toren-agent chat`. They
 // were written for a resident assistant that ASURA does not ship. Rather than
-// leave them failing, `asura-agent` answers them in their own line protocols
+// leave them failing, `toren-agent` answers them in their own line protocols
 // by handing the question to the assistant ASURA does ship: OpenCode, opened in
-// the user's terminal (asura-app), with the ASURA skills wired in.
+// the user's terminal (toren-app), with the ASURA skills wired in.
 
 // openInAssistant opens OpenCode in a terminal, with prompt as its first
 // message when there is one. It returns a sentence for the panel to show.
@@ -25,11 +25,11 @@ var openInAssistant = func(prompt string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("OpenCode is not installed")
 	}
-	argv := []string{"asura-app", "terminal", "--", opencode}
+	argv := []string{"toren-app", "terminal", "--", opencode}
 	if prompt != "" && opencodeTakesPrompt(opencode) {
 		argv = append(argv, "--prompt", prompt)
 	}
-	if _, err := exec.LookPath("asura-app"); err != nil {
+	if _, err := exec.LookPath("toren-app"); err != nil {
 		argv = argv[3:] // no launcher: run it directly (it needs a terminal)
 	}
 	cmd := exec.Command(argv[0], argv[1:]...)
@@ -53,7 +53,7 @@ func opencodeTakesPrompt(opencode string) bool {
 	return err == nil && strings.Contains(string(out), "--prompt")
 }
 
-// Ask answers `asura-agent ask [--recent | --cancel | QUESTION...]` in the
+// Ask answers `toren-agent ask [--recent | --cancel | QUESTION...]` in the
 // quick-ask panel's protocol: `@answer {json}` or `@error message` lines.
 func Ask(args []string, out io.Writer) int {
 	if len(args) > 0 {
@@ -76,7 +76,7 @@ func Ask(args []string, out io.Writer) int {
 	return 0
 }
 
-// Chat answers `asura-agent chat ...` in the chat panel's protocol: one JSON
+// Chat answers `toren-agent chat ...` in the chat panel's protocol: one JSON
 // object per line, a turn ending in {"type":"done"} or {"type":"error"}.
 func Chat(args []string, out io.Writer) int {
 	emit := func(v map[string]any) {

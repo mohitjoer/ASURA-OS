@@ -37,7 +37,7 @@ CHROOT="$WORK/chroot"
 DISK="$WORK/disk.img"
 TARGET_MNT="$WORK/target"
 LOOP=""
-PASSPHRASE="asura-ci-passphrase"
+PASSPHRASE="toren-ci-passphrase"
 USER_NAME="ciuser"
 USER_PASS="ci-password-123"
 
@@ -51,8 +51,8 @@ cleanup() {
 		"$ROOTFS_MNT" "$SQUASH_MNT" "$ISO_MNT"; do
 		mountpoint -q "$m" 2>/dev/null && sudo umount -l "$m"
 	done
-	[ -e /dev/mapper/asura_ci ] && sudo cryptsetup close asura_ci
-	[ -e /dev/mapper/asura_root ] && sudo cryptsetup close asura_root
+	[ -e /dev/mapper/toren_ci ] && sudo cryptsetup close toren_ci
+	[ -e /dev/mapper/toren_root ] && sudo cryptsetup close toren_root
 	[ -n "$LOOP" ] && sudo losetup -d "$LOOP"
 	[ -f "$WORK/qemu.pid" ] && sudo kill "$(cat "$WORK/qemu.pid")" 2>/dev/null
 	sudo rm -rf "$WORK"
@@ -104,7 +104,7 @@ log "running the installer"
 set +e
 # The log is written by this (unprivileged) shell on purpose: it lands in OUTDIR.
 # shellcheck disable=SC2024,SC2086
-printf '1\nasura-ci\n%s\n%s\n%s\nY\nYES\nn\n\n' "$USER_NAME" "$USER_PASS" "$USER_PASS" |
+printf '1\ntoren-ci\n%s\n%s\n%s\nY\nYES\nn\n\n' "$USER_NAME" "$USER_PASS" "$USER_PASS" |
 	sudo chroot "$CHROOT" /usr/bin/env -i PATH=/usr/bin:/usr/sbin:/bin:/sbin TERM=dumb HOME=/root $ENC_ENV \
 		sh /tmp/toren-installer.sh "$ENC_FLAG" "$LOOP" >"$OUT/install.log" 2>&1
 rc=$?
@@ -122,7 +122,7 @@ log "installer finished and verified itself"
 
 # The installer unmounts what it mounted; close its LUKS mapping too if it is
 # still open, then re-attach the image so the partitions are read afresh.
-[ -e /dev/mapper/asura_root ] && sudo cryptsetup close asura_root
+[ -e /dev/mapper/toren_root ] && sudo cryptsetup close toren_root
 sudo losetup -d "$LOOP"
 LOOP=$(sudo losetup -fP --show "$DISK")
 sudo udevadm settle 2>/dev/null || true
@@ -132,9 +132,9 @@ if [ "$MODE" = luks ]; then
 	# ── 3a. Encrypted: unlock with the passphrase and check the wiring ──────
 	ROOT_PART="${LOOP}p2"
 	sudo cryptsetup isLuks "$ROOT_PART" || { echo "::error::$ROOT_PART is not LUKS"; exit 1; }
-	printf '%s' "$PASSPHRASE" | sudo cryptsetup open --key-file=- "$ROOT_PART" asura_ci
+	printf '%s' "$PASSPHRASE" | sudo cryptsetup open --key-file=- "$ROOT_PART" toren_ci
 	LUKS_UUID=$(sudo cryptsetup luksUUID "$ROOT_PART")
-	sudo mount -o subvol=@ /dev/mapper/asura_ci "$TARGET_MNT"
+	sudo mount -o subvol=@ /dev/mapper/toren_ci "$TARGET_MNT"
 	sudo mount "${LOOP}p1" "$TARGET_MNT/boot"
 	sudo grep -q "UUID=$LUKS_UUID" "$TARGET_MNT/etc/crypttab" || { echo "::error::crypttab does not name the LUKS partition"; exit 1; }
 	sudo grep -q "rd.luks.uuid=$LUKS_UUID" "$TARGET_MNT/etc/default/grub" || { echo "::error::GRUB_CMDLINE_LINUX lacks rd.luks.uuid"; exit 1; }

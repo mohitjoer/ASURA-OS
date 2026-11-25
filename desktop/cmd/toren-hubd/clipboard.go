@@ -13,8 +13,8 @@ import (
 // daemon's back, so a size it shows and a prune it runs cannot disagree with the
 // history the panel is drawing.
 //
-//	asura-hubd clipboard stats   print {items,starred,bytes,textBytes,...} as JSON
-//	asura-hubd clipboard prune   drop every unstarred entry, then print the same
+//	toren-hubd clipboard stats   print {items,starred,bytes,textBytes,...} as JSON
+//	toren-hubd clipboard prune   drop every unstarred entry, then print the same
 type clipboardStats struct {
 	Items      int   `json:"items"`
 	Starred    int   `json:"starred"`

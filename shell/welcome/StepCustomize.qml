@@ -9,7 +9,7 @@ import "Singletons"
 // same stores the shell reads live -- interface scale (the #1 "everything looks
 // huge" fix), the bar style, which desktop widgets show, and a wallpaper reroll.
 // Every control previews on the desktop behind the tour the moment it changes.
-// Deeper knobs (colours, rounding) stay in Asura Settings.
+// Deeper knobs (colours, rounding) stay in Toren Settings.
 Flickable {
     id: step
 
@@ -19,7 +19,7 @@ Flickable {
     boundsBehavior: Flickable.StopAtBounds
     flickableDirection: Flickable.VerticalFlick
 
-    readonly property string cfgDir: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/asura"
+    readonly property string cfgDir: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/toren"
 
     property real uiScale: 100          // fontScale * 100, shown as a percent
     property string barStyle: "top"
@@ -47,10 +47,10 @@ Flickable {
         o[k] = v;
         file.setText(JSON.stringify(o, null, 2) + "\n");
     }
-    // shell.json has one writer, the asura-shell daemon: ask it to patch the leaf
+    // shell.json has one writer, the toren-shell daemon: ask it to patch the leaf
     // and let shellFile's watcher pick the result up.
     function setShellKey(k, v) {
-        Quickshell.execDetached(["asura-shell", "call", "settings.patch", JSON.stringify({ path: k, value: v })]);
+        Quickshell.execDetached(["toren-shell", "call", "settings.patch", JSON.stringify({ path: k, value: v })]);
     }
     function setWidget(k, v) {
         step.mergeKey(widgetsFile, k, v);
@@ -72,8 +72,8 @@ Flickable {
         onLoaded: step.syncWidgets()
     }
 
-    Process { id: wallProc; command: ["asura-wallpaper", "wallpaper", "next"] }
-    Process { id: barStudioProc; command: ["asura-shell", "hub", "open", "bar-studio"] }
+    Process { id: wallProc; command: ["toren-wallpaper", "wallpaper", "next"] }
+    Process { id: barStudioProc; command: ["toren-shell", "hub", "open", "bar-studio"] }
 
     Component.onCompleted: { step.syncShell(); step.syncWidgets(); }
 

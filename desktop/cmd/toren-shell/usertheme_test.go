@@ -163,8 +163,8 @@ func TestUserThemeBuiltinIDNotShadowed(t *testing.T) {
 func TestUserThemeCardsIgnorePreviewArt(t *testing.T) {
 	t.Setenv("XDG_DATA_HOME", t.TempDir())
 	blk := sampleBlock
-	installFixtureTheme(t, "with-art", "With Art", "Asura", noctaliaScheme{Dark: &blk})
-	installFixtureTheme(t, "no-art", "No Art", "Asura", noctaliaScheme{Dark: &blk})
+	installFixtureTheme(t, "with-art", "With Art", "Toren", noctaliaScheme{Dark: &blk})
+	installFixtureTheme(t, "no-art", "No Art", "Toren", noctaliaScheme{Dark: &blk})
 
 	art := filepath.Join(userThemeDir(), "with-art", "preview.png")
 	if err := os.WriteFile(art, []byte("\x89PNG\r\n"), 0o644); err != nil {

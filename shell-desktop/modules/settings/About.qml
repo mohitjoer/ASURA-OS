@@ -89,7 +89,7 @@ ContentPage {
             Layout.bottomMargin: 10
             IconImage {
                 implicitSize: 80
-                source: Quickshell.iconPath("asura")
+                source: Quickshell.iconPath("toren")
             }
             ColumnLayout {
                 Layout.alignment: Qt.AlignVCenter

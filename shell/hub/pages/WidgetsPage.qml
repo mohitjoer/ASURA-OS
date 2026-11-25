@@ -300,7 +300,7 @@ Item {
     // ── persistence: the page owns widgets.json ──────────────────────────────
     FileView {
         id: cfg
-        path: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/asura/widgets.json"
+        path: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/toren/widgets.json"
         blockLoading: true
         watchChanges: true
         printErrors: false
@@ -441,7 +441,7 @@ Item {
             Image {
                 width: 12; height: 12
                 anchors.verticalCenter: parent.verticalCenter
-                source: Qt.resolvedUrl("../../assets/asura-logo-on-dark.svg")
+                source: Qt.resolvedUrl("../../assets/toren-logo-on-dark.svg")
                 sourceSize.width: 24; sourceSize.height: 24
                 fillMode: Image.PreserveAspectFit
                 smooth: true
@@ -503,7 +503,7 @@ Item {
     // Plugins whose home is the wallpaper, discovered exactly as the Add-ons
     // page does (discover.sh --all, then keep only the desktopWidget host).
     // They live below the built-in grid, grouped by the set their manifest
-    // names, and toggle live through asura-plugins-place -- outside this page's
+    // names, and toggle live through toren-plugins-place -- outside this page's
     // draft/Save flow entirely.
     property var storeRows: []
 
@@ -534,7 +534,7 @@ Item {
     function placePlugin(id, enabled) {
         if (!id)
             return;
-        storePlaceProc.command = ["asura-plugins-place", id, "enabled", enabled ? "true" : "false"];
+        storePlaceProc.command = ["toren-plugins-place", id, "enabled", enabled ? "true" : "false"];
         storePlaceProc.running = true;
     }
 
@@ -578,7 +578,7 @@ Item {
     // this shelf without reopening the Hub.
     FileView {
         id: placementWatch
-        path: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/asura/plugins.json"
+        path: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/toren/plugins.json"
         watchChanges: true
         printErrors: false
         onFileChanged: pg.refreshStore()

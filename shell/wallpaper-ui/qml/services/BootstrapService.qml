@@ -12,10 +12,10 @@ QtObject {
     readonly property string _configDir: Config.configDir
     readonly property string _configFile: _configDir + "/config.json"
     // The daemon hands the install dir through ASURA_WALLPAPER_WALL_INSTALL, so this is
-    // /usr/share/asura-wallpaper/data/config.json.example on a packaged box.
+    // /usr/share/toren-wallpaper/data/config.json.example on a packaged box.
     readonly property string _exampleFile: Config.installDir + "/data/config.json.example"
 
-    // First run seeds ~/.config/asura-wallpaper-wall from the shipped example. Nothing
+    // First run seeds ~/.config/toren-wallpaper-wall from the shipped example. Nothing
     // else on the system creates it, and until config.json exists Config never
     // loads: the picker never builds (Super+W does nothing) and the daemon has
     // no config. Gating on config.json (not a marker) also makes "delete

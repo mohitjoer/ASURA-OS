@@ -1,17 +1,17 @@
 #!/bin/sh
-# Asura Safe Mode Session Entry Point
+# Toren Safe Mode Session Entry Point
 # Minimal fallback desktop running Hyprland with safe-mode.conf
 set -eu
 
-LOG="${XDG_STATE_HOME:-$HOME/.local/state}/asura/session-safe.log"
+LOG="${XDG_STATE_HOME:-$HOME/.local/state}/toren/session-safe.log"
 mkdir -p "$(dirname "$LOG")"
 exec >>"$LOG" 2>&1
 
-echo "--- asura-session-safe $(date -Is)"
+echo "--- toren-session-safe $(date -Is)"
 
-export XDG_SESSION_DESKTOP=asura
-export XDG_CURRENT_DESKTOP=Asura
-export DESKTOP_SESSION=asura
+export XDG_SESSION_DESKTOP=toren
+export XDG_CURRENT_DESKTOP=Toren
+export DESKTOP_SESSION=toren
 export XDG_SESSION_TYPE=wayland
 export ASURA_SAFE_MODE=1
 
@@ -37,7 +37,7 @@ if [ -z "$COMPOSITOR" ]; then
 fi
 
 if [ -z "$COMPOSITOR" ] || ( ! command -v "$COMPOSITOR" >/dev/null 2>&1 && [ ! -x "$COMPOSITOR" ] ); then
-    echo "asura-session-safe: error: Hyprland compositor binary not found on system!" >&2
+    echo "toren-session-safe: error: Hyprland compositor binary not found on system!" >&2
     exit 127
 fi
 
@@ -48,9 +48,9 @@ hyprland_reads_lua() {
     [ -n "$hv" ] || return 1
     echo "$hv" | awk -F. '{ exit !($1 > 0 || ($1 == 0 && $2 >= 57)) }'
 }
-if [ -f "/usr/share/asura/safe-mode/hyprland.lua" ] && hyprland_reads_lua; then
-    SAFE_CONF="${ASURA_SAFE_HYPRLAND_CONFIG:-/usr/share/asura/safe-mode/hyprland.lua}"
+if [ -f "/usr/share/toren/safe-mode/hyprland.lua" ] && hyprland_reads_lua; then
+    SAFE_CONF="${ASURA_SAFE_HYPRLAND_CONFIG:-/usr/share/toren/safe-mode/hyprland.lua}"
 else
-    SAFE_CONF="${ASURA_SAFE_HYPRLAND_CONFIG:-/usr/share/asura/safe-mode/hyprland.conf}"
+    SAFE_CONF="${ASURA_SAFE_HYPRLAND_CONFIG:-/usr/share/toren/safe-mode/hyprland.conf}"
 fi
 exec "$COMPOSITOR" -c "$SAFE_CONF" "$@"

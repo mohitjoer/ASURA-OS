@@ -1,4 +1,4 @@
-// ASURA overlay (shell-desktop/asura/vendor.sh OVERLAYS): the desktop's interface
+// ASURA overlay (shell-desktop/toren/vendor.sh OVERLAYS): the desktop's interface
 // settings: the dock's Auto-hide switch instead of the desktop's hover-to-reveal and
 // pin switches, and no translator switch (the left sidebar is not loaded).
 import QtQuick

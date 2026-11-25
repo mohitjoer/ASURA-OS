@@ -9,23 +9,23 @@ import (
 	"strings"
 	"time"
 
-	"asura/hardware/probe"
-	"asura/hardware/quirks"
+	"toren/hardware/probe"
+	"toren/hardware/quirks"
 )
 
 // Hardware quirks engine with layered matching:
 // generic -> vendor -> family -> model -> component
 //
 // Usage:
-//   asura hardware quirks list
-//   asura hardware quirks show [model-or-component-id]
-//   asura hardware quirks apply [id]
-//   asura hardware quirks remove [id]
+//   toren hardware quirks list
+//   toren hardware quirks show [model-or-component-id]
+//   toren hardware quirks apply [id]
+//   toren hardware quirks remove [id]
 
 const (
-	appliedStateJSONFile   = "/var/lib/asura/hardware/applied.json"
-	legacyAppliedStateFile = "/var/lib/asura/quirks.applied"
-	appliedBackupsDir      = "/var/lib/asura/hardware/backups"
+	appliedStateJSONFile   = "/var/lib/toren/hardware/applied.json"
+	legacyAppliedStateFile = "/var/lib/toren/quirks.applied"
+	appliedBackupsDir      = "/var/lib/toren/hardware/backups"
 )
 
 var (
@@ -36,7 +36,7 @@ var (
 // resolveHardwareDirs finds the models and components directories.
 func resolveHardwareDirs() (modelsDir, componentsDir string) {
 	candidates := []string{
-		"/usr/share/asura/hardware",
+		"/usr/share/toren/hardware",
 		"system/hardware",
 		"../system/hardware",
 		"../../system/hardware",
@@ -93,7 +93,7 @@ func getAppliedQuirkIDs() map[string]bool {
 	return res
 }
 
-const quirksUsage = `Usage: asura hardware quirks [list | show | apply | remove]
+const quirksUsage = `Usage: toren hardware quirks [list | show | apply | remove]
 
 Manages hardware fixes and device tuning with layered precedence.
 
@@ -121,7 +121,7 @@ func hardwareQuirks(args []string) int {
 		fmt.Print(quirksUsage)
 		return exitOK
 	default:
-		fmt.Fprintf(os.Stderr, "asura hardware quirks: unknown verb %q\n\n%s", args[0], quirksUsage)
+		fmt.Fprintf(os.Stderr, "toren hardware quirks: unknown verb %q\n\n%s", args[0], quirksUsage)
 		return exitUsage
 	}
 }
@@ -129,7 +129,7 @@ func hardwareQuirks(args []string) int {
 func runQuirksList() int {
 	allDefs, err := loadAllHardwareQuirks()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "asura hardware quirks: %v\n", err)
+		fmt.Fprintf(os.Stderr, "toren hardware quirks: %v\n", err)
 		return exitFail
 	}
 
@@ -171,7 +171,7 @@ func runQuirksList() int {
 			}
 		}
 		if !allApplied {
-			fmt.Println("Run 'asura hardware quirks apply' to apply all matched hardware layers.")
+			fmt.Println("Run 'toren hardware quirks apply' to apply all matched hardware layers.")
 		}
 	}
 
@@ -181,7 +181,7 @@ func runQuirksList() int {
 func runQuirksShow(args []string) int {
 	allDefs, err := loadAllHardwareQuirks()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "asura hardware quirks: %v\n", err)
+		fmt.Fprintf(os.Stderr, "toren hardware quirks: %v\n", err)
 		return exitFail
 	}
 
@@ -196,7 +196,7 @@ func runQuirksShow(args []string) int {
 			}
 		}
 		if target == nil {
-			fmt.Fprintf(os.Stderr, "asura hardware quirks: quirk %q not found\n", targetID)
+			fmt.Fprintf(os.Stderr, "toren hardware quirks: quirk %q not found\n", targetID)
 			return exitFail
 		}
 
@@ -334,7 +334,7 @@ func runQuirksShow(args []string) int {
 func runQuirksApply(args []string) int {
 	allDefs, err := loadAllHardwareQuirks()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "asura hardware quirks: %v\n", err)
+		fmt.Fprintf(os.Stderr, "toren hardware quirks: %v\n", err)
 		return exitFail
 	}
 
@@ -352,7 +352,7 @@ func runQuirksApply(args []string) int {
 			}
 		}
 		if len(layersToApply) == 0 {
-			fmt.Fprintf(os.Stderr, "asura hardware quirks: quirk %q not found\n", targetID)
+			fmt.Fprintf(os.Stderr, "toren hardware quirks: quirk %q not found\n", targetID)
 			return exitFail
 		}
 	} else {
@@ -448,7 +448,7 @@ func runQuirksApply(args []string) int {
 	_ = quirksPrivileged("udevadm", "control", "--reload-rules")
 	_ = quirksPrivileged("udevadm", "trigger")
 
-	// Save state to /var/lib/asura/hardware/applied.json
+	// Save state to /var/lib/toren/hardware/applied.json
 	var appliedLayers []quirks.AppliedLayerInfo
 	for _, m := range layersToApply {
 		appliedLayers = append(appliedLayers, quirks.AppliedLayerInfo{
@@ -500,8 +500,8 @@ func runQuirksRemove(args []string) int {
 				continue
 			}
 		}
-		// Also check legacy .asura-quirk-bak
-		legacyBak := f.Target + ".asura-quirk-bak"
+		// Also check legacy .toren-quirk-bak
+		legacyBak := f.Target + ".toren-quirk-bak"
 		if _, err := os.Stat(legacyBak); err == nil {
 			_ = quirksPrivileged("cp", legacyBak, f.Target)
 			_ = quirksPrivileged("rm", "-f", legacyBak)

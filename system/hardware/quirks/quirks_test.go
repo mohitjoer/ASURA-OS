@@ -3,7 +3,7 @@ package quirks_test
 import (
 	"testing"
 
-	"asura/hardware/quirks"
+	"toren/hardware/quirks"
 )
 
 func TestParseQuirkYAML(t *testing.T) {

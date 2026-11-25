@@ -2,10 +2,10 @@ import QtQuick
 import Quickshell
 import "welcome"
 
-// Asura first-run welcome. A normal floating window (not a layer-shell surface);
+// Toren first-run welcome. A normal floating window (not a layer-shell surface);
 // the Hyprland window rule floats and centres it by its title. Entry file at the
 // shell root so the qs.* imports resolve (see hub.qml); started by
-// session/asura-welcome, which runs it once on first login, holds the lock so it
+// session/toren-welcome, which runs it once on first login, holds the lock so it
 // never double-fires, and writes the done-marker after this process exits -- so
 // the tour shows exactly once. Quit on every close (Finish, Skip, Escape, or the
 // compositor) so the lock always releases and the marker write runs.

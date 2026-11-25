@@ -52,7 +52,7 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
-    WlrLayershell.namespace: "asura-capture"
+    WlrLayershell.namespace: "toren-capture"
 
     anchors { top: true; bottom: true; left: true; right: true }
 

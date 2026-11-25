@@ -12,7 +12,7 @@ import qs.Services as Svc
  * One workspace as a scaled mini-desktop. A large Fraunces workspace numeral is
  * the identity (vermillion when active); windows sit at their real fractional
  * positions, each a LIVE ScreencopyView over an app-icon fallback. Every cell
- * carries a hard solid-black offset shadow (Asura brutalist depth, no blur), and
+ * carries a hard solid-black offset shadow (Toren brutalist depth, no blur), and
  * Left-click empty space to switch here, or a window to focus it; RIGHT-CLICK
  * anywhere enters that workspace. Press-drag a window onto another cell to move
  * it. In the scrolling layout a workspace is an infinite horizontal tape, so the

@@ -119,18 +119,18 @@ jobs:
           cache-dependency-path: |
             system/hardware/go.mod
             desktop/go.mod
-      - name: Build and smoke-test asura
+      - name: Build and smoke-test toren
         working-directory: desktop
         run: |
-          go build -o "$RUNNER_TEMP/asura" ./cmd/toren
+          go build -o "$RUNNER_TEMP/toren" ./cmd/toren
           for command in state windows; do
-            if ! output="$("$RUNNER_TEMP/asura" "$command")"; then
-              echo "::error::asura $command exited non-zero"; exit 1
+            if ! output="$("$RUNNER_TEMP/toren" "$command")"; then
+              echo "::error::toren $command exited non-zero"; exit 1
             fi
             if ! printf '%s' "$output" | python3 -c 'import json,sys; json.load(sys.stdin)'; then
-              echo "::error::asura $command did not emit valid JSON"; exit 1
+              echo "::error::toren $command did not emit valid JSON"; exit 1
             fi
-            echo "asura $command ok"
+            echo "toren $command ok"
           done
 
   # ==========================================================================
@@ -222,7 +222,7 @@ jobs:
   # whole config fail to load ("Quickshell: Reload failed") and nothing else in
   # CI compiles QML. This loads shell-desktop/ with the Quickshell and Qt modules
   # the OS ships (system/packages-void.yaml), offscreen, and fails on any type
-  # that does not compile or resolve. asura update only takes commits that pass.
+  # that does not compile or resolve. toren update only takes commits that pass.
   desktop-load:
     name: Shell — desktop loads (Quickshell)
     timeout-minutes: 15
@@ -308,7 +308,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: asura-boot-test-artifacts
+          name: toren-boot-test-artifacts
           path: |
             ${{ runner.temp }}/qemu-test/serial.log
             ${{ runner.temp }}/qemu-test/boot-screen.png
@@ -319,8 +319,8 @@ jobs:
         with:
           name: toren-linux-iso
           path: |
-            ${{ runner.temp }}/asura-iso/*.iso
-            ${{ runner.temp }}/asura-iso/*.iso.sha256
+            ${{ runner.temp }}/toren-iso/*.iso
+            ${{ runner.temp }}/toren-iso/*.iso.sha256
           if-no-files-found: error
           retention-days: 7
 
@@ -391,11 +391,23 @@ jobs:
   # LAST: publish ASURA's package repository (dev-unstable pushes only)
   # ==========================================================================
   # Runs only when every required job above passed, so a commit is published
-  # exactly when asura update would take it. The installer end-to-end test is
+  # exactly when toren update would take it. The installer end-to-end test is
   # still allowed to fail, so it does not hold this back.
   packages:
     name: Packages — build, sign and publish
-    needs: [go-hardware, go-desktop, go-version-check, cli-smoke, session-tests, shell-tests, desktop-load, release-scripts, contract-tests, iso]
+    needs:
+      [
+        go-hardware,
+        go-desktop,
+        go-version-check,
+        cli-smoke,
+        session-tests,
+        shell-tests,
+        desktop-load,
+        release-scripts,
+        contract-tests,
+        iso,
+      ]
     if: github.event_name == 'push' && github.ref == 'refs/heads/dev-unstable'
     permissions:
       contents: read

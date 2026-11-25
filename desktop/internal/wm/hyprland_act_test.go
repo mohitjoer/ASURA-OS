@@ -390,7 +390,7 @@ func TestFollowMouseReportsPreviousMode(t *testing.T) {
 func TestScreenShaderResolvesNamesToFiles(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
-	dir := filepath.Join(home, ".config", "asura", "hyprland", "shaders")
+	dir := filepath.Join(home, ".config", "toren", "hyprland", "shaders")
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -509,7 +509,7 @@ func TestCapsHelperBackedEntriesFollowTheTool(t *testing.T) {
 	if caps.Has(CapNightLight) || caps.Has(CapTouchpadToggle) {
 		t.Fatalf("capabilities offered without their tools: %v", caps.Supports)
 	}
-	for _, tool := range []string{"gammastep", "asura-touchpad"} {
+	for _, tool := range []string{"gammastep", "toren-touchpad"} {
 		if err := os.WriteFile(filepath.Join(bin, tool), []byte("#!/bin/sh\n"), 0o755); err != nil {
 			t.Fatal(err)
 		}
@@ -549,8 +549,8 @@ func TestCapsDoNotClaimWhatIsAbsent(t *testing.T) {
 		seen[c] = true
 	}
 	for _, f := range caps.GeneratedFiles {
-		if !strings.HasPrefix(f, "asura/hyprland/") || !strings.HasSuffix(f, ".conf") {
-			t.Errorf("generated file %q is outside the Asura compositor overlay", f)
+		if !strings.HasPrefix(f, "toren/hyprland/") || !strings.HasSuffix(f, ".conf") {
+			t.Errorf("generated file %q is outside the Toren compositor overlay", f)
 		}
 	}
 }

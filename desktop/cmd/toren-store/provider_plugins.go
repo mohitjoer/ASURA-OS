@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-// pluginIDRe is the id grammar `asura plugin` enforces: lowercase alphanumerics
+// pluginIDRe is the id grammar `toren plugin` enforces: lowercase alphanumerics
 // and dashes, never starting with a dash, so a store id can never escape the
 // plugins directory or read as an option.
 var pluginIDRe = regexp.MustCompile(`^[a-z0-9][a-z0-9-]*$`)
@@ -86,7 +86,7 @@ func (pluginProvider) Install(ctx context.Context, id string) error {
 	if !pluginIDRe.MatchString(id) {
 		return fmt.Errorf("invalid plugin id %q", id)
 	}
-	// A catalogue entry carries the upstream repo `asura plugin install`
+	// A catalogue entry carries the upstream repo `toren plugin install`
 	// clones from. Without that link there is no payload to install -- an
 	// empty folder is not a plugin -- so refuse rather than claim success.
 	upstream := ""
@@ -98,19 +98,19 @@ func (pluginProvider) Install(ctx context.Context, id string) error {
 			}
 		}
 	}
-	if !have("asura") {
+	if !have("toren") {
 		if upstream == "" {
-			return fmt.Errorf("plugin %q has no upstream to install from and asura is not installed", id)
+			return fmt.Errorf("plugin %q has no upstream to install from and toren is not installed", id)
 		}
-		return fmt.Errorf("asura is not installed; run asura plugin install %s", upstream)
+		return fmt.Errorf("toren is not installed; run toren plugin install %s", upstream)
 	}
 	if upstream == "" {
 		// Already installed under a different id, or a local folder install:
-		// `asura plugin list` owns the roster; the store never mkdirs empties.
-		return fmt.Errorf("plugin %q has no upstream to install from; use asura plugin install <git-url|dir>", id)
+		// `toren plugin list` owns the roster; the store never mkdirs empties.
+		return fmt.Errorf("plugin %q has no upstream to install from; use toren plugin install <git-url|dir>", id)
 	}
 	emitStage("FETCHING", -1)
-	cmd := exec.CommandContext(ctx, "asura", "plugin", "install", upstream, "--yes")
+	cmd := exec.CommandContext(ctx, "toren", "plugin", "install", upstream, "--yes")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("install failed: %s", withOutput(string(out), err))
@@ -123,8 +123,8 @@ func (pluginProvider) Remove(ctx context.Context, id string) error {
 	if !pluginIDRe.MatchString(id) {
 		return fmt.Errorf("invalid plugin id %q", id)
 	}
-	if have("asura") {
-		cmd := exec.CommandContext(ctx, "asura", "plugin", "remove", id)
+	if have("toren") {
+		cmd := exec.CommandContext(ctx, "toren", "plugin", "remove", id)
 		out, err := cmd.CombinedOutput()
 		if err != nil {
 			return fmt.Errorf("remove failed: %s", withOutput(string(out), err))
@@ -147,9 +147,9 @@ func withOutput(out string, err error) string {
 func pluginDir() string {
 	home, _ := os.UserHomeDir()
 	if b := os.Getenv("XDG_DATA_HOME"); b != "" {
-		return filepath.Join(b, "asura", "plugins")
+		return filepath.Join(b, "toren", "plugins")
 	}
-	return filepath.Join(home, ".local", "share", "asura", "plugins")
+	return filepath.Join(home, ".local", "share", "toren", "plugins")
 }
 
 func getInstalledPlugins() map[string]bool {

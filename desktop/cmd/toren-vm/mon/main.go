@@ -1,4 +1,4 @@
-// asura-vm-mon: live control of a running quickemu VM through the sockets quickemu
+// toren-vm-mon: live control of a running quickemu VM through the sockets quickemu
 // already creates -- the HMP text monitor and, when the guest runs
 // qemu-guest-agent, the QGA JSON socket. No QEMU flag injection, no engine
 // changes. Each verb prints one JSON object to stdout; errors go to stderr with
@@ -6,10 +6,10 @@
 //
 // Usage:
 //
-//	asura-vm-mon stats   <monitorSock> <agentSock|-> <pidFile|->
-//	asura-vm-mon power   <monitorSock> <pause|resume|reset|shutdown>
-//	asura-vm-mon balloon <monitorSock> <MB>
-//	asura-vm-mon pin     <monitorSock> <pidFile> <auto|off>
+//	toren-vm-mon stats   <monitorSock> <agentSock|-> <pidFile|->
+//	toren-vm-mon power   <monitorSock> <pause|resume|reset|shutdown>
+//	toren-vm-mon balloon <monitorSock> <MB>
+//	toren-vm-mon pin     <monitorSock> <pidFile> <auto|off>
 package main
 
 import (
@@ -40,33 +40,33 @@ func emit(v map[string]any) {
 }
 
 func fail(msg string) {
-	fmt.Fprintln(os.Stderr, "asura-vm-mon: "+msg)
+	fmt.Fprintln(os.Stderr, "toren-vm-mon: "+msg)
 	os.Exit(1)
 }
 
 func main() {
 	if len(os.Args) < 2 {
-		fail("usage: asura-vm-mon <stats|power|balloon|pin> ...")
+		fail("usage: toren-vm-mon <stats|power|balloon|pin> ...")
 	}
 	switch os.Args[1] {
 	case "stats":
 		if len(os.Args) != 5 {
-			fail("usage: asura-vm-mon stats <monitorSock> <agentSock|-> <pidFile|->")
+			fail("usage: toren-vm-mon stats <monitorSock> <agentSock|-> <pidFile|->")
 		}
 		doStats(os.Args[2], os.Args[3], os.Args[4])
 	case "power":
 		if len(os.Args) != 4 {
-			fail("usage: asura-vm-mon power <monitorSock> <pause|resume|reset|shutdown>")
+			fail("usage: toren-vm-mon power <monitorSock> <pause|resume|reset|shutdown>")
 		}
 		doPower(os.Args[2], os.Args[3])
 	case "balloon":
 		if len(os.Args) != 4 {
-			fail("usage: asura-vm-mon balloon <monitorSock> <MB>")
+			fail("usage: toren-vm-mon balloon <monitorSock> <MB>")
 		}
 		doBalloon(os.Args[2], os.Args[3])
 	case "pin":
 		if len(os.Args) != 5 {
-			fail("usage: asura-vm-mon pin <monitorSock> <pidFile> <auto|off>")
+			fail("usage: toren-vm-mon pin <monitorSock> <pidFile> <auto|off>")
 		}
 		doPin(os.Args[2], os.Args[3], os.Args[4])
 	default:

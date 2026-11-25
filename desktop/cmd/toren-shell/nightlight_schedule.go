@@ -138,7 +138,7 @@ func (n *nightlightState) tickSchedule() {
 		err = n.intent("off")
 	}
 	if err != nil {
-		log.Printf("asura-shell: night light schedule tick failed: %v", err)
+		log.Printf("toren-shell: night light schedule tick failed: %v", err)
 		return // retry on the next tick: do not record an action that did not land
 	}
 	n.schedMu.Lock()

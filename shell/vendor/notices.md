@@ -1,17 +1,17 @@
 # Third-party notices
 
 The vendored tree in `shell/modules/` and `shell/services/` is upstream's code, except at the
-few paths Asura supplies itself. Some of it upstream took from other projects, and that code
+few paths Toren supplies itself. Some of it upstream took from other projects, and that code
 carries its own attribution and its own licence. This file records what that is.
 
 It exists to answer one question in one lookup: **which licence applies to this file?**
 
 ## The components
 
-| Component | Upstream project | Pinned commit | Licence | Full text |
-|---|---|---|---|---|
-| `ii` | [end-4/dots-hyprland](https://github.com/end-4/dots-hyprland) | `2f2a376fdb2ad738bf55f693dd0b474b64bb0ab8` | GPL-3.0-only | [`shell/vendor/COPYING`](COPYING) |
-| `shapes` | [end-4/rounded-polygon-qmljs](https://github.com/end-4/rounded-polygon-qmljs) | `e31ec4cb4ebf6a46b267f5c42eabf6874916fa16` | Apache-2.0 | [`shell/vendor/LICENSE.apache-2.0`](LICENSE.apache-2.0) |
+| Component | Upstream project                                                              | Pinned commit                              | Licence      | Full text                                               |
+| --------- | ----------------------------------------------------------------------------- | ------------------------------------------ | ------------ | ------------------------------------------------------- |
+| `ii`      | [end-4/dots-hyprland](https://github.com/end-4/dots-hyprland)                 | `2f2a376fdb2ad738bf55f693dd0b474b64bb0ab8` | GPL-3.0-only | [`shell/vendor/COPYING`](COPYING)                       |
+| `shapes`  | [end-4/rounded-polygon-qmljs](https://github.com/end-4/rounded-polygon-qmljs) | `e31ec4cb4ebf6a46b267f5c42eabf6874916fa16` | Apache-2.0   | [`shell/vendor/LICENSE.apache-2.0`](LICENSE.apache-2.0) |
 
 `shell/vendor/COPYING` and `shell/vendor/LICENSE.apache-2.0` are byte-identical to the
 upstream projects' own `LICENSE` files, copied by `sh shell/vendor/vendor.sh sync`.
@@ -29,16 +29,16 @@ Every file in the vendored tree is covered by its component's licence **unless**
 this table. A file that appears here carries an upstream credit of its own, and that credit
 decides its licence.
 
-| File | Came from | Licence | Copyright line in the file | Full text |
-|---|---|---|---|---|
-| `modules/common/Icons.qml` | caelestia-dots/shell | GPL-3.0-only | none stated | [`COPYING`](COPYING) |
-| `modules/common/widgets/DirectoryIcon.qml` | caelestia-dots/shell, with modifications | GPL-3.0-only | none stated | [`COPYING`](COPYING) |
-| `services/Brightness.qml` | caelestia-dots/shell, with modifications | GPL-3.0-only | none stated | [`COPYING`](COPYING) |
-| `services/Network.qml` | caelestia-dots/shell | GPL-3.0-only | none stated | [`COPYING`](COPYING) |
-| `modules/common/functions/levendist.js` | koeqaife/hyprland-material-you | GPL-3.0-only | none stated | [`COPYING`](COPYING) |
-| `modules/common/functions/fuzzysort.js` | farzher/fuzzysort | MIT | `Copyright (c) 2018 Stephen Kamenar` | [inline below](#the-mit-licence) |
-| `modules/common/functions/fuzzysort.js` — the priority queue inlined at the end of the file | lemire/FastPriorityQueue.js | Apache-2.0 | none stated | [`LICENSE.apache-2.0`](LICENSE.apache-2.0) |
-| `services/MprisController.qml` | outfoxxed/nixnew | no licence granted; the author permits redistribution | none stated | none — see below |
+| File                                                                                        | Came from                                | Licence                                               | Copyright line in the file           | Full text                                  |
+| ------------------------------------------------------------------------------------------- | ---------------------------------------- | ----------------------------------------------------- | ------------------------------------ | ------------------------------------------ |
+| `modules/common/Icons.qml`                                                                  | caelestia-dots/shell                     | GPL-3.0-only                                          | none stated                          | [`COPYING`](COPYING)                       |
+| `modules/common/widgets/DirectoryIcon.qml`                                                  | caelestia-dots/shell, with modifications | GPL-3.0-only                                          | none stated                          | [`COPYING`](COPYING)                       |
+| `services/Brightness.qml`                                                                   | caelestia-dots/shell, with modifications | GPL-3.0-only                                          | none stated                          | [`COPYING`](COPYING)                       |
+| `services/Network.qml`                                                                      | caelestia-dots/shell                     | GPL-3.0-only                                          | none stated                          | [`COPYING`](COPYING)                       |
+| `modules/common/functions/levendist.js`                                                     | koeqaife/hyprland-material-you           | GPL-3.0-only                                          | none stated                          | [`COPYING`](COPYING)                       |
+| `modules/common/functions/fuzzysort.js`                                                     | farzher/fuzzysort                        | MIT                                                   | `Copyright (c) 2018 Stephen Kamenar` | [inline below](#the-mit-licence)           |
+| `modules/common/functions/fuzzysort.js` — the priority queue inlined at the end of the file | lemire/FastPriorityQueue.js              | Apache-2.0                                            | none stated                          | [`LICENSE.apache-2.0`](LICENSE.apache-2.0) |
+| `services/MprisController.qml`                                                              | outfoxxed/nixnew                         | no licence granted; the author permits redistribution | none stated                          | none — see below                           |
 
 The Copyright column quotes what the file says, and where it says nothing the column says so.
 Only `fuzzysort.js` names a copyright holder anywhere in the vendored tree. In the
@@ -55,10 +55,10 @@ Everything else in the vendored tree — every other file under `shell/modules/`
 **carries no attribution of its own** and inherits its component's licence: GPL-3.0-only for
 the `ii` component, Apache-2.0 for the `shapes` component.
 
-The files at upstream's paths that Asura supplies itself are not vendored files and are not
+The files at upstream's paths that Toren supplies itself are not vendored files and are not
 in this table: `shell/GlobalStates.qml`, `shell/modules/common/Appearance.qml`,
 `shell/modules/common/Config.qml` and `shell/modules/common/widgets/AppIcon.qml`. They are
-Asura's own code under Asura's own licence, and they carry no upstream credit.
+Toren's own code under Toren's own licence, and they carry no upstream credit.
 
 ## The credits, as the files state them
 
@@ -145,10 +145,10 @@ its pinned commit. This file records them a second time, in one place, for a rea
 the list rather than the archaeology.
 
 **State the changes.** There are none to the vendored files themselves: that is what the
-byte-identical rule means. The difference between what upstream ships and what Asura ships is
+byte-identical rule means. The difference between what upstream ships and what Toren ships is
 the overlay files at upstream's paths — `shell/GlobalStates.qml`,
 `shell/modules/common/Appearance.qml`, `shell/modules/common/Config.qml` and
-`shell/modules/common/widgets/AppIcon.qml` — which are Asura's own files, and the fact that
+`shell/modules/common/widgets/AppIcon.qml` — which are Toren's own files, and the fact that
 upstream's versions of those are not shipped. Every other byte in the tree is upstream's,
 unchanged.
 
@@ -165,7 +165,7 @@ none, and the source is this repository.
 ## Fonts and artwork
 
 The vendored tree contains no font, no image and no artwork. It names fonts it expects to be
-present on the system — a Material Symbols family and a Nerd Font — and Asura's base layer
+present on the system — a Material Symbols family and a Nerd Font — and Toren's base layer
 carries neither. The base layer supplies the icon fonts the shell actually renders, and those
 are distribution packages with their own copyright files, outside this repository.
 

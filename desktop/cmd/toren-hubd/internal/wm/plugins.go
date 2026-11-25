@@ -43,13 +43,13 @@ var bundledPlugins = []bundledPlugin{
 		Desc: "A horizontally scrolling tiling layout (core in Hyprland 0.54)."},
 }
 
-// unpackagedPlugins are the store blocks Asura keeps but cannot run, with the
+// unpackagedPlugins are the store blocks Toren keeps but cannot run, with the
 // reason shown beside each one that is switched on.
 var unpackagedPlugins = map[string]string{
 	"dynamicCursors": "The dynamic cursors plugin has no Ubuntu package.",
 	"imgborders":     "The image borders plugin has no Ubuntu package.",
 	"hyprglass":      "The glass plugin has no Ubuntu package.",
-	"keysounds":      "The key sounds plugin is upstream's own and Asura does not build it.",
+	"keysounds":      "The key sounds plugin is upstream's own and Toren does not build it.",
 }
 
 func bundledByID(id string) (bundledPlugin, bool) {
@@ -193,7 +193,7 @@ func buildPluginRoster(o Overrides) pluginRoster {
 	// Building a plugin from source is not offered, so the toolchain is reported
 	// as unavailable with the reason; the page then hides the build controls
 	// instead of offering a button that cannot work.
-	r.Toolchain.Missing = []string{"building plugins from source is not supported on Asura; install the packaged ones with apt"}
+	r.Toolchain.Missing = []string{"building plugins from source is not supported on Toren; install the packaged ones with apt"}
 	loaded := map[string]bool{}
 	if live() {
 		loaded = loadedPlugins()
@@ -231,7 +231,7 @@ func runPlugins(args []string) ([]byte, error) {
 		syncPlugins(loadStore(DesktopStorePath()))
 		return compactJSON(map[string]bool{"synced": true})
 	case "rebuild", "add", "remove":
-		return nil, fmt.Errorf("plugins %s: not available on Asura: plugins are the packaged hyprland-plugin-* ones, pinned to the installed Hyprland; install or remove them with apt", args[0])
+		return nil, fmt.Errorf("plugins %s: not available on Toren: plugins are the packaged hyprland-plugin-* ones, pinned to the installed Hyprland; install or remove them with apt", args[0])
 	default:
 		return nil, fmt.Errorf("unknown plugins subcommand: %s", args[0])
 	}
@@ -349,7 +349,7 @@ func genPluginConfig(o Overrides) string {
 	return b.String()
 }
 
-// pluginUnhonored names each switched-on plugin feature Asura cannot run.
+// pluginUnhonored names each switched-on plugin feature Toren cannot run.
 func pluginUnhonored(o Overrides) []Unhonored {
 	var out []Unhonored
 	for _, d := range bundledPlugins {
@@ -373,7 +373,7 @@ func pluginUnhonored(o Overrides) []Unhonored {
 		if p.Extra[id].Enabled {
 			out = append(out, Unhonored{
 				Key:    "wm.hyprland.plugins.extra." + id,
-				Reason: "Plugins added from git are not supported on Asura.",
+				Reason: "Plugins added from git are not supported on Toren.",
 			})
 		}
 	}

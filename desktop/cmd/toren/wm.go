@@ -11,25 +11,25 @@ import (
 	"strings"
 	"time"
 
-	"asura/desktop/internal/wm"
+	"toren/desktop/internal/wm"
 )
 
-// `asura wm` is the front door to the compositor seam (internal/wm) for what
+// `toren wm` is the front door to the compositor seam (internal/wm) for what
 // is not the daemon. Ported from upstream wm.go, minus the verbs nothing calls
 // here: the switching and config-path verbs belong to a second compositor
-// Asura does not have, and `state` has no caller yet.
+// Toren does not have, and `state` has no caller yet.
 //
 // What calls the verbs that remain:
 //
 //	status  the capture scripts read "Capabilities:", the store reads "Provider:"
-//	caps    asura-cmd-nightlight reads nightLightProcess
+//	caps    toren-cmd-nightlight reads nightLightProcess
 //	act     the Hub's touchpad switch, and the scripts that reload the compositor
 //	        or start the night light
 //
 // The output of status and caps is read by scripts with sed, so the labels are
 // not translated.
 
-const wmUsage = `Usage: asura wm <command>
+const wmUsage = `Usage: toren wm <command>
 
   status            the compositor, its version, workspace model and capabilities
   caps              the capability manifest, as JSON
@@ -39,10 +39,10 @@ act exits 3 when no compositor answers and 4 when it cannot do the action.
 `
 
 func init() {
-	register("wm", "the compositor seam: status, caps, act", asuraWm)
+	register("wm", "the compositor seam: status, caps, act", torenWm)
 }
 
-func asuraWm(args []string) int {
+func torenWm(args []string) int {
 	return wmMain(args, wm.Open(), os.Stdout, os.Stderr)
 }
 
@@ -63,7 +63,7 @@ func wmMain(args []string, c *wm.Client, out, errOut io.Writer) int {
 		fmt.Fprint(out, wmUsage)
 		return exitOK
 	}
-	fmt.Fprintf(errOut, "asura wm: unknown command %q\n\n%s", args[0], wmUsage)
+	fmt.Fprintf(errOut, "toren wm: unknown command %q\n\n%s", args[0], wmUsage)
 	return exitUsage
 }
 
@@ -98,13 +98,13 @@ func wmStatus(c *wm.Client, out io.Writer) int {
 func wmCaps(c *wm.Client, out, errOut io.Writer) int {
 	caps, err := c.Caps()
 	if err != nil {
-		fmt.Fprintln(errOut, "asura wm:", err)
+		fmt.Fprintln(errOut, "toren wm:", err)
 		return exitFail
 	}
 	encoder := json.NewEncoder(out)
 	encoder.SetIndent("", "  ")
 	if err := encoder.Encode(caps); err != nil {
-		fmt.Fprintln(errOut, "asura wm:", err)
+		fmt.Fprintln(errOut, "toren wm:", err)
 		return exitFail
 	}
 	return exitOK
@@ -132,12 +132,12 @@ func wmCallContext() (context.Context, context.CancelFunc, error) {
 // compositor cannot". Quiet on success: it runs on the idle and lock paths.
 func wmAct(c *wm.Client, args []string, out, errOut io.Writer) int {
 	if len(args) == 0 {
-		fmt.Fprintln(errOut, "usage: asura wm act <action> [args...]")
+		fmt.Fprintln(errOut, "usage: toren wm act <action> [args...]")
 		return exitUsage
 	}
 	ctx, cancel, err := wmCallContext()
 	if err != nil {
-		fmt.Fprintln(errOut, "asura wm:", err)
+		fmt.Fprintln(errOut, "toren wm:", err)
 		return exitUsage
 	}
 	defer cancel()
@@ -151,7 +151,7 @@ func wmAct(c *wm.Client, args []string, out, errOut io.Writer) int {
 		}
 		return exitOK
 	}
-	fmt.Fprintf(errOut, "asura: %v\n", err)
+	fmt.Fprintf(errOut, "toren: %v\n", err)
 	switch {
 	case errors.Is(err, wm.ErrNoProvider):
 		return 3

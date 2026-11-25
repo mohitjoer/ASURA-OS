@@ -2,7 +2,7 @@ import QtQuick
 import Quickshell
 import qs.Ui.Singletons
 
-// What the curtain shows: the Asura mark by default, or the still, animated
+// What the curtain shows: the Toren mark by default, or the still, animated
 // image or muted video the user chose on the Hub's Reload cover page.
 //
 // This file is also the Hub's live preview of that page, loaded into a frame
@@ -82,7 +82,7 @@ Item {
     // source, then lettering. The SVG is the one copy of the mark, so it is not
     // duplicated into this directory where it could stop matching the original.
     readonly property var markSources: [
-        "file:///usr/share/asura/branding/asura-logo-on-dark.svg",
+        "file:///usr/share/toren/branding/toren-logo-on-dark.svg",
         Qt.resolvedUrl("../../public/toren-logo-on-dark.svg")
     ]
     property int markTry: 0
@@ -103,7 +103,7 @@ Item {
 
     // Lettering is the last resort, for a machine with no branding directory
     // and no checkout. It names the product in Latin letters rather than with
-    // the Asura mark glyph
+    // the Toren mark glyph
     // when the machine is short of files.
     Text {
         anchors.centerIn: parent

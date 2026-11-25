@@ -4,13 +4,13 @@ import qs.modules.common
 import QtQuick
 import Quickshell
 
-// The region selector, as Asura ships it: draw a rectangle or a circle on the
+// The region selector, as Toren ships it: draw a rectangle or a circle on the
 // screen, and the text inside it is recognised and copied to the clipboard.
 //
 // This is an overlay. Upstream's version of this file is the entry point for
 // five actions — copy, annotate, image search, text recognition and screen
 // recording — and registers an IPC handler and a global shortcut for each.
-// Asura's region selector reaches exactly one of them, the text recognition,
+// Toren's region selector reaches exactly one of them, the text recognition,
 // because the desktop's other halves of those actions already exist: the
 // screenshot tool owns capture and annotation, the colour picker owns picking,
 // and a region recording is not something the desktop ships. An entry point
@@ -23,7 +23,7 @@ import Quickshell
 // the one action it carries.
 //
 // The keybind reaches this through the shell's own IPC bridge, as
-// `asura ipc call asura ocr` — the same bridge every shell surface is called
+// `toren ipc call toren ocr` — the same bridge every shell surface is called
 // through — so there is no second handler to keep a target name honest with.
 Scope {
     id: root

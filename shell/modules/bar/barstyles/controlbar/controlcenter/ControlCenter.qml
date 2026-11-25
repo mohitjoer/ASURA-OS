@@ -7,7 +7,7 @@ import "kit/Routes.js" as Routes
 import qs.Ui
 import qs.Ui.Singletons
 
-// QS Bar Settings: the panel the bar's Asura logo opens. It is about one thing, the
+// QS Bar Settings: the panel the bar's Toren logo opens. It is about one thing, the
 // bar, in four routes down one rail: Bar (where it sits and how its surface
 // reads), Layout (the three lanes you arrange the widgets in), Widgets (every
 // widget as a row you show, size, colour and tune) and Dock (the app dock beside
@@ -16,7 +16,7 @@ import qs.Ui.Singletons
 //
 // State reads and writes straight off `root` (the qsbar Theme) and the shell's
 // own services, so persistence is untouched. The chrome is paper and ink from
-// Asura.Ui; the bar's retinted colours appear only where they are data (the
+// Toren.Ui; the bar's retinted colours appear only where they are data (the
 // silhouette, the accent swatches, the lane chips, the marker preview).
 PanelWindow {
     id: cc
@@ -82,7 +82,7 @@ PanelWindow {
             { id: "layout.arrange", name: I18n.tr("Arrange widgets"), route: "layout", category: I18n.tr("Layout"),
               searchTags: ["move", "reorder", "order", "left", "center", "right", "lane"], description: I18n.tr("Move widgets across the three lanes.") },
             { id: "layout.add", name: I18n.tr("Add a widget"), route: "layout", category: I18n.tr("Layout"),
-              searchTags: ["add", "hidden", "plugin", "asura-store", "more"], description: I18n.tr("Add a hidden built-in or an installed plugin to the bar.") },
+              searchTags: ["add", "hidden", "plugin", "toren-store", "more"], description: I18n.tr("Add a hidden built-in or an installed plugin to the bar.") },
             { id: "layout.unlock", name: I18n.tr("Unlock the bar"), route: "layout", category: I18n.tr("Layout"),
               searchTags: ["unlock", "drag", "rearrange", "in place"], description: I18n.tr("Drag the widgets around on the bar itself.") },
             { id: "layout.reset", name: I18n.tr("Reset layout"), route: "layout", category: I18n.tr("Layout"),
@@ -110,7 +110,7 @@ PanelWindow {
             { id: "community.installed", name: I18n.tr("Community widgets"), route: "community", category: I18n.tr("Community"),
               searchTags: ["plugin", "plugins", "installed", "third", "party", "remove", "uninstall"], description: I18n.tr("Bar widgets installed from outside Toren.") },
             { id: "community.add", name: I18n.tr("Add from git or Toren Store"), route: "community", category: I18n.tr("Community"),
-              searchTags: ["git", "url", "asura-store", "store", "install", "add"], description: I18n.tr("Install a community bar widget.") }
+              searchTags: ["git", "url", "toren-store", "store", "install", "add"], description: I18n.tr("Install a community bar widget.") }
         ]);
     }
 
@@ -119,7 +119,7 @@ PanelWindow {
     anchors { top: true; bottom: true; left: true; right: true }
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.namespace: "asura-control"
+    WlrLayershell.namespace: "toren-control"
     WlrLayershell.keyboardFocus: cc.root.controlVisible ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
     property real reveal: cc.root.controlVisible ? 1 : 0
@@ -212,7 +212,7 @@ PanelWindow {
             current: cc.route
             onChose: (id) => cc.route = id
             onSearchRequested: searchOverlay.shown = true
-            onHubRequested: { Spawn.run(["sh", "-c", "flock -n -o /tmp/asura-hub.lock qs -c hub"]); cc.close(); }
+            onHubRequested: { Spawn.run(["sh", "-c", "flock -n -o /tmp/toren-hub.lock qs -c hub"]); cc.close(); }
         }
 
         Item {

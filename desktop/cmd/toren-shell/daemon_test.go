@@ -3,7 +3,7 @@ package main
 import (
 	"testing"
 
-	"asura/desktop/internal/wm"
+	"toren/desktop/internal/wm"
 )
 
 // shouldTakeOver decides whether a starting daemon displaces the incumbent on

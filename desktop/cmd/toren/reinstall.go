@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	register("reinstall", "re-apply Toren files for currently installed commit", asuraReinstall)
+	register("reinstall", "re-apply Toren files for currently installed commit", torenReinstall)
 }
 
 // reinstallPlan returns the command that will be executed to apply the commit.
@@ -18,8 +18,8 @@ func reinstallPlan(repoDir, commit, root string) []string {
 // reinstallApply runs the apply step. Stubbed in tests.
 var reinstallApply = applyRepo
 
-// asuraReinstall re-applies shipped files for the currently applied commit.
-func asuraReinstall(args []string) int {
+// torenReinstall re-applies shipped files for the currently applied commit.
+func torenReinstall(args []string) int {
 	set := newFlags("reinstall", reinstallUsage)
 	var root = set.String("root", "", "operate on a tree under this directory")
 	if _, err := parseFlags(set, args); err != nil {
@@ -34,7 +34,7 @@ func asuraReinstall(args []string) int {
 			}
 		}
 		if commit == "" {
-			fmt.Fprintln(os.Stderr, "asura reinstall: no applied commit recorded in /usr/share/asura/applied-commit")
+			fmt.Fprintln(os.Stderr, "toren reinstall: no applied commit recorded in /usr/share/toren/applied-commit")
 			return exitFail
 		}
 	}
@@ -45,7 +45,7 @@ func asuraReinstall(args []string) int {
 		if _, errStat := os.Stat("installation/apply-repo.sh"); errStat == nil {
 			repoDir, _ = filepath.Abs(".")
 		} else {
-			fmt.Fprintf(os.Stderr, "asura reinstall: %v\n", err)
+			fmt.Fprintf(os.Stderr, "toren reinstall: %v\n", err)
 			return exitFail
 		}
 	}
@@ -57,7 +57,7 @@ func asuraReinstall(args []string) int {
 			_ = repoGit(repoDir, "fetch", "origin").Run()
 		}
 		if gitOut(repoDir, "cat-file", "-t", commit) != "commit" {
-			fmt.Fprintf(os.Stderr, "asura reinstall: commit %s not found in repository\n", commit)
+			fmt.Fprintf(os.Stderr, "toren reinstall: commit %s not found in repository\n", commit)
 			return exitFail
 		}
 	}
@@ -65,14 +65,14 @@ func asuraReinstall(args []string) int {
 	// Detach to the exact applied commit so nothing newer is applied
 	if gitOut(repoDir, "rev-parse", "HEAD") != commit {
 		if err := repoGit(repoDir, "checkout", "--quiet", "--detach", commit).Run(); err != nil {
-			fmt.Fprintf(os.Stderr, "asura reinstall: checkout commit %s: %v\n", short(commit), err)
+			fmt.Fprintf(os.Stderr, "toren reinstall: checkout commit %s: %v\n", short(commit), err)
 			return exitFail
 		}
 	}
 
 	fmt.Printf("==> Reinstalling Toren files at commit %s\n", short(commit))
 	if err := reinstallApply(repoDir, *root); err != nil {
-		fmt.Fprintf(os.Stderr, "asura reinstall: apply-repo failed: %v\n", err)
+		fmt.Fprintf(os.Stderr, "toren reinstall: apply-repo failed: %v\n", err)
 		return exitFail
 	}
 

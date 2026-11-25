@@ -75,7 +75,7 @@ func (d *daemon) wallpaperVerb(line string) string {
 		// Resident picker: flip its surface over the event hub; a dead or
 		// not-yet-started instance cold-launches already visible instead.
 		if d.ui.ensure() {
-			d.broadcast("asura-wallpaper.wall.toggle", map[string]interface{}{})
+			d.broadcast("toren-wallpaper.wall.toggle", map[string]interface{}{})
 		}
 		return "ok"
 	case "resource":

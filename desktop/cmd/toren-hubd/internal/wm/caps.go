@@ -2,7 +2,7 @@
 // the neutral settings store it is configured from, and the hyprlang that store
 // is rendered into.
 //
-// Asura runs Hyprland only, so the client calls the provider in-process.
+// Toren runs Hyprland only, so the client calls the provider in-process.
 //
 // Consumers ask what the compositor can do, never which one it is.
 package wm

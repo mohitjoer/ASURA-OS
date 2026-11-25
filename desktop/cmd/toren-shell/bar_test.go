@@ -18,8 +18,8 @@ const catalogueFixture = `[
     "desc": "The mark that opens the launcher and this panel.",
     "settings": [
       { "key": "launcherLogoMode", "type": "choice", "label": "Mark", "options": ["text", "icon"] },
-      { "key": "launcherLogoText", "type": "choice", "label": "Wordmark", "options": ["asura", "hyprland", "arch", "omacom"] },
-      { "key": "launcherLogoIcon", "type": "choice", "label": "Glyph", "options": ["asura", "arch", "dragon"] } ] },
+      { "key": "launcherLogoText", "type": "choice", "label": "Wordmark", "options": ["toren", "hyprland", "arch", "omacom"] },
+      { "key": "launcherLogoIcon", "type": "choice", "label": "Glyph", "options": ["toren", "arch", "dragon"] } ] },
   { "id": "workspaces", "gid": "G2",  "label": "Workspaces",      "gloss": "",   "category": "Bar",
     "settings": [
       { "key": "workspaceMode",  "type": "choice", "label": "Shown", "options": ["active", "5", "10"] },
@@ -509,7 +509,7 @@ func TestBarCatalogWithPlugin(t *testing.T) {
 	t.Setenv("ASURA_PLUGINS_DIR", pluginsDir)
 
 	// Enable it on the bar through plugins.json.
-	pj := filepath.Join(os.Getenv("XDG_CONFIG_HOME"), "asura")
+	pj := filepath.Join(os.Getenv("XDG_CONFIG_HOME"), "toren")
 	if err := os.MkdirAll(pj, 0o755); err != nil {
 		t.Fatal(err)
 	}

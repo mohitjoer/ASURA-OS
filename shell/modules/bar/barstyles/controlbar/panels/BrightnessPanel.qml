@@ -3,7 +3,7 @@ import "../modules"
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
-import "../AsuraPower.js" as AsuraPower
+import "../TorenPower.js" as TorenPower
 import qs.Ui.Singletons
 
 PanelWindow {
@@ -16,7 +16,7 @@ PanelWindow {
     anchors { top: true; bottom: true; left: true; right: true }
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.namespace: "asura-brightness"
+    WlrLayershell.namespace: "toren-brightness"
 
     readonly property int barBottom: root.v2BarHeight
     readonly property int gap: 6
@@ -49,7 +49,7 @@ PanelWindow {
         if (setRunner.running || queuedSetPercent < 0) return
         var p = queuedSetPercent
         queuedSetPercent = -1
-        setRunner.command = ["bash", "-c", AsuraPower.brightnessSetCmd(p + "%")]
+        setRunner.command = ["bash", "-c", TorenPower.brightnessSetCmd(p + "%")]
         setRunner.running = true
     }
 
@@ -213,7 +213,7 @@ PanelWindow {
 
     Process {
         id: briData
-        command: ["bash", "-c", AsuraPower.brightnessPercentCmd]
+        command: ["bash", "-c", TorenPower.brightnessPercentCmd]
         running: false
         stdout: StdioCollector {
             onStreamFinished: {
@@ -235,7 +235,7 @@ PanelWindow {
     }
     Process {
         id: upRunner
-        command: ["bash", "-c", AsuraPower.brightnessSetCmd("+5%")]
+        command: ["bash", "-c", TorenPower.brightnessSetCmd("+5%")]
         onExited: (code) => {
             briPanel.notifyBrightnessError("Brightness up", code)
             briPanel.refresh()
@@ -243,7 +243,7 @@ PanelWindow {
     }
     Process {
         id: downRunner
-        command: ["bash", "-c", AsuraPower.brightnessSetCmd("5%-")]
+        command: ["bash", "-c", TorenPower.brightnessSetCmd("5%-")]
         onExited: (code) => {
             briPanel.notifyBrightnessError("Brightness down", code)
             briPanel.refresh()

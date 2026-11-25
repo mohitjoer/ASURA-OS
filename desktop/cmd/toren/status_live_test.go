@@ -7,21 +7,21 @@ import (
 	"strings"
 	"testing"
 
-	"asura/desktop/internal/runner/runnertest"
+	"toren/desktop/internal/runner/runnertest"
 )
 
 const xbpsListOutput = `[*] brave-browser-1.97.57_1 update to 1.98.60_1 ...
 [*] ca-certificates-20260601_1 update to 20260816_1 ...
-[*] asura-0.1-pre-alpha update to 0.2 ...
-[*] asura-agent-0.1 update to 0.2 ...
+[*] toren-0.1-pre-alpha update to 0.2 ...
+[*] toren-agent-0.1 update to 0.2 ...
 `
 
 // The shell's Updates page reads this line, so the field names, the split
-// between Asura's packages and upstream Void's, and the one-line form are what is
+// between Toren's packages and upstream Void's, and the one-line form are what is
 // pinned. A machine with nothing waiting must still send arrays, not nulls.
 func TestStatusReport(t *testing.T) {
 	fake := runnertest.New().
-		Out("xbps-query -p pkgver asura", "asura-0.1-pre-alpha\n").
+		Out("xbps-query -p pkgver toren", "toren-0.1-pre-alpha\n").
 		Out("xbps-install -un", xbpsListOutput)
 
 	var out bytes.Buffer
@@ -45,7 +45,7 @@ func TestStatusReport(t *testing.T) {
 		t.Fatal(err)
 	}
 	if got.Installed != "0.1-pre-alpha" || got.Latest != "0.2" || !got.Available || got.Behind != 2 {
-		t.Errorf("asura lane wrong: %+v", got)
+		t.Errorf("toren lane wrong: %+v", got)
 	}
 	if got.System != 2 || len(got.Packages) != 2 || got.Packages[0].Name != "brave-browser" ||
 		got.Packages[1].Old != "20260601_1" {
@@ -55,7 +55,7 @@ func TestStatusReport(t *testing.T) {
 
 func TestStatusReportWithNothingToSay(t *testing.T) {
 	fake := runnertest.New().
-		Fail("xbps-query -p pkgver asura", runnertest.NotInstalled("xbps-query")).
+		Fail("xbps-query -p pkgver toren", runnertest.NotInstalled("xbps-query")).
 		Fail("xbps-install -un", runnertest.NotInstalled("xbps-install"))
 	var out bytes.Buffer
 	statusJSON(t.TempDir(), &out, fake.Run)

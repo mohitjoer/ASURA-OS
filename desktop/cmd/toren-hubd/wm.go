@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 
-	"asura/desktop/cmd/toren-hubd/internal/wm"
+	"toren/desktop/cmd/toren-hubd/internal/wm"
 )
 
-// asura-hubd wm answers what the Hub's compositor control asks. Asura runs one
+// toren-hubd wm answers what the Hub's compositor control asks. Toren runs one
 // compositor, so list has one row and there is no switch to preview.
 //
 //	wm list             the compositor: name, active, capabilities
@@ -23,7 +23,7 @@ func runWm(args []string) error {
 		if len(args) < 2 {
 			return fmt.Errorf("wm preview needs a name")
 		}
-		return fmt.Errorf("unknown compositor %q: Asura runs %s only", args[1], wm.ProviderHyprland)
+		return fmt.Errorf("unknown compositor %q: Toren runs %s only", args[1], wm.ProviderHyprland)
 	default:
 		return fmt.Errorf("wm needs list|preview")
 	}

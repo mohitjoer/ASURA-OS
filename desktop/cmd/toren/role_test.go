@@ -2,19 +2,19 @@ package main
 
 import "testing"
 
-func TestAsuraRoleUsage(t *testing.T) {
-	code := asuraRole([]string{"--help"})
+func TestTorenRoleUsage(t *testing.T) {
+	code := torenRole([]string{"--help"})
 	if code != exitOK {
-		t.Fatalf("asura role --help returned code %d, want %d", code, exitOK)
+		t.Fatalf("toren role --help returned code %d, want %d", code, exitOK)
 	}
 
-	code = asuraRole([]string{"status"})
+	code = torenRole([]string{"status"})
 	if code != exitOK {
-		t.Fatalf("asura role status returned code %d, want %d", code, exitOK)
+		t.Fatalf("toren role status returned code %d, want %d", code, exitOK)
 	}
 
-	code = asuraRole([]string{"invalid-role"})
+	code = torenRole([]string{"invalid-role"})
 	if code != exitUsage {
-		t.Fatalf("asura role invalid-role returned code %d, want %d", code, exitUsage)
+		t.Fatalf("toren role invalid-role returned code %d, want %d", code, exitUsage)
 	}
 }

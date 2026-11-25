@@ -5,21 +5,21 @@ import (
 	"os"
 )
 
-const usage = `asura-agent: Toren Linux local coding agent harness integration
+const usage = `toren-agent: Toren Linux local coding agent harness integration
 
 Usage:
-  asura-agent wire [agent]      Symlink the Asura skill suite into all or specified agent
-  asura-agent unwire [agent]    Remove the Asura skill symlink from all or specified agent
-  asura-agent status [--json]   Report detection in PATH and wiring status of local agents
-  asura-agent wire --installed  Wire every supported agent that is installed (run at login)
-  asura-agent ask QUESTION      Ask ASURA's assistant (opens OpenCode in a terminal)
-  asura-agent chat MESSAGE      The same, for the shell's chat panel (JSON lines)
+  toren-agent wire [agent]      Symlink the Toren skill suite into all or specified agent
+  toren-agent unwire [agent]    Remove the Toren skill symlink from all or specified agent
+  toren-agent status [--json]   Report detection in PATH and wiring status of local agents
+  toren-agent wire --installed  Wire every supported agent that is installed (run at login)
+  toren-agent ask QUESTION      Ask ASURA's assistant (opens OpenCode in a terminal)
+  toren-agent chat MESSAGE      The same, for the shell's chat panel (JSON lines)
 
 Supported agents:
-  opencode    OpenCode CLI (~/.config/opencode/skills/asura)
-  pi          Pi coding agent (~/.pi/agent/skills/asura)
-  claude      Claude Code (~/.claude/skills/asura)
-  gemini      Gemini CLI / Antigravity (~/.gemini/skills/asura)
+  opencode    OpenCode CLI (~/.config/opencode/skills/toren)
+  pi          Pi coding agent (~/.pi/agent/skills/toren)
+  claude      Claude Code (~/.claude/skills/toren)
+  gemini      Gemini CLI / Antigravity (~/.gemini/skills/toren)
 `
 
 func main() {
@@ -36,13 +36,13 @@ func main() {
 		}
 		if agent == "--installed" {
 			if _, err := WireInstalled(); err != nil {
-				fmt.Fprintf(os.Stderr, "asura-agent wire: %v\n", err)
+				fmt.Fprintf(os.Stderr, "toren-agent wire: %v\n", err)
 				os.Exit(1)
 			}
 			return
 		}
 		if _, err := Wire(agent); err != nil {
-			fmt.Fprintf(os.Stderr, "asura-agent wire: %v\n", err)
+			fmt.Fprintf(os.Stderr, "toren-agent wire: %v\n", err)
 			os.Exit(1)
 		}
 	case "unwire":
@@ -51,7 +51,7 @@ func main() {
 			agent = os.Args[2]
 		}
 		if _, err := Unwire(agent); err != nil {
-			fmt.Fprintf(os.Stderr, "asura-agent unwire: %v\n", err)
+			fmt.Fprintf(os.Stderr, "toren-agent unwire: %v\n", err)
 			os.Exit(1)
 		}
 	case "status":
@@ -62,7 +62,7 @@ func main() {
 			}
 		}
 		if err := Status(asJSON); err != nil {
-			fmt.Fprintf(os.Stderr, "asura-agent status: %v\n", err)
+			fmt.Fprintf(os.Stderr, "toren-agent status: %v\n", err)
 			os.Exit(1)
 		}
 	case "ask":

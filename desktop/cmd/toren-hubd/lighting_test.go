@@ -248,10 +248,10 @@ func TestLiftColorKeepsDarkPalettesVisible(t *testing.T) {
 		t.Fatal("a palette already bright enough must pass through untouched")
 	}
 	if got := liftColor("#000000"); got != lightingFallback {
-		t.Fatalf("black = %s, want the Asura fallback", got)
+		t.Fatalf("black = %s, want the Toren fallback", got)
 	}
 	if got := liftColor("garbage"); got != lightingFallback {
-		t.Fatalf("nonsense = %s, want the Asura fallback", got)
+		t.Fatalf("nonsense = %s, want the Toren fallback", got)
 	}
 }
 
@@ -274,7 +274,7 @@ func TestPunchColorRestoresWashedOutAccents(t *testing.T) {
 		t.Fatalf("dark = %s, want unchanged", got)
 	}
 	if got := punchColor("garbage"); got != lightingFallback {
-		t.Fatalf("nonsense = %s, want the Asura fallback", got)
+		t.Fatalf("nonsense = %s, want the Toren fallback", got)
 	}
 }
 
@@ -309,7 +309,7 @@ func TestStateDefaultsToOffAndSurvivesGarbage(t *testing.T) {
 		t.Fatalf("round trip lost settings: %+v", got.Devices["Board#SN1"])
 	}
 
-	if err := os.WriteFile(filepath.Join(dir, "asura", "lighting.json"), []byte("{{{"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "toren", "lighting.json"), []byte("{{{"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if st := loadLighting(); st.Enabled || len(st.Devices) != 0 {
@@ -471,10 +471,10 @@ func TestStateReportDoesNotTouchHardware(t *testing.T) {
 	t.Setenv("XDG_CACHE_HOME", dir)
 	t.Setenv("PATH", dir)
 
-	if err := os.MkdirAll(filepath.Join(dir, "asura"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(dir, "toren"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(dir, "asura", "colors.json"),
+	if err := os.WriteFile(filepath.Join(dir, "toren", "colors.json"),
 		[]byte(`{"background":"#101010","color4":"#dec2a2"}`), 0o644); err != nil {
 		t.Fatal(err)
 	}

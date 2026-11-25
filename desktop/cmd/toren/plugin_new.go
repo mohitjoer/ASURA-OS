@@ -12,11 +12,11 @@ import (
 	"time"
 )
 
-// plugin_new.go is `asura plugin new`: it scaffolds a plugin folder from the
+// plugin_new.go is `toren plugin new`: it scaffolds a plugin folder from the
 // embedded template, generates a manifest for the chosen host, git-inits the
 // folder and commits it as the author, then prints the next steps. Ported from
 // upstream's plugin scaffold (GPL-3.0). The template is a complete, working demo (a
-// ticking counter, a mark, a panel with a button) that passes `asura plugin
+// ticking counter, a mark, a panel with a button) that passes `toren plugin
 // audit` with no findings, and a test keeps it that way.
 
 //go:embed plugin_template
@@ -24,10 +24,10 @@ var pluginTemplate embed.FS
 
 const pluginTemplateRoot = "plugin_template"
 
-const pluginNewUsage = `Usage: asura plugin new <id> [flags]
+const pluginNewUsage = `Usage: toren plugin new <id> [flags]
 
 Scaffolds a working demo plugin into
-$(xdg-user-dir DOCUMENTS)/asura-plugins/<id> (or ~/asura-plugins/<id>),
+$(xdg-user-dir DOCUMENTS)/toren-plugins/<id> (or ~/toren-plugins/<id>),
 git-inits it and commits it as the author. The id is lowercase letters, digits
 and dashes.
 
@@ -60,18 +60,18 @@ func pluginCmdNew(args []string, pio pluginIO) int {
 
 	host, err := pluginHostFlag(*bar, *desktop, *popout)
 	if err != nil {
-		fmt.Fprintf(pio.err, "asura plugin new: %v\n", err)
+		fmt.Fprintf(pio.err, "toren plugin new: %v\n", err)
 		return exitUsage
 	}
 	if host == "" {
 		host = "topbarGlyph"
 	}
 	if !pluginIDRe.MatchString(id) {
-		fmt.Fprintf(pio.err, "asura plugin new: id %q must be lowercase letters, digits and dashes, not starting with a dash\n", id)
+		fmt.Fprintf(pio.err, "toren plugin new: id %q must be lowercase letters, digits and dashes, not starting with a dash\n", id)
 		return exitUsage
 	}
 	if pluginReservedIDs()[id] {
-		fmt.Fprintf(pio.err, "asura plugin new: %q is a reserved built-in widget id; choose another\n", id)
+		fmt.Fprintf(pio.err, "toren plugin new: %q is a reserved built-in widget id; choose another\n", id)
 		return exitUsage
 	}
 	if *name == "" {
@@ -81,7 +81,7 @@ func pluginCmdNew(args []string, pio pluginIO) int {
 		*author = pluginDefaultAuthor()
 	}
 	if strings.ContainsAny(*name+*author, "\r\n") {
-		fmt.Fprintln(pio.err, "asura plugin new: the name and author are one line each")
+		fmt.Fprintln(pio.err, "toren plugin new: the name and author are one line each")
 		return exitUsage
 	}
 
@@ -90,7 +90,7 @@ func pluginCmdNew(args []string, pio pluginIO) int {
 		dir = filepath.Join(pluginAuthorRoot(), id)
 	}
 	if entries, err := os.ReadDir(dir); err == nil && len(entries) > 0 {
-		fmt.Fprintf(pio.err, "asura plugin new: %s already exists and is not empty\n", dir)
+		fmt.Fprintf(pio.err, "toren plugin new: %s already exists and is not empty\n", dir)
 		return exitFail
 	}
 
@@ -273,7 +273,7 @@ func pluginManifestJSON(id, name, author, host string, bar bool) ([]byte, error)
 		Name:         name,
 		Version:      "0.1.0",
 		Author:       author,
-		Description:  name + " is a Asura shell plugin.",
+		Description:  name + " is a Toren shell plugin.",
 		License:      "MIT",
 		Official:     false,
 		Hosts:        []string{host},
@@ -322,16 +322,16 @@ func pluginMarshalIndent(v any) ([]byte, error) {
 }
 
 // pluginAuthorRoot is R1's authoring root: the XDG DOCUMENTS dir's
-// asura-plugins folder, falling back to ~/asura-plugins.
+// toren-plugins folder, falling back to ~/toren-plugins.
 func pluginAuthorRoot() string {
 	if pluginHas("xdg-user-dir") {
 		if out, err := pluginOutput("xdg-user-dir", "DOCUMENTS"); err == nil {
 			if dir := strings.TrimSpace(out); dir != "" && dir != pluginHome() {
-				return filepath.Join(dir, "asura-plugins")
+				return filepath.Join(dir, "toren-plugins")
 			}
 		}
 	}
-	return filepath.Join(pluginHome(), "asura-plugins")
+	return filepath.Join(pluginHome(), "toren-plugins")
 }
 
 // pluginTitleFromID turns a plugin id into a display name: demo-x -> "Demo X".
@@ -365,7 +365,7 @@ func pluginDefaultAuthor() string {
 	if user := os.Getenv("USER"); user != "" {
 		return user
 	}
-	return "asura"
+	return "toren"
 }
 
 // pluginGitInit makes the folder a git repo with one commit authored by the
@@ -390,12 +390,12 @@ func pluginPrintNextSteps(pio pluginIO, id, dir string, bar bool) {
 	}
 	fmt.Fprintln(pio.out, edit)
 	fmt.Fprintln(pio.out, "  2. capture assets/preview-widget.png (see README.md), then list it in manifest files")
-	fmt.Fprintf(pio.out, "  3. check:   asura plugin audit %s\n", dir)
+	fmt.Fprintf(pio.out, "  3. check:   toren plugin audit %s\n", dir)
 	if bar {
-		fmt.Fprintf(pio.out, "  4. install: asura plugin install %s --bar --yes\n", dir)
+		fmt.Fprintf(pio.out, "  4. install: toren plugin install %s --bar --yes\n", dir)
 		fmt.Fprintln(pio.out, "     then find it on the bar, and on the bar's Community page")
 	} else {
-		fmt.Fprintf(pio.out, "  4. install: asura plugin install %s --yes\n", dir)
-		fmt.Fprintf(pio.out, "     then turn it on: asura plugin enable %s --desktop|--popout\n", id)
+		fmt.Fprintf(pio.out, "  4. install: toren plugin install %s --yes\n", dir)
+		fmt.Fprintf(pio.out, "     then turn it on: toren plugin enable %s --desktop|--popout\n", id)
 	}
 }

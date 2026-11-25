@@ -65,7 +65,7 @@ Item {
     readonly property var sel: (pg.selected >= 0 && pg.selected < pg.draft.length) ? pg.draft[pg.selected] : null
 
     // ── per-monitor interface (shell) scale ──────────────────────────────
-    // Distinct from the compositor SCALE control below: this is the Asura shell
+    // Distinct from the compositor SCALE control below: this is the Toren shell
     // chrome's own logical scale on a monitor (shell.json displays.ui_scale,
     // keyed by output name), so one screen's bar, menus and this Hub can shrink
     // or grow without touching the crisp compositor scale apps render at. A shell
@@ -224,7 +224,7 @@ Item {
     // ── data load: the seam's output list + saved profiles ──────────────────
     Process {
         id: listProc
-        command: ["asura-hubd", "outputs"]
+        command: ["toren-hubd", "outputs"]
         running: true
         stderr: StdioCollector {
             onStreamFinished: pg.listError = this.text.trim()
@@ -265,7 +265,7 @@ Item {
 
     Process {
         id: profilesProc
-        command: ["asura-hubd", "outputs", "profiles"]
+        command: ["toren-hubd", "outputs", "profiles"]
         running: true
         stdout: StdioCollector {
             onStreamFinished: {
@@ -628,7 +628,7 @@ Item {
     function apply() {
         var prev = pg.committed;
         var next = JSON.stringify(pg.specsAll());
-        applyProc.command = ["asura-hubd", "outputs", "apply", next];
+        applyProc.command = ["toren-hubd", "outputs", "apply", next];
         applyProc.running = true;
         pg.committed = next;
         pg.tick++;
@@ -669,7 +669,7 @@ Item {
         pg.revertSecs = 0;
         if (pg.revertBaseline === "")
             return;
-        applyProc.command = ["asura-hubd", "outputs", "apply", pg.revertBaseline];
+        applyProc.command = ["toren-hubd", "outputs", "apply", pg.revertBaseline];
         applyProc.running = true;
         pg.committed = pg.revertBaseline;
         pg.revertBaseline = "";
@@ -680,7 +680,7 @@ Item {
     function saveProfile(name) {
         if (name.trim() === "")
             return;
-        profileProc.command = ["asura-hubd", "outputs", "save", name.trim(), JSON.stringify(pg.specsAll())];
+        profileProc.command = ["toren-hubd", "outputs", "save", name.trim(), JSON.stringify(pg.specsAll())];
         profileProc.running = true;
         pg.committed = JSON.stringify(pg.specsAll());
         pg.tick++;
@@ -688,12 +688,12 @@ Item {
         profileRefresh.start();
     }
     function loadProfile(name) {
-        profileProc.command = ["asura-hubd", "outputs", "load", name];
+        profileProc.command = ["toren-hubd", "outputs", "load", name];
         profileProc.running = true;
         listRefresh.start();
     }
     function deleteProfile(name) {
-        profileProc.command = ["asura-hubd", "outputs", "rm", name];
+        profileProc.command = ["toren-hubd", "outputs", "rm", name];
         profileProc.running = true;
         profileRefresh.start();
     }
@@ -760,7 +760,7 @@ Item {
             Image {
                 width: 12; height: 12
                 anchors.verticalCenter: parent.verticalCenter
-                source: Qt.resolvedUrl("../../assets/asura-logo-on-dark.svg")
+                source: Qt.resolvedUrl("../../assets/toren-logo-on-dark.svg")
                 sourceSize.width: 24; sourceSize.height: 24
                 fillMode: Image.PreserveAspectFit
                 smooth: true
@@ -961,7 +961,7 @@ Item {
                     horizontalAlignment: Text.AlignHCenter
                     wrapMode: Text.WordWrap
                     text: pg.listError !== "" ? pg.listError
-                        : I18n.tr("Not available: the display backend (asura-hubd) did not answer. Check that the desktop daemon is running, then retry.")
+                        : I18n.tr("Not available: the display backend (toren-hubd) did not answer. Check that the desktop daemon is running, then retry.")
                     color: Tokens.inkMuted; font.family: Tokens.ui; font.pixelSize: Tokens.fSmall
                 }
                 Btn {
@@ -1086,7 +1086,7 @@ Item {
                         anchors.left: parent.left; anchors.right: parent.right
                         divider: true
                         // The SCALE above is the compositor (hardware) scale apps
-                        // render at; this is the Asura shell's own interface scale
+                        // render at; this is the Toren shell's own interface scale
                         // on this monitor, shrinking or growing its chrome without
                         // touching that crisp compositor scale. Live shell setting.
                         label: I18n.tr("INTERFACE SCALE")
@@ -1311,7 +1311,7 @@ Item {
                         x: Tokens.s4
                         spacing: Tokens.s2
 
-                        // dynamic data from `asura-hubd outputs profiles`.
+                        // dynamic data from `toren-hubd outputs profiles`.
                         Repeater {
                             model: pg.profiles
 

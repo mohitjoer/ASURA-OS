@@ -8,7 +8,7 @@ import qs.Ui.Singletons
 
 // Lockscreen settings page.
 // Backed by hyprlock (PAM authenticator), hypridle (inactivity daemon),
-// and the org.asura.desktop idle timeouts store.
+// and the org.toren.desktop idle timeouts store.
 Item {
     id: pg
 
@@ -45,7 +45,7 @@ Item {
     }
 
     function setIdleKey(key, seconds) {
-        setProc.command = ["sh", "-c", "gsettings set org.asura.desktop " + key + " " + seconds + " 2>/dev/null || asura config set org.asura.desktop." + key + " " + seconds + " 2>/dev/null || true"];
+        setProc.command = ["sh", "-c", "gsettings set org.toren.desktop " + key + " " + seconds + " 2>/dev/null || toren config set org.toren.desktop." + key + " " + seconds + " 2>/dev/null || true"];
         setProc.running = true;
     }
 
@@ -65,9 +65,9 @@ Item {
         running: true
         command: ["sh", "-c",
             "printf '%s\\n' "
-            + "\"$(gsettings get org.asura.desktop idle-lock-seconds 2>/dev/null || echo 300)\" "
-            + "\"$(gsettings get org.asura.desktop idle-dim-seconds 2>/dev/null || echo 0)\" "
-            + "\"$(gsettings get org.asura.desktop idle-blank-seconds 2>/dev/null || echo 0)\""]
+            + "\"$(gsettings get org.toren.desktop idle-lock-seconds 2>/dev/null || echo 300)\" "
+            + "\"$(gsettings get org.toren.desktop idle-dim-seconds 2>/dev/null || echo 0)\" "
+            + "\"$(gsettings get org.toren.desktop idle-blank-seconds 2>/dev/null || echo 0)\""]
         stdout: StdioCollector {
             onStreamFinished: {
                 var lines = text.trim().split("\n");
@@ -131,7 +131,7 @@ Item {
                         anchors.verticalCenter: parent.verticalCenter
                         text: I18n.tr("LOCK NOW")
                         armed: pg.canLock
-                        onAct: Quickshell.execDetached(["asura-shell", "lock"])
+                        onAct: Quickshell.execDetached(["toren-shell", "lock"])
                     }
                 }
             }
@@ -146,7 +146,7 @@ Item {
                     block: true
                     label: I18n.tr("Lock session after")
                     desc: I18n.tr("Inactivity duration before the screen automatically locks.")
-                    source: "org.asura.desktop.idle-lock-seconds"
+                    source: "org.toren.desktop.idle-lock-seconds"
 
                     Seg {
                         anchors.left: parent.left
@@ -169,7 +169,7 @@ Item {
                     divider: true
                     label: I18n.tr("Dim display after")
                     desc: I18n.tr("Lowers display brightness before locking to reduce power consumption.")
-                    source: "org.asura.desktop.idle-dim-seconds"
+                    source: "org.toren.desktop.idle-dim-seconds"
 
                     Seg {
                         anchors.left: parent.left
@@ -192,7 +192,7 @@ Item {
                     divider: true
                     label: I18n.tr("Turn display off after")
                     desc: I18n.tr("Powers down displays via DPMS standby after prolonged inactivity.")
-                    source: "org.asura.desktop.idle-blank-seconds"
+                    source: "org.toren.desktop.idle-blank-seconds"
 
                     Seg {
                         anchors.left: parent.left

@@ -6,23 +6,23 @@ It was originally ported from another project's VM manager. Almost nothing was r
 
 ## What runs
 
-| Name | What it is |
-|---|---|
-| `toren-vm` | The launcher (`session/toren-vm`). No arguments opens the window, once: a second launch finds the lock held. Any other word is an engine verb and is handed to `toren-vmd`, so `toren-vm list` works. |
-| `toren-vmd` | The engine (`desktop/cmd/toren-vm/toren-vmd`), a bash script over **quickemu** and **quickget**, which are in Void's archive. One quickemu `.conf` per machine. The window never talks to QEMU itself; every verb prints one JSON document. |
-| `toren-vm-mon` | Live control of a running machine through the monitor socket quickemu opens: pause, resume, reset, memory balloon, CPU pinning, host usage, and the guest's address when it runs qemu-guest-agent. |
-| `toren-vm-ssh` | The Remotes plate's engine: reads `~/.ssh/config`, probes hosts, connects in a terminal, keeps saved passwords in the login keyring (`secret-tool`). |
+| Name           | What it is                                                                                                                                                                                                                                  |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `toren-vm`     | The launcher (`session/toren-vm`). No arguments opens the window, once: a second launch finds the lock held. Any other word is an engine verb and is handed to `toren-vmd`, so `toren-vm list` works.                                       |
+| `toren-vmd`    | The engine (`desktop/cmd/toren-vm/toren-vmd`), a bash script over **quickemu** and **quickget**, which are in Void's archive. One quickemu `.conf` per machine. The window never talks to QEMU itself; every verb prints one JSON document. |
+| `toren-vm-mon` | Live control of a running machine through the monitor socket quickemu opens: pause, resume, reset, memory balloon, CPU pinning, host usage, and the guest's address when it runs qemu-guest-agent.                                          |
+| `toren-vm-ssh` | The Remotes plate's engine: reads `~/.ssh/config`, probes hosts, connects in a terminal, keeps saved passwords in the login keyring (`secret-tool`).                                                                                        |
 
 The window is `shell/vm.qml` with its code in `shell/vm/`, an entry at the shell root for the reason `hub.qml` is. Its title is exactly `toren-vm`; the float rule in `session/hyprland/window-rules.conf` and the dock's title map key on it.
 
-Terminals (`connect`, `ssh` into a machine, the install button) are opened with `asura-app terminal --`, so they follow the terminal chosen in Settings.
+Terminals (`connect`, `ssh` into a machine, the install button) are opened with `toren-app terminal --`, so they follow the terminal chosen in Settings.
 
 ## Where things are
 
-- Machines: `~/.local/share/asura/vm/` (`<name>.conf`, `<name>/`; `ASURA_VM_HOME` overrides). Deleting a machine in the window removes both.
-- Catalogue and logo cache: `~/.cache/asura/`.
-- The window's defaults (cores, memory, disk, display): `~/.config/asura/toren-vm.json`, written by the window.
-- Remote hosts added in the window: `~/.config/asura/toren-vm/remotes.json`, and an include file `~/.ssh/config.d/toren-vm`. Your own `~/.ssh/config` is never rewritten.
+- Machines: `~/.local/share/toren/vm/` (`<name>.conf`, `<name>/`; `ASURA_VM_HOME` overrides). Deleting a machine in the window removes both.
+- Catalogue and logo cache: `~/.cache/toren/`.
+- The window's defaults (cores, memory, disk, display): `~/.config/toren/toren-vm.json`, written by the window.
+- Remote hosts added in the window: `~/.config/toren/toren-vm/remotes.json`, and an include file `~/.ssh/config.d/toren-vm`. Your own `~/.ssh/config` is never rewritten.
 
 ## What it needs, and what it says when that is missing
 
@@ -43,8 +43,8 @@ Ported as it was: create from the catalogue, Instant (prebuilt cloud images with
 Changed because Void or Toren forces it:
 
 - `setup` installs with `xbps-install` through `apm` instead of pacman and an AUR helper.
-- The conf keys the engine stamps are `asura_vm_*`. quickemu sources the conf as shell, so a key with a hyphen would be a syntax error.
-- Terminals go through `asura-app`, not kitty; the SSH-command copy button uses the shell's clipboard, not `wl-copy`.
+- The conf keys the engine stamps are `toren_vm_*`. quickemu sources the conf as shell, so a key with a hyphen would be a syntax error.
+- Terminals go through `toren-app`, not kitty; the SSH-command copy button uses the shell's clipboard, not `wl-copy`.
 - The catalogue no longer loads at startup.
 - Instant machines accept SSH by key only (`ssh_pwauth: false`). quickemu forwards the guest's port 22 on every host interface, and the throwaway account (`toren`, passwordless sudo) must not be reachable from the network with a known password.
 

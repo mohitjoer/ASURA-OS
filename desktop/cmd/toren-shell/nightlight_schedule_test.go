@@ -86,7 +86,7 @@ func TestNightlightScheduleRoundTrip(t *testing.T) {
 	dir := t.TempDir()
 	n := &nightlightState{
 		stateDir:       dir,
-		schedFile:      filepath.Join(dir, "asura-nightlight-schedule.json"),
+		schedFile:      filepath.Join(dir, "toren-nightlight-schedule.json"),
 		schedMode:      nlSchedOff,
 		schedMarginMin: nlDefaultMarginMin,
 	}
@@ -123,7 +123,7 @@ func TestNightlightTickFailsSafeWithoutSun(t *testing.T) {
 	}
 	n := &nightlightState{
 		topic:          topic,
-		schedFile:      filepath.Join(dir, "asura-nightlight-schedule.json"),
+		schedFile:      filepath.Join(dir, "toren-nightlight-schedule.json"),
 		schedMode:      nlSchedSun,
 		schedMarginMin: 0,
 	}
@@ -142,8 +142,8 @@ func TestNightlightScheduleFrameShape(t *testing.T) {
 	defer topic.unsubscribe(sub)
 	n := &nightlightState{
 		topic:          topic,
-		tempFile:       filepath.Join(dir, "asura-nightlight"),
-		schedFile:      filepath.Join(dir, "asura-nightlight-schedule.json"),
+		tempFile:       filepath.Join(dir, "toren-nightlight"),
+		schedFile:      filepath.Join(dir, "toren-nightlight-schedule.json"),
 		schedMode:      nlSchedSun,
 		schedMarginMin: 45,
 	}

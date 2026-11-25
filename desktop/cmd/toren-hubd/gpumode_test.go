@@ -13,9 +13,9 @@ func TestClassifyMode(t *testing.T) {
 		name, value, want string
 	}{
 		{"empty is hybrid", "", "hybrid"},
-		{"dgpu primary is performance", "/dev/dri/asura-gpu-0000-01-00-0:/dev/dri/asura-gpu-0000-65-00-0", "performance"},
-		{"igpu solo is passthrough", "/dev/dri/asura-gpu-0000-65-00-0", "passthrough"},
-		{"igpu primary but not solo is hybrid", "/dev/dri/asura-gpu-0000-65-00-0:/dev/dri/asura-gpu-0000-01-00-0", "hybrid"},
+		{"dgpu primary is performance", "/dev/dri/toren-gpu-0000-01-00-0:/dev/dri/toren-gpu-0000-65-00-0", "performance"},
+		{"igpu solo is passthrough", "/dev/dri/toren-gpu-0000-65-00-0", "passthrough"},
+		{"igpu primary but not solo is hybrid", "/dev/dri/toren-gpu-0000-65-00-0:/dev/dri/toren-gpu-0000-01-00-0", "hybrid"},
 		{"cardN form is unclassified (hybrid)", "/dev/dri/card1:/dev/dri/card0", "hybrid"},
 	}
 	for _, tc := range cases {
@@ -50,11 +50,11 @@ func TestGpuModeCost(t *testing.T) {
 func TestReadAQValue(t *testing.T) {
 	dir := t.TempDir()
 	p := filepath.Join(dir, "gpu.conf")
-	conf := "# managed\nenv = AQ_DRM_DEVICES,/dev/dri/asura-gpu-0000-01-00-0\n"
+	conf := "# managed\nenv = AQ_DRM_DEVICES,/dev/dri/toren-gpu-0000-01-00-0\n"
 	if err := os.WriteFile(p, []byte(conf), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if v := readAQValue(p); v != "/dev/dri/asura-gpu-0000-01-00-0" {
+	if v := readAQValue(p); v != "/dev/dri/toren-gpu-0000-01-00-0" {
 		t.Errorf("readAQValue = %q", v)
 	}
 	if v := readAQValue(filepath.Join(dir, "missing.conf")); v != "" {

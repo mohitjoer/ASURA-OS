@@ -4,7 +4,7 @@ import "sync"
 
 // stateTopic is a coalescing retained topic: a subscriber gets the last frame
 // at once, then a fresh frame on every change; byte-identical frames are
-// suppressed so an unchanged value never wakes a binding. Mirrors asura-shell's
+// suppressed so an unchanged value never wakes a binding. Mirrors toren-shell's
 // Go stateTopic and the Rust StateTopic it replaces.
 type stateTopic struct {
 	mu   sync.Mutex

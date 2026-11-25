@@ -2,7 +2,7 @@ package main
 
 // The per-subcommand usage texts. They live in one file so that a flag added to
 // a subcommand and the text describing it are edited in the same place.
-const reportUsage = `Usage: asura hardware report [flags]
+const reportUsage = `Usage: toren hardware report [flags]
 
 Prints this machine's hardware, redacted. The output is safe to paste into an
 issue: serials appear as stable tokens, never in the clear.
@@ -17,7 +17,7 @@ issue: serials appear as stable tokens, never in the clear.
   --profiles DIR               profile database directory
 `
 
-const matchUsage = `Usage: asura hardware match [flags]
+const matchUsage = `Usage: toren hardware match [flags]
 
 Reports the profile that claims this machine, its support tier, and the
 candidates that matched but lost. Exit code 3 means no profile matches, or two
@@ -27,7 +27,7 @@ profiles tie and disagree — an answer, not a failure.
   --profiles DIR    profile database directory
 `
 
-const lintUsage = `Usage: asura hardware lint-profiles [flags]
+const lintUsage = `Usage: toren hardware lint-profiles [flags]
 
 Checks every profile against the schema rules in system/hardware/README.md, and
 warns about pairs of profiles that can select the same machine — the shape that
@@ -37,7 +37,7 @@ becomes a conflict once a third arrives.
   --profiles DIR    profile database directory
 `
 
-const captureUsage = `Usage: asura hardware capture --out DIR [flags]
+const captureUsage = `Usage: toren hardware capture --out DIR [flags]
 
 Runs the same readers a live machine does and writes the files they consume, so
 a fixture is a machine. Captures are redacted as they are written, so a committed
@@ -47,8 +47,8 @@ fixture cannot contain a serial.
   --root DIR    read this sysfs tree instead of /sys
 `
 
-const updateUsage = `Usage: asura update [flags]
-       sudo asura update [flags]
+const updateUsage = `Usage: toren update [flags]
+       sudo toren update [flags]
 
 Updates Toren desktop packages and configuration. When run as a normal user,
 it updates Toren packages, overlays, and git code. When run as root (or with sudo),
@@ -61,7 +61,7 @@ it also updates all base system packages (XBPS) and creates a Btrfs snapshot.
   --branch NAME    specify a git branch to pull code updates from
   --channel NAME   update channel (stable, unstable)
   --system         update all system packages (XBPS) even when unprivileged
-  --asura-only     only update Toren packages and components (skip XBPS)
+  --toren-only     only update Toren packages and components (skip XBPS)
   --check          only report whether a newer Toren is available (exit 3 if so)
   --force          take the tip of the branch without checking CI, and reapply
                    even when it is already the applied commit
@@ -80,7 +80,7 @@ the checkout is applied by installation/apply-repo.sh, which records the commit
 and the checkout it came from. Nothing new means nothing is rebuilt.
 `
 
-const rollbackUsage = `Usage: asura rollback [flags] [snapshot-name]
+const rollbackUsage = `Usage: toren rollback [flags] [snapshot-name]
 
 Restores configuration overlay (--config) or restores Btrfs root snapshots (--system).
 
@@ -101,17 +101,17 @@ root is kept until you delete it. /boot is its own partition and is not
 rolled back.
 `
 
-const materializeUsage = `Usage: asura materialize [flags]
+const materializeUsage = `Usage: toren materialize [flags]
 
 Re-lays the whole base into the config tree, clobbering shipped content. User
-edits are preserved. For one file, use ` + "`asura reset <path>`" + `.
+edits are preserved. For one file, use ` + "`toren reset <path>`" + `.
 
   --root DIR   operate on a tree under this directory
 `
 
-const resetUsage = `Usage: asura reset <path> [flags]
-       asura reset --desktop [flags]
-       asura reset --restore BACKUP [flags]
+const resetUsage = `Usage: toren reset <path> [flags]
+       toren reset --desktop [flags]
+       toren reset --restore BACKUP [flags]
 
 Drops user edits and restores defaults.
 
@@ -122,7 +122,7 @@ Drops user edits and restores defaults.
   --root DIR          operate on a tree under this directory
 `
 
-const reinstallUsage = `Usage: asura reinstall [flags]
+const reinstallUsage = `Usage: toren reinstall [flags]
 
 Re-apply the Toren files for the commit already installed, to repair deleted
 or edited shipped files without updating to anything newer.
@@ -130,14 +130,14 @@ or edited shipped files without updating to anything newer.
   --root DIR   operate on a tree under this directory
 `
 
-const recoveryUsage = `Usage: asura recovery
+const recoveryUsage = `Usage: toren recovery
 
 A guided text menu that works on a TTY (no desktop needed) to diagnose and
 repair system issues: run doctor, reset desktop configuration, reinstall
 Toren files, list and restore snapshots, launch safe-mode session, or inspect logs.
 `
 
-const doctorUsage = `Usage: asura doctor [flags]
+const doctorUsage = `Usage: toren doctor [flags]
 
 Reports drift between the base and the config tree. It changes nothing unless
 asked to: --fix renames the values Toren has renamed in your shell.json.
@@ -147,7 +147,7 @@ asked to: --fix renames the values Toren has renamed in your shell.json.
   --json       print the report as JSON: {"ok", "sections": [{"section", "ok", "lines"}]}
 `
 
-const statusUsage = `Usage: asura status [flags]
+const statusUsage = `Usage: toren status [flags]
 
 The current revision, the paths in use, how much drift there is, and whether
 the shell and the daemon are up.
@@ -156,7 +156,7 @@ the shell and the daemon are up.
   --json       the update report the shell reads, as one line of JSON
 `
 
-const bindsUsage = `Usage: asura binds [flags]
+const bindsUsage = `Usage: toren binds [flags]
 
 Prints the keybinding catalogue as JSON: every chord, with a label and a
 category. It is the same catalogue the compositor's configuration is checked

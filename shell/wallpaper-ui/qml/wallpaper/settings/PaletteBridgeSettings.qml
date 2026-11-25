@@ -5,7 +5,7 @@ import "../.."
 import "../../components"
 import qs.Ui.Singletons
 
-// Settings for the optional Asura Palette Bridge. The backend handles validation
+// Settings for the optional Toren Palette Bridge. The backend handles validation
 // and service policy; this page displays its status and sends actions.
 Column {
     id: root
@@ -27,7 +27,7 @@ Column {
     function refresh() {
         if (!statusProc.running) {
             root._statusBuf = ""
-            statusProc.command = ["asura-hubd", "palette-bridge", "status", Config.paletteBridgeSource]
+            statusProc.command = ["toren-hubd", "palette-bridge", "status", Config.paletteBridgeSource]
             statusProc.running = true
         }
     }
@@ -37,7 +37,7 @@ Column {
         root.busy = true
         root.message = label + "…"
         root._actionBuf = ""
-        actionProc.command = ["asura-hubd", "palette-bridge"].concat(args)
+        actionProc.command = ["toren-hubd", "palette-bridge"].concat(args)
         actionProc.running = true
     }
 
@@ -104,7 +104,7 @@ Column {
             title: I18n.tr("Build source")
             description: I18n.tr("Use a local checkout, or Toren's packaged source.")
             value: Config.paletteBridgeSource
-            placeholder: "/usr/share/asura/palette-bridge"
+            placeholder: "/usr/share/toren/palette-bridge"
             onCommit: function(v) {
                 if (root.saveConfigKey) root.saveConfigKey("paletteBridgeSource", v)
                 root.refresh()

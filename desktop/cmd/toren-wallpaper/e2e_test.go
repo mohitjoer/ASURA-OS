@@ -34,7 +34,7 @@ func startDaemon(t *testing.T) *testDaemon {
 	if err := os.MkdirAll(runtime, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	bin := filepath.Join(root, "asura-wallpaper-test-bin")
+	bin := filepath.Join(root, "toren-wallpaper-test-bin")
 	build := exec.Command("go", "build", "-o", bin, ".")
 	if out, err := build.CombinedOutput(); err != nil {
 		t.Fatalf("build: %v: %s", err, out)
@@ -51,7 +51,7 @@ func startDaemon(t *testing.T) *testDaemon {
 	if err := cmd.Start(); err != nil {
 		t.Fatal(err)
 	}
-	d := &testDaemon{t: t, cmd: cmd, sock: filepath.Join(runtime, "asura-wallpaper.sock"), root: root}
+	d := &testDaemon{t: t, cmd: cmd, sock: filepath.Join(runtime, "toren-wallpaper.sock"), root: root}
 	t.Cleanup(func() { _ = cmd.Process.Kill(); _, _ = cmd.Process.Wait() })
 	deadline := time.Now().Add(15 * time.Second)
 	for {
@@ -218,7 +218,7 @@ func TestE2EJSONRequestsAndEventsShareOneConnection(t *testing.T) {
 		t.Fatal("wall.list returns no wallpapers array")
 	}
 
-	fmt.Fprintln(conn, `{"method":"subscribe","params":{"prefixes":["asura-wallpaper."]},"id":9}`)
+	fmt.Fprintln(conn, `{"method":"subscribe","params":{"prefixes":["toren-wallpaper."]},"id":9}`)
 	sub := readJSONLine(t, r)
 	if _, has := sub["result"].(map[string]interface{})["subscribed"]; !has {
 		t.Fatal("subscribe not acked")
@@ -229,8 +229,8 @@ func TestE2EJSONRequestsAndEventsShareOneConnection(t *testing.T) {
 	}
 	ev := readJSONLine(t, r)
 	name, _ := ev["event"].(string)
-	if !strings.HasPrefix(name, "asura-wallpaper.wall.") {
-		t.Fatalf("pushed line is not a asura-wallpaper event: %v", ev)
+	if !strings.HasPrefix(name, "toren-wallpaper.wall.") {
+		t.Fatalf("pushed line is not a toren-wallpaper event: %v", ev)
 	}
 }
 
@@ -328,8 +328,8 @@ func TestE2EFavouriteSurvivesRescan(t *testing.T) {
 	}
 }
 
-// Regression: asura-wallpaper owns the wallpaper now, but rice capture, the overview
-// backdrop and the Super+W on-air dot still read ~/.local/state/asura-wallpaper.
+// Regression: toren-wallpaper owns the wallpaper now, but rice capture, the overview
+// backdrop and the Super+W on-air dot still read ~/.local/state/toren-wallpaper.
 // A `wall.apply` must write that legacy state file with the applied path, or
 // those readers see a stale wallpaper (a saved rice grabs the wrong wall).
 func TestE2EWallApplyWritesLegacyState(t *testing.T) {
@@ -341,7 +341,7 @@ func TestE2EWallApplyWritesLegacyState(t *testing.T) {
 	if !strings.Contains(reply, `"applied"`) {
 		t.Fatalf("apply replied: %s", reply)
 	}
-	statePath := filepath.Join(d.root, ".local", "state", "asura-wallpaper")
+	statePath := filepath.Join(d.root, ".local", "state", "toren-wallpaper")
 	deadline := time.Now().Add(5 * time.Second)
 	var got string
 	for {

@@ -52,18 +52,18 @@ runs:
       shell: bash
       env:
         ASURA_VERSION: ${{ inputs.version }}
-      run: sudo env "PATH=$PATH" ASURA_VERSION="$ASURA_VERSION" installation/build-iso-void.sh "$RUNNER_TEMP/asura-iso"
+      run: sudo env "PATH=$PATH" ASURA_VERSION="$ASURA_VERSION" installation/build-iso-void.sh "$RUNNER_TEMP/toren-iso"
 
     - name: Locate ISO
       id: locate
       shell: bash
       run: |
         set -eu
-        sudo chmod -R a+rwX "$RUNNER_TEMP/asura-iso"
-        iso="$(find "$RUNNER_TEMP/asura-iso" -maxdepth 1 -type f -name '*.iso' -print -quit)"
+        sudo chmod -R a+rwX "$RUNNER_TEMP/toren-iso"
+        iso="$(find "$RUNNER_TEMP/toren-iso" -maxdepth 1 -type f -name '*.iso' -print -quit)"
         if [ -z "$iso" ] || [ ! -s "$iso" ]; then
           echo "::error::void-mklive completed without producing an ISO"
-          ls -laR "$RUNNER_TEMP/asura-iso"
+          ls -laR "$RUNNER_TEMP/toren-iso"
           exit 1
         fi
         echo "ISO: $iso ($(du -h "$iso" | cut -f1))"

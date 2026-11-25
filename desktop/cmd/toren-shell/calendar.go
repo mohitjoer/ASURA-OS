@@ -112,7 +112,7 @@ func calendarCacheDir() string {
 	if base == "" {
 		base = filepath.Join(os.Getenv("HOME"), ".cache")
 	}
-	return filepath.Join(base, "asura", "holidays")
+	return filepath.Join(base, "toren", "holidays")
 }
 
 func (s *calendarState) cachePath(country string, year int) string {

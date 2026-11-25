@@ -5,8 +5,8 @@ import Quickshell.Io
 
 /**
  * The live wallpaper palette, active while Match wallpaper is on. The theme
- * daemon is the only author of colour math in Asura: on every wallpaper change
- * it writes ~/.cache/asura/colors.json carrying the full Material role set
+ * daemon is the only author of colour math in Toren: on every wallpaper change
+ * it writes ~/.cache/toren/colors.json carrying the full Material role set
  * (camelCase keys) beside the sixteen terminal colours, already contrast
  * corrected for light and dark images alike. This singleton is a thin reader:
  * every role is consumed verbatim, no derivation, so the shell can never
@@ -96,7 +96,7 @@ Singleton {
 
     FileView {
         id: file
-        path: (Quickshell.env("XDG_CACHE_HOME") || (Quickshell.env("HOME") + "/.cache")) + "/asura/colors.json"
+        path: (Quickshell.env("XDG_CACHE_HOME") || (Quickshell.env("HOME") + "/.cache")) + "/toren/colors.json"
         blockLoading: true
         watchChanges: true
         printErrors: false

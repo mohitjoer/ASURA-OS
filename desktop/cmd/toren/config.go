@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	"asura/desktop/internal/hub"
-	"asura/desktop/internal/settings"
+	"toren/desktop/internal/hub"
+	"toren/desktop/internal/settings"
 )
 
 // settingsDir is where the schemas are installed.
@@ -21,7 +21,7 @@ import (
 // "what is this set to"; this answers "what is this, and what will it accept".
 const settingsDir = "/usr/share/glib-2.0/schemas"
 
-// settingsCatalogue finds Asura's schemas, installed or in a checkout.
+// settingsCatalogue finds Toren's schemas, installed or in a checkout.
 //
 // The installed directory is the truth on a real machine. ASURA_SCHEMA_DIR
 // exists so the command also works in a checkout, because a command that only
@@ -37,9 +37,9 @@ func settingsCatalogue(root string) (*settings.Catalogue, error) {
 	override := os.Getenv("ASURA_SCHEMA_DIR")
 	if override == "" {
 		return nil, fmt.Errorf(
-			"Asura's schemas are not installed in %s; install the asura "+
+			"Toren's schemas are not installed in %s; install the toren "+
 				"package, or set ASURA_SCHEMA_DIR to a directory of "+
-				"org.asura.*.gschema.xml", dir)
+				"org.toren.*.gschema.xml", dir)
 	}
 	catalogue, err := settings.Load(override)
 	if err != nil {
@@ -48,7 +48,7 @@ func settingsCatalogue(root string) (*settings.Catalogue, error) {
 	return catalogue, nil
 }
 
-func asuraConfig(args []string) int {
+func torenConfig(args []string) int {
 	if len(args) == 0 {
 		fmt.Fprint(os.Stderr, configUsage)
 		return exitUsage
@@ -56,7 +56,7 @@ func asuraConfig(args []string) int {
 
 	catalogue, err := settingsCatalogue("")
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura config:", err)
+		fmt.Fprintln(os.Stderr, "toren config:", err)
 		return exitFail
 	}
 
@@ -76,7 +76,7 @@ func asuraConfig(args []string) int {
 	case "values":
 		return configValues(catalogue)
 	default:
-		fmt.Fprintf(os.Stderr, "asura config: unknown subcommand %q\n", args[0])
+		fmt.Fprintf(os.Stderr, "toren config: unknown subcommand %q\n", args[0])
 		return exitUsage
 	}
 }
@@ -86,7 +86,7 @@ func configList(catalogue *settings.Catalogue, args []string) int {
 	if len(args) == 2 && args[0] == "--page" {
 		only = args[1]
 	} else if len(args) != 0 {
-		fmt.Fprintln(os.Stderr, "asura config list: takes no arguments, "+
+		fmt.Fprintln(os.Stderr, "toren config list: takes no arguments, "+
 			"or --page SLUG")
 		return exitUsage
 	}
@@ -144,20 +144,20 @@ func configList(catalogue *settings.Catalogue, args []string) int {
 
 func configGet(catalogue *settings.Catalogue, args []string) int {
 	if len(args) != 2 {
-		fmt.Fprintln(os.Stderr, "asura config get: needs SCHEMA and KEY")
+		fmt.Fprintln(os.Stderr, "toren config get: needs SCHEMA and KEY")
 		return exitUsage
 	}
 	ref := settings.Ref{Schema: args[0], Key: args[1]}
 
 	if !settings.Available() {
-		fmt.Fprintln(os.Stderr, "asura config: gsettings is not installed, "+
+		fmt.Fprintln(os.Stderr, "toren config: gsettings is not installed, "+
 			"so the current value cannot be read; the default is in the schema")
 		return exitFail
 	}
 
 	value, err := catalogue.Get(ref)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura config get:", err)
+		fmt.Fprintln(os.Stderr, "toren config get:", err)
 		return exitFail
 	}
 	fmt.Println(value)
@@ -166,7 +166,7 @@ func configGet(catalogue *settings.Catalogue, args []string) int {
 
 func configSet(catalogue *settings.Catalogue, args []string) int {
 	if len(args) != 3 {
-		fmt.Fprintln(os.Stderr, "asura config set: needs SCHEMA, KEY and VALUE")
+		fmt.Fprintln(os.Stderr, "toren config set: needs SCHEMA, KEY and VALUE")
 		return exitUsage
 	}
 	ref := settings.Ref{Schema: args[0], Key: args[1]}
@@ -196,15 +196,15 @@ func configSet(catalogue *settings.Catalogue, args []string) int {
 	// is accepted by GSettings, and then the shell reads it and does something
 	// nobody asked for.
 	if err := catalogue.ValidateValue(ref, value); err != nil {
-		fmt.Fprintln(os.Stderr, "asura config set:", err)
+		fmt.Fprintln(os.Stderr, "toren config set:", err)
 		return exitFail
 	}
 	if !settings.Available() {
-		fmt.Fprintln(os.Stderr, "asura config: gsettings is not installed")
+		fmt.Fprintln(os.Stderr, "toren config: gsettings is not installed")
 		return exitFail
 	}
 	if err := catalogue.Set(ref, value); err != nil {
-		fmt.Fprintln(os.Stderr, "asura config set:", err)
+		fmt.Fprintln(os.Stderr, "toren config set:", err)
 		return exitFail
 	}
 
@@ -244,7 +244,7 @@ func notifyShell() {
 		return
 	}
 	cmd := exec.Command("quickshell", "ipc", "--path", path,
-		"call", "asura", "reloadSettings")
+		"call", "toren", "reloadSettings")
 	if err := cmd.Run(); err != nil {
 		return
 	}
@@ -252,17 +252,17 @@ func notifyShell() {
 
 func configReset(catalogue *settings.Catalogue, args []string) int {
 	if len(args) != 2 {
-		fmt.Fprintln(os.Stderr, "asura config reset: needs SCHEMA and KEY")
+		fmt.Fprintln(os.Stderr, "toren config reset: needs SCHEMA and KEY")
 		return exitUsage
 	}
 	ref := settings.Ref{Schema: args[0], Key: args[1]}
 
 	if !settings.Available() {
-		fmt.Fprintln(os.Stderr, "asura config: gsettings is not installed")
+		fmt.Fprintln(os.Stderr, "toren config: gsettings is not installed")
 		return exitFail
 	}
 	if err := catalogue.Reset(ref); err != nil {
-		fmt.Fprintln(os.Stderr, "asura config reset:", err)
+		fmt.Fprintln(os.Stderr, "toren config reset:", err)
 		return exitFail
 	}
 	fmt.Printf("%s reset to its default.\n", ref)
@@ -274,17 +274,17 @@ func configReset(catalogue *settings.Catalogue, args []string) int {
 // It exists so the Hub window reads the registry rather than repeating it. A
 // registry written twice agrees until somebody edits one of them, and the result
 // is a page showing settings it does not own — which is the exact fault
-// `asura doctor` reports.
+// `toren doctor` reports.
 //
 // The value of every setting is included, so the window never reads dconf
-// itself. `asura config` is then the only writer, which is what the architecture
+// itself. `toren config` is then the only writer, which is what the architecture
 // record requires.
 func configExport(catalogue *settings.Catalogue) int {
 	document := hub.Export(catalogue)
 	encoder := json.NewEncoder(os.Stdout)
 	encoder.SetIndent("", "  ")
 	if err := encoder.Encode(document); err != nil {
-		fmt.Fprintln(os.Stderr, "asura config export:", err)
+		fmt.Fprintln(os.Stderr, "toren config export:", err)
 		return exitFail
 	}
 	return exitOK
@@ -301,20 +301,20 @@ func configPages() int {
 	return exitOK
 }
 
-const configUsage = `asura config — read and write Asura's settings
+const configUsage = `toren config — read and write Toren's settings
 
 Usage:
-  asura config list [--page SLUG]
-  asura config get SCHEMA KEY
-  asura config set SCHEMA KEY VALUE
-  asura config reset SCHEMA KEY
-  asura config pages
-  asura config export    the page registry as JSON, for the Hub window
-  asura config values    every setting as JSON, for the shell
+  toren config list [--page SLUG]
+  toren config get SCHEMA KEY
+  toren config set SCHEMA KEY VALUE
+  toren config reset SCHEMA KEY
+  toren config pages
+  toren config export    the page registry as JSON, for the Hub window
+  toren config values    every setting as JSON, for the shell
 
-asura apps               the applications on this machine, as JSON, for the
+toren apps               the applications on this machine, as JSON, for the
                           shell's launcher
 
-Every setting has a Hub page and every page has a command; "asura config
+Every setting has a Hub page and every page has a command; "toren config
 pages" prints the mapping.
 `

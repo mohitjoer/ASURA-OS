@@ -10,7 +10,7 @@ anyone gets to log in. Report accordingly.
 **Do not open a public issue, and do not open a pull request.** A public report gives an
 attacker a development timeline.
 
-Send it to **security@asuraos.dev** — `conduct@asuraos.dev` if the issue is about a person rather
+Send it to **security@torenos.dev** — `conduct@torenos.dev` if the issue is about a person rather
 than a machine.
 
 Include:
@@ -33,13 +33,13 @@ something happen that the user's consent does not cover.
 
 ### The updater and rollback
 
-`asura update` fetches debs as root, re-materialises the base, and repaints. `asura rollback`
+`toren update` fetches debs as root, re-materialises the base, and repaints. `toren rollback`
 restores a previous revision.
 
 - An unprivileged path from a user-writable location into the base or the overlay.
 - A signature check that can be skipped, bypassed by a partial failure, or satisfied by a
   repository that is not Toren's.
-- `asura rollback` restoring a state that silently drops a security fix, or losing an overlay
+- `toren rollback` restoring a state that silently drops a security fix, or losing an overlay
   file in a way the user is not told about.
 - A snapshot of `~/.config` written somewhere an unprivileged local process can read or
   modify it.
@@ -56,8 +56,8 @@ restores a previous revision.
 
 ### Privileged helpers
 
-Anything running as root. `asura doctor`, `asura-firmware load`, materialisation into
-`/usr/share/asura/` and `/etc/asura/`, and any future privileged action.
+Anything running as root. `toren doctor`, `toren-firmware load`, materialisation into
+`/usr/share/toren/` and `/etc/toren/`, and any future privileged action.
 
 - Command injection from a filename, profile field, device label, or package metadata.
 - Path traversal — a relative path or symlink resolving outside the directory the helper is
@@ -77,7 +77,7 @@ and the offline firmware rescue bundle.
 
 ### Packaging
 
-- An Toren package writing outside `/usr/share/asura/` and `/etc/asura/`, into another package's
+- An Toren package writing outside `/usr/share/toren/` and `/etc/toren/`, into another package's
   files, or into `~`.
 - A setuid or file-capability bit on a binary that does not need one.
 - A post-install script running with privileges it does not require, or a dependency pulled
@@ -88,7 +88,7 @@ and the offline firmware rescue bundle.
 ### The overlay model specifically
 
 The overlay is the design's load-bearing trust boundary: a user file in
-`~/.config/asura/user_edits/` wins over the packaged base at its mirrored path. Reports that an
+`~/.config/toren/user_edits/` wins over the packaged base at its mirrored path. Reports that an
 overlay file can be made to win at a privileged path, or that materialisation copies one
 outside its mirrored directory, are in scope and taken seriously.
 
@@ -105,15 +105,15 @@ File these as normal issues, using the hardware support form where it applies:
 
 ## Supported versions
 
-| Toren release | Status | Security fixes |
-|---|---|---|
-| `0.1.0-beta.1` and the `dev-unstable` line `asura update` follows | Current | Yes |
-| Anything older | No releases exist | No |
+| Toren release                                                     | Status            | Security fixes |
+| ----------------------------------------------------------------- | ----------------- | -------------- |
+| `0.1.0-beta.1` and the `dev-unstable` line `toren update` follows | Current           | Yes            |
+| Anything older                                                    | No releases exist | No             |
 
 `0.1.0-beta.1` is the first release. Installed machines follow `dev-unstable` through
-`asura update` (only commits that passed CI), so a fix reaches them as soon as it is merged.
+`toren update` (only commits that passed CI), so a fix reaches them as soon as it is merged.
 When a later release line starts, the previous one moves to security fixes only.
 
 **Base layer: Void Linux (rolling).** Security updates for the substrate arrive through Void Linux's
-own repository and reach users through `xbps-install -Su` or `asura update`. When a fix is present in Void Linux's repository
+own repository and reach users through `xbps-install -Su` or `toren update`. When a fix is present in Void Linux's repository
 and absent from an up-to-date Toren installation, that is an Toren bug — report it here.

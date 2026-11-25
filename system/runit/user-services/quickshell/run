@@ -5,9 +5,9 @@ exec 2>&1
 RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
 export XDG_RUNTIME_DIR="$RUNTIME_DIR"
 export QT_QPA_PLATFORM=wayland
-export XDG_CURRENT_DESKTOP=Asura
-export XDG_SESSION_DESKTOP=asura
-export DESKTOP_SESSION=asura
+export XDG_CURRENT_DESKTOP=Toren
+export XDG_SESSION_DESKTOP=toren
+export DESKTOP_SESSION=toren
 export GDK_BACKEND=wayland
 # What a Wayland session's apps expect, for anything the shell starts itself:
 # this runs under a runit supervisor that can start before the compositor,
@@ -46,18 +46,18 @@ for _ in $(seq 1 50); do
 	sleep 0.1
 done
 
-LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/asura"
+LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/toren"
 mkdir -p "$LOG_DIR"
 exec >>"$LOG_DIR/quickshell.log" 2>&1
 
-# Which desktop shell: org.asura.shell desktop-shell picks ASURA's own shell
-# (asura) or the desktop shell (desktop). ASURA_DESKTOP_SHELL
+# Which desktop shell: org.toren.shell desktop-shell picks ASURA's own shell
+# (toren) or the desktop shell (desktop). ASURA_DESKTOP_SHELL
 # overrides it for a test run, and ASURA_SHELL_DIR overrides the directory.
-DESKTOP_SHELL="${ASURA_DESKTOP_SHELL:-$(gsettings get org.asura.shell desktop-shell 2>/dev/null | tr -d "'")}"
+DESKTOP_SHELL="${ASURA_DESKTOP_SHELL:-$(gsettings get org.toren.shell desktop-shell 2>/dev/null | tr -d "'")}"
 DESKTOP_SHELL="${DESKTOP_SHELL:-desktop}"
 
 # The desktop is the default shell. ASURA's own shell runs only when the user chooses it
-# (org.asura.shell desktop-shell = asura); it is never switched to on its own.
+# (org.toren.shell desktop-shell = toren); it is never switched to on its own.
 # When the desktop exits within 15 seconds three times in a row, it is restarted
 # after a pause instead, so a crash loop does not spin the CPU, and the user
 # is told once where the log is.
@@ -75,7 +75,7 @@ if [ "$DESKTOP_SHELL" = "desktop" ]; then
 	if [ "$count" -ge 3 ]; then
 		echo "quickshell: the desktop exited within 15s $count times in a row; restarting it in 5s" >&2
 		if [ "$count" -eq 3 ] && command -v notify-send >/dev/null 2>&1; then
-			notify-send -a ASURA "The desktop keeps restarting" "See ~/.local/state/asura/quickshell.log" 2>/dev/null || true
+			notify-send -a ASURA "The desktop keeps restarting" "See ~/.local/state/toren/quickshell.log" 2>/dev/null || true
 		fi
 		sleep 5
 	fi
@@ -83,12 +83,12 @@ if [ "$DESKTOP_SHELL" = "desktop" ]; then
 fi
 
 case "$DESKTOP_SHELL" in
-	desktop) DEFAULT_DIR=/usr/share/asura/shell-desktop ;;
-	*) DEFAULT_DIR=/usr/share/asura/shell ;;
+	desktop) DEFAULT_DIR=/usr/share/toren/shell-desktop ;;
+	*) DEFAULT_DIR=/usr/share/toren/shell ;;
 esac
 SHELL_DIR="${ASURA_SHELL_DIR:-$DEFAULT_DIR}"
 if [ ! -f "$SHELL_DIR/shell.qml" ]; then
-	echo "quickshell: $SHELL_DIR/shell.qml is missing; reinstall with: asura update --force" >&2
+	echo "quickshell: $SHELL_DIR/shell.qml is missing; reinstall with: toren update --force" >&2
 	sleep 10
 	exit 1
 fi

@@ -7,7 +7,7 @@ import qs.Ui
 import qs.Ui.Singletons
 import "Singletons"
 
-// The harbour: asura-vm's first plate. A command dossier for the whole fleet --
+// The harbour: toren-vm's first plate. A command dossier for the whole fleet --
 // the machines berthed here and the remotes reached from here -- read at a glance
 // and acted on in one tap. The Profile plate's register (a dithered decor hero,
 // monumental Fraunces, an instrument readout, the watermark and marginalia) put
@@ -315,7 +315,7 @@ Item {
                             width: remBody.width
                             text: Remotes.engineOk
                                 ? I18n.tr("No remotes yet. Add a VPS, or drop hosts in ~/.ssh/config.")
-                                : I18n.tr("The remote engine (asura-vm-ssh) is not installed.")
+                                : I18n.tr("The remote engine (toren-vm-ssh) is not installed.")
                             color: Tokens.inkFaint
                             font.family: Tokens.ui; font.pixelSize: 12
                         }

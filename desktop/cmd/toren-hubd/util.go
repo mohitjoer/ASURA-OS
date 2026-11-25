@@ -37,7 +37,7 @@ func selfExe() string {
 	if e, err := os.Executable(); err == nil {
 		return e
 	}
-	return "asura-hubd"
+	return "toren-hubd"
 }
 
 // escalateSelf re-runs this binary as root via pkexec, preserving the invoking
@@ -60,7 +60,7 @@ func run(name string, args ...string) {
 	_ = cmd.Run()
 }
 
-// unavailable answers a verb whose backend Asura does not have. A read prints
+// unavailable answers a verb whose backend Toren does not have. A read prints
 // {"available":false,"reason":...} and succeeds, so the page can show why; a
 // verb that would change something fails, so nothing reads it as done.
 func unavailable(verb, reason string, args []string) error {

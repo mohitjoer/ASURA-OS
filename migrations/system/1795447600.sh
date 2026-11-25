@@ -14,9 +14,9 @@ for conf in "$CONF_DIR"/*.conf; do
 	fi
 done
 
-# Ensure ASURA repository line is present in /etc/xbps.d/asura.conf
-ASURA_CONF="$CONF_DIR/asura.conf"
-REPO_LINE="repository=https://mohitjoer.github.io/ASURA-OS/current"
+# Ensure ASURA repository line is present in /etc/xbps.d/toren.conf
+ASURA_CONF="$CONF_DIR/toren.conf"
+REPO_LINE="repository=https://mohitjoer.github.io/TOREN-OS/current"
 
 if [ -f "$ASURA_CONF" ]; then
 	if ! grep -Fq "$REPO_LINE" "$ASURA_CONF"; then
@@ -29,7 +29,7 @@ if [ -f "$ASURA_CONF" ]; then
 	fi
 else
 	cat >"$ASURA_CONF" <<EOF
-# Asura OS Package Repositories
+# Toren OS Package Repositories
 channel=stable
 
 $REPO_LINE
@@ -40,16 +40,16 @@ repository=https://repo-fastly.voidlinux.org/current/multilib/nonfree
 EOF
 fi
 
-# Ensure 00-repository-main.conf points to asura.conf if needed
+# Ensure 00-repository-main.conf points to toren.conf if needed
 if [ ! -e "$CONF_DIR/00-repository-main.conf" ]; then
-	ln -sf asura.conf "$CONF_DIR/00-repository-main.conf" 2>/dev/null || true
+	ln -sf toren.conf "$CONF_DIR/00-repository-main.conf" 2>/dev/null || true
 fi
 
 # Remove third-party key if present
 rm -f /var/db/xbps/keys/30:93:47:9e:1f:55:c5:c5:07:b1:9a:e6:8b:10:5b:4b.plist 2>/dev/null || true
 
 # Install ASURA public signing key if present in the package or tree
-for keydir in /usr/share/asura/xbps/keys /usr/share/asura/keys; do
+for keydir in /usr/share/toren/xbps/keys /usr/share/toren/keys; do
 	if [ -d "$keydir" ]; then
 		mkdir -p /var/db/xbps/keys
 		cp -f "$keydir"/*.plist /var/db/xbps/keys/ 2>/dev/null || true

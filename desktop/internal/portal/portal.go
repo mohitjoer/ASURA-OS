@@ -3,14 +3,14 @@
 // This exists because of one specific silent failure. `xdg-desktop-portal`
 // derives the name of its per-desktop configuration file from
 // `XDG_CURRENT_DESKTOP`, lower-cased. A session that does not declare itself
-// correctly therefore finds no `asura-portals.conf`, falls back to the system
+// correctly therefore finds no `toren-portals.conf`, falls back to the system
 // `portals.conf`, and quietly uses whatever that names — which on a machine
 // adopted from GNOME means `use=gnome;` and a dispatcher trying to activate a
 // backend that is not installed.
 //
 // Nothing is printed. No error, no warning, no fallback. The desktop comes up and
-// the file chooser is wrong, and the user reports it as "Asura's file chooser is
-// broken" rather than as a session identity problem. `asura doctor` asserts the
+// the file chooser is wrong, and the user reports it as "Toren's file chooser is
+// broken" rather than as a session identity problem. `toren doctor` asserts the
 // configuration is actually being read, and that assertion is the whole reason
 // this package exists.
 package portal
@@ -67,9 +67,9 @@ func (c Config) Backend(section string) (string, bool) {
 // ConfigFile is the per-desktop configuration file name for a desktop identity.
 //
 // `xdg-desktop-portal` lower-cases XDG_CURRENT_DESKTOP and appends "-portals",
-// so XDG_CURRENT_DESKTOP=Asura reads "asura-portals.conf". The desktop's
+// so XDG_CURRENT_DESKTOP=Toren reads "toren-portals.conf". The desktop's
 // capitalisation is therefore load-bearing: a session that exports
-// XDG_CURRENT_DESKTOP=asura and XDG_SESSION_DESKTOP=Asura backwards — which
+// XDG_CURRENT_DESKTOP=toren and XDG_SESSION_DESKTOP=Toren backwards — which
 // reads as a plausible mistake, because the two are near-synonyms — resolves a
 // different file name and silently gets the wrong configuration.
 func ConfigFile(currentDesktop string) string {
@@ -78,9 +78,9 @@ func ConfigFile(currentDesktop string) string {
 
 // ExpectedDesktop is the session identity the session script sets.
 //
-// It is exported so `asura doctor` can compare it against what a machine is
+// It is exported so `toren doctor` can compare it against what a machine is
 // actually running, which is the assertion the architecture record requires.
-const ExpectedDesktop = "Asura"
+const ExpectedDesktop = "Toren"
 
 // Resolution is what the dispatcher will actually do on this machine.
 type Resolution struct {
@@ -110,7 +110,7 @@ type Resolution struct {
 	// Notices are known limitations of the stack rather than of this machine's
 	// configuration. They are reported because a silent gap is worse than a
 	// stated one, and they are kept out of Problems because a user cannot fix
-	// them by editing anything — `asura doctor` failing for a gap the user has
+	// them by editing anything — `toren doctor` failing for a gap the user has
 	// no lever on teaches them to ignore its exit code.
 	Notices []string
 }
@@ -131,13 +131,13 @@ type Env struct {
 	// CurrentDesktop is $XDG_CURRENT_DESKTOP as the running session sees it.
 	CurrentDesktop string
 	// Root prefixes every system path, so the checks that read installed files
-	// can be exercised against a fixture without a Asura install and without
+	// can be exercised against a fixture without a Toren install and without
 	// root. Empty means the running machine.
 	Root string
 }
 
 // Resolve works out which configuration the dispatcher will read, and whether it
-// is the one Asura intends.
+// is the one Toren intends.
 //
 // The order of the problems is deliberate: the identity first, because every
 // downstream failure is caused by it, and the backends last, because they are the
@@ -169,9 +169,9 @@ func Resolve(env Env) Resolution {
 	// 2. The configuration, in the dispatcher's own precedence order.
 	//
 	// Two names per directory, not one. The per-desktop file is what the package
-	// installs — /usr/share/xdg-desktop-portal/asura-portals.conf, the same
+	// installs — /usr/share/xdg-desktop-portal/toren-portals.conf, the same
 	// place gnome-portals.conf sits and the same name the man page prescribes —
-	// and the generic portals.conf is what `asura adopt` writes. Checking only
+	// and the generic portals.conf is what `toren adopt` writes. Checking only
 	// the per-desktop name in the user's directory meant that after adoption,
 	// which the adoption doc sends to portals.conf, doctor reported "no portal
 	// configuration was found at all" on a machine that had one.
@@ -234,7 +234,7 @@ func Resolve(env Env) Resolution {
 	return resolution
 }
 
-// required maps the sections Asura needs a backend for, to the backend it needs.
+// required maps the sections Toren needs a backend for, to the backend it needs.
 //
 // Secret is listed because the configuration is what the architecture record
 // specifies and omitting it silently would be worse than a stated limitation. It
@@ -252,7 +252,7 @@ var required = []struct {
 	{"org.freedesktop.impl.portal.OpenURI", "gtk"},
 	{"org.freedesktop.impl.portal.Print", "gtk"},
 	// Secret is not required: no backend in the image implements it (lxqt is
-	// not packaged yet), and asura-portals.conf deliberately names none.
+	// not packaged yet), and toren-portals.conf deliberately names none.
 
 	// Access is named explicitly because [default] is hyprland, which does not
 	// implement it. Access is what the dispatcher's own Camera portal asks for
@@ -289,7 +289,7 @@ func checkBackends(config Config) []string {
 
 	for _, want := range required {
 		// A section may be spelled with the backend's own interface name
-		// (org.freedesktop.impl.portal.*, what asura-portals.conf uses) or the
+		// (org.freedesktop.impl.portal.*, what toren-portals.conf uses) or the
 		// legacy org.gnome.impl.portal.* alias; either one counts.
 		got, present := config.Backend(want.section)
 		if !present {

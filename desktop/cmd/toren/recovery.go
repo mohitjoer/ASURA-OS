@@ -11,11 +11,11 @@ import (
 )
 
 func init() {
-	register("recovery", "guided recovery menu on TTY (diagnostics, reset, snapshots, safe-mode)", asuraRecovery)
+	register("recovery", "guided recovery menu on TTY (diagnostics, reset, snapshots, safe-mode)", torenRecovery)
 }
 
-// asuraRecovery launches the interactive recovery menu for TTY.
-func asuraRecovery(args []string) int {
+// torenRecovery launches the interactive recovery menu for TTY.
+func torenRecovery(args []string) int {
 	return runRecoveryMenu(defaultRecoveryRunner())
 }
 
@@ -35,22 +35,22 @@ func defaultRecoveryRunner() *recoveryRunner {
 		in:  os.Stdin,
 		out: os.Stdout,
 		doctor: func() int {
-			return asuraDoctor([]string{})
+			return torenDoctor([]string{})
 		},
 		reset: func() int {
-			return asuraReset([]string{"--desktop"})
+			return torenReset([]string{"--desktop"})
 		},
 		reinstall: func() int {
-			return asuraReinstall([]string{})
+			return torenReinstall([]string{})
 		},
 		rollback: func() int {
-			return asuraRollback([]string{"--system"})
+			return torenRollback([]string{"--system"})
 		},
 		safeMode: func() int {
-			fmt.Println("Starting safe-mode session via /usr/share/asura/session/asura-session-safe...")
-			safeBin := "/usr/share/asura/session/asura-session-safe"
+			fmt.Println("Starting safe-mode session via /usr/share/toren/session/toren-session-safe...")
+			safeBin := "/usr/share/toren/session/toren-session-safe"
 			if _, err := os.Stat(safeBin); err != nil {
-				safeBin = "session/asura-session-safe"
+				safeBin = "session/toren-session-safe"
 			}
 			cmd := exec.Command(safeBin)
 			cmd.Stdin = os.Stdin
@@ -71,7 +71,7 @@ func defaultRecoveryRunner() *recoveryRunner {
 
 func printRecentLogs(out io.Writer) {
 	home := os.Getenv("HOME")
-	stateDir := filepath.Join(home, ".local", "state", "asura")
+	stateDir := filepath.Join(home, ".local", "state", "toren")
 	logFiles := []string{
 		filepath.Join(stateDir, "session.log"),
 		filepath.Join(stateDir, "quickshell.log"),
@@ -93,7 +93,7 @@ func printRecentLogs(out io.Writer) {
 		}
 	}
 	if !found {
-		fmt.Fprintln(out, "No recent ASURA log files found in ~/.local/state/asura/")
+		fmt.Fprintln(out, "No recent ASURA log files found in ~/.local/state/toren/")
 	}
 }
 
@@ -132,7 +132,7 @@ func runRecoveryMenu(r *recoveryRunner) int {
 		switch choice {
 		case "1":
 			fmt.Fprintln(r.out, "\n[Option 1: System Doctor]")
-			fmt.Fprintln(r.out, "This runs 'asura doctor' to inspect service states, missing tools,")
+			fmt.Fprintln(r.out, "This runs 'toren doctor' to inspect service states, missing tools,")
 			fmt.Fprintln(r.out, "and any configuration drift between packaged base and user settings.")
 			if confirm(reader, r.out, "Run system doctor now? [y/N]: ") {
 				r.doctor()
@@ -141,7 +141,7 @@ func runRecoveryMenu(r *recoveryRunner) int {
 			fmt.Fprintln(r.out, "\n[Option 2: Reset Desktop Configuration]")
 			fmt.Fprintln(r.out, "This moves your current desktop configuration (desktop config.json,")
 			fmt.Fprintln(r.out, "Hyprland overrides, shell state) into a dated backup folder under")
-			fmt.Fprintln(r.out, "~/.local/state/asura/backups/ and restores clean ASURA defaults.")
+			fmt.Fprintln(r.out, "~/.local/state/toren/backups/ and restores clean ASURA defaults.")
 			fmt.Fprintln(r.out, "Nothing outside your desktop configuration is touched.")
 			if confirm(reader, r.out, "Reset desktop configuration to defaults? [y/N]: ") {
 				r.reset()

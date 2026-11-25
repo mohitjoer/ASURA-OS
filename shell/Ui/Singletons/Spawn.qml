@@ -7,8 +7,8 @@ import Quickshell
 // A Quickshell instance that has crashed once carries __QUICKSHELL_CRASH_INFO_FD
 // in its environment, naming an inherited memfd that records the config it came
 // back from. Upstream reads that variable before it parses any argument
-// (checkCrashRelaunch, src/launch/main.cpp), so `qs -c asura-wallpaper` started from the
-// desktop ignored `-c asura-wallpaper` and relaunched the desktop instead: opening an app
+// (checkCrashRelaunch, src/launch/main.cpp), so `qs -c toren-wallpaper` started from the
+// desktop ignored `-c toren-wallpaper` and relaunched the desktop instead: opening an app
 // from the launcher drew a second bar and a second dock over the first, and the
 // frame rate paid for both. The memfd is dup'd without CLOEXEC upstream, so the
 // variable is the only half we can take away, and taking it away is enough.

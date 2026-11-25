@@ -1,4 +1,4 @@
 #!/bin/sh
 exec 2>&1
-mkdir -p /var/log/asura-sysd
-exec svlogd -tt /var/log/asura-sysd
+mkdir -p /var/log/toren-sysd
+exec svlogd -tt /var/log/toren-sysd

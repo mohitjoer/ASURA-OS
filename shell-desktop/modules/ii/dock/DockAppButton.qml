@@ -1,4 +1,4 @@
-// ASURA overlay (shell-desktop/asura/vendor.sh OVERLAYS): the desktop's dock button
+// ASURA overlay (shell-desktop/toren/vendor.sh OVERLAYS): the desktop's dock button
 // without the window-count marks under a running app's icon.
 import qs.services
 import qs.modules.common
@@ -81,53 +81,53 @@ DockButton {
     function launchApp() {
         const idLower = (appToplevel?.appId ?? "").toLowerCase();
 
-        // Standard desktop roles: launch via asura-app so the user's default app
+        // Standard desktop roles: launch via toren-app so the user's default app
         // is honored with proper environment, working directory, and terminal wrapping.
         if (idLower.includes("ghostty") || idLower.includes("terminal") || idLower.includes("term")) {
             try {
-                Quickshell.execDetached(["asura-app", "terminal"]);
+                Quickshell.execDetached(["toren-app", "terminal"]);
                 return;
             } catch (_) {}
             try {
                 Quickshell.execDetached(["ghostty"]);
                 return;
             } catch (_) {}
-            root.hyprExec(["asura-app", "terminal"]);
+            root.hyprExec(["toren-app", "terminal"]);
             return;
         }
 
         if (idLower.includes("thunar") || idLower.includes("nautilus") || idLower.includes("file") || idLower.includes("fm")) {
             try {
-                Quickshell.execDetached(["asura-app", "files"]);
+                Quickshell.execDetached(["toren-app", "files"]);
                 return;
             } catch (_) {}
             try {
                 Quickshell.execDetached(["thunar"]);
                 return;
             } catch (_) {}
-            root.hyprExec(["asura-app", "files"]);
+            root.hyprExec(["toren-app", "files"]);
             return;
         }
 
         if (idLower.includes("chromium") || idLower.includes("firefox") || idLower.includes("browser") || idLower.includes("web")) {
             try {
-                Quickshell.execDetached(["asura-app", "browser"]);
+                Quickshell.execDetached(["toren-app", "browser"]);
                 return;
             } catch (_) {}
             try {
                 Quickshell.execDetached(["chromium"]);
                 return;
             } catch (_) {}
-            root.hyprExec(["asura-app", "browser"]);
+            root.hyprExec(["toren-app", "browser"]);
             return;
         }
 
-        if (idLower === "asura-store" || idLower.includes("store")) {
+        if (idLower === "toren-store" || idLower.includes("store")) {
             const storePaths = [
-                "asura-store",
-                "/usr/local/bin/asura-store",
-                "/usr/bin/asura-store",
-                (Directories.home ?? "") + "/.local/bin/asura-store"
+                "toren-store",
+                "/usr/local/bin/toren-store",
+                "/usr/bin/toren-store",
+                (Directories.home ?? "") + "/.local/bin/toren-store"
             ];
             for (let p of storePaths) {
                 try {
@@ -135,7 +135,7 @@ DockButton {
                     return;
                 } catch (_) {}
             }
-            root.hyprExec(["asura-store", "open", "discover"]);
+            root.hyprExec(["toren-store", "open", "discover"]);
             return;
         }
 
@@ -151,7 +151,7 @@ DockButton {
 
             const command = entry.command ? Array.from(entry.command) : [];
             if (command.length > 0) {
-                const fullCmd = entry.runInTerminal ? ["asura-app", "terminal", "--"].concat(command) : command;
+                const fullCmd = entry.runInTerminal ? ["toren-app", "terminal", "--"].concat(command) : command;
                 try {
                     Quickshell.execDetached(fullCmd);
                     return;

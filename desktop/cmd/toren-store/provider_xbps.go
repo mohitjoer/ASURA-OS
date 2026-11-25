@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-// seedAppsXbps is the curated Discover shelf for Asura OS.
+// seedAppsXbps is the curated Discover shelf for Toren OS.
 var seedAppsXbps = []struct{ pkg, title string }{
 	{"vlc", "VLC"}, {"mpv", "mpv"}, {"gimp", "GIMP"}, {"inkscape", "Inkscape"},
 	{"krita", "Krita"}, {"blender", "Blender"}, {"darktable", "darktable"},

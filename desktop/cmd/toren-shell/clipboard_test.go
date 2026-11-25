@@ -485,8 +485,8 @@ func TestIsClipPersistCmdline(t *testing.T) {
 	}{
 		{"our keeper", []string{"wl-clip-persist", "--clipboard", "regular"}, true},
 		{"keeper by path", []string{"/usr/bin/wl-clip-persist", "--clipboard", "regular"}, true},
-		{"the watcher is not a keeper", []string{"wl-paste", "--watch", "/home/u/.local/bin/asura-shell", "__clip-ingest"}, false},
-		{"the daemon is not a keeper", []string{"/home/u/.local/bin/asura-shell", "daemon"}, false},
+		{"the watcher is not a keeper", []string{"wl-paste", "--watch", "/home/u/.local/bin/toren-shell", "__clip-ingest"}, false},
+		{"the daemon is not a keeper", []string{"/home/u/.local/bin/toren-shell", "daemon"}, false},
 		{"empty", nil, false},
 	}
 	for _, c := range cases {
@@ -499,7 +499,7 @@ func TestIsClipPersistCmdline(t *testing.T) {
 // isClipWatcherCmdline must match only our own watcher/helper -- never another
 // app's wl-paste or the daemon itself -- since a false match SIGKILLs the pid.
 func TestIsClipWatcherCmdline(t *testing.T) {
-	const self = "/home/u/.local/bin/asura-shell"
+	const self = "/home/u/.local/bin/toren-shell"
 	cases := []struct {
 		name string
 		argv []string

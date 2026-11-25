@@ -15,7 +15,7 @@ import (
 // number in Settings rather than as an error. Both halves are pinned here.
 func TestDaemonStatsReadsTheReport(t *testing.T) {
 	dir := t.TempDir()
-	sock := filepath.Join(dir, "asura-shell.sock")
+	sock := filepath.Join(dir, "toren-shell.sock")
 	ln, err := net.Listen("unix", sock)
 	if err != nil {
 		t.Fatalf("listen: %v", err)
@@ -79,7 +79,7 @@ func TestDaemonCallWithoutDaemon(t *testing.T) {
 // updates from one command instead of two racing ones.
 func TestClipboardPrunePrintsPostPruneStats(t *testing.T) {
 	dir := t.TempDir()
-	sock := filepath.Join(dir, "asura-shell.sock")
+	sock := filepath.Join(dir, "toren-shell.sock")
 	ln, err := net.Listen("unix", sock)
 	if err != nil {
 		t.Fatalf("listen: %v", err)

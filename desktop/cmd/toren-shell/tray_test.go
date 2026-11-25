@@ -33,7 +33,7 @@ func TestSelectBestPixmap(t *testing.T) {
 
 // resolveTrayIcon is the full precedence chain: per-item themed path, then theme
 // name, then nearest pixmap converted to RGBA, then the generic fallback, with
-// the Asura attention-icon override on top.
+// the Toren attention-icon override on top.
 func TestResolveTrayIcon(t *testing.T) {
 	none := func(string) bool { return false }
 
@@ -64,7 +64,7 @@ func TestResolveTrayIcon(t *testing.T) {
 		t.Errorf("empty input = %+v, want the generic executable icon", got)
 	}
 
-	// Asura divergence: NeedsAttention prefers the attention icon.
+	// Toren divergence: NeedsAttention prefers the attention icon.
 	got = resolveTrayIcon(trayIconInput{Status: "NeedsAttention", IconName: "app", AttentionName: "urgent"}, none)
 	if got.Name != "urgent" {
 		t.Errorf("attention name = %+v, want Name=urgent", got)

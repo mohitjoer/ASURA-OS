@@ -7,18 +7,18 @@ into `/etc/runit/runsvdir/default` by the same loop in
 [`installation/toren-installer.sh`](../installation/toren-installer.sh) (installed system).
 `installation/build-iso-void_test.sh` fails if either list drops one of them.
 
-| Need | Package | Runit service | Notes |
-|---|---|---|---|
-| Clock sync | `chrony` | `chronyd` | Without it the clock drifts until TLS, `toren update` and package signature checks fail |
-| Inbound firewall | `nftables` | `nftables` | Loads `/etc/nftables.conf`, Toren's ruleset below |
-| Removable media | `udisks2` | none (D-Bus activated) | Lets Thunar and gvfs mount USB drives and SD cards without root |
-| Firmware updates | `fwupd` | none (D-Bus activated) | `fwupdmgr refresh && fwupdmgr update` updates BIOS, SSD and dock firmware from LVFS |
-| Printing | `cups`, `cups-filters` | `cupsd` | Add printers at <http://localhost:631> |
-| Device power saving | `tlp` | `tlp` | USB autosuspend, Wi-Fi power save, SATA and PCIe runtime PM. CPU governor, EPP and platform profile stay with `toren-sysd`; [`system/tlp.d/01-asura-cpu.conf`](../system/tlp.d/01-asura-cpu.conf) disables them in tlp |
-| System log | `socklog-void` | `socklog-unix`, `nanoklogd` | Kernel and daemon messages under `/var/log/socklog` |
-| Scheduled maintenance | (none) | `toren-maintenance` | Weekly fstrim, monthly btrfs scrub, no cron daemon |
-| Out-of-memory protection | `earlyoom` | `earlyoom` | Protects Hyprland and quickshell; prefers killing large apps |
-| Thermal management | `thermald` | `thermald` | Enabled only on Intel CPUs |
+| Need                     | Package                | Runit service               | Notes                                                                                                                                                                                                                  |
+| ------------------------ | ---------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Clock sync               | `chrony`               | `chronyd`                   | Without it the clock drifts until TLS, `toren update` and package signature checks fail                                                                                                                                |
+| Inbound firewall         | `nftables`             | `nftables`                  | Loads `/etc/nftables.conf`, Toren's ruleset below                                                                                                                                                                      |
+| Removable media          | `udisks2`              | none (D-Bus activated)      | Lets Thunar and gvfs mount USB drives and SD cards without root                                                                                                                                                        |
+| Firmware updates         | `fwupd`                | none (D-Bus activated)      | `fwupdmgr refresh && fwupdmgr update` updates BIOS, SSD and dock firmware from LVFS                                                                                                                                    |
+| Printing                 | `cups`, `cups-filters` | `cupsd`                     | Add printers at <http://localhost:631>                                                                                                                                                                                 |
+| Device power saving      | `tlp`                  | `tlp`                       | USB autosuspend, Wi-Fi power save, SATA and PCIe runtime PM. CPU governor, EPP and platform profile stay with `toren-sysd`; [`system/tlp.d/01-toren-cpu.conf`](../system/tlp.d/01-toren-cpu.conf) disables them in tlp |
+| System log               | `socklog-void`         | `socklog-unix`, `nanoklogd` | Kernel and daemon messages under `/var/log/socklog`                                                                                                                                                                    |
+| Scheduled maintenance    | (none)                 | `toren-maintenance`         | Weekly fstrim, monthly btrfs scrub, no cron daemon                                                                                                                                                                     |
+| Out-of-memory protection | `earlyoom`             | `earlyoom`                  | Protects Hyprland and quickshell; prefers killing large apps                                                                                                                                                           |
+| Thermal management       | `thermald`             | `thermald`                  | Enabled only on Intel CPUs                                                                                                                                                                                             |
 
 ## Firewall
 
@@ -30,7 +30,7 @@ installed as `/etc/nftables.conf`.
 - **Outbound:** everything is allowed.
 - **Forwarding:** not touched. Docker and Podman manage their own NAT and forwarding rules.
 
-The file replaces only its own table (`inet asura_filter`) and never runs `flush ruleset`.
+The file replaces only its own table (`inet toren_filter`) and never runs `flush ruleset`.
 To apply a change, reload the file with `sudo nft -f /etc/nftables.conf`; that leaves
 Docker's and Podman's rules alone. **Don't** use `sv restart nftables` for this: the Void
 service's `finish` script runs `nft flush ruleset` when it stops, which also removes the

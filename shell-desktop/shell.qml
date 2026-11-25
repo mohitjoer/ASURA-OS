@@ -23,10 +23,10 @@ ShellRoot {
     // Stuff for every panel family
     ReloadPopup {}
 
-    // ASURA: answers `asura ipc call asura ...`, the calls ASURA's keybindings
+    // ASURA: answers `toren ipc call toren ...`, the calls ASURA's keybindings
     // make, by driving this desktop's surfaces. The only change from upstream's
-    // shell.qml (shell-desktop/asura/vendor.sh lists this file as an overlay).
-    AsuraBridge {}
+    // shell.qml (shell-desktop/toren/vendor.sh lists this file as an overlay).
+    TorenBridge {}
 
     Component.onCompleted: {
         MaterialThemeLoader.reapplyTheme()

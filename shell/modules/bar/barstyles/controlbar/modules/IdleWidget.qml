@@ -8,7 +8,7 @@ Item {
     required property var root
     readonly property color contentColor: root.widgetContentColor("G8", root.seal)
 
-    // "Stay awake" mode active; Theme maps this to the active Asura idle backend.
+    // "Stay awake" mode active; Theme maps this to the active Toren idle backend.
     readonly property bool awake: root.stayAwake
 
     visible: awake
@@ -28,7 +28,7 @@ Item {
 
     Process {
         id: toggleProc
-        command: ["asura-cmd-caffeine"]
+        command: ["toren-cmd-caffeine"]
         onExited: root.refreshStatusIndicators()
     }
 

@@ -65,7 +65,7 @@ Item {
         function onUpdateRefreshTickChanged() { Updates.check() }
     }
 
-    Process { id: runProc; command: ["bash", "-c", "kitty asura update"] }
+    Process { id: runProc; command: ["bash", "-c", "kitty toren update"] }
 
     IconText {
         anchors.centerIn: parent

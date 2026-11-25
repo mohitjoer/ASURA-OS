@@ -4,7 +4,7 @@ import Quickshell
 import Quickshell.Io
 import "lib/screens.js" as Screens
 
-// screen recording state + control. drives asura-cmd-screenrecord
+// screen recording state + control. drives toren-cmd-screenrecord
 // (wf-recorder, the only recorder in the Ubuntu archive; gpu-screen-recorder when
 // the user has installed it) and
 // reconciles against the live process, so a failed launch or an external stop
@@ -30,11 +30,11 @@ Singleton {
     property real pulse: 1
     readonly property string elapsedText: fmt(elapsedSec)
 
-    readonly property string script: "asura-cmd-screenrecord"
+    readonly property string script: "toren-cmd-screenrecord"
 
     // studio uses gpu-screen-recorder + a cursor track (this wrapper), then opens
     // the clip in the motion editor.
-    readonly property string studioScript: "asura-cmd-studiorecord"
+    readonly property string studioScript: "toren-cmd-studiorecord"
 
     // region capture: the box the user drew as gsr's "WxH+X+Y" (logical coords),
     // "" = full monitor. slurp must launch detached (a managed Process gets its
@@ -70,7 +70,7 @@ Singleton {
     // clear the stamp whenever the region clears (a manual clear, or the drop
     // above), so it is only ever consulted alongside a live region.
     onRegionGeomChanged: if (root.regionGeom === "") root.regionLayoutSig = "";
-    readonly property string regionFilePath: (Quickshell.env("ASURA_STATE_PATH") || (Quickshell.env("HOME") + "/.local/state/asura")) + "/region-pick"
+    readonly property string regionFilePath: (Quickshell.env("ASURA_STATE_PATH") || (Quickshell.env("HOME") + "/.local/state/toren")) + "/region-pick"
     function pickRegion() {
         root.regionPicking = true;
         Quickshell.execDetached(["sh", "-c",
@@ -108,10 +108,10 @@ Singleton {
     // (native resolution and audio kept) so it drops straight into a chat.
     // Studio never compresses. pendingDiscord latches the toggle at start, so a
     // mid-capture change can't retarget the clip; discordMode persists.
-    readonly property string discordScript: "asura-cmd-discord-compress"
+    readonly property string discordScript: "toren-cmd-discord-compress"
     property bool discordMode: false
     property bool pendingDiscord: false
-    readonly property string discordFile: (Quickshell.env("ASURA_STATE_PATH") || (Quickshell.env("HOME") + "/.local/state/asura")) + "/discord-record"
+    readonly property string discordFile: (Quickshell.env("ASURA_STATE_PATH") || (Quickshell.env("HOME") + "/.local/state/toren")) + "/discord-record"
     FileView {
         id: discordPref
         path: root.discordFile
@@ -125,14 +125,14 @@ Singleton {
     // Remembered capture options the record island's chooser and the capture card
     // both read, persisted to record.json: the desktop-audio / mic toggles and
     // "edit after" -- when a Quick recording ends it opens the clip in the motion editor.
-    // Studio always routes through asura-motion, so it ignores editMode. Shape
+    // Studio always routes through toren-motion, so it ignores editMode. Shape
     // mirrors Flags: watch for outside edits, write back on change, seed once.
     property alias optDesktopAudio: recPrefs.desktopAudio
     property alias optMic: recPrefs.mic
     property alias editMode: recPrefs.edit
     FileView {
         id: recPrefsFile
-        path: (Quickshell.env("ASURA_STATE_PATH") || (Quickshell.env("HOME") + "/.local/state/asura")) + "/record.json"
+        path: (Quickshell.env("ASURA_STATE_PATH") || (Quickshell.env("HOME") + "/.local/state/toren")) + "/record.json"
         blockLoading: true
         watchChanges: true
         printErrors: false
@@ -157,7 +157,7 @@ Singleton {
     // capture begins and cleared when it ends; the process poll below reads it
     // back on reload. A capture started outside the shell has no stamp and falls
     // back to counting from when the shell first saw it.
-    readonly property string sessionFile: (Quickshell.env("ASURA_STATE_PATH") || (Quickshell.env("HOME") + "/.local/state/asura")) + "/record-session"
+    readonly property string sessionFile: (Quickshell.env("ASURA_STATE_PATH") || (Quickshell.env("HOME") + "/.local/state/toren")) + "/record-session"
     function writeSession(v) {
         Quickshell.execDetached(["sh", "-c",
             "mkdir -p \"${1%/*}\"; printf '%s' \"$2\" > \"$1\"", "sh", root.sessionFile, v]);
@@ -175,7 +175,7 @@ Singleton {
         onFileChanged: reload()
     }
 
-    // desktop-audio + mic flags -> asura-cmd-screenrecord args, shared by the card
+    // desktop-audio + mic flags -> toren-cmd-screenrecord args, shared by the card
     // and the island so the two never build the argument list differently.
     function recordArgs() {
         var a = [];
@@ -184,9 +184,9 @@ Singleton {
         return a;
     }
 
-    // edit-after: when a Quick recording ends, hand the clip to asura-motion. Latched
+    // edit-after: when a Quick recording ends, hand the clip to toren-motion. Latched
     // at start so a mid-capture toggle can't retarget it; Studio never uses it.
-    readonly property string editScript: "asura-cmd-edit-recording"
+    readonly property string editScript: "toren-cmd-edit-recording"
     property bool pendingEdit: false
 
     // pre-record countdown: the capture card can arm a delay (Capture.delay,
@@ -265,7 +265,7 @@ Singleton {
             Quickshell.execDetached([root.discordScript]);
             root.pendingDiscord = false;
         }
-        // edit-after: open the just-finished Quick clip in asura-motion; the script
+        // edit-after: open the just-finished Quick clip in toren-motion; the script
         // waits for the mp4 to finalise before launching the editor.
         if (root.pendingEdit) {
             Quickshell.execDetached([root.editScript]);

@@ -13,9 +13,9 @@ Item {
         anchors.fill: parent
         source: {
             if (root.variant === "dark") {
-                return Qt.resolvedUrl("../assets/asura-logo.svg");
+                return Qt.resolvedUrl("../assets/toren-logo.svg");
             }
-            return Qt.resolvedUrl("../assets/asura-logo-on-dark.svg");
+            return Qt.resolvedUrl("../assets/toren-logo-on-dark.svg");
         }
         sourceSize.width: Math.round(root.size * 2)
         sourceSize.height: Math.round(root.size * 2)

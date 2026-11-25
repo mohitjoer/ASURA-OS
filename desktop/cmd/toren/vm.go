@@ -10,9 +10,9 @@ import (
 	"strings"
 )
 
-const vmUsage = `Usage: asura vm [list | windows | launch NAME | stop NAME]
+const vmUsage = `Usage: toren vm [list | windows | launch NAME | stop NAME]
 
-Manage virtual machines on Asura OS via asura-vmd and quickemu.
+Manage virtual machines on Toren OS via toren-vmd and quickemu.
 
 Commands:
   list              list local virtual machines and runtime status
@@ -22,20 +22,20 @@ Commands:
 `
 
 func init() {
-	register("vm", "manage virtual machines, including guided Windows setup", asuraVm)
+	register("vm", "manage virtual machines, including guided Windows setup", torenVm)
 	helpText["vm"] = vmUsage
 }
 
 var (
 	vmStdinReader = bufio.NewReader(os.Stdin)
 	vmRunner      = func(args ...string) error {
-		cmd := exec.Command("asura-vmd", args...)
+		cmd := exec.Command("toren-vmd", args...)
 		cmd.Stdout, cmd.Stderr, cmd.Stdin = os.Stdout, os.Stderr, os.Stdin
 		return cmd.Run()
 	}
 )
 
-func asuraVm(args []string) int {
+func torenVm(args []string) int {
 	if len(args) == 0 || args[0] == "list" {
 		return vmList()
 	}
@@ -44,37 +44,37 @@ func asuraVm(args []string) int {
 		return vmWindows(args[1:])
 	case "launch":
 		if len(args) < 2 {
-			fmt.Fprintln(os.Stderr, "asura vm launch: missing VM name")
+			fmt.Fprintln(os.Stderr, "toren vm launch: missing VM name")
 			fmt.Fprint(os.Stderr, vmUsage)
 			return exitUsage
 		}
 		if err := vmRunner("launch", args[1]); err != nil {
-			fmt.Fprintf(os.Stderr, "asura vm launch: %v\n", err)
+			fmt.Fprintf(os.Stderr, "toren vm launch: %v\n", err)
 			return exitFail
 		}
 		return exitOK
 	case "stop":
 		if len(args) < 2 {
-			fmt.Fprintln(os.Stderr, "asura vm stop: missing VM name")
+			fmt.Fprintln(os.Stderr, "toren vm stop: missing VM name")
 			fmt.Fprint(os.Stderr, vmUsage)
 			return exitUsage
 		}
 		if err := vmRunner("stop", args[1]); err != nil {
-			fmt.Fprintf(os.Stderr, "asura vm stop: %v\n", err)
+			fmt.Fprintf(os.Stderr, "toren vm stop: %v\n", err)
 			return exitFail
 		}
 		return exitOK
 	default:
-		fmt.Fprintf(os.Stderr, "asura vm: unknown subcommand %q\n\n", args[0])
+		fmt.Fprintf(os.Stderr, "toren vm: unknown subcommand %q\n\n", args[0])
 		fmt.Fprint(os.Stderr, vmUsage)
 		return exitUsage
 	}
 }
 
 func vmList() int {
-	out, err := exec.Command("asura-vmd", "list").Output()
+	out, err := exec.Command("toren-vmd", "list").Output()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "asura vm: failed to query VMs: %v\n", err)
+		fmt.Fprintf(os.Stderr, "toren vm: failed to query VMs: %v\n", err)
 		return exitFail
 	}
 	var vms []struct {
@@ -89,7 +89,7 @@ func vmList() int {
 	}
 	if len(vms) == 0 {
 		fmt.Println("No virtual machines created yet.")
-		fmt.Println("Run 'asura vm windows' to create a Windows VM.")
+		fmt.Println("Run 'toren vm windows' to create a Windows VM.")
 		return exitOK
 	}
 	fmt.Printf("%-20s %-12s %-10s %s\n", "NAME", "OS", "STATUS", "DISK")
@@ -140,7 +140,7 @@ func vmWindows(args []string) int {
 
 	vmsDir := os.Getenv("ASURA_VM_HOME")
 	if vmsDir == "" {
-		vmsDir = filepath.Join(os.Getenv("HOME"), ".local", "share", "asura", "vm")
+		vmsDir = filepath.Join(os.Getenv("HOME"), ".local", "share", "toren", "vm")
 	}
 	_ = os.MkdirAll(vmsDir, 0o755)
 
@@ -149,10 +149,10 @@ func vmWindows(args []string) int {
 	cmd.Dir = vmsDir
 	cmd.Stdout, cmd.Stderr, cmd.Stdin = os.Stdout, os.Stderr, os.Stdin
 	if err := cmd.Run(); err != nil {
-		cmd2 := exec.Command("asura-vmd", "create", "windows", "11")
+		cmd2 := exec.Command("toren-vmd", "create", "windows", "11")
 		cmd2.Stdout, cmd2.Stderr, cmd2.Stdin = os.Stdout, os.Stderr, os.Stdin
 		if err2 := cmd2.Run(); err2 != nil {
-			fmt.Fprintf(os.Stderr, "asura vm windows: failed to download Windows 11: %v\n", err)
+			fmt.Fprintf(os.Stderr, "toren vm windows: failed to download Windows 11: %v\n", err)
 			return exitFail
 		}
 	}
@@ -164,7 +164,7 @@ func vmWindows(args []string) int {
 
 	fmt.Println("\n==> Step 2/2: Windows 11 VM created successfully!")
 	fmt.Println("To launch your VM, run:")
-	fmt.Println("    asura vm launch windows-11")
+	fmt.Println("    toren vm launch windows-11")
 	return exitOK
 }
 

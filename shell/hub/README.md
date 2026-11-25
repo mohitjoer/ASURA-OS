@@ -1,32 +1,32 @@
 # The Hub
 
-Asura Settings: the Hub (a navigation rail in groups, a global search, one page per
-area of the desktop), plus one extra group, **Asura**, for the settings the GSettings schemas
-declare. `session/asura-hub [PAGE]` runs `quickshell -p /usr/share/asura/shell/hub.qml`; the
-window is titled exactly `Asura Settings` (its Wayland class is `org.quickshell`), which is what
-the compositor's window rule matches. `PAGE` is a navigation key (`displays`, `keybinds`, `asura`)
+Toren Settings: the Hub (a navigation rail in groups, a global search, one page per
+area of the desktop), plus one extra group, **Toren**, for the settings the GSettings schemas
+declare. `session/toren-hub [PAGE]` runs `quickshell -p /usr/share/toren/shell/hub.qml`; the
+window is titled exactly `Toren Settings` (its Wayland class is `org.quickshell`), which is what
+the compositor's window rule matches. `PAGE` is a navigation key (`displays`, `keybinds`, `toren`)
 and reaches the window as `ASURA_HUB_PAGE`. A running Hub is steered with
 `quickshell ipc -p .../hub.qml call nav open KEY` and closed with `call hub close`.
 
 A Quickshell configuration's root is the directory of the file it is started on, so the entry file,
 `../hub.qml`, is at the shell's root, where `qs.*` resolves. Everything else is here.
 
-| What | Where |
-|---|---|
-| The window: rail, search, page host, action bar | `Hub.qml` |
-| The pages | `pages/` (one file per rail entry), their rows in `schema/` |
-| Page chrome shared by them | `SchemaPage.qml`, `SettingsSheet.qml`, `Combos.js`, `fuzzy.js` |
-| The daemon, as the Hub sees it | `Singletons/` (`Settings.qml` is the `asura-shell` socket) |
-| The Asura group | `AsuraPage.qml`, drawn with `PageView.qml`, `Editor.qml`, `Controls/`, `Asura.qml`, `GVariant.qml` |
+| What                                            | Where                                                                                              |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| The window: rail, search, page host, action bar | `Hub.qml`                                                                                          |
+| The pages                                       | `pages/` (one file per rail entry), their rows in `schema/`                                        |
+| Page chrome shared by them                      | `SchemaPage.qml`, `SettingsSheet.qml`, `Combos.js`, `fuzzy.js`                                     |
+| The daemon, as the Hub sees it                  | `Singletons/` (`Settings.qml` is the `toren-shell` socket)                                         |
+| The Toren group                                 | `TorenPage.qml`, drawn with `PageView.qml`, `Editor.qml`, `Controls/`, `Toren.qml`, `GVariant.qml` |
 
-Hub pages edit `shell.json` through the daemon and the compositor files through `asura-hubd`.
-The Asura group is the other store: GSettings, written only through `asura config set`. It shows a
+Hub pages edit `shell.json` through the daemon and the compositor files through `toren-hubd`.
+The Toren group is the other store: GSettings, written only through `toren config set`. It shows a
 control only for a setting something reads (today the idle timeouts); the rest are on the `Unread`
 list in `desktop/internal/hub`, with the reason, and come off it when something starts reading them.
 
-## Where the Asura pages come from
+## Where the Toren pages come from
 
-Nowhere in this directory. `AsuraPage.qml` runs `asura config export`, which writes the page registry
+Nowhere in this directory. `TorenPage.qml` runs `toren config export`, which writes the page registry
 as JSON, and draws what it is given: the pages, the keys on each page, the type of each key, the
 permitted values of an enum, the range of a number, and the current value of everything.
 
@@ -52,16 +52,16 @@ Editor {
 
 `key` is one entry of the export:
 
-| Field | What it is |
-|---|---|
-| `schema`, `name` | The setting's identity, as the tool names it. |
-| `type` | The GVariant type: `s`, `i`, `b`, `as`, or the name of an enum. |
-| `control` | Which editor the setting is edited with: `switch`, `spin`, `choice`, `list`, `text`. |
-| `value` | The current value, as a GVariant literal in text form. |
-| `default` | The schema's default, in the same spelling. |
-| `summary` | One line describing the setting. |
-| `minimum`, `maximum`, `hasRange` | The bounds of a number, when the schema declares them. |
-| `choices` | The nicks of an enum, in the schema's order. |
+| Field                            | What it is                                                                           |
+| -------------------------------- | ------------------------------------------------------------------------------------ |
+| `schema`, `name`                 | The setting's identity, as the tool names it.                                        |
+| `type`                           | The GVariant type: `s`, `i`, `b`, `as`, or the name of an enum.                      |
+| `control`                        | Which editor the setting is edited with: `switch`, `spin`, `choice`, `list`, `text`. |
+| `value`                          | The current value, as a GVariant literal in text form.                               |
+| `default`                        | The schema's default, in the same spelling.                                          |
+| `summary`                        | One line describing the setting.                                                     |
+| `minimum`, `maximum`, `hasRange` | The bounds of a number, when the schema declares them.                               |
+| `choices`                        | The nicks of an enum, in the schema's order.                                         |
 
 The editor is given its key as it is loaded:
 
@@ -84,26 +84,26 @@ over at creation, so every binding in the editor is right from the first frame.
 Five, one for each kind of setting the schemas use. Each is an `Editor` with a name of its own, and
 each says the same thing the tool would say if it were asked.
 
-| Editor | What it edits | What it will not do |
-|---|---|---|
-| `SwitchControl` | A boolean. A track that is an outline over a well when the setting is off and a filled bar when it is on. | It will not read a boolean as `'true'`. The export writes a boolean bare, and a switch that looked for the quotes would show every boolean in the desktop as off. |
-| `SpinControl` | An integer, with a field and two buttons. | It will not invent a range. A key that declares bounds is stepped between them and says so; a key that declares none is given none, and the tool decides what the schema accepts. |
-| `ChoiceControl` | An enum, as a list of the schema's own nicks. | It will not show the first choice when the stored value is not one of them. It says what the value is instead, because a control that shows a value the setting does not have is showing a lie. |
-| `TextControl` | A string, as a field. | It will not write what it was given. A GVariant string is quoted on the way in and on the way out, and a path that names a file that is not there says so under the field. |
-| `ListControl` | A list of strings, as a row per item. | It will not split the list on commas. A GVariant tuple is parsed and written by the dialect, so an item with a comma in it and an item with an apostrophe in it both come back as the item that went in. |
+| Editor          | What it edits                                                                                             | What it will not do                                                                                                                                                                                      |
+| --------------- | --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SwitchControl` | A boolean. A track that is an outline over a well when the setting is off and a filled bar when it is on. | It will not read a boolean as `'true'`. The export writes a boolean bare, and a switch that looked for the quotes would show every boolean in the desktop as off.                                        |
+| `SpinControl`   | An integer, with a field and two buttons.                                                                 | It will not invent a range. A key that declares bounds is stepped between them and says so; a key that declares none is given none, and the tool decides what the schema accepts.                        |
+| `ChoiceControl` | An enum, as a list of the schema's own nicks.                                                             | It will not show the first choice when the stored value is not one of them. It says what the value is instead, because a control that shows a value the setting does not have is showing a lie.          |
+| `TextControl`   | A string, as a field.                                                                                     | It will not write what it was given. A GVariant string is quoted on the way in and on the way out, and a path that names a file that is not there says so under the field.                               |
+| `ListControl`   | A list of strings, as a row per item.                                                                     | It will not split the list on commas. A GVariant tuple is parsed and written by the dialect, so an item with a comma in it and an item with an apostrophe in it both come back as the item that went in. |
 
 ## The dialect
 
 Every value is a GVariant literal in text form, and the two directions do not spell the same value
 the same way.
 
-| Type | The export writes | The tool takes |
-|---|---|---|
-| `s` | `'file:///usr/share/asura/backgrounds/galaxy.png'` | the same |
-| `i` | `32` | the same |
-| `b` | `true` | the same |
-| `as` | `['workspaces', 'clock']` | the same |
-| an enum | `'top'` | `top` |
+| Type    | The export writes                                  | The tool takes |
+| ------- | -------------------------------------------------- | -------------- |
+| `s`     | `'file:///usr/share/toren/backgrounds/galaxy.png'` | the same       |
+| `i`     | `32`                                               | the same       |
+| `b`     | `true`                                             | the same       |
+| `as`    | `['workspaces', 'clock']`                          | the same       |
+| an enum | `'top'`                                            | `top`          |
 
 The enum is the exception, and it is the one that matters. The export quotes the nick because that
 is how GVariant spells a string, and the tool compares what it is given against the schema's nicks,
@@ -117,7 +117,7 @@ where one item ends and the next begins, and the mangled list is what gets writt
 
 ## The write path
 
-One writer: `Asura.set(key, value)`, which runs `asura config set` and nothing else. The editors
+One writer: `Toren.set(key, value)`, which runs `toren config set` and nothing else. The editors
 never touch dconf.
 
 The writes are queued and run one at a time. A process that is given a second command while it is
@@ -170,14 +170,14 @@ sh shell/shell_test.sh
 ```
 
 loads both configurations, each named by its entry file: the desktop's `shell.qml` and the Hub's
-`hub.qml`. `asura doctor` reads the same tree for the things reading can see — that nothing names a
+`hub.qml`. `toren doctor` reads the same tree for the things reading can see — that nothing names a
 colour of its own, that every import is on the closed list, and that every command the tree runs is a
 command the tool has.
 
 To load the Hub itself, from a checkout:
 
 ```sh
-asura config export >/dev/null          # the schemas have to be installed
+toren config export >/dev/null          # the schemas have to be installed
 quickshell -p shell/hub.qml --no-color
 ```
 

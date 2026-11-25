@@ -3,9 +3,9 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// Installed colour schemes (the Asura Store Themes library), read from the daemon's
+// Installed colour schemes (the Toren Store Themes library), read from the daemon's
 // theme catalog so the Hub Appearance picker lists downloaded schemes beside the
-// built-ins. `asura-shell theme catalog` prints every card; only library schemes
+// built-ins. `toren-shell theme catalog` prints every card; only library schemes
 // carry a provider, so filtering to provider-tagged cards yields the user set.
 // A card is { id, label, provider, dark, sw:[7] } -- the SchemeCard shape -- and
 // selecting one writes theme.theme through the same settings seam as a built-in.
@@ -22,7 +22,7 @@ Singleton {
 
     Process {
         id: catalogProc
-        command: ["asura-shell", "theme", "catalog"]
+        command: ["toren-shell", "theme", "catalog"]
         stdout: StdioCollector {
             onStreamFinished: {
                 try {

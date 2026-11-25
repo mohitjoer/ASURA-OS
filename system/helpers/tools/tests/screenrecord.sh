@@ -35,10 +35,10 @@ export ASURA_SCREENRECORD_WF="$bin/wf-recorder"
 
 fail() { echo "FAIL: $1" >&2; exit 1; }
 
-info="$("$scripts/asura-cmd-screenrecord" --info)"
+info="$("$scripts/toren-cmd-screenrecord" --info)"
 grep -q '"backend":"wf"' <<<"$info" || fail "backend is not wf without gpu-screen-recorder: $info"
 
-"$scripts/asura-cmd-screenrecord" --fullscreen >/dev/null 2>&1 || fail "wf start exited non-zero"
+"$scripts/toren-cmd-screenrecord" --fullscreen >/dev/null 2>&1 || fail "wf start exited non-zero"
 clip="$(cat "$ASURA_STATE_PATH/last-recording")"
 [[ $clip == "$ASURA_SHELL_RECORDINGS_DIR"/*.mp4 && -s $clip ]] || fail "last-recording does not name a clip in the recordings dir: $clip"
 grep -q -- '-r 60' "$tmp/wf.log" || fail "wf-recorder was not given the default 60 fps: $(cat "$tmp/wf.log")"
@@ -47,7 +47,7 @@ grep -q 'Recording saved' "$tmp/notify.log" || fail "post-save hook did not anno
 
 # Without wf-recorder either, the message names the apt package, and exits 127.
 rc=0
-ASURA_SCREENRECORD_WF="$tmp/none" ASURA_SCREENRECORD_BACKEND=wf "$scripts/asura-cmd-screenrecord" --fullscreen >/dev/null 2>&1 || rc=$?
+ASURA_SCREENRECORD_WF="$tmp/none" ASURA_SCREENRECORD_BACKEND=wf "$scripts/toren-cmd-screenrecord" --fullscreen >/dev/null 2>&1 || rc=$?
 [ "$rc" -eq 127 ] || fail "missing wf-recorder exited $rc, want 127"
 grep -q 'sudo apt install wf-recorder' "$tmp/notify.log" || fail "missing-tool notification does not name the package"
 

@@ -1,10 +1,10 @@
 #!/bin/sh
 # Apply an ASURA OS checkout to a running system: everything the ISO build
 # installs from the repository, installed the same way, so a change merged into
-# dev-unstable reaches an installed machine through `asura update`.
+# dev-unstable reaches an installed machine through `toren update`.
 #
 # Usage: installation/apply-repo.sh [--no-packages] [--no-build] REPO [ROOT]
-#   REPO           an ASURA-OS checkout (asura update passes the one it pulled)
+#   REPO           an TOREN-OS checkout (toren update passes the one it pulled)
 #   ROOT           the system to apply to (default /); a directory for tests
 #   --no-packages  do not install packages new in system/packages-void.yaml
 #   --no-build     do not rebuild the Go tools
@@ -60,70 +60,57 @@ put_bin() {
 
 # ── The desktop ─────────────────────────────────────────────────────────────
 log "desktop shells, Hyprland, apps"
-put shell /usr/share/asura/shell
-put shell-desktop /usr/share/asura/shell-desktop
-rm -f "$ROOT/usr/share/asura/shell-desktop/toren/vendor.sh" \
-	"$ROOT/usr/share/asura/shell-desktop/toren/manifest.txt"
-ln -sfn toren "$ROOT/usr/share/asura/shell-desktop/asura"
-put session/hyprland /usr/share/asura/hyprland
-put session/safe-mode /usr/share/asura/safe-mode
-put apps /usr/share/asura/apps
+put shell /usr/share/toren/shell
+put shell-desktop /usr/share/toren/shell-desktop
+rm -f "$ROOT/usr/share/toren/shell-desktop/toren/vendor.sh" \
+	"$ROOT/usr/share/toren/shell-desktop/toren/manifest.txt"
+put session/hyprland /usr/share/toren/hyprland
+put session/safe-mode /usr/share/toren/safe-mode
+put apps /usr/share/toren/apps
 put_as apps/mimeapps/toren-mimeapps.list /usr/share/applications/toren-mimeapps.list
-ln -sf toren-mimeapps.list "$ROOT/usr/share/applications/asura-mimeapps.list"
-put shell/agent/skills /usr/share/asura/skills
-put docs/manual /usr/share/doc/asura/manual
-# One-time fixes for installed machines; asura update runs the new ones
-# (asura migrate). Marked done only on a fresh install, never here.
-put migrations /usr/share/asura/migrations
-for f in "$ROOT"/usr/share/asura/migrations/*/*.sh; do
+put shell/agent/skills /usr/share/toren/skills
+put docs/manual /usr/share/doc/toren/manual
+# One-time fixes for installed machines; toren update runs the new ones
+# (toren migrate). Marked done only on a fresh install, never here.
+put migrations /usr/share/toren/migrations
+for f in "$ROOT"/usr/share/toren/migrations/*/*.sh; do
 	[ -f "$f" ] && chmod 0755 "$f"
 done
-put desktop/catalog /usr/share/asura/store/catalog
-put system/runit/user-services /usr/share/asura/runit/services
-put system/hardware/models /usr/share/asura/hardware/models
-put system/hardware/components /usr/share/asura/hardware/components
+put desktop/catalog /usr/share/toren/store/catalog
+put system/runit/user-services /usr/share/toren/runit/services
+put system/hardware/models /usr/share/toren/hardware/models
+put system/hardware/components /usr/share/toren/hardware/components
 
 # ── The session ─────────────────────────────────────────────────────────────
 log "session files and scripts"
 for f in toren-session toren-session-safe toren-activate; do
-	af=$(echo "$f" | sed 's/^toren/asura/')
-	put_as "session/$f" "/usr/share/asura/session/$f"
-	ln -sf "$f" "$ROOT/usr/share/asura/session/$af"
+	put_as "session/$f" "/usr/share/toren/session/$f"
 	put_bin "session/$f" "/usr/bin/$f"
-	ln -sf "$f" "$ROOT/usr/bin/$af"
 done
-put_as session/toren.desktop /usr/share/asura/session/toren.desktop
+put_as session/toren.desktop /usr/share/toren/session/toren.desktop
 put_as session/toren.desktop /usr/share/wayland-sessions/toren.desktop
-put_as session/toren-safe.desktop /usr/share/asura/session/toren-safe.desktop
+put_as session/toren-safe.desktop /usr/share/toren/session/toren-safe.desktop
 put_as session/toren-safe.desktop /usr/share/wayland-sessions/toren-safe.desktop
-put_as session/binds.json /usr/share/asura/session/binds.json
-put_as session/runit/toren-user-services /usr/share/asura/session/toren-user-services
-ln -sf toren-user-services "$ROOT/usr/share/asura/session/asura-user-services"
+put_as session/binds.json /usr/share/toren/session/binds.json
+put_as session/runit/toren-user-services /usr/share/toren/session/toren-user-services
 put_bin session/runit/toren-user-services /usr/bin/toren-user-services
-ln -sf toren-user-services "$ROOT/usr/bin/asura-user-services"
-put_as session/toren-store /usr/share/asura/session/toren-store
-ln -sf toren-store "$ROOT/usr/share/asura/session/asura-store"
-put_as session/toren-portals.conf /usr/share/xdg-desktop-portal/asura-portals.conf
-put_as session/toren-portals.conf /usr/share/asura/session/toren-portals.conf
-ln -sf toren-portals.conf "$ROOT/usr/share/asura/session/asura-portals.conf"
-put session/units /usr/share/asura/units
-put session/units /usr/share/asura/session/units
+put_as session/toren-store /usr/share/toren/session/toren-store
+put_as session/toren-portals.conf /usr/share/xdg-desktop-portal/toren-portals.conf
+put_as session/toren-portals.conf /usr/share/toren/session/toren-portals.conf
+put session/units /usr/share/toren/units
+put session/units /usr/share/toren/session/units
 put session/units /usr/lib/systemd/user
-put session/grub /usr/share/asura/session/grub
-put session/sddm /usr/share/asura/session/sddm
+put session/grub /usr/share/toren/session/grub
+put session/sddm /usr/share/toren/session/sddm
 for s in toren-hub toren-idle toren-pin toren-reload-cover toren-shot toren-vm toren-wallpaper-ui toren-welcome toren-greeter; do
-	as=$(echo "$s" | sed 's/^toren/asura/')
 	put_bin "session/$s" "/usr/bin/$s"
-	ln -sf "$s" "$ROOT/usr/bin/$as"
-	put_as "session/$s" "/usr/share/asura/session/$s"
-	ln -sf "$s" "$ROOT/usr/share/asura/session/$as"
+	put_as "session/$s" "/usr/share/toren/session/$s"
 done
 for f in "$REPO"/session/scripts/* "$REPO"/shell/scripts/*; do
 	case "$f" in *.md) continue ;; esac
 	[ -f "$f" ] || continue
 	b=$(basename "$f")
 	put_bin "${f#"$REPO"/}" "/usr/bin/$b"
-	case "$b" in toren-*) ln -sf "$b" "$ROOT/usr/bin/$(echo "$b" | sed 's/^toren/asura/')" ;; esac
 done
 put session/applications /usr/share/applications
 put_as session/turnstile/turnstile.conf /etc/turnstile/turnstile.conf
@@ -140,30 +127,27 @@ done
 for h in prime-run fan-profile systemctl journalctl toren-gpu with-mimalloc; do
 	put_bin "system/helpers/$h" "/usr/bin/$h"
 done
-ln -sf toren-gpu "$ROOT/usr/bin/asura-gpu"
 put_bin installation/toren-installer.sh /usr/bin/toren-installer
-ln -sf toren-installer "$ROOT/usr/bin/asura-installer"
 put_bin desktop/cmd/toren-vm/toren-vmd /usr/bin/toren-vmd
-ln -sf toren-vmd "$ROOT/usr/bin/asura-vmd"
 
 # ── Settings schemas, branding, fonts, wallpapers ───────────────────────────
 log "schemas, branding, fonts, wallpapers"
 mkdir -p "$ROOT/usr/share/glib-2.0/schemas"
-for f in "$REPO"/shell/org.asura.*.gschema.xml; do
+for f in "$REPO"/shell/org.toren.*.gschema.xml; do
 	[ -f "$f" ] && cp -f "$f" "$ROOT/usr/share/glib-2.0/schemas/"
 done
-put public/branding /usr/share/asura/branding
-put_as public/toren-logo.svg /usr/share/asura/branding/asura-logo.svg
-put_as public/toren-logo-on-dark.svg /usr/share/asura/branding/asura-logo-on-dark.svg
-put_as public/branding/toren-logo.txt /usr/share/asura/branding/fastfetch-ascii.txt
+put public/branding /usr/share/toren/branding
+put_as public/toren-logo.svg /usr/share/toren/branding/toren-logo.svg
+put_as public/toren-logo-on-dark.svg /usr/share/toren/branding/toren-logo-on-dark.svg
+put_as public/branding/toren-logo.txt /usr/share/toren/branding/fastfetch-ascii.txt
 put public/fonts /usr/share/fonts/TTF
-put public/wallpapers /usr/share/asura/backgrounds
-put system/plymouth/toren /usr/share/plymouth/themes/asura
-put_as shell/assets/toren-store.svg /usr/share/icons/hicolor/scalable/apps/asura-store.svg
-put_as shell/assets/toren-installer.svg /usr/share/icons/hicolor/scalable/apps/asura-installer.svg
-put_as shell/assets/toren-store.png /usr/share/icons/hicolor/512x512/apps/asura-store.png
-put_as shell-desktop/assets/icons/asura-settings.svg /usr/share/icons/hicolor/scalable/apps/asura-settings.svg
-put_as shell-desktop/assets/icons/asura-vm.svg /usr/share/icons/hicolor/scalable/apps/asura-vm.svg
+put public/wallpapers /usr/share/toren/backgrounds
+put system/plymouth/toren /usr/share/plymouth/themes/toren
+put_as shell/assets/toren-store.svg /usr/share/icons/hicolor/scalable/apps/toren-store.svg
+put_as shell/assets/toren-installer.svg /usr/share/icons/hicolor/scalable/apps/toren-installer.svg
+put_as shell/assets/toren-store.png /usr/share/icons/hicolor/512x512/apps/toren-store.png
+put_as shell-desktop/assets/icons/toren-settings.svg /usr/share/icons/hicolor/scalable/apps/toren-settings.svg
+put_as shell-desktop/assets/icons/toren-vm.svg /usr/share/icons/hicolor/scalable/apps/toren-vm.svg
 put_as shell-desktop/assets/icons/preferences-system.svg /usr/share/icons/hicolor/scalable/apps/preferences-system.svg
 put_as shell-desktop/assets/icons/preferences-system-network.svg /usr/share/icons/hicolor/scalable/apps/preferences-system-network.svg
 put_as shell-desktop/assets/icons/computer.svg /usr/share/icons/hicolor/scalable/apps/computer.svg
@@ -181,11 +165,11 @@ put system/modprobe.d /etc/modprobe.d
 put system/modules-load.d /etc/modules-load.d
 put system/tlp.d /etc/tlp.d
 put system/sysctl.d /etc/sysctl.d
-put_as system/xbps.d/toren.conf /etc/xbps.d/asura.conf
+put_as system/xbps.d/toren.conf /etc/xbps.d/toren.conf
 put_as system/xbps.d/toren.conf /etc/xbps.d/00-repository-main.conf
 # Toren Linux repository signing key (installed only where missing is handled
 # by the migration; here we always refresh from the checkout).
-put system/xbps-keys /usr/share/asura/xbps/keys
+put system/xbps-keys /usr/share/toren/xbps/keys
 put system/xbps-keys /var/db/xbps/keys
 put_as system/nftables/nftables.conf /etc/nftables.conf
 put system/ananicy /etc/ananicy-cpp
@@ -214,19 +198,11 @@ if [ "$BUILD" -eq 1 ]; then
 			mv -f "$ROOT/usr/bin/.$(basename "$b").new" "$ROOT/usr/bin/$(basename "$b")"
 		done || log "the Go build failed; the installed tools are unchanged"
 		rm -rf "$out"
-		for tool in toren toren-store toren-shell toren-wallpaper toren-hubd toren-sysd toren-userd toren-agent toren-vm toren-vm-mon toren-vm-ssh toren-vmd; do
-			asura_tool=$(echo "$tool" | sed 's/^toren/asura/')
-			if [ -e "$ROOT/usr/bin/$tool" ]; then
-				ln -sf "$tool" "$ROOT/usr/bin/$asura_tool"
-			fi
-		done
-		for f in "$ROOT/usr/share/asura/session"/toren-*; do
+		for f in "$ROOT/usr/share/toren/session"/toren-*; do
 			[ -e "$f" ] || continue
 			base=$(basename "$f")
-			asura_base=$(echo "$base" | sed 's/^toren/asura/')
-			ln -sf "$base" "$ROOT/usr/share/asura/session/$asura_base"
-			if [ -x "$f" ] && [ ! -e "$ROOT/usr/bin/$asura_base" ]; then
-				ln -sf "/usr/share/asura/session/$base" "$ROOT/usr/bin/$asura_base"
+			if [ -x "$f" ] && [ ! -e "$ROOT/usr/bin/$base" ]; then
+				ln -sf "/usr/share/toren/session/$base" "$ROOT/usr/bin/$base"
 			fi
 		done
 	else
@@ -263,17 +239,12 @@ if [ "$ROOT" = "" ]; then
 fi
 
 # ── Which commit this system now runs ───────────────────────────────────────
-# asura update compares it with the branch: nothing new, nothing rebuilt.
+# toren update compares it with the branch: nothing new, nothing rebuilt.
 if commit=$(git -c safe.directory='*' -C "$REPO" rev-parse HEAD 2>/dev/null); then
-	printf '%s\n' "$commit" >"$ROOT/usr/share/asura/applied-commit"
-	# And where it came from: asura update follows that checkout next time
+	printf '%s\n' "$commit" >"$ROOT/usr/share/toren/applied-commit"
+	# And where it came from: toren update follows that checkout next time
 	# instead of searching for one.
-	printf '%s\n' "$REPO" >"$ROOT/usr/share/asura/applied-source"
-fi
-
-# Transitional symlink for /usr/share/toren <-> /usr/share/asura
-if [ -d "$ROOT/usr/share/asura" ] && [ ! -e "$ROOT/usr/share/toren" ]; then
-	ln -sfn asura "$ROOT/usr/share/toren"
+	printf '%s\n' "$REPO" >"$ROOT/usr/share/toren/applied-source"
 fi
 
 # ── Make the system notice ──────────────────────────────────────────────────
@@ -284,4 +255,4 @@ if [ "$ROOT" = "" ]; then
 else
 	command -v glib-compile-schemas >/dev/null 2>&1 && glib-compile-schemas "$ROOT/usr/share/glib-2.0/schemas" || true
 fi
-log "done. asura update now refreshes the running desktop; or run: asura refresh"
+log "done. toren update now refreshes the running desktop; or run: toren refresh"

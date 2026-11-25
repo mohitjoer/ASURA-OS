@@ -17,7 +17,7 @@ enable_svc() {
 enable_svc socklog-unix
 enable_svc nanoklogd
 enable_svc earlyoom
-enable_svc asura-maintenance
+enable_svc toren-maintenance
 
 # thermald only on Intel CPUs
 if grep -qi "GenuineIntel\|Intel" /proc/cpuinfo 2>/dev/null; then

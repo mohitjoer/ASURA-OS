@@ -3,7 +3,7 @@
 set -euo pipefail
 
 app="Color picker"
-prog="asura-cmd-color-picker"
+prog="toren-cmd-color-picker"
 # A missing tool is a notification, because the shell runs this with nowhere to
 # print, plus exit 127 (the shell's "command not found") with the apt package
 # named. notify-send is checked first and on its own: it is the one tool whose

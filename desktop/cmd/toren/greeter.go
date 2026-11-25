@@ -10,9 +10,9 @@ import (
 	"time"
 )
 
-const greeterUsage = `Usage: asura greeter enable|disable|test
+const greeterUsage = `Usage: toren greeter enable|disable|test
 
-Asura's login screen is an SDDM theme. Nothing installs it for you: a login
+Toren's login screen is an SDDM theme. Nothing installs it for you: a login
 screen that does not come up leaves nobody able to log in, so the one file that
 turns it on is copied by you, with sudo, after this command has checked that
 everything the screen needs is installed.
@@ -24,10 +24,10 @@ everything the screen needs is installed.
 `
 
 const (
-	greeterDropIn    = "/usr/share/asura/session/sddm/asura.conf"
-	greeterInstalled = "/etc/sddm.conf.d/10-asura.conf"
-	greeterTheme     = "/usr/share/asura/session/sddm/themes/asura"
-	greeterWrapper   = "/usr/share/asura/session/asura-greeter"
+	greeterDropIn    = "/usr/share/toren/session/sddm/toren.conf"
+	greeterInstalled = "/etc/sddm.conf.d/10-toren.conf"
+	greeterTheme     = "/usr/share/toren/session/sddm/themes/toren"
+	greeterWrapper   = "/usr/share/toren/session/toren-greeter"
 	greeterBinary    = "/usr/bin/sddm-greeter-qt6"
 )
 
@@ -41,10 +41,10 @@ var (
 )
 
 func init() {
-	register("greeter", "turn the Asura login screen on or off, or try it", asuraGreeter)
+	register("greeter", "turn the Toren login screen on or off, or try it", torenGreeter)
 }
 
-func asuraGreeter(args []string) int {
+func torenGreeter(args []string) int {
 	if len(args) == 1 {
 		switch args[0] {
 		case "enable":
@@ -77,15 +77,15 @@ func greeterMissing() []string {
 	}
 	need(greeterBinary, "sudo xbps-install -S sddm", true)
 	need("/usr/bin/weston", "sudo xbps-install -S weston", true)
-	need(greeterTheme+"/Main.qml", "reinstall the asura package", false)
-	need(greeterWrapper, "reinstall the asura package", true)
-	need(greeterDropIn, "reinstall the asura package", false)
+	need(greeterTheme+"/Main.qml", "reinstall the toren package", false)
+	need(greeterWrapper, "reinstall the toren package", true)
+	need(greeterDropIn, "reinstall the toren package", false)
 	return missing
 }
 
 func greeterEnable() int {
 	if missing := greeterMissing(); len(missing) > 0 {
-		fmt.Fprintln(greeterErr, "asura greeter: not ready, so there is nothing to enable yet. Missing:")
+		fmt.Fprintln(greeterErr, "toren greeter: not ready, so there is nothing to enable yet. Missing:")
 		for _, m := range missing {
 			fmt.Fprintln(greeterErr, "  "+m)
 		}
@@ -98,27 +98,27 @@ func greeterEnable() int {
 		fmt.Fprintln(greeterOut, "Note: sddm is not this machine's display manager, so the file below does nothing until it is.")
 		fmt.Fprintln(greeterOut)
 	}
-	fmt.Fprintf(greeterOut, "Ready. To turn the Asura login screen on, run:\n\n  sudo install -D -m 0644 %s %s\n\n", greeterDropIn, greeterInstalled)
+	fmt.Fprintf(greeterOut, "Ready. To turn the Toren login screen on, run:\n\n  sudo install -D -m 0644 %s %s\n\n", greeterDropIn, greeterInstalled)
 	fmt.Fprintf(greeterOut, "If the login screen ever fails, switch to a text console with Ctrl+Alt+F3,\nlog in, and run:\n\n  sudo rm %s\n", greeterInstalled)
 	return exitOK
 }
 
 func greeterDisable() int {
 	if _, err := os.Stat(greeterRoot + greeterInstalled); err != nil {
-		fmt.Fprintln(greeterOut, "The Asura login screen is not enabled; there is nothing to remove.")
+		fmt.Fprintln(greeterOut, "The Toren login screen is not enabled; there is nothing to remove.")
 		return exitOK
 	}
-	fmt.Fprintf(greeterOut, "To turn the Asura login screen off, run:\n\n  sudo rm %s\n", greeterInstalled)
+	fmt.Fprintf(greeterOut, "To turn the Toren login screen off, run:\n\n  sudo rm %s\n", greeterInstalled)
 	return exitOK
 }
 
 func greeterTest() int {
 	if _, err := os.Stat(greeterRoot + greeterBinary); err != nil {
-		fmt.Fprintln(greeterErr, "asura greeter: not available: sddm-greeter-qt6 is not installed (sudo xbps-install -S sddm)")
+		fmt.Fprintln(greeterErr, "toren greeter: not available: sddm-greeter-qt6 is not installed (sudo xbps-install -S sddm)")
 		return exitFail
 	}
 	if os.Getenv("WAYLAND_DISPLAY") == "" && os.Getenv("DISPLAY") == "" {
-		fmt.Fprintln(greeterErr, "asura greeter: test needs a graphical session to draw in")
+		fmt.Fprintln(greeterErr, "toren greeter: test needs a graphical session to draw in")
 		return exitFail
 	}
 
@@ -133,7 +133,7 @@ func greeterTest() int {
 		return exitOK
 	}
 	if err != nil {
-		fmt.Fprintln(greeterErr, "asura greeter:", err)
+		fmt.Fprintln(greeterErr, "toren greeter:", err)
 		return exitFail
 	}
 	return exitOK

@@ -1,7 +1,7 @@
 package main
 
-// The asura-livewall pipeline: a video wallpaper plays through the in-repo C
-// player (asura/shell/livewall), which software-decodes a pre-transcoded clip
+// The toren-livewall pipeline: a video wallpaper plays through the in-repo C
+// player (toren/shell/livewall), which software-decodes a pre-transcoded clip
 // into wl_shm buffers on a wlr background surface. It maps no GPU/EGL driver,
 // so it holds ~40-60 MB RSS on any vendor, where mpv/mpvpaper (a client GL
 // pipeline) cost 300-700 MB, leak per loop, and on a hybrid layout dropped
@@ -20,7 +20,7 @@ import (
 	"time"
 )
 
-const liveDaemon = "asura-wallpaper-live"
+const liveDaemon = "toren-wallpaper-live"
 
 // livePlayerInstalled reports whether the external player is on PATH.
 func livePlayerInstalled() bool {
@@ -290,7 +290,7 @@ func transcodeCachePath(src string, fps, capW int) string {
 	if err != nil {
 		return ""
 	}
-	dir := filepath.Join(cacheHome(), "asura", "wallpaper", "livewall")
+	dir := filepath.Join(cacheHome(), "toren", "wallpaper", "livewall")
 	name := strings.TrimSuffix(filepath.Base(src), filepath.Ext(src))
 	return filepath.Join(dir, name+"-"+strconv.FormatInt(st.ModTime().Unix(), 10)+
 		"-w"+strconv.Itoa(capW)+"-f"+strconv.Itoa(fps)+"-a.mp4")

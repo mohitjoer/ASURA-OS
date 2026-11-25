@@ -7,7 +7,7 @@ import (
 	"github.com/godbus/dbus/v5"
 )
 
-const e2eLabel = "asura-e2e-island"
+const e2eLabel = "toren-e2e-island"
 
 // Throwaway manual driver: triggers a real CreateCollection prompt against the
 // running dev shell's island and waits for the user (wtype) to answer it. Proves

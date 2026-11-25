@@ -6,7 +6,7 @@ import (
 
 func TestShareUnavailableWhenTailscaleOff(t *testing.T) {
 	// By default /var/service/tailscaled is not present in test environment
-	code := asuraShare([]string{"devices"})
+	code := torenShare([]string{"devices"})
 	if code != exitFail {
 		t.Errorf("expected exitFail when tailscale is off, got %d", code)
 	}
@@ -31,7 +31,7 @@ func TestShareDevicesParse(t *testing.T) {
 	defer func() { shareTailscaleStatus = oldStatus }()
 	shareTailscaleStatus = func() ([]byte, error) {
 		return []byte(`{
-			"Self": {"HostName": "asura-laptop", "DNSName": "asura-laptop.net", "Online": true},
+			"Self": {"HostName": "toren-laptop", "DNSName": "toren-laptop.net", "Online": true},
 			"Peer": {
 				"peer1": {"HostName": "phone", "DNSName": "phone.net", "Online": true, "OS": "iOS"},
 				"peer2": {"HostName": "workstation", "DNSName": "workstation.net", "Online": false, "OS": "linux"}

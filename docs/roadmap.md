@@ -13,46 +13,46 @@ snapshot before updating packages.
 
 ## M1 — Foundations
 
-*Status: complete in `main`.*
+_Status: complete in `main`._
 
 Repository scaffold, licensing, the design system, and the architecture record.
 Documentation only, no working code. The point of doing this first is that every later
 decision has somewhere to be written down.
 
 - [x] Repo layout, `.gitignore`, and the placeholder trees — `docs/journal/`, `installation/`,
-  `release/`, `tests/`
+      `release/`, `tests/`
 - [x] `LICENSE` (GPL-3.0), `LICENSING.md` covering the three-way split
 - [x] `AGENTS.md` + `agents/agents.md` — the agent contract and design system
 - [x] `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, the `.github/` issue forms and
-  pull request template, and the markdown gate
+      pull request template, and the markdown gate
 - [x] `docs/architecture.md` — decisions, rationale, rejected options
-- [x] `docs/adopting-asura.md`, `docs/hardware-detection.md` and `docs/session.md` — the
-  adoption path, the detection subsystem and the session chain, all decided before any of them
-  is written as code
+- [x] `docs/adopting-toren.md`, `docs/hardware-detection.md` and `docs/session.md` — the
+      adoption path, the detection subsystem and the session chain, all decided before any of them
+      is written as code
 - [x] `system/hardware/` — support tiers, the profile schema and an annotated example profile
 - [x] `system/kernel/fleet.yaml` and `system/packages-void.yaml` — the pinned kernel fleet and the
-  reviewed package manifest, GNOME exclusions included
+      reviewed package manifest, GNOME exclusions included
 
 ## M2 — The `toren` control tool
 
-*Status: complete. The exit criterion is met — `toren update` lays down a base and an
+_Status: complete. The exit criterion is met — `toren update` lays down a base and an
 overlay, a user edit survives the next update, and `toren rollback` restores the previous
-revision.*
+revision._
 
 The first working code. Go, because the tools must be static binaries that start instantly.
 
 - [x] `toren update` / `rollback` / `materialize` / `reset` / `doctor` — the command surface
-  `docs/architecture.md` defines
+      `docs/architecture.md` defines
 - [x] `toren status` — current revision, resolved profile and overlay state at a glance. New in
-  this milestone; the command table in `docs/architecture.md` has no row for it yet
-- [x] The overlay model: base in `/usr/share/asura/`, user overlay in `~/.config/asura/user_edits/`
+      this milestone; the command table in `docs/architecture.md` has no row for it yet
+- [x] The overlay model: base in `/usr/share/toren/`, user overlay in `~/.config/toren/user_edits/`
 - [x] A git snapshot of `~/.config` before every update
 - [x] A Btrfs root snapshot before every update (`desktop/cmd/toren/update.go`:
-  `createBtrfsSnapshot()` runs during `toren update`)
+      `createBtrfsSnapshot()` runs during `toren update`)
 
 The invariant the whole model rests on is that a user's override wins at its mirrored path and
-no update can clobber it. That means the user's content is *written* to
-`~/.config/asura/<path>`, not left to be shadowed from `user_edits/` — applications read the
+no update can clobber it. That means the user's content is _written_ to
+`~/.config/toren/<path>`, not left to be shadowed from `user_edits/` — applications read the
 mirrored path and know nothing of the overlay directory, so a model that skipped writing it
 would resolve the edit in the one place nothing reads.
 
@@ -60,10 +60,9 @@ Exit criterion: on a stock image of the base layer, `toren update` lays down a b
 overlay, a user edit survives the next update, and `toren rollback` restores the previous
 revision. **The last two hold and are tested; the first has not been run against a real image.**
 
-
 ## M3 — Hardware detection
 
-*Status: the detection, matching, redaction, report and profile-lint libraries are written and
+_Status: the detection, matching, redaction, report and profile-lint libraries are written and
 tested, and `toren hardware report|match|lint-profiles|capture` reaches all of them. The
 report has run on a real laptop for the first time, and it refused to emit: two DMI
 attributes that real machines carry and the captured fixture trees do not were
@@ -71,27 +70,27 @@ unclassified, so the sweep could not tell the report's own `board_vendor` from a
 unread `chassis_vendor` and refused the report as a leak. That is the class of fault a
 fixture tree cannot hold, and it is fixed. The machine's candidate profile now comes out
 of the report, with the two things detection cannot decide — the kernel flavour and the
-display mux — left for a human.*
+display mux — left for a human._
 
 The subsystem that decides whether Toren works on someone else's laptop.
 
 - [x] Detection: DMI, PCI, USB, ACPI, EDID, device tree, network chips, GPU topology
 - [x] Every reader takes a filesystem root, enforced by an AST test, so a captured machine is a
-  fixture and the subsystem is testable without a hardware lab
+      fixture and the subsystem is testable without a hardware lab
 - [x] Profile matching with a defined tie-break when several match, and a reported conflict
-  when the tie-break cannot decide
+      when the tie-break cannot decide
 - [x] Report redaction, two layers: the reader allowlist and a sweep that refuses to emit
 - [x] `toren hardware report` — text, JSON and the candidate profile shape, swept before it is
-  emitted; `--raw` refuses under CI
+      emitted; `--raw` refuses under CI
 - [x] `toren hardware report --profile` — render a candidate profile, schema-shaped and
-  token-free, with no kernel patch pin and no firmware file
+      token-free, with no kernel patch pin and no firmware file
 - [x] `toren hardware match` — report tier and the profile that matched, plus the candidates
-  that matched and lost. Also new in this milestone; `docs/architecture.md` names only `report`
+      that matched and lost. Also new in this milestone; `docs/architecture.md` names only `report`
 - [x] `toren hardware lint-profiles` — every rule in "what a profile must not contain",
-  plus the database-wide overlap check that catches the profile pair which becomes a
-  conflict once a third arrives
+      plus the database-wide overlap check that catches the profile pair which becomes a
+      conflict once a third arrives
 - [x] `toren hardware capture` — write a machine's sysfs tree as a fixture, filtered through an
-  allowlist of what the readers consume, so a committed fixture cannot carry a serial
+      allowlist of what the readers consume, so a committed fixture cannot carry a serial
 
 The whole milestone is now reachable from one binary, and `probe → report → lint` closes: a
 profile generated from a captured machine passes the linter that checks it.
@@ -103,12 +102,12 @@ it. Its identity is projected onto the same match-key fields rather than a secon
 a profile is written once and works whichever architecture answers.
 
 Exit criterion: detection correctly identifies GPU, WiFi, audio codec and storage on a real
-x86 laptop *and* a real ARM laptop, and produces a candidate profile that a human can read and
+x86 laptop _and_ a real ARM laptop, and produces a candidate profile that a human can read and
 confirm.
 
 ## M4 — Bootable ISO & Guided Installer
 
-*Status: complete in `dev-unstable`. The Void Linux Live ISO builder (`installation/build-iso-void.sh`) compiles and generates bootable hybrid UEFI/BIOS ISOs in CI (`asura-os-void-beta-001.iso`). The live ISO features automated tty1 login directly into the Wayland session with Hyprland and Quickshell, seat management via seatd, user-level runit supervision, and the guided desktop installer (`toren install` / `toren-installer.desktop`).*
+_Status: complete in `dev-unstable`. The Void Linux Live ISO builder (`installation/build-iso-void.sh`) compiles and generates bootable hybrid UEFI/BIOS ISOs in CI (`toren-os-void-beta-001.iso`). The live ISO features automated tty1 login directly into the Wayland session with Hyprland and Quickshell, seat management via seatd, user-level runit supervision, and the guided desktop installer (`toren install` / `toren-installer.desktop`)._
 
 - [x] `installation/build-iso-void.sh` — Void Linux live ISO builder via `void-mklive`, package extraction from `system/packages-void.yaml`, user autologin (`agetty-tty1`), and user group membership (`_seatd`, `video`, `audio`, `input`)
 - [x] `installation/build-iso-void_test.sh` — validation suite asserting required packages, runit services, and postsetup hooks
@@ -121,7 +120,7 @@ confirm.
 - [x] Daily-driver services ([`docs/system-services.md`](system-services.md)): clock sync (`chrony`), a default inbound firewall (`nftables`, `system/nftables/nftables.conf`), removable-media mounting (`udisks2`), firmware updates (`fwupd`) and printing (`cups`), installed and enabled on the live ISO and on installed systems
 - [ ] Installer end to end in CI (`installation/ci/installer-e2e.sh`, the `installer-e2e` job): install the freshly built ISO onto a disk image, boot the plain install to runit stage 2, unlock the encrypted one and check its crypttab, fstab and GRUB. Non-blocking until it has passed on `dev-unstable`; booting the encrypted install (passphrase over serial) is the next step
 - [x] ~~Zed updates~~: Zed was removed from the ISO (Neovim is the default editor), so there is nothing to carry. Was: the ISO installs Zed's prebuilt release (`ZED_VERSION` in `build-iso-void.sh`) into `/usr/lib/zed`. Void has no Zed package, `toren update` does not touch it, and Zed's own updater cannot write to `/usr/lib/zed`, so an install keeps the Zed it shipped with. Repackage the release as an XBPS package in Toren's repository, so `toren update` carries new versions
-- [x] The Quickshell desktop ships as `shell-desktop/` and is the default shell (`org.asura.shell desktop-shell`): byte-identical to its pin, Lua dispatches rewritten for Hyprland 0.49, and every Toren keybinding answered by `shell-desktop/toren/AsuraBridge.qml`. Toren's own shell runs only when chosen; it is never switched to automatically. See `shell-desktop/toren/README.md`
+- [x] The Quickshell desktop ships as `shell-desktop/` and is the default shell (`org.toren.shell desktop-shell`): byte-identical to its pin, Lua dispatches rewritten for Hyprland 0.49, and every Toren keybinding answered by `shell-desktop/toren/TorenBridge.qml`. Toren's own shell runs only when chosen; it is never switched to automatically. See `shell-desktop/toren/README.md`
 - [x] The desktop's colours follow the wallpaper (matugen, Toren's template config), the dock is on at first login, and Super+W / Super+Shift+W open the wallpaper picker. `toren update` applies a pulled `dev-unstable` through `installation/apply-repo.sh`, which `apply-repo_test.sh` keeps equal to the ISO build
 - [ ] Hyprland version (after 0.1.0-beta.1): the ISO ships prebuilt Hyprland 0.49.0 from `Makrennel/hyprland-void`, and the session configuration is written for it (`windowrulev2`, `layerrule`); the beta ships on 0.49. To move to a newer Hyprland, build the Hyprland stack (`hyprutils`, `hyprlang`, `hyprcursor`, `hyprgraphics`, `aquamarine`, `hyprland`, `xdg-desktop-portal-hyprland`, `hypridle`, `hyprlock`) from `packaging/xbps/` and switch the ISO to it
 - [ ] Secure Boot — not supported yet; the ISO and installed systems boot only with Secure Boot disabled (see [`docs/system-services.md`](system-services.md#secure-boot))
@@ -130,54 +129,54 @@ Exit criterion: an Toren ISO boots on a clean machine into the live Wayland desk
 
 ## M5 — Session and portals
 
-*Status: the session is now wired end to end in source and packaged — entry
+_Status: the session is now wired end to end in source and packaged — entry
 point, the runit user services, the SDDM drop-in and all six registrations,
 with `toren doctor` asserting that every registration is installed and that
-every service points at a binary that exists.*
+every service points at a binary that exists._
 
 Before any shell work, because it validates the base-layer bet.
 
 - [x] `toren-session` — a `/bin/sh` entry point that sets the session
-  environment, imports it into dbus activation, and `exec`s Hyprland
-- [x] `asura.desktop` — the session registration, with `DesktopNames=ASURA` so
-  the portal dispatcher derives the right configuration file name
+      environment, imports it into dbus activation, and `exec`s Hyprland
+- [x] `toren.desktop` — the session registration, with `DesktopNames=ASURA` so
+      the portal dispatcher derives the right configuration file name
 - [x] `toren-portals.conf` — the backend preference, with `GlobalShortcuts`
-  deliberately absent and `Secret` served by `xdg-desktop-portal-lxqt`
+      deliberately absent and `Secret` served by `xdg-desktop-portal-lxqt`
 - [x] The Secret portal, which was the worst gap in the project: every Flatpak
-  that stores a password had nowhere to store one. `toren doctor` reads each
-  named backend's `.portal` file, so an interface pointed at a backend that
-  cannot serve it is reported rather than sitting there looking handled
+      that stores a password had nowhere to store one. `toren doctor` reads each
+      named backend's `.portal` file, so an interface pointed at a backend that
+      cannot serve it is reported rather than sitting there looking handled
 - [x] The Camera portal, which looked like a missing backend and was not. No
-  backend implements `org.freedesktop.portal.Camera` — but the interface is
-  implemented by `xdg-desktop-portal` itself, and it asks an **Access** backend
-  for consent before opening a device. Access was un-named, so it fell to
-  `[default] use=hyprland`, and Hyprland does not implement it. Naming
-  `Access` → `gtk` is the whole fix
+      backend implements `org.freedesktop.portal.Camera` — but the interface is
+      implemented by `xdg-desktop-portal` itself, and it asks an **Access** backend
+      for consent before opening a device. Access was un-named, so it fell to
+      `[default] use=hyprland`, and Hyprland does not implement it. Naming
+      `Access` → `gtk` is the whole fix
 - [x] Portal resolution, and the `toren doctor` assertion that the
-  configuration is actually being read
+      configuration is actually being read
 - [x] The runit user services (`system/runit/user-services/`) — each is a
-  `run` script naming the daemon it starts
+      `run` script naming the daemon it starts
 - [ ] The SDDM drop-in — held, not shipped. Its entire content is
-  `DisplayServer=wayland` with `CompositorCommand=toren-greeter`, and SDDM has no
-  way to start a Wayland greeter that does not exist, so installing it before the
-  greeter lands does not degrade the login screen, it removes it. The
-  registration is on the sanctioned list and `toren doctor` reports it, so the
-  gap is visible rather than forgotten. It ships with the greeter, which is now
-  an M6 item.
+      `DisplayServer=wayland` with `CompositorCommand=toren-greeter`, and SDDM has no
+      way to start a Wayland greeter that does not exist, so installing it before the
+      greeter lands does not degrade the login screen, it removes it. The
+      registration is on the sanctioned list and `toren doctor` reports it, so the
+      gap is visible rather than forgotten. It ships with the greeter, which is now
+      an M6 item.
 - [x] All six registrations packaged, every one on the sanctioned list in
-  [architecture.md](architecture.md), each a pointer to content under
-  `/usr/share/asura/`
+      [architecture.md](architecture.md), each a pointer to content under
+      `/usr/share/toren/`
 - [x] `toren doctor` asserts every registration is installed and every service's
-  `run` script names an existing binary — the packaging faults that are silent
-  in both the package build and the login
+      `run` script names an existing binary — the packaging faults that are silent
+      in both the package build and the login
 - [x] The screenshot toolchain in the manifest: `grim`, `slurp` and `hyprpicker`.
-  The portal backend shells out to them, so without them it does not create the
-  Screenshot portal at all and a screenshot keybinding produces nothing
+      The portal backend shells out to them, so without them it does not create the
+      Screenshot portal at all and a screenshot keybinding produces nothing
 - [x] Verified under a screenshot round trip — both the granted path (the dispatcher returns a real PNG) and the consent path (the GTK access dialog appears; Allow stores the permission, Deny is remembered silently in the permission store under app id "") — raw guest serial output in the Stage 4 verification run
 - [ ] Verified under screen sharing, camera access, the GTK file chooser and a secret round-trip — none of which can be done without a display
 
 M6 owns the shell. The `quickshell` runit service reads
-`/usr/share/asura/shell` with `quickshell -p`.
+`/usr/share/toren/shell` with `quickshell -p`.
 
 **The portal assertion is the point of this milestone.** `xdg-desktop-portal`
 derives its per-desktop configuration file name from `XDG_CURRENT_DESKTOP`,
@@ -191,7 +190,7 @@ rather than as a session identity problem, and `toren doctor` now names it.
 Two details in that resolution are pinned by tests because both look like
 non-issues and neither is:
 
-- **`XDG_CURRENT_DESKTOP=ASURA` and `XDG_SESSION_DESKTOP=asura` are different
+- **`XDG_CURRENT_DESKTOP=ASURA` and `XDG_SESSION_DESKTOP=toren` are different
   strings.** The dispatcher lower-cases the first to derive the file name, so the
   capitalisation is load-bearing. A session that swaps them still resolves a
   filename — just the wrong one.
@@ -204,10 +203,9 @@ doctor` exits 0 on a healthy machine despite it. A gap the user has no lever on
 is not a misconfiguration, and a doctor that fails for one teaches users to
 ignore its exit code.
 
-
 ## M6 — The shell
 
-*Status: the shell's source exists — the schema, the entry point, the widget
+_Status: the shell's source exists — the schema, the entry point, the widget
 catalogue, the notification server and the settings bridge — and it is packaged.
 The surfaces it draws are a vendored upstream Quickshell configuration, pinned to
 a commit and kept byte-identical to it, and re-themed to Toren's design system
@@ -216,89 +214,89 @@ source and is not in the archive, so there is no quickshell here to run and no
 qmllint to check the QML with. What is checked instead is everything checkable
 without an engine, and that check found four real faults while it was being
 written. The vendored tree is exempt from it by declaration, and that exemption
-has a price: the bridges into the tree are a contract that nothing checks.*
+has a price: the bridges into the tree are a contract that nothing checks._
 
 - `toren-greeter`, which runs `weston --shell=kiosk` and hosts Toren's own login
   surface. It had no owner until the SDDM drop-in made the dependency explicit:
   the drop-in points at it, so the login screen cannot ship without it. M6 owns it
   because it is a Quickshell surface like everything else on the desktop.
-- [x] `org.asura.shell` and `org.asura.desktop`, the schemas the shell reads.
-  The keys adoption imports into — `wallpaper-path`, `wallpaper-path-dark`,
-  `favorites`, `dock-position` — keep the names and types
-  [adopting-asura.md](adopting-asura.md) already uses
+- [x] `org.toren.shell` and `org.toren.desktop`, the schemas the shell reads.
+      The keys adoption imports into — `wallpaper-path`, `wallpaper-path-dark`,
+      `favorites`, `dock-position` — keep the names and types
+      [adopting-toren.md](adopting-toren.md) already uses
 - [x] The Toren "do everything" menu (`toren menu`, `SUPER ALT, Space`), built directly into the launcher as a native mode coordinating apps, keybindings cheatsheet, styling, settings deep-links, package management, updates, screenshots, and session controls. Documented in [`docs/menu.md`](menu.md).
 - [x] The bar, the dock, the launcher and the popover surfaces, taken from a
-  vendored upstream component at a pinned commit and re-themed, rather than
-  written from nothing. Since the port the running shell draws ported
-  components for these, adapted in place (see [`NOTICE.md`](../NOTICE.md))
-- [x] The widget catalogue, Toren's own, driven by `org.asura.shell`
+      vendored upstream component at a pinned commit and re-themed, rather than
+      written from nothing. Since the port the running shell draws ported
+      components for these, adapted in place (see [`NOTICE.md`](../NOTICE.md))
+- [x] The widget catalogue, Toren's own, driven by `org.toren.shell`
 - [x] The vendored tree itself, held byte-identical to its upstream commit.
-  `sh shell/vendor/vendor.sh verify` hashes every vendored file against the
-  manifest and fails on a file that was edited by hand, which is the only check
-  that can catch an edit nobody intended
+      `sh shell/vendor/vendor.sh verify` hashes every vendored file against the
+      manifest and fails on a file that was edited by hand, which is the only check
+      that can catch an edit nobody intended
 - [x] The monochrome re-theme, carried into the vendored components by three
-  overlay files at upstream's own paths — the palette bridge, the settings bridge
-  and the shell's own state — with no vendored file modified
+      overlay files at upstream's own paths — the palette bridge, the settings bridge
+      and the shell's own state — with no vendored file modified
 - [x] `toren config set` as the only writer of those schemas; the shell's look in
-  `shell.json` has its own, the `toren-shell` daemon
+      `shell.json` has its own, the `toren-shell` daemon
 - [x] `toren doctor` checks the shell's source: the widget catalogue naming a
-  file that is not there, a surface reading a property the settings wrapper does
-  not declare, a `schemaId` with no schema file, a path outside the boundary, an
-  import outside the closed module list
+      file that is not there, a surface reading a property the settings wrapper does
+      not declare, a `schemaId` with no schema file, a path outside the boundary, an
+      import outside the closed module list
 - [x] Popovers — one at a time, tracked by a single `currentPopover` rather than
-  three booleans, so opening the third cannot leave two orphaned surfaces with
-  no keybinding that closes them
+      three booleans, so opening the third cannot leave two orphaned surfaces with
+      no keybinding that closes them
 - [x] Quick settings and the status area
 - [x] The icon font: `font-awesome` (4.7, no dependencies) for the status set. Every glyph is declared in `Icons.qml` as a `\uXXXX` escape and checked to be inside its font's real range — which caught that the first draft used U+F8FF and U+F8C0, neither of which is a Font Awesome 4.7 glyph
 - [ ] The vendored components' own icon names. Upstream names its icons the
-  Material Symbols way and asks for a font the base layer does not carry, and
-  Font Awesome 4.7 is a codepoint font with no ligatures — so those names resolve
-  to nothing until they are mapped onto the codepoints the archive's font has.
-  The map is the missing piece, and it belongs in the bridge
+      Material Symbols way and asks for a font the base layer does not carry, and
+      Font Awesome 4.7 is a codepoint font with no ligatures — so those names resolve
+      to nothing until they are mapped onto the codepoints the archive's font has.
+      The map is the missing piece, and it belongs in the bridge
 - [x] `toren-greeter` — the kiosk Weston wrapper, which is the part that can be
-  tested without a display, plus twelve checks that run it against stubbed weston
-  and modetest
+      tested without a display, plus twelve checks that run it against stubbed weston
+      and modetest
 - [ ] The login surface itself, and the SDDM drop-in with it. Both stay
-  uninstalled: a greeter that cannot authenticate is worse than no greeter,
-  because it is a machine that takes a password and does nothing with it. What is
-  left is the sddm-greeter authentication protocol
+      uninstalled: a greeter that cannot authenticate is worse than no greeter,
+      because it is a machine that takes a password and does nothing with it. What is
+      left is the sddm-greeter authentication protocol
 - [x] The notification server. `org.freedesktop.Notifications` is a
-  session-scoped bus name and no daemon in the image holds it, so with the
-  shell not running it every application that sends a notification gets an error
-  back. Actions are advertised because the popup renders them; body markup is
-  not, and the body is `Text.PlainText` to match; persistence is not advertised,
-  because there is no notification centre yet and a client that believes it need
-  not show its own reminder is a client with no reminder and no history
-- [x] Idle policy in `org.asura.desktop` — dim, blank and lock timeouts, each
-  independent, 0 meaning never — run by hypridle through the `toren-idle` runit
-  service; `Idle.qml` draws the dim scrim
+      session-scoped bus name and no daemon in the image holds it, so with the
+      shell not running it every application that sends a notification gets an error
+      back. Actions are advertised because the popup renders them; body markup is
+      not, and the body is `Text.PlainText` to match; persistence is not advertised,
+      because there is no notification centre yet and a client that believes it need
+      not show its own reminder is a client with no reminder and no history
+- [x] Idle policy in `org.toren.desktop` — dim, blank and lock timeouts, each
+      independent, 0 meaning never — run by hypridle through the `toren-idle` runit
+      service; `Idle.qml` draws the dim scrim
 - [x] The lock itself, by `hyprlock` rather than by the shell. That is a decision,
-  not a platform limit: Quickshell here links libpam and has `Quickshell.Services.Pam`.
-  `hyprlock` is mature, runs as a process of its own, and is in the archive,
-  so rule 2 settles it; every competing locker is now excluded, so the image has exactly one
+      not a platform limit: Quickshell here links libpam and has `Quickshell.Services.Pam`.
+      `hyprlock` is mature, runs as a process of its own, and is in the archive,
+      so rule 2 settles it; every competing locker is now excluded, so the image has exactly one
 - [x] The idle screen, as a scrim. It answers the question rather than deferring
-  it: the gap between idle and lock is exactly the window where someone walks
-  past, so the shell dims what is on screen. It does not blank the display and
-  does not claim to — power saving is the compositor's job, and a shell drawing
-  opaque black would make the screen look off while the panel drew at full power
+      it: the gap between idle and lock is exactly the window where someone walks
+      past, so the shell dims what is on screen. It does not blank the display and
+      does not claim to — power saving is the compositor's job, and a shell drawing
+      opaque black would make the screen look off while the panel drew at full power
 - [x] The wallpaper. It existed because adoption imports into
-  `org.asura.shell/wallpaper-path` and no GNOME shell exists to draw it; a
-  setting an import writes and nothing draws is an import that succeeds and does
-  nothing
+      `org.toren.shell/wallpaper-path` and no GNOME shell exists to draw it; a
+      setting an import writes and nothing draws is an import that succeeds and does
+      nothing
 - [x] The launcher, which until now had a `refresh()` that set its model to an
-  empty list and showed nothing. Empty `launcher-apps` means every launchable
-  application, which is the correct default rather than a fallback
+      empty list and showed nothing. Empty `launcher-apps` means every launchable
+      application, which is the correct default rather than a fallback
 
 ## M7 — Toren Hub
 
-*Status: the settings catalogue and the page registry exist, and the invariant
+_Status: the settings catalogue and the page registry exist, and the invariant
 between them is checked by `toren doctor` rather than asserted. The Hub's window
 is a ported Hub (a grouped rail, a global search and a page per area of the
 desktop), drawn with the shell's own component kit, and the settings catalogue is its
-**Toren** group; `toren-hubd` is its data plane for the compositor and the machine.*
+**Toren** group; `toren-hubd` is its data plane for the compositor and the machine._
 
 - `toren config` — `list`, `get`, `set`, `reset`, `pages`. Values are validated
-  against the key's type, range and enum *before* the write, because a value that
+  against the key's type, range and enum _before_ the write, because a value that
   is well-formed GVariant and outside a declared range is accepted by GSettings,
   committed to dconf, and then read by the shell, which does something nobody
   asked for
@@ -310,36 +308,36 @@ desktop), drawn with the shell's own component kit, and the settings catalogue i
   command line can change; a page with no command is a control the user can see
   and use that either does nothing or writes dconf behind the tool's back
 - [x] The Hub window, drawn in Quickshell (QML) — one UI toolkit and one design
-  system on the desktop, not two. It draws pages it did not write: `toren config
-  export` hands it the navigation, the keys, their types, their permitted values,
-  their ranges and their current values
+      system on the desktop, not two. It draws pages it did not write: `toren config
+export` hands it the navigation, the keys, their types, their permitted values,
+      their ranges and their current values
 - [x] The Hub's chrome built from the shell's component kit — its navigation rail, its content
-  page, its grouped rows and its text — with the window's own code at the shell's
-  root rather than in a configuration root of its own, because the kit's files reach
-  each other through imports that only resolve from there. A change to the kit's look
-  reaches the settings window and the desktop shell together, which is what one design
-  system means in practice
+      page, its grouped rows and its text — with the window's own code at the shell's
+      root rather than in a configuration root of its own, because the kit's files reach
+      each other through imports that only resolve from there. A change to the kit's look
+      reaches the settings window and the desktop shell together, which is what one design
+      system means in practice
 - [x] Every control writes through `toren config set`, never through GSettings,
-  so every write to dconf on this desktop passes the same validation the tool
-  does. A control writing dconf itself could put 999999 in a bar height that
-  declares a maximum of 96
+      so every write to dconf on this desktop passes the same validation the tool
+      does. A control writing dconf itself could put 999999 in a bar height that
+      declares a maximum of 96
 - [x] A third invariant: every setting type has a control, and every control is
-  used by some setting. A type with no control is a page that renders the row and
-  leaves it unchangeable — which reads as a broken Hub rather than a missing
-  widget
+      used by some setting. A type with no control is a page that renders the row and
+      leaves it unchangeable — which reads as a broken Hub rather than a missing
+      widget
 
 ## M8 — Repository and release
 
-*Status: the control package builds and the XBPS repository is indexed by
+_Status: the control package builds and the XBPS repository is indexed by
 `packaging/xbps/build-repo.sh`. Nothing has been published; the built repository
-is unsigned.*
+is unsigned._
 
 - [x] The `toren` package, built reproducibly: `SOURCE_DATE_EPOCH` pinned, `-trimpath`, mtimes
-  and modes normalized. Two builds are byte-identical, which is checked rather than asserted
+      and modes normalized. Two builds are byte-identical, which is checked rather than asserted
 - [x] XBPS repository indexed with `xbps-rindex` (`packaging/xbps/build-repo.sh`)
-- [ ] The other packages the stack names — `asura-terminal` and the session and portal
-  packages. Everything built so far ships in the one `toren` package, and `toren-shell`
-  and `toren-hub` are a binary and a launcher inside it, not packages of their own
+- [ ] The other packages the stack names — `toren-terminal` and the session and portal
+      packages. Everything built so far ships in the one `toren` package, and `toren-shell`
+      and `toren-hub` are a binary and a launcher inside it, not packages of their own
 - [ ] Published, and `toren update` verified against a machine that installed from it
 - [x] Release pipeline: pushing a `v*` tag runs `.github/workflows/release.yml`, which builds the ISO with the same steps as CI (`.github/actions/build-iso`), boot-tests it in QEMU (strict), writes `SHA256SUMS`, signs it with minisign when `MINISIGN_SECRET_KEY` is set, and publishes a GitHub Release (`-alpha`/`-beta`/`-rc` tags as pre-releases)
 - [ ] First tagged release (`v0.1.0-beta.1`) published, with the install steps in `README.md` checked end to end on real hardware
@@ -348,53 +346,52 @@ The boundary check exists because a package that quietly gains a file another pa
 a fork of that package, and that cost arrives at the next rebase as a conflict nobody remembers
 the origin of.
 
-
 ## M9 — Adoption (Legacy — Ubuntu/APT design)
 
-*Status: the preflight is written and tested — all eleven checks, the three exit codes, and the
+_Status: the preflight is written and tested — all eleven checks, the three exit codes, and the
 never-write promises enforced as data rather than prose. `toren adopt` itself does not exist,
-and the preflight has never been run against a machine that was about to be switched.*
+and the preflight has never been run against a machine that was about to be switched._
 
 **Note:** This milestone documents the Ubuntu/APT-based adoption design. A Void/XBPS-based
 adoption would follow the same principles but with different package manager commands and
-no GDM dependency (Toren uses SDDM). The design in [`adopting-asura.md`](adopting-asura.md)
+no GDM dependency (Toren uses SDDM). The design in [`adopting-toren.md`](adopting-toren.md)
 is preserved for reference.
 
 Switching an existing GNOME desktop on the base layer over to the Toren shell, in place,
 without reinstalling and without touching the user's data. Designed in
-[`adopting-asura.md`](adopting-asura.md).
+[`adopting-toren.md`](adopting-toren.md).
 
 This is also the project's growth path: it is how someone decides whether they want Toren
 before they commit to installing it. That is worth more than a landing page.
 
 - [x] `toren adopt --check` — preflight. Reports what would change and changes nothing, needs
-  no root, and is safe to run as often as the user likes
+      no root, and is safe to run as often as the user likes
 - [x] Eleven checks, each with its own fail condition: base release, desktop session, display
-  manager, GNOME version, GPU and driver, composite support, portal availability, disk space,
-  XBPS health, third-party extensions, boot chain
+      manager, GNOME version, GPU and driver, composite support, portal availability, disk space,
+      XBPS health, third-party extensions, boot chain
 - [x] Blockers separated from report-only warnings, with three distinct exit codes so the same
-  command is usable from a script
+      command is usable from a script
 - [x] `--json`, which is how `toren adopt` re-runs the preflight as its own step zero rather
-  than reimplementing any of it
+      than reimplementing any of it
 - [x] The never-write promises encoded as data, so a test can assert against them instead of a
-  comment being trusted
+      comment being trusted
 - [x] The adoption state file, written atomically and versioned. `--undo`, `toren doctor`
-  and every failure path read it, and a truncated one read as empty is a state file that
-  makes undo do nothing and report success
+      and every failure path read it, and a truncated one read as empty is a state file that
+      makes undo do nothing and report success
 - [x] The adoption plan, derived from the machine rather than a fixed script. A registration
-  already byte-identical to its source is not a step, because writing it again is a change
-  that changes nothing and makes "what adoption did" a worse record
-- [x] The undo script, generated from the same plan and written *before* the first write, so
-  it exists even if adoption dies half way through. A plain file rather than a subcommand,
-  because the moment it is needed there may be no working desktop to run one from
+      already byte-identical to its source is not a step, because writing it again is a change
+      that changes nothing and makes "what adoption did" a worse record
+- [x] The undo script, generated from the same plan and written _before_ the first write, so
+      it exists even if adoption dies half way through. A plain file rather than a subcommand,
+      because the moment it is needed there may be no working desktop to run one from
 - [ ] `toren adopt` — execute the plan. The plan, the state and the undo exist; running
-  them as root does not
+      them as root does not
 - [x] A GNOME audit in the manifest verifier, in three parts: nothing GNOME in the
-  `packages:` list, the metapackages that would pull a desktop in *transitively* excluded,
-  and no GNOME tool invoked anywhere in the tree. `gnome-keyring` is allowed and named
-  with its reason; its transitive closure was verified by hand — 199 packages, no desktop
-  component among them. `gsettings` is deliberately not treated as a GNOME tool: it is
-  GLib's, it reads the same dconf the shell reads, and it is the interface GLib documents
+      `packages:` list, the metapackages that would pull a desktop in _transitively_ excluded,
+      and no GNOME tool invoked anywhere in the tree. `gnome-keyring` is allowed and named
+      with its reason; its transitive closure was verified by hand — 199 packages, no desktop
+      component among them. `gsettings` is deliberately not treated as a GNOME tool: it is
+      GLib's, it reads the same dconf the shell reads, and it is the interface GLib documents
 - [ ] `toren adopt --verify`, `--prune`, `--undo`
 
 Two decisions in the preflight are worth recording because they are counterintuitive.
@@ -402,14 +399,13 @@ Two decisions in the preflight are worth recording because they are counterintui
 **The GPU check never blocks.** Refusing adoption for a GPU this project does not recognise
 would put a ceiling on reach at exactly the hardware the project exists to support, and adoption
 installs no driver. So an unusual GPU is a warning naming it, and a blocker only appears when
-the *portal backends cannot be installed* — the one future-facing check that genuinely blocks,
+the _portal backends cannot be installed_ — the one future-facing check that genuinely blocks,
 because a desktop whose file choosers and screen sharing silently do not work is not a desktop.
 
 **An xbps lock file is a warning, not a blocker.** A lock file existing is normal;
-xbps creates one per operation. What cannot be established without `fuser` is *who*
+xbps creates one per operation. What cannot be established without `fuser` is _who_
 holds it, so the honest answer is a warning that says so. A half-configured package is a
 blocker — running xbps in that state is unsafe.
-
 
 ## M10 — Agent layer
 
@@ -420,9 +416,9 @@ Distro-independent by construction.
 
 ## M11 — Theming, sidebar, switching, plugins, rollback, agent, installer
 
-*Recorded 2026-10-19, from a comparison against the project the shell was inspired
+_Recorded 2026-10-19, from a comparison against the project the shell was inspired
 by. This is a scope decision, not a feature list discovered by reading someone
-else's codebase.*
+else's codebase._
 
 **What is deliberately not being copied.** The project this shell was inspired by is an
 Arch distribution whose desktop runs on Hyprland or niri, and whose base is rolling.
@@ -447,106 +443,106 @@ it is the answer.
 **What is being taken**, in the order it is worth doing:
 
 - [x] **Vendored upstream components.** The shell's surfaces are a vendored
-  open-source Quickshell configuration, held byte-identical to a pinned upstream
-  commit and re-themed rather than forked. The decision is a trade, and the trade is
-  recorded rather than implied: Toren gives up writing a bar, a dock and a
-  launcher from nothing, and takes on a dependency it does not control, pinned to a
-  commit it has to re-vendor and re-check when upstream moves. What makes the trade
-  worth taking is the byte-identical rule. The tree is upstream's; every change is a
-  configuration value, an overlay or a patch; and the shell's design system reaches
-  the components through three overlay files at upstream's own paths, so the desktop
-  looks like Toren's without a vendored file being edited. The cost is stated
-  rather than discovered: a re-vendor is a re-theme event, because the bridges are a
-  contract that no linter checks. Adoptions are one surface at a time, and the first
-  is the region selector's text recognition: a rectangle or a circle drawn on the
-  screen, the words inside it read with `tesseract-ocr` and copied to the clipboard,
-  on Super+Shift+T. Upstream's entry point registers an IPC handler and a shortcut
-  for each of its five actions; Toren's overlay registers none of them and reaches
-  the one action through the shell's own IPC bridge, because a chord registered
-  inside a vendored file is a chord the keybinding catalogue does not know. The
-  selector's drawing options — what a selection snaps to, the aim lines, the stroke
-  and the padding — are schema keys behind a Hub page, and the actions Toren does
-  not reach yet are not registered: an entry point for a missing command is a
-  control that runs nothing.
+      open-source Quickshell configuration, held byte-identical to a pinned upstream
+      commit and re-themed rather than forked. The decision is a trade, and the trade is
+      recorded rather than implied: Toren gives up writing a bar, a dock and a
+      launcher from nothing, and takes on a dependency it does not control, pinned to a
+      commit it has to re-vendor and re-check when upstream moves. What makes the trade
+      worth taking is the byte-identical rule. The tree is upstream's; every change is a
+      configuration value, an overlay or a patch; and the shell's design system reaches
+      the components through three overlay files at upstream's own paths, so the desktop
+      looks like Toren's without a vendored file being edited. The cost is stated
+      rather than discovered: a re-vendor is a re-theme event, because the bridges are a
+      contract that no linter checks. Adoptions are one surface at a time, and the first
+      is the region selector's text recognition: a rectangle or a circle drawn on the
+      screen, the words inside it read with `tesseract-ocr` and copied to the clipboard,
+      on Super+Shift+T. Upstream's entry point registers an IPC handler and a shortcut
+      for each of its five actions; Toren's overlay registers none of them and reaches
+      the one action through the shell's own IPC bridge, because a chord registered
+      inside a vendored file is a chord the keybinding catalogue does not know. The
+      selector's drawing options — what a selection snaps to, the aim lines, the stroke
+      and the padding — are schema keys behind a Hub page, and the actions Toren does
+      not reach yet are not registered: an entry point for a missing command is a
+      control that runs nothing.
 - [x] **The monochrome re-theme.** Strict monochrome is now the whole desktop's rule
-  and not only the shell's own surfaces. The vendored components are monochrome by
-  configuration and not by exception: a token bridge answers upstream's Material
-  property names with Toren's greys, and the handful of colours upstream hard-codes
-  in its own files are a patch to make rather than an exception to grant. The
-  wallpaper palette is namespaced and kept as the record of what the wallpaper would
-  have said rather than as something the desktop draws with. The decision recorded
-  here is the hard one: a component that cannot be made monochrome without being
-  patched is a finding against vendoring it, not a reason to grant it an exception.
-  An exception for one component is how a desktop ends up with two design systems,
-  one of which is a coincidence.
+      and not only the shell's own surfaces. The vendored components are monochrome by
+      configuration and not by exception: a token bridge answers upstream's Material
+      property names with Toren's greys, and the handful of colours upstream hard-codes
+      in its own files are a patch to make rather than an exception to grant. The
+      wallpaper palette is namespaced and kept as the record of what the wallpaper would
+      have said rather than as something the desktop draws with. The decision recorded
+      here is the hard one: a component that cannot be made monochrome without being
+      patched is a finding against vendoring it, not a reason to grant it an exception.
+      An exception for one component is how a desktop ends up with two design systems,
+      one of which is a coincidence.
 - [x] **The shell daemon.** `toren-shell daemon` (run by the `torend` runit service) replaces the
-  shell's two-second poll of `toren state` with a subscription to a streaming Go daemon
-  speaking `toren-shell/1` over a Unix socket. The decision is where the parsing lives: it
-  stays in Go, where it is tested against real captured output of tools that do not
-  behave, and the shell reads a frame rather than interpreting a tool's output
-  itself. `toren state` survives as a CLI of its own, so a terminal, a script and
-  anything that is not Quickshell keep a way in; it probes its tools through
-  `desktop/internal/desktopstate`, which the daemon, a port of the prior project's, does not use.
+      shell's two-second poll of `toren state` with a subscription to a streaming Go daemon
+      speaking `toren-shell/1` over a Unix socket. The decision is where the parsing lives: it
+      stays in Go, where it is tested against real captured output of tools that do not
+      behave, and the shell reads a frame rather than interpreting a tool's output
+      itself. `toren state` survives as a CLI of its own, so a terminal, a script and
+      anything that is not Quickshell keep a way in; it probes its tools through
+      `desktop/internal/desktopstate`, which the daemon, a port of the prior project's, does not use.
 - [x] **Theming.** A wallpaper that recolours the desktop, with no matugen on the machine:
-  `toren theme generate` makes the scheme and `toren theme render` fills the app
-  templates, both in Go (`desktop/internal/theme`). The daemon runs them on every wallpaper
-  change and writes `colors.json` and `tones.json` under `$XDG_CACHE_HOME/asura/`, and the
-  shell reads them, so picking a wallpaper repaints the system and nothing restarts. The
-  default scheme is `scheme-monochrome`: the wallpaper drives tone and not hue, unless a
-  person picks a coloured scheme. See [`theming.md`](theming.md)
+      `toren theme generate` makes the scheme and `toren theme render` fills the app
+      templates, both in Go (`desktop/internal/theme`). The daemon runs them on every wallpaper
+      change and writes `colors.json` and `tones.json` under `$XDG_CACHE_HOME/toren/`, and the
+      shell reads them, so picking a wallpaper repaints the system and nothing restarts. The
+      default scheme is `scheme-monochrome`: the wallpaper drives tone and not hue, unless a
+      person picks a coloured scheme. See [`theming.md`](theming.md)
 - [x] **The sidebar.** A slide-in panel for audio, network, bluetooth, display
-  and media, on the right edge. Quick settings are a popover; this is the surface
-  that belongs to the edge rather than to a keybinding. `toren state` probes all
-  five tools in Go and emits JSON, and `Sidebar.qml` is a renderer that never
-  interprets a tool's output itself — the same contract the Hub has. That split is
-  the whole design: wpctl reporting `Volume: 1.53`, nmcli escaping the colons in a
-  MAC address, and bluetoothctl exiting 0 while printing an error are five parsers
-  that would have had no tests in QML, so they are in Go with fixtures taken from
-  real captured output. Nothing fails on absent hardware; a section with no
-  adapter is hidden rather than shown as an error. The state comes from `torend`
-  over its socket rather than from a two-second poll of the CLI, and a closed
-  panel costs nothing because the daemon decides when to push. It opens through
-  `togglePopover("sidebar")` in
-  `shell.qml`, alongside the launcher and quick settings — and, like those two,
-  nothing calls that function yet. No keybinding layer exists in this shell at
-  all, so the sidebar is reachable only from QML today
+      and media, on the right edge. Quick settings are a popover; this is the surface
+      that belongs to the edge rather than to a keybinding. `toren state` probes all
+      five tools in Go and emits JSON, and `Sidebar.qml` is a renderer that never
+      interprets a tool's output itself — the same contract the Hub has. That split is
+      the whole design: wpctl reporting `Volume: 1.53`, nmcli escaping the colons in a
+      MAC address, and bluetoothctl exiting 0 while printing an error are five parsers
+      that would have had no tests in QML, so they are in Go with fixtures taken from
+      real captured output. Nothing fails on absent hardware; a section with no
+      adapter is hidden rather than shown as an error. The state comes from `torend`
+      over its socket rather than from a two-second poll of the CLI, and a closed
+      panel costs nothing because the daemon decides when to push. It opens through
+      `togglePopover("sidebar")` in
+      `shell.qml`, alongside the launcher and quick settings — and, like those two,
+      nothing calls that function yet. No keybinding layer exists in this shell at
+      all, so the sidebar is reachable only from QML today
 - [ ] **Notifications in the sidebar.** The roadmap originally folded this into the
-  sidebar and it is not there. The server keeps a 32-entry history, but reaching it
-  means reading an `id` across a file boundary in QML, and Quickshell is not
-  installed on any machine this project can test on. Guessing at an API that cannot
-  be checked is the one thing here that is worse than shipping late
+      sidebar and it is not there. The server keeps a 32-entry history, but reaching it
+      means reading an `id` across a file boundary in QML, and Quickshell is not
+      installed on any machine this project can test on. Guessing at an API that cannot
+      be checked is the one thing here that is worse than shipping late
 - [x] **Window switching.** A most-recently-used switcher over Hyprland, on
-  Alt+Tab (Super+Tab opens the workspace overview instead). `toren windows`
-  reads
-  `hyprctl -j clients`, drops unmapped and scratchpad windows, and sorts by
-  `focusHistoryID` — which is *inverted* from what it looks like: Hyprland's
-  history vector is oldest-first and the id is `size - index - 1`, so **lower is
-  more recent** and zero is the window you are already in. Sorting descending,
-  the obvious thing, is least-recently-used. That is the whole feature, so it is
-  sorted in Go with tests rather than in QML. Also gotcha-shaped and worth
-  writing down: scratchpad workspaces are `-99..-2`, so `id < 0` is *wrong* — it
-  also catches name-based normal workspaces, which start at -1337
+      Alt+Tab (Super+Tab opens the workspace overview instead). `toren windows`
+      reads
+      `hyprctl -j clients`, drops unmapped and scratchpad windows, and sorts by
+      `focusHistoryID` — which is _inverted_ from what it looks like: Hyprland's
+      history vector is oldest-first and the id is `size - index - 1`, so **lower is
+      more recent** and zero is the window you are already in. Sorting descending,
+      the obvious thing, is least-recently-used. That is the whole feature, so it is
+      sorted in Go with tests rather than in QML. Also gotcha-shaped and worth
+      writing down: scratchpad workspaces are `-99..-2`, so `id < 0` is _wrong_ — it
+      also catches name-based normal workspaces, which start at -1337
 - [x] **The binds.** The compositor configuration is in the repository now
-  (`session/hyprland/`, hyprlang, for Hyprland 0.53.3). Alt+Tab advances the switcher
-  and its release, a `bindr`, closes it; Alt+Shift+Tab walks back; Super+Tab opens the
-  workspace overview and Super+Alt+Tab steps its desktops. The first version put the
-  switcher on Super+Tab and closed it with `bindl`, which is Hyprland's *locked* flag and
-  not release, so the card flashed for about 50 ms (`journal/2026-10-23.md`)
+      (`session/hyprland/`, hyprlang, for Hyprland 0.53.3). Alt+Tab advances the switcher
+      and its release, a `bindr`, closes it; Alt+Shift+Tab walks back; Super+Tab opens the
+      workspace overview and Super+Alt+Tab steps its desktops. The first version put the
+      switcher on Super+Tab and closed it with `bindl`, which is Hyprland's _locked_ flag and
+      not release, so the card flashed for about 50 ms (`journal/2026-10-23.md`)
 - [x] **Plugins.** A mechanism for shell plugins, and the thing that makes desktop
-  widgets addable by anyone: `toren plugin`, the plugin runtime in `shell/plugins/` and
-  the `qs.PluginKit` kit. See [`plugins.md`](plugins.md)
+      widgets addable by anyone: `toren plugin`, the plugin runtime in `shell/plugins/` and
+      the `qs.PluginKit` kit. See [`plugins.md`](plugins.md)
 - [x] **Rollback.** Btrfs snapshots around every update. `toren update` creates
-  a Btrfs root snapshot (`.snapshots/pre-update-<timestamp>`) before updating
-  packages, and `toren rollback --system` lists and restores them.
+      a Btrfs root snapshot (`.snapshots/pre-update-<timestamp>`) before updating
+      packages, and `toren rollback --system` lists and restores them.
 - [ ] **The agent.** M10: a local knowledge vault, an index over the machine, and
-  a dashboard. The daemon, the vault and the dashboard are built as Toren Agent
-  (`toren-agent`, off until the user switches it on; [`agent.md`](agent.md)), but no
-  engine ships, so this stays open until one is wired to its `engine.command` seam
+      a dashboard. The daemon, the vault and the dashboard are built as Toren Agent
+      (`toren-agent`, off until the user switches it on; [`agent.md`](agent.md)), but no
+      engine ships, so this stays open until one is wired to its `engine.command` seam
 - [ ] **The installer.** Blocked on M4 and on root. Recorded here so the scope is
-  visible, not because it is reachable
+      visible, not because it is reachable
 
 ## Later, unsequenced
 
 - A package index for the shell's plugins (the plugin mechanism itself is built)
-- `asura benchmark` so performance regressions are visible rather than anecdotal
+- `toren benchmark` so performance regressions are visible rather than anecdotal
 - A second base release, once hardware profiles justify it

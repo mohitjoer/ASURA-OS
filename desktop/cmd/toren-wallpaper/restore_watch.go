@@ -52,7 +52,7 @@ func (d *daemon) restoreFallback() {
 	}
 	saveJSON(path, state)
 	if _, applied := d.restoreOutputs(); applied > 0 {
-		fmt.Fprintf(os.Stderr, "asura-wallpaper: recorded wallpaper never arrived; painted %s\n",
+		fmt.Fprintf(os.Stderr, "toren-wallpaper: recorded wallpaper never arrived; painted %s\n",
 			filepath.Base(src))
 	}
 }

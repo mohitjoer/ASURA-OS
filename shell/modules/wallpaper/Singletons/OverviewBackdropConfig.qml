@@ -5,7 +5,7 @@ import Quickshell
 import Quickshell.Io
 
 // The overview-backdrop knobs, read straight from wallpaper config
-// (~/.config/asura-wallpaper-wall/config.json), the same overviewBackdrop.* block the
+// (~/.config/toren-wallpaper-wall/config.json), the same overviewBackdrop.* block the
 // picker's "Overview backdrop" panel writes. Those settings had no consumer:
 // nothing rendered a backdrop, so the picker wrote them into a void. The shell
 // paints the surface itself now (modules/wallpaper -> OverviewBackdrop) and
@@ -18,7 +18,7 @@ Singleton {
         if (override && override.length > 0)
             return override + "/config.json";
         const base = Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config");
-        return base + "/asura-wallpaper-wall/config.json";
+        return base + "/toren-wallpaper-wall/config.json";
     }
 
     // The overviewBackdrop sub-object, refreshed on every file write below.

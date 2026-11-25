@@ -34,7 +34,7 @@ const wallToneSub = 4
 
 // wallpaperTonePath is the map every wallpaper-floating surface watches.
 func wallpaperTonePath() string {
-	return filepath.Join(matugenCacheHome(), "asura", "wallpaper-tone.json")
+	return filepath.Join(matugenCacheHome(), "toren", "wallpaper-tone.json")
 }
 
 // writeWallpaperTone samples pic into the map. A video is measured through the

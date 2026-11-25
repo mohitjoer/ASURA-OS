@@ -8,15 +8,15 @@ import (
 	"strings"
 	"testing"
 
-	"asura/desktop/cmd/toren-hubd/internal/wm"
+	"toren/desktop/cmd/toren-hubd/internal/wm"
 )
 
-// Asura's shipped legend for the test: the bind catalogue. SUPER+Q (close) is
+// Toren's shipped legend for the test: the bind catalogue. SUPER+Q (close) is
 // the chord the imported config shadows.
 const fxBinds = `{"categories":[{"id":"w","label":"Windows"},{"id":"a","label":"Apps"}],"binds":[
  {"id":"close","category":"w","label":"Close window","chord":"SUPER + Q","kind":"wm","action":"killactive"},
  {"id":"fullscreen","category":"w","label":"Fullscreen","chord":"SUPER + F","kind":"wm","action":"fullscreen","argument":"0"},
- {"id":"terminal","category":"a","label":"Terminal","chord":"SUPER + Return","kind":"app","action":"asura-app terminal"}]}`
+ {"id":"terminal","category":"a","label":"Terminal","chord":"SUPER + Return","kind":"app","action":"toren-app terminal"}]}`
 
 // A migrating user's native hyprland.conf: a shadowing bind (Q), a couple of
 // clean ingestable binds, a self-duplicate (G twice), a native
@@ -25,7 +25,7 @@ const fxBinds = `{"categories":[{"id":"w","label":"Windows"},{"id":"a","label":"
 const fxHypr = `$mainMod = SUPER
 
 # apps
-bind = $mainMod, Q, exec, foot           # shadows Asura's close
+bind = $mainMod, Q, exec, foot           # shadows Toren's close
 bind = $mainMod SHIFT, E, exec, thunar   # clean
 bind = $mainMod, T, togglefloating       # ingestable dispatcher
 bind = $mainMod, G, exec, gimp           # duplicate 1
@@ -86,7 +86,7 @@ func importHome(t *testing.T) string {
 	mustWrite(t, catalogue, fxBinds)
 	t.Setenv("ASURA_BINDS_JSON", catalogue)
 	t.Setenv("HYPRLAND_INSTANCE_SIGNATURE", "")
-	mustWrite(t, filepath.Join(home, ".config", "asura", "hyprland", "user.conf"), "# user overrides\n")
+	mustWrite(t, filepath.Join(home, ".config", "toren", "hyprland", "user.conf"), "# user overrides\n")
 	mustWrite(t, filepath.Join(home, ".config", "kitty", "user.conf"), "# kitty user\n")
 	return home
 }
@@ -159,8 +159,8 @@ func TestScanResultModel(t *testing.T) {
 	if shadow == nil || shadow.Kind != "shipped" {
 		t.Fatalf("q+super conflict = %+v, want kind shipped", shadow)
 	}
-	if shadow.Asura.Action != "close" {
-		t.Errorf("shadow asura.action = %q, want close", shadow.Asura.Action)
+	if shadow.Toren.Action != "close" {
+		t.Errorf("shadow toren.action = %q, want close", shadow.Toren.Action)
 	}
 	if !strings.Contains(shadow.Mine.Raw, "exec, foot") {
 		t.Errorf("shadow mine.raw = %q, want the foot bind", shadow.Mine.Raw)
@@ -229,7 +229,7 @@ func TestApplyIngestsAndUnbinds(t *testing.T) {
 	dec := decisions{
 		Source:    src,
 		Apps:      allApps(),
-		Conflicts: map[string]json.RawMessage{"q+super": json.RawMessage(`"mine"`), "g+super": json.RawMessage(`"asura"`)},
+		Conflicts: map[string]json.RawMessage{"q+super": json.RawMessage(`"mine"`), "g+super": json.RawMessage(`"toren"`)},
 	}
 	res, err := applyImport(dec)
 	if err != nil {
@@ -274,7 +274,7 @@ func TestApplyIngestsAndUnbinds(t *testing.T) {
 		t.Fatal(err)
 	}
 	u := string(ul)
-	if !strings.Contains(u, "# >>> asura-import "+res.Ts+" >>>") || !strings.Contains(u, "# <<< asura-import <<<") {
+	if !strings.Contains(u, "# >>> toren-import "+res.Ts+" >>>") || !strings.Contains(u, "# <<< toren-import <<<") {
 		t.Errorf("user.conf missing the marked block:\n%s", u)
 	}
 	for _, want := range []string{
@@ -283,7 +283,7 @@ func TestApplyIngestsAndUnbinds(t *testing.T) {
 		"monitor = eDP-1, 1920x1080@60, 0x0, 1",
 		"bind = SUPER, X, movetoworkspace, 3",
 		"general:gaps_in = 3",
-		"# asura-import (port by hand: somethingweird): bind = $mainMod, Z, somethingweird",
+		"# toren-import (port by hand: somethingweird): bind = $mainMod, Z, somethingweird",
 	} {
 		if !strings.Contains(u, want) {
 			t.Errorf("user.conf missing %q:\n%s", want, u)
@@ -302,7 +302,7 @@ func TestApplyIngestsAndUnbinds(t *testing.T) {
 
 	// the layer includes got the imported config in a marked block.
 	kitty, _ := os.ReadFile(filepath.Join(configHome(), "kitty", "user.conf"))
-	if !strings.Contains(string(kitty), "font_family JetBrains Mono") || !strings.Contains(string(kitty), "# >>> asura-import ") {
+	if !strings.Contains(string(kitty), "font_family JetBrains Mono") || !strings.Contains(string(kitty), "# >>> toren-import ") {
 		t.Errorf("kitty/user.conf missing imported block:\n%s", kitty)
 	}
 }
@@ -402,9 +402,9 @@ func TestNormCombo(t *testing.T) {
 	}
 }
 
-// a conflict defaulting to "asura" (absent from decisions) drops the imported
-// bind and adds no unbind, so Asura's shipped chord is untouched.
-func TestApplyDefaultKeepsAsura(t *testing.T) {
+// a conflict defaulting to "toren" (absent from decisions) drops the imported
+// bind and adds no unbind, so Toren's shipped chord is untouched.
+func TestApplyDefaultKeepsToren(t *testing.T) {
 	importHome(t)
 	src := importSource(t)
 	dec := decisions{Source: src, Apps: map[string]appDecision{"hyprland": {Include: true}}}
@@ -413,12 +413,12 @@ func TestApplyDefaultKeepsAsura(t *testing.T) {
 		t.Fatal(err)
 	}
 	if res.Unbinds != 0 {
-		t.Errorf("unbinds = %d, want 0 (default keeps Asura)", res.Unbinds)
+		t.Errorf("unbinds = %d, want 0 (default keeps Toren)", res.Unbinds)
 	}
 	d, _ := readJSONMap(desktopStorePath())["desktop"].(map[string]any)
 	blob, _ := json.Marshal(d)
 	if strings.Contains(string(blob), `"value":"foot"`) {
-		t.Error("the shadowing foot bind was ingested despite defaulting to asura")
+		t.Error("the shadowing foot bind was ingested despite defaulting to toren")
 	}
 }
 
@@ -463,7 +463,7 @@ func TestNativeBinds(t *testing.T) {
 }
 
 // "use mine" on a shadow whose dispatcher cannot be translated must NOT unbind
-// the shipped chord (that would leave a dead key); it keeps Asura's and records
+// the shipped chord (that would leave a dead key); it keeps Toren's and records
 // the imported bind as unresolved instead.
 func TestApplyMineUnknownDispatcherNoUnbind(t *testing.T) {
 	importHome(t)

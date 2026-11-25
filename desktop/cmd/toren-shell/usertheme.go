@@ -10,21 +10,21 @@ import (
 	"strings"
 )
 
-// usertheme.go projects Asura Store-installed colour schemes into the daemon's
-// static-theme world. Asura Store installs a scheme (install-only) under
+// usertheme.go projects Toren Store-installed colour schemes into the daemon's
+// static-theme world. Toren Store installs a scheme (install-only) under
 // userThemeDir()/<id>/ as a Noctalia-format scheme.json ({dark?, light?} of
 // mPrimary/.../mSurface roles) plus a meta.json ({label, provider}). Here the
 // chosen Noctalia block is converted into the 34-role catalog palette every
 // static-theme seam consumes (matugenApplyStatic, resolveThemePalette, the theme
 // catalog projection, and theme.theme validation), so a downloaded scheme
 // behaves exactly like a built-in one: it appears in the switcher belt and the
-// Hub picker, applies through `asura-shell theme <id>`, and matugen fans it into
+// Hub picker, applies through `toren-shell theme <id>`, and matugen fans it into
 // every app. themePalettes (themes_gen.go) stays the built-in source of truth;
 // the library only adds names and never shadows a built-in id.
 
-// userThemeDir is the install root Asura Store writes to and this reads.
+// userThemeDir is the install root Toren Store writes to and this reads.
 func userThemeDir() string {
-	return filepath.Join(matugenDataHome(), "asura", "themes")
+	return filepath.Join(matugenDataHome(), "toren", "themes")
 }
 
 // noctaliaColors is the reduced Material set each Noctalia block carries. The
@@ -54,7 +54,7 @@ type noctaliaScheme struct {
 }
 
 // userThemeMeta is the on-disk meta.json: the display label and the provider the
-// scheme came from (the Asura Store subtab that offered it).
+// scheme came from (the Toren Store subtab that offered it).
 type userThemeMeta struct {
 	Label    string `json:"label"`
 	Provider string `json:"provider"`

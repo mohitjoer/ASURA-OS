@@ -40,7 +40,7 @@ PanelWindow {
 
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
-    WlrLayershell.namespace: "asura-keyboard-osd"
+    WlrLayershell.namespace: "toren-keyboard-osd"
 
     anchors.top: true
     anchors.left: true

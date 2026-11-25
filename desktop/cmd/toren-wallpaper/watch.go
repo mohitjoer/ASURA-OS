@@ -15,7 +15,7 @@ import (
 // using inotify: a signature of every catalogued file's path, mtime and size,
 // compared every few seconds. A no-op tick only stats the media files already
 // there; a real change reuses the mtime-gated rescan, whose per-item
-// `asura-wallpaper.wall.cached` and closing `cache ready` events the resident picker
+// `toren-wallpaper.wall.cached` and closing `cache ready` events the resident picker
 // already folds into its grid live (and reloads from on next open). The
 // startup rescan seeds the baseline, so this never double-scans at boot.
 func (d *daemon) watchLibrary() {

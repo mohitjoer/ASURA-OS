@@ -51,7 +51,7 @@ PanelWindow {
     exclusiveZone: 0
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
-    WlrLayershell.namespace: "asura-osd"
+    WlrLayershell.namespace: "toren-osd"
 
     // Span the desktop hole (compositor clamps to it), a small gap off the bottom.
     anchors.bottom: true

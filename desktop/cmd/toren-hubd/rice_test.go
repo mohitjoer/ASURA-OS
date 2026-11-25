@@ -75,7 +75,7 @@ func TestSaveLoadListRice(t *testing.T) {
 	r := Rice{
 		Schema: riceSchema, Slug: "demo", Name: "Demo", CreatedWith: "0.6.8",
 		Color: RiceColor{Mode: "wallpaper"},
-		Look:  map[string]map[string]any{"shell": {"frameBars": map[string]any{"style": "asura-frame"}}},
+		Look:  map[string]map[string]any{"shell": {"frameBars": map[string]any{"style": "toren-frame"}}},
 	}
 	if err := saveRice(r); err != nil {
 		t.Fatal(err)
@@ -84,7 +84,7 @@ func TestSaveLoadListRice(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got.Look["shell"]["frameBars"].(map[string]any)["style"] != "asura-frame" {
+	if got.Look["shell"]["frameBars"].(map[string]any)["style"] != "toren-frame" {
 		t.Fatalf("round-trip lost look: %v", got.Look)
 	}
 
@@ -104,7 +104,7 @@ func TestSaveLoadListRice(t *testing.T) {
 func TestRiceCapture(t *testing.T) {
 	dir := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", dir)
-	if err := os.MkdirAll(filepath.Join(dir, "asura"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(dir, "toren"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	write := func(p, body string) {
@@ -113,7 +113,7 @@ func TestRiceCapture(t *testing.T) {
 		}
 	}
 	writeDesktopStore(t, `{"appearance":{"rounding":10},"cursor":{"theme":"Bibata-Modern-Ice","size":24},"input":{"sensitivity":0.2}}`)
-	write(shellStorePath(), `{"frameBars":{"style":"asura-frame"},"weatherLocation":"Oslo","sidebarWidth":360}`)
+	write(shellStorePath(), `{"frameBars":{"style":"toren-frame"},"weatherLocation":"Oslo","sidebarWidth":360}`)
 	write(launcherStorePath(), `{"heroStrength":0.5,"showWeather":true}`)
 	write(themeStatePath(), `{"followWallpaper":true}`)
 
@@ -130,8 +130,8 @@ func TestRiceCapture(t *testing.T) {
 	if _, ok := r.Look["hypr"]["input"]; ok {
 		t.Fatal("input leaked into look (it is a behavior layer)")
 	}
-	if frameBars, ok := r.Look["shell"]["frameBars"].(map[string]any); !ok || frameBars["style"] != "asura-frame" {
-		t.Fatalf("shell frameBars = %v, want asura-frame", r.Look["shell"]["frameBars"])
+	if frameBars, ok := r.Look["shell"]["frameBars"].(map[string]any); !ok || frameBars["style"] != "toren-frame" {
+		t.Fatalf("shell frameBars = %v, want toren-frame", r.Look["shell"]["frameBars"])
 	}
 	if _, ok := r.Look["shell"]["weatherLocation"]; ok {
 		t.Fatal("personal key weatherLocation captured")
@@ -167,7 +167,7 @@ func TestRiceApplyMergesAndRestoreReverts(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", dir)
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(dir, "cache"))
 	t.Setenv("HOME", dir)
-	if err := os.MkdirAll(filepath.Join(dir, "asura"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(dir, "toren"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 
@@ -191,13 +191,13 @@ func TestRiceApplyMergesAndRestoreReverts(t *testing.T) {
 		t.Fatal(err)
 	}
 	w(filepath.Join(ricesDir(), "cool", "palette.json"), `{"background":"#101010","color4":"#ff8800","foreground":"#eeeeee"}`)
-	w(ricePath("cool"), `{"schema":1,"slug":"cool","name":"Cool","color":{"mode":"fixed","palette":"palette.json"},"look":{"hypr":{"appearance":{"rounding":18}},"shell":{"frameBars":{"style":"asura-frame","rails":{"top":{"size":38}}}},"launcher":{}}}`)
+	w(ricePath("cool"), `{"schema":1,"slug":"cool","name":"Cool","color":{"mode":"fixed","palette":"palette.json"},"look":{"hypr":{"appearance":{"rounding":18}},"shell":{"frameBars":{"style":"toren-frame","rails":{"top":{"size":38}}}},"launcher":{}}}`)
 	if err := applyRice("cool", nil); err != nil {
 		t.Fatal(err)
 	}
 	shell := readJSONMap(shellStorePath())
 	frameBars := shell["frameBars"].(map[string]any)
-	if frameBars["style"] != "asura-frame" {
+	if frameBars["style"] != "toren-frame" {
 		t.Fatalf("apply did not set frameBars.style: %v", frameBars["style"])
 	}
 	if shell["sidebarWidth"] != float64(360) {
@@ -210,8 +210,8 @@ func TestRiceApplyMergesAndRestoreReverts(t *testing.T) {
 	if loadThemeState().FollowWallpaper {
 		t.Fatal("a fixed rice must turn off followWallpaper")
 	}
-	if !isFile(filepath.Join(dir, "cache", "asura", "colors.json")) {
-		t.Fatal("fixed palette not written to the asura cache")
+	if !isFile(filepath.Join(dir, "cache", "toren", "colors.json")) {
+		t.Fatal("fixed palette not written to the toren cache")
 	}
 	reloaded := false
 	for _, c := range calls {
@@ -245,7 +245,7 @@ func TestThemeAppsRoundTrip(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", dir)
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(dir, "cache"))
 	t.Setenv("HOME", dir)
-	if err := os.MkdirAll(filepath.Join(dir, "asura"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(dir, "toren"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	origRun, origReload := riceRun, riceReload
@@ -306,11 +306,11 @@ func TestRiceTouchesAndExport(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", dir)
 
 	r := Rice{
-		Schema: riceSchema, Slug: "demo", Name: "Demo", Author: "Asura Team",
+		Schema: riceSchema, Slug: "demo", Name: "Demo", Author: "Toren Team",
 		CreatedWith: "0.6.8",
 		Color:       RiceColor{Mode: "fixed", Palette: "palette.json"},
 		Assets:      RiceAssets{Wallpaper: "wall.png"},
-		Look:        map[string]map[string]any{"hypr": {"rounding": 3.0}, "shell": {"frameBars": map[string]any{"style": "asura-frame"}}},
+		Look:        map[string]map[string]any{"hypr": {"rounding": 3.0}, "shell": {"frameBars": map[string]any{"style": "toren-frame"}}},
 	}
 	rdir := filepath.Join(ricesDir(), "demo")
 	if err := os.MkdirAll(rdir, 0o755); err != nil {
@@ -342,7 +342,7 @@ func TestRiceTouchesAndExport(t *testing.T) {
 		t.Fatalf("launcher.json should be present but not provided: %+v", l)
 	}
 	if find("colors.json") == nil {
-		t.Fatal("fixed rice should touch the asura palette cache")
+		t.Fatal("fixed rice should touch the toren palette cache")
 	}
 	if find("Desktop wallpaper") == nil {
 		t.Fatal("bundled wallpaper not reported")
@@ -366,7 +366,7 @@ func TestRiceTouchesAndExport(t *testing.T) {
 func TestCaptureAllLayersAndTouches(t *testing.T) {
 	dir := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", dir)
-	if err := os.MkdirAll(filepath.Join(dir, "asura"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(dir, "toren"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	writeDesktopStore(t, `{"appearance":{"rounding":0},"keybinds":[{"keys":"SUPER + T","action":"exec","value":"kitty"}],"windowRules":[{"class":"Spotify","action":"float"}],"input":[]}`)
@@ -408,7 +408,7 @@ func TestSquareShellAndKeybindRoundTrip(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", dir)
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(dir, "cache"))
 	t.Setenv("HOME", dir)
-	if err := os.MkdirAll(filepath.Join(dir, "asura"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(dir, "toren"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	origRun, origReload := riceRun, riceReload
@@ -469,7 +469,7 @@ func TestCaptureNewStoresDecorsAndLiveWall(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", dir)
 	t.Setenv("XDG_STATE_HOME", filepath.Join(dir, "state"))
 	t.Setenv("HOME", dir)
-	for _, d := range []string{filepath.Join(dir, "asura"), filepath.Join(dir, "state"), filepath.Join(dir, "pics")} {
+	for _, d := range []string{filepath.Join(dir, "toren"), filepath.Join(dir, "state"), filepath.Join(dir, "pics")} {
 		if err := os.MkdirAll(d, 0o755); err != nil {
 			t.Fatal(err)
 		}
@@ -486,14 +486,14 @@ func TestCaptureNewStoresDecorsAndLiveWall(t *testing.T) {
 	w(mark, "PNG")
 	w(clip, "MP4")
 	writeDesktopStore(t, `{"appearance":{"rounding":8}}`)
-	w(shellStorePath(), `{"frameBars":{"style":"asura-frame"}}`)
+	w(shellStorePath(), `{"frameBars":{"style":"toren-frame"}}`)
 	w(launcherStorePath(), `{"bgBlur":0.4,"radius":22}`)
 	w(themeStatePath(), `{"followWallpaper":true}`)
 	w(widgetsStorePath(), `{"clock24h":true,"clockScale":1.2}`)
 	w(visualizerStorePath(), `{"bars":116,"style":"bars"}`)
 	w(decorStorePath(), `{"input.touchpad":{"shot":6,"zoom":1,"src":"file://`+decorPic+`"},"input.map":{"shot":10,"src":""}}`)
 	w(brandStorePath(), `{"name":"Berserk","markText":"A","markImage":"`+mark+`"}`)
-	w(filepath.Join(dir, "state", "asura-wallpaper"), clip+"\n")
+	w(filepath.Join(dir, "state", "toren-wallpaper"), clip+"\n")
 
 	r, err := captureRice("Wave", []string{"all"})
 	if err != nil {
@@ -554,7 +554,7 @@ func TestApplyNewStoresBrandAndVideoWall(t *testing.T) {
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(dir, "cache"))
 	t.Setenv("XDG_STATE_HOME", filepath.Join(dir, "state"))
 	t.Setenv("HOME", dir)
-	if err := os.MkdirAll(filepath.Join(dir, "asura"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(dir, "toren"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	var calls []string
@@ -590,7 +590,7 @@ func TestApplyNewStoresBrandAndVideoWall(t *testing.T) {
 	w(ricePath("wave"), `{"schema":1,"slug":"wave","name":"Wave",
 	  "color":{"mode":"wallpaper"},
 	  "assets":{"wallpaper":"wall.mp4"},
-	  "look":{"hypr":{"appearance":{"rounding":18}},"shell":{"frameBars":{"style":"asura-frame"}},"launcher":{},
+	  "look":{"hypr":{"appearance":{"rounding":18}},"shell":{"frameBars":{"style":"toren-frame"}},"launcher":{},
 	          "widgets":{"clock24h":true},"visualizer":{"bars":116},
 	          "decor":{"input.touchpad":{"shot":6,"src":"rice://decor-input-touchpad.png"}}},
 	  "layers":{"brand":{"name":"Berserk","markImage":"rice://brandmark.png"}}}`)
@@ -606,7 +606,7 @@ func TestApplyNewStoresBrandAndVideoWall(t *testing.T) {
 	}
 	dec := readJSONMap(decorStorePath())["input.touchpad"].(map[string]any)
 	src, _ := dec["src"].(string)
-	if !strings.HasPrefix(src, "file://"+filepath.Join(dir, "asura", "rice-assets", "wave")) {
+	if !strings.HasPrefix(src, "file://"+filepath.Join(dir, "toren", "rice-assets", "wave")) {
 		t.Fatalf("decor src not rehydrated under rice-assets: %q", src)
 	}
 	if !isFile(strings.TrimPrefix(src, "file://")) {
@@ -617,13 +617,13 @@ func TestApplyNewStoresBrandAndVideoWall(t *testing.T) {
 		t.Fatalf("brand layer not applied: %v", br)
 	}
 	mi, _ := br["markImage"].(string)
-	if !strings.HasPrefix(mi, filepath.Join(dir, "asura", "rice-assets", "wave")) || !isFile(mi) {
+	if !strings.HasPrefix(mi, filepath.Join(dir, "toren", "rice-assets", "wave")) || !isFile(mi) {
 		t.Fatalf("brand mark not rehydrated: %q", mi)
 	}
 	wantWall := filepath.Join(dir, "Pictures", "livewalls", "wave.mp4")
 	found := false
 	for _, c := range calls {
-		if c == "asura-wallpaper wallpaper set "+wantWall {
+		if c == "toren-wallpaper wallpaper set "+wantWall {
 			found = true
 		}
 	}
@@ -654,7 +654,7 @@ func TestSetWallVideoAndImport(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", dir)
 	t.Setenv("XDG_STATE_HOME", filepath.Join(dir, "state"))
 	t.Setenv("HOME", dir)
-	if err := os.MkdirAll(filepath.Join(dir, "asura"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(dir, "toren"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	w := func(p, body string) {
@@ -688,7 +688,7 @@ func TestSetWallVideoAndImport(t *testing.T) {
 	if err := os.MkdirAll(filepath.Join(exp, "configs"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	w(filepath.Join(exp, "rice.json"), `{"schema":1,"slug":"demo","name":"Demo","color":{"mode":"wallpaper"},"look":{"shell":{"frameBars":{"style":"asura-frame"}}}}`)
+	w(filepath.Join(exp, "rice.json"), `{"schema":1,"slug":"demo","name":"Demo","color":{"mode":"wallpaper"},"look":{"shell":{"frameBars":{"style":"toren-frame"}}}}`)
 	w(filepath.Join(exp, "wall.png"), "PNG")
 	w(filepath.Join(exp, "README.txt"), "hi")
 	w(filepath.Join(exp, "configs", "shell.json"), `{}`)
@@ -759,7 +759,7 @@ func TestCaptureAppliesThemeFastfetchAndLock(t *testing.T) {
 	emblem := filepath.Join(dir, "logo.png")
 	w(emblem, "PNG")
 	w(fastfetchConfigPath(), `{"logo":{"type":"kitty-direct","source":"`+emblem+`"},"display":{"key":{"width":9}}}`)
-	w(filepath.Join(dir, "cache", "asura", "colors.json"), `{"background":"#101010"}`)
+	w(filepath.Join(dir, "cache", "toren", "colors.json"), `{"background":"#101010"}`)
 
 	r, err := captureRice("Identity", []string{"all"})
 	if err != nil {
@@ -768,10 +768,10 @@ func TestCaptureAppliesThemeFastfetchAndLock(t *testing.T) {
 	if r.Look["theme"]["scheme"] != "mono" || r.Look["theme"]["gtkTheme"] != "adwaita" {
 		t.Fatalf("theme master not captured: %v", r.Look["theme"])
 	}
-	if mat, ok := r.Look["asura-wallpaper"]["matugen"].(map[string]any); !ok || mat["schemeType"] != "scheme-fidelity" {
-		t.Fatalf("asura-wallpaper matugen scheme not captured: %v", r.Look["asura-wallpaper"])
+	if mat, ok := r.Look["toren-wallpaper"]["matugen"].(map[string]any); !ok || mat["schemeType"] != "scheme-fidelity" {
+		t.Fatalf("toren-wallpaper matugen scheme not captured: %v", r.Look["toren-wallpaper"])
 	}
-	if _, ok := r.Look["asura-wallpaper"]["resource_tier"]; ok {
+	if _, ok := r.Look["toren-wallpaper"]["resource_tier"]; ok {
 		t.Fatal("machine tuning (resource_tier) must not travel")
 	}
 	rdir := filepath.Join(ricesDir(), r.Slug)
@@ -821,7 +821,7 @@ func TestCaptureBundlesReloadCover(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", dir)
 	t.Setenv("XDG_STATE_HOME", filepath.Join(dir, "state"))
 	t.Setenv("HOME", dir)
-	if err := os.MkdirAll(filepath.Join(dir, "asura"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(dir, "toren"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	cover := filepath.Join(dir, "cover.gif")
@@ -868,7 +868,7 @@ func TestRehydrateReloadCoverAsset(t *testing.T) {
 	dir := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", dir)
 	t.Setenv("HOME", dir)
-	if err := os.MkdirAll(filepath.Join(dir, "asura"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(dir, "toren"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	riceDir := filepath.Join(dir, "rice")
@@ -891,7 +891,7 @@ func TestRehydrateReloadCoverAsset(t *testing.T) {
 		t.Fatalf("reloadCover dropped for a valid rice:// asset: %v", bm)
 	}
 	got, _ := rc["path"].(string)
-	wantPrefix := filepath.Join(dir, "asura", "rice-assets", "cov")
+	wantPrefix := filepath.Join(dir, "toren", "rice-assets", "cov")
 	if !strings.HasPrefix(got, wantPrefix) || !isFile(got) {
 		t.Fatalf("reloadCover not rehydrated under rice-assets: %q", got)
 	}
@@ -904,7 +904,7 @@ func TestRehydrateReloadCoverAsset(t *testing.T) {
 	}
 
 	// foreign absolute path that does not resolve on this box: dropped.
-	bm = map[string]any{"reloadCover": map[string]any{"path": "/home/someone-else/.local/share/asura/reload-cover/x.gif", "kind": "animated"}}
+	bm = map[string]any{"reloadCover": map[string]any{"path": "/home/someone-else/.local/share/toren/reload-cover/x.gif", "kind": "animated"}}
 	rehydrateBrandAssets(riceDir, "cov", bm)
 	if _, ok := bm["reloadCover"]; ok {
 		t.Fatalf("dangling absolute cover not dropped: %v", bm)

@@ -52,7 +52,7 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Top
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
-    WlrLayershell.namespace: "asura-region"
+    WlrLayershell.namespace: "toren-region"
 
     anchors { top: true; bottom: true; left: true; right: true }
 

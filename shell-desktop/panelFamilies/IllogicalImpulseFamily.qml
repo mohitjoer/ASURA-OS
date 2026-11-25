@@ -1,4 +1,4 @@
-// ASURA overlay (shell-desktop/asura/vendor.sh OVERLAYS): the desktop's panels without
+// ASURA overlay (shell-desktop/toren/vendor.sh OVERLAYS): the desktop's panels without
 // the left sidebar (its AI chat and anime browser are not part of ASURA).
 import QtQuick
 import Quickshell

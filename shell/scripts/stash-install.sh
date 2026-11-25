@@ -1,5 +1,5 @@
 #!/bin/bash
-# stash app installer: makes whatever the user dropped in the Asura stash
+# stash app installer: makes whatever the user dropped in the Toren stash
 # launchable. an AppImage or self-contained tarball gets a synthesized XDG
 # desktop entry under ~/.local; a package is handed to `xbps-install` via pkexec
 # so it installs the normal way (dependencies resolved, maintainer scripts run)
@@ -10,7 +10,7 @@
 set -u
 
 STASH="${STASH_DIR:-${XDG_DOWNLOAD_DIR:-$HOME/Downloads}/Stash}"
-APPSTORE="$HOME/.local/share/asura-apps"        # installed payloads
+APPSTORE="$HOME/.local/share/toren-apps"        # installed payloads
 APPDIR="$HOME/.local/share/applications"         # launcher reads .desktop from here
 ICONDIR="$HOME/.local/share/icons"
 # successful install copies/extracts/installs the app out of the stash. the
@@ -137,7 +137,7 @@ write_desktop() {
     printf 'Icon=%s\n' "${ic:-$nm}"
     printf 'Terminal=false\n'
     printf 'Categories=%s\n' "$cat"
-    printf 'X-Asura-Stash=true\n'
+    printf 'X-Toren-Stash=true\n'
   } > "$out"
 }
 

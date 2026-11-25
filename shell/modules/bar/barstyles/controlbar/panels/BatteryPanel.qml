@@ -3,7 +3,7 @@ import "../modules"
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
-import "../AsuraPower.js" as AsuraPower
+import "../TorenPower.js" as TorenPower
 import qs.Ui.Singletons
 
 PanelWindow {
@@ -16,7 +16,7 @@ PanelWindow {
     anchors { top: true; bottom: true; left: true; right: true }
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.namespace: "asura-battery"
+    WlrLayershell.namespace: "toren-battery"
 
     readonly property int barBottom: root.v2BarHeight
     readonly property int gap: 6
@@ -199,7 +199,7 @@ PanelWindow {
 
     Process {
         id: batData
-        command: ["bash", "-c", AsuraPower.batteryDataCmd]
+        command: ["bash", "-c", TorenPower.batteryDataCmd]
         running: false
         stdout: StdioCollector {
             onStreamFinished: {
@@ -227,5 +227,5 @@ PanelWindow {
         onTriggered: batPanel.refreshBatteryData()
     }
 
-    Process { id: sysmonRunner; command: ["asura-app", "terminal", "--", "btop"] }
+    Process { id: sysmonRunner; command: ["toren-app", "terminal", "--", "btop"] }
 }

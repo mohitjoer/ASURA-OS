@@ -123,7 +123,7 @@ Item {
     visible: hud.live
 
     // Chooser state: the Super+S capture card opens this island before recording.
-    // Quick records via gsr; Studio and Edit hand off to asura-motion. `starting`
+    // Quick records via gsr; Studio and Edit hand off to toren-motion. `starting`
     // holds the island up through the short beat between closing the chooser and
     // gsr coming up, so it never blinks out.
     property bool starting: false
@@ -140,15 +140,15 @@ Item {
         }
     }
     Timer { id: quickTimer; interval: 420; onTriggered: { Recorder.startAfter(Recorder.recordArgs(), Capture.delay); hud.starting = false; } }
-    // Edit opens asura-motion straight to its import screen (--edit) so you pick a
+    // Edit opens toren-motion straight to its import screen (--edit) so you pick a
     // clip to edit; notify-send keeps a click from silently doing nothing before
     // the app is installed.
     function launchRyomotion() {
         Recorder.chooserOpen = false;
         Quickshell.execDetached(["sh", "-c",
-            "command -v asura-motion >/dev/null 2>&1 && exec asura-motion --edit || notify-send 'Asura' 'Not installed yet'"]);
+            "command -v toren-motion >/dev/null 2>&1 && exec toren-motion --edit || notify-send 'Toren' 'Not installed yet'"]);
     }
-    // studio: our island is the toolbar, so asura-motion records headless (its HUD
+    // studio: our island is the toolbar, so toren-motion records headless (its HUD
     // hidden) with the chooser's options and we drive the stop from the control bar.
     function startStudio() {
         Recorder.chooserOpen = false;
@@ -463,7 +463,7 @@ Item {
             }
 
             // pre-record chooser: capture toggles, then Quick (gsr) / Studio / Edit
-            // (both open asura-motion). Same icon-tile idiom and orientation flip as the
+            // (both open toren-motion). Same icon-tile idiom and orientation flip as the
             // live control bar, so it reads as one island in two states.
             Grid {
                 id: chooserGrid

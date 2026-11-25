@@ -5,7 +5,7 @@ import "popouts"
 import "panel"
 import qs.Services
 
-// One Asura-owned surface riding the shared Popout. Credential prompts, voice,
+// One Toren-owned surface riding the shared Popout. Credential prompts, voice,
 // stash, capture, and small rail cards mount on demand.
 Popout {
     id: root

@@ -11,13 +11,13 @@ import (
 )
 
 // bar.go is the agent-facing bar/dock control surface on the daemon: the
-// `asura-shell bar ...` and `asura-shell dock ...` verbs. The bar layout lives in
+// `toren-shell bar ...` and `toren-shell dock ...` verbs. The bar layout lives in
 // shell.json (qsbar.layout) as three ordered lists of stable widget ids;
 // built-in widgets and installed store plugins are entries of the same list.
 // These verbs read the widget catalogue (the one file the shell, the panel and
 // this CLI share) and the installed plugins, validate every mutation against
 // them, and write through the settings store (the sole writer of shell.json) or,
-// for a plugin, through asura-plugins-place. Nothing here executes plugin code.
+// for a plugin, through toren-plugins-place. Nothing here executes plugin code.
 //
 // The layout algebra (layoutMove, normalizeLayout, layoutDefaults, barListRows)
 // is pure so it can be unit-tested without a running daemon.
@@ -121,7 +121,7 @@ type pluginInfo struct {
 	Manifest map[string]any
 }
 
-// pluginState is a plugin's placement in ~/.config/asura/plugins.json.
+// pluginState is a plugin's placement in ~/.config/toren/plugins.json.
 type pluginState struct {
 	enabled bool
 	host    string
@@ -372,18 +372,18 @@ func dataHome() string {
 	return filepath.Join(os.Getenv("HOME"), ".local", "share")
 }
 
-// pluginsPlaceTool resolves asura-plugins-place: the checkout copy under
+// pluginsPlaceTool resolves toren-plugins-place: the checkout copy under
 // ASURA_SHELL_DIR, else the packaged name on PATH (matching Desktop.qml).
 func pluginsPlaceTool() string {
 	if shellDir != "" {
-		return filepath.Join(shellDir, "plugins", "asura-plugins-place")
+		return filepath.Join(shellDir, "plugins", "toren-plugins-place")
 	}
-	return "asura-plugins-place"
+	return "toren-plugins-place"
 }
 
 // loadInstalledPlugins reads every plugin manifest from the dev-override dirs
 // (ASURA_PLUGINS_DIR, colon-separated) and the installed root
-// (~/.local/share/asura/plugins), first source wins on a duplicate id,
+// (~/.local/share/toren/plugins), first source wins on a duplicate id,
 // mirroring discover.sh's source order.
 func loadInstalledPlugins() []pluginInfo {
 	var dirs []string
@@ -394,7 +394,7 @@ func loadInstalledPlugins() []pluginInfo {
 			}
 		}
 	}
-	dirs = append(dirs, filepath.Join(dataHome(), "asura", "plugins"))
+	dirs = append(dirs, filepath.Join(dataHome(), "toren", "plugins"))
 	seen := map[string]bool{}
 	var out []pluginInfo
 	for _, dir := range dirs {
@@ -436,10 +436,10 @@ func barCapablePlugins(all []pluginInfo) []pluginInfo {
 	return out
 }
 
-// loadPluginsState reads ~/.config/asura/plugins.json into enabled/host per id.
+// loadPluginsState reads ~/.config/toren/plugins.json into enabled/host per id.
 func loadPluginsState() map[string]pluginState {
 	out := map[string]pluginState{}
-	b, err := os.ReadFile(filepath.Join(asuraConfigDir(), "plugins.json"))
+	b, err := os.ReadFile(filepath.Join(torenConfigDir(), "plugins.json"))
 	if err != nil {
 		return out
 	}
@@ -486,7 +486,7 @@ func (p pluginInfo) author() string {
 	return s
 }
 
-// official is the manifest's own claim; Asura's plugins ship it true, so any
+// official is the manifest's own claim; Toren's plugins ship it true, so any
 // other bar plugin is a community widget (the panel's Community route).
 func (p pluginInfo) official() bool {
 	b, _ := p.Manifest["official"].(bool)
@@ -932,9 +932,9 @@ func runPlace(tool string, args ...string) (string, error) {
 func placeErr(out string, err error) string {
 	out = strings.TrimSpace(out)
 	if out != "" {
-		return "asura-plugins-place: " + out
+		return "toren-plugins-place: " + out
 	}
-	return "asura-plugins-place: " + err.Error()
+	return "toren-plugins-place: " + err.Error()
 }
 
 func (d *daemon) barSet(args []string) string {
@@ -1173,7 +1173,7 @@ func (d *daemon) barDefaults() string {
 // IPC the shell exposes; an empty route opens the default route.
 func (d *daemon) barSettings(_ []string) string {
 	go func() {
-		cmd := exec.Command("asura-shell", "hub", "open", "bar-studio")
+		cmd := exec.Command("toren-shell", "hub", "open", "bar-studio")
 		cmd.Start()
 	}()
 	return "ok"

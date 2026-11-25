@@ -3,13 +3,13 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// The one translation lookup, shared by every Asura surface (Hub, shell, apps,
+// The one translation lookup, shared by every Toren surface (Hub, shell, apps,
 // the wallpaper picker, the greeter). Source-string-as-key:
 // `I18n.tr("Power limit")` returns the current language's string, or the English
 // key itself when there is no translation, so the UI is never broken and
 // translating is purely additive. English is the source of truth in code, so a
 // developer only ever writes English; the per-language catalogs are
-// shell/i18n/data, installed read-only at /usr/share/asura/i18n.
+// shell/i18n/data, installed read-only at /usr/share/toren/i18n.
 //
 // The language is a global shell setting (shell.json "language"), set from the
 // Hub's Global page and watched here, so changing it retranslates every open
@@ -99,7 +99,7 @@ Singleton {
     // QML cannot make.
     readonly property var catalogDirs: [
         Quickshell.env("ASURA_I18N_DIR") || "",
-        "/usr/share/asura/i18n"
+        "/usr/share/toren/i18n"
     ].filter((d) => d !== "")
     property int dirIndex: 0
     readonly property string catalogDir: i18n.catalogDirs[Math.min(i18n.dirIndex, i18n.catalogDirs.length - 1)]
@@ -107,18 +107,18 @@ Singleton {
         return i18n.catalogDir + "/" + l + ".json";
     }
     // A hand fix for one's own box layers over the shipped catalog. It lives in
-    // the user's data dir, not ~/.config/asura/i18n: `asura materialize`
-    // mirrors all of /usr/share/asura, i18n/ included, into ~/.config/asura,
+    // the user's data dir, not ~/.config/toren/i18n: `toren materialize`
+    // mirrors all of /usr/share/toren, i18n/ included, into ~/.config/toren,
     // and a mirror in the layer that wins would pin an old translation after
     // the package updates.
     function _genPath(l) {
-        return (Quickshell.env("XDG_DATA_HOME") || (Quickshell.env("HOME") + "/.local/share")) + "/asura/i18n/" + l + ".json";
+        return (Quickshell.env("XDG_DATA_HOME") || (Quickshell.env("HOME") + "/.local/share")) + "/toren/i18n/" + l + ".json";
     }
 
     // the global config; language lives under "language", watched for live switch.
     FileView {
         id: cfg
-        path: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/asura/shell.json"
+        path: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/toren/shell.json"
         blockLoading: true
         watchChanges: true
         atomicWrites: true
@@ -143,7 +143,7 @@ Singleton {
             // The path rebind after stepping does not reliably re-emit
             // loaded/loadFailed, so the next candidate has to force its own
             // read once the binding settles. Without this the step never
-            // happens on a packaged install (no user drop), /usr/share/asura/
+            // happens on a packaged install (no user drop), /usr/share/toren/
             // i18n is never reached, and the picker lists only "Auto" (#241).
             if (i18n.dirIndex < i18n.catalogDirs.length - 1) {
                 i18n.dirIndex = i18n.dirIndex + 1;

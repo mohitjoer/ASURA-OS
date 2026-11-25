@@ -27,12 +27,12 @@ Item {
         ListElement { name: "guest"; realName: ""; icon: "" }
         ListElement { name: "mohit"; realName: "Mohit"; icon: "" }
     }
-    // Alphabetical, as SDDM lists them: Asura arrives last.
+    // Alphabetical, as SDDM lists them: Toren arrives last.
     ListModel {
         id: sessionModel
         ListElement { file: "/usr/share/wayland-sessions/gnome.desktop"; name: "GNOME" }
         ListElement { file: "/usr/share/wayland-sessions/hyprland.desktop"; name: "Hyprland" }
-        ListElement { file: "/usr/share/wayland-sessions/asura.desktop"; name: "Asura" }
+        ListElement { file: "/usr/share/wayland-sessions/toren.desktop"; name: "Toren" }
     }
 
     Loader {
@@ -72,8 +72,8 @@ Item {
                 keyClick(text[i])
         }
 
-        function test_asura_is_listed_first_and_preselected() {
-            compare(loader.item.sessions[0].name, "Asura")
+        function test_toren_is_listed_first_and_preselected() {
+            compare(loader.item.sessions[0].name, "Toren")
             compare(loader.item.sessions[0].row, 2)
             compare(loader.item.sessionPos, 0)
             compare(loader.item.userName, "mohit")

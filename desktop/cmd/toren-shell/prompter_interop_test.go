@@ -24,7 +24,7 @@ func TestPrompterInterop(t *testing.T) {
 		t.Skip("set ASURA_KEYRING_INTEROP=1 to run the live gnome-keyring interop test")
 	}
 
-	const pw = "asura-interop-pw-\U0001F510" // non-ASCII secret exercises utf-8
+	const pw = "toren-interop-pw-\U0001F510" // non-ASCII secret exercises utf-8
 
 	// prompter and Secret Service client must look like distinct peers, so they
 	// take separate bus connections.
@@ -66,7 +66,7 @@ func TestPrompterInterop(t *testing.T) {
 	// password-protected collection (a "new keyring password" prompt).
 	var collPath, promptPath dbus.ObjectPath
 	props := map[string]dbus.Variant{
-		"org.freedesktop.Secret.Collection.Label": dbus.MakeVariant("asura-interop-test"),
+		"org.freedesktop.Secret.Collection.Label": dbus.MakeVariant("toren-interop-test"),
 	}
 	if err := secrets.Call("org.freedesktop.Secret.Service.CreateCollection", 0, props, "").
 		Store(&collPath, &promptPath); err != nil {

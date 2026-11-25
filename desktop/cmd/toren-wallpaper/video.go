@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-// videoPlayer drives video wallpapers through asura-wallpaper-live, one process per
+// videoPlayer drives video wallpapers through toren-wallpaper-live, one process per
 // live output (each in its own process group so the whole tree dies on Stop).
 // Play is asynchronous: the one-time transcode runs off the hot path while the
 // shell paints the clip's still, and a generation counter serializes rapid
@@ -90,7 +90,7 @@ func (p *videoPlayer) Play(outputs []string, path, fit, tier string, onLive func
 		fps := liveFps(tier, src)
 		file := livewallSource(path, src, capW, fps)
 		if file == "" {
-			fmt.Fprintf(os.Stderr, "asura-wallpaper: transcode failed for %s; keeping the still\n", path)
+			fmt.Fprintf(os.Stderr, "toren-wallpaper: transcode failed for %s; keeping the still\n", path)
 			return
 		}
 		targets := outputs
@@ -132,7 +132,7 @@ func (p *videoPlayer) spawnLocked(gen int64, output, file string, capW int, fit 
 		cmd.Stderr = p.log
 	}
 	if err := cmd.Start(); err != nil {
-		fmt.Fprintf(os.Stderr, "asura-wallpaper: launch %s: %v (build it with asura/shell/livewall/build.sh)\n", liveDaemon, err)
+		fmt.Fprintf(os.Stderr, "toren-wallpaper: launch %s: %v (build it with toren/shell/livewall/build.sh)\n", liveDaemon, err)
 		return
 	}
 	p.procs = append(p.procs, cmd)
@@ -148,7 +148,7 @@ func (p *videoPlayer) spawnLocked(gen int64, output, file string, capW int, fit 
 		cb := p.onLive
 		p.mu.Unlock()
 		if tracked {
-			fmt.Fprintf(os.Stderr, "asura-wallpaper: %s on %q exited unexpectedly: %v\n", liveDaemon, output, err)
+			fmt.Fprintf(os.Stderr, "toren-wallpaper: %s on %q exited unexpectedly: %v\n", liveDaemon, output, err)
 		}
 		if lastGone && cb != nil {
 			cb(false) // every player died: the still shows meanwhile
@@ -175,7 +175,7 @@ func (p *videoPlayer) respawn(gen int64, output, file string, capW int, fit stri
 	n := p.deaths
 	p.mu.Unlock()
 	if n > 5 {
-		fmt.Fprintf(os.Stderr, "asura-wallpaper: %s on %q keeps dying; leaving the still\n", liveDaemon, output)
+		fmt.Fprintf(os.Stderr, "toren-wallpaper: %s on %q keeps dying; leaving the still\n", liveDaemon, output)
 		return
 	}
 	delay := time.Second << (n - 1)

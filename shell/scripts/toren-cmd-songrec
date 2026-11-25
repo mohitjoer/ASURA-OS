@@ -9,7 +9,7 @@
 set -euo pipefail
 
 app="Recognize music"
-prog="asura-cmd-songrec"
+prog="toren-cmd-songrec"
 
 notify() { command -v notify-send >/dev/null 2>&1 && notify-send "$@" 2>/dev/null || true; }
 

@@ -15,21 +15,21 @@ import (
 	"syscall"
 	"time"
 
-	"asura/desktop/internal/overlay"
-	"asura/desktop/internal/runner"
+	"toren/desktop/internal/overlay"
+	"toren/desktop/internal/runner"
 )
 
-// asuraUpdate runs the complete Void Linux system update lifecycle.
+// torenUpdate runs the complete Void Linux system update lifecycle.
 //
 // Lifecycle sequence:
 //  1. Snapshot ~/.config to git AND create an atomic Btrfs root snapshot
 //     (/.snapshots/pre-update-<timestamp>) if / is on Btrfs.
 //  2. Run system package updates via xbps-install -Su -y (routing through
-//     asura-sysd socket /run/asura/sysd.sock or sudo xbps-install -Su -y).
+//     toren-sysd socket /run/toren/sysd.sock or sudo xbps-install -Su -y).
 //  3. Update installed Flatpaks via flatpak update -y (if flatpak is present).
-//  4. Re-materialize the /usr/share/asura/ base overlay with ~/.config/asura/user_edits/
+//  4. Re-materialize the /usr/share/toren/ base overlay with ~/.config/toren/user_edits/
 //     and trigger a live shell/daemon reload.
-func asuraUpdate(args []string) int {
+func torenUpdate(args []string) int {
 	set := newFlags("update", updateUsage)
 	var (
 		root       = set.String("root", "", "operate on a tree under this directory")
@@ -39,7 +39,7 @@ func asuraUpdate(args []string) int {
 		branch     = set.String("branch", "", "git branch to pull code updates from (default: dev-unstable)")
 		channel    = set.String("channel", "", "channel to update from (stable, unstable, dev-unstable)")
 		system     = set.Bool("system", false, "force update of all system packages (XBPS)")
-		asuraOnly  = set.Bool("asura-only", false, "only update Toren packages and desktop components")
+		torenOnly  = set.Bool("toren-only", false, "only update Toren packages and desktop components")
 		check      = set.Bool("check", false, "only report whether a newer Toren is available")
 		force      = set.Bool("force", false, "take the tip of the branch without checking CI, and reapply even when already applied")
 		wait       = set.Bool("wait", false, "wait for CI still running on the newest commit instead of taking the last one that passed")
@@ -79,12 +79,12 @@ func asuraUpdate(args []string) int {
 
 	paths, err := overlayPaths(*root)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura update:", err)
+		fmt.Fprintln(os.Stderr, "toren update:", err)
 		return exitFail
 	}
 
 	isRoot := os.Geteuid() == 0
-	updateSystemPkgs := (isRoot || *system) && !*asuraOnly
+	updateSystemPkgs := (isRoot || *system) && !*torenOnly
 
 	var snapshot func(overlay.Paths) error
 	if !*noSnapshot {
@@ -94,7 +94,7 @@ func asuraUpdate(args []string) int {
 			}
 			if !*dryRun && updateSystemPkgs {
 				if snap, err := createBtrfsSnapshot(); err != nil {
-					fmt.Fprintf(os.Stderr, "asura update: btrfs snapshot: %v\n", err)
+					fmt.Fprintf(os.Stderr, "toren update: btrfs snapshot: %v\n", err)
 				} else if snap != "" {
 					fmt.Printf("created system Btrfs snapshot: %s\n", snap)
 					pruneBtrfsSnapshots("/.snapshots", keepUpdateSnapshots)
@@ -104,7 +104,7 @@ func asuraUpdate(args []string) int {
 		}
 	}
 
-	var asuraErr error
+	var torenErr error
 	var fetch func() error
 	if !*dryRun {
 		runUserHooks("pre-update", nil)
@@ -114,10 +114,10 @@ func asuraUpdate(args []string) int {
 			if updateSystemPkgs {
 				fmt.Println("==> Step 1/4: Updating system packages (XBPS)...")
 				if err := voidFetch(); err != nil {
-					fmt.Fprintf(os.Stderr, "asura update: system packages: %v\n", err)
+					fmt.Fprintf(os.Stderr, "toren update: system packages: %v\n", err)
 				}
 			} else {
-				fmt.Println("==> Step 1/4: System packages: skipped (sudo asura update, or --system, updates them)")
+				fmt.Println("==> Step 1/4: System packages: skipped (sudo toren update, or --system, updates them)")
 			}
 			// Then ASURA, from its branch (dev-unstable unless the channel or
 			// a flag names another).
@@ -127,16 +127,16 @@ func asuraUpdate(args []string) int {
 			}
 			fmt.Printf("==> Step 2/4: Updating Toren to the latest '%s'...\n", b)
 			if err := pullGitUpdates(b, *root); err != nil {
-				asuraErr = err
-				fmt.Fprintf(os.Stderr, "asura update: Toren was not updated: %v\n", err)
+				torenErr = err
+				fmt.Fprintf(os.Stderr, "toren update: Toren was not updated: %v\n", err)
 			}
 			// The one-time fixes this machine has not had yet, run by the
 			// binary just applied, so a migration added in this update runs
 			// with the code that knows about it.
 			if *root == "" {
 				fmt.Println("==> Running one-time fixes (migrations)...")
-				if err := runUpdateMigrations(); err != nil && asuraErr == nil {
-					asuraErr = err
+				if err := runUpdateMigrations(); err != nil && torenErr == nil {
+					torenErr = err
 				}
 			}
 			return nil
@@ -147,7 +147,7 @@ func asuraUpdate(args []string) int {
 
 	// Step 1 & 2 & 4: snapshot, package update, and re-materialization
 	if err := overlay.Update(paths, snapshot, fetch); err != nil {
-		fmt.Fprintln(os.Stderr, "asura update:", err)
+		fmt.Fprintln(os.Stderr, "toren update:", err)
 		return exitFail
 	}
 
@@ -163,14 +163,14 @@ func asuraUpdate(args []string) int {
 			cmd := exec.Command("grub-mkconfig", "-o", "/boot/grub/grub.cfg")
 			cmd.Stdout, cmd.Stderr = os.Stdout, os.Stderr
 			if err := cmd.Run(); err != nil {
-				fmt.Fprintf(os.Stderr, "asura update: grub-mkconfig: %v\n", err)
+				fmt.Fprintf(os.Stderr, "toren update: grub-mkconfig: %v\n", err)
 			}
 		}
 	}
 
 	status, err := overlay.StatusOf(paths)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura update:", err)
+		fmt.Fprintln(os.Stderr, "toren update:", err)
 		return exitFail
 	}
 	fmt.Printf("updated to revision %s\n", status.Revision)
@@ -189,18 +189,18 @@ func asuraUpdate(args []string) int {
 		}
 	}
 
-	if asuraErr != nil {
-		fmt.Fprintln(os.Stderr, "\n==> Toren update FAILED:", asuraErr)
-		fmt.Fprintln(os.Stderr, "==> The desktop was refreshed, but runs the code it had before. `asura doctor` checks the system.")
+	if torenErr != nil {
+		fmt.Fprintln(os.Stderr, "\n==> Toren update FAILED:", torenErr)
+		fmt.Fprintln(os.Stderr, "==> The desktop was refreshed, but runs the code it had before. `toren doctor` checks the system.")
 		return exitFail
 	}
-	if !updateSystemPkgs && !*asuraOnly {
+	if !updateSystemPkgs && !*torenOnly {
 		fmt.Println("\n--------------------------------------------------------------------------------")
 		fmt.Println("==> Toren packages and desktop components are up to date.")
 		fmt.Println("==> Recommendation: To update all base system packages (XBPS) and OS, run:")
-		fmt.Println("    sudo asura update")
+		fmt.Println("    sudo toren update")
 		fmt.Println("--------------------------------------------------------------------------------")
-	} else if *asuraOnly {
+	} else if *torenOnly {
 		fmt.Println("\n==> Toren update complete.")
 	} else {
 		fmt.Println("\n==> Full system and Toren update complete.")
@@ -215,13 +215,13 @@ func asuraUpdate(args []string) int {
 }
 
 // voidFetch executes the system package update via Void Linux XBPS.
-// It first attempts to route through the privileged asura-sysd socket.
+// It first attempts to route through the privileged toren-sysd socket.
 // If the daemon is not active, it falls back to direct xbps-install.
 func voidFetch() error {
 
 	// Try sysd socket first
 	if err := runSysdPkgUpdate(); err == nil {
-		fmt.Println("system packages updated via asura-sysd")
+		fmt.Println("system packages updated via toren-sysd")
 		return nil
 	}
 
@@ -229,9 +229,9 @@ func voidFetch() error {
 	return runLocalXbpsUpdate()
 }
 
-// runSysdPkgUpdate communicates with asura-sysd over /run/asura/sysd.sock.
+// runSysdPkgUpdate communicates with toren-sysd over /run/toren/sysd.sock.
 func runSysdPkgUpdate() error {
-	conn, err := net.DialTimeout("unix", "/run/asura/sysd.sock", 2*time.Second)
+	conn, err := net.DialTimeout("unix", "/run/toren/sysd.sock", 2*time.Second)
 	if err != nil {
 		return err
 	}
@@ -264,7 +264,7 @@ func runSysdPkgUpdate() error {
 		}
 		return nil
 	}
-	return fmt.Errorf("no response from asura-sysd")
+	return fmt.Errorf("no response from toren-sysd")
 }
 
 // runLocalXbpsUpdate executes xbps-install -Su -y locally with privilege elevation.
@@ -445,7 +445,7 @@ func pruneBtrfsSnapshots(dir string, keep int) {
 				args = append([]string{"sudo"}, args...)
 			}
 			if out, err := exec.Command(args[0], args[1:]...).CombinedOutput(); err != nil {
-				fmt.Fprintf(os.Stderr, "asura: removing old snapshot %s: %v (%s)\n", name, err, strings.TrimSpace(string(out)))
+				fmt.Fprintf(os.Stderr, "toren: removing old snapshot %s: %v (%s)\n", name, err, strings.TrimSpace(string(out)))
 				continue
 			}
 			fmt.Printf("removed old system snapshot: %s\n", name)
@@ -506,10 +506,10 @@ const defaultGitRepoURL = "https://github.com/mohitjoer/Toren-Linux.git"
 
 // appliedCommitFile records the commit installation/apply-repo.sh last
 // applied to this system, so an update knows whether there is anything new.
-var appliedCommitFile = "/usr/share/asura/applied-commit"
+var appliedCommitFile = "/usr/share/toren/applied-commit"
 
 // appliedSourceFile records the checkout that commit was applied from.
-var appliedSourceFile = "/usr/share/asura/applied-source"
+var appliedSourceFile = "/usr/share/toren/applied-source"
 
 // updateForce reapplies the checkout even when it is the applied commit.
 var updateForce bool
@@ -530,24 +530,24 @@ func gitOut(repoDir string, args ...string) string {
 	return strings.TrimSpace(string(out))
 }
 
-// isUpdateCache: a checkout asura update cloned for itself, which it may reset
+// isUpdateCache: a checkout toren update cloned for itself, which it may reset
 // to the branch. A developer's checkout is only ever fast-forwarded, so local
 // work in it is never lost.
 func isUpdateCache(repoDir string) bool {
-	return strings.HasSuffix(repoDir, filepath.Join(".cache", "asura", "source")) ||
-		repoDir == "/var/cache/asura/source"
+	return strings.HasSuffix(repoDir, filepath.Join(".cache", "toren", "source")) ||
+		repoDir == "/var/cache/toren/source"
 }
 
-// runUpdateMigrations runs `asura migrate` from the installed binary: system
+// runUpdateMigrations runs `toren migrate` from the installed binary: system
 // migrations as root (through sudo), then the user's (as SUDO_USER when the
 // update runs under sudo).
 func runUpdateMigrations() error {
-	bin := "/usr/bin/asura"
+	bin := "/usr/bin/toren"
 	if _, err := os.Stat(bin); err != nil {
 		bin = selfPath()
 	}
 	if code := runSelf([]string{bin, "migrate"}); code != exitOK {
-		return fmt.Errorf("a migration failed (asura migrate --list shows which); it runs again on the next update")
+		return fmt.Errorf("a migration failed (toren migrate --list shows which); it runs again on the next update")
 	}
 	return nil
 }
@@ -574,7 +574,7 @@ func followBranch(repoDir, branch string) (string, error) {
 		// Without the gate nothing may be taken: an unchecked tip is exactly
 		// what the gate keeps off machines.
 		fmt.Printf("    could not read CI results from GitHub (%v)\n", err)
-		fmt.Println("    keeping the installed Toren; `asura update --force` takes the tip unchecked")
+		fmt.Println("    keeping the installed Toren; `toren update --force` takes the tip unchecked")
 		return "", nil
 	}
 	if note != "" {
@@ -592,7 +592,7 @@ func followBranch(repoDir, branch string) (string, error) {
 func pullGitUpdates(branch string, root string) error {
 	repoDir, err := findOrCloneRepo(branch)
 	if err != nil {
-		return fmt.Errorf("locating Asura repository: %w", err)
+		return fmt.Errorf("locating Toren repository: %w", err)
 	}
 	fmt.Printf("    source: %s (%s)\n", repoDir, branch)
 	target, err := followBranch(repoDir, branch)
@@ -638,12 +638,12 @@ func pullGitUpdates(branch string, root string) error {
 func checkForUpdate(branch, root string) int {
 	repoDir, err := findOrCloneRepo(branch)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura update --check:", err)
+		fmt.Fprintln(os.Stderr, "toren update --check:", err)
 		return exitFail
 	}
 	target, err := followBranch(repoDir, branch)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura update --check:", err)
+		fmt.Fprintln(os.Stderr, "toren update --check:", err)
 		return exitFail
 	}
 	if target == "" {
@@ -698,7 +698,7 @@ var applyRepoArgs = func(repoDir, root string) []string {
 func applyRepo(repoDir, root string) error {
 	script := filepath.Join(repoDir, "installation", "apply-repo.sh")
 	if _, err := os.Stat(script); err != nil {
-		return fmt.Errorf("%s is missing; the checkout is older than this asura", script)
+		return fmt.Errorf("%s is missing; the checkout is older than this toren", script)
 	}
 	args := applyRepoArgs(repoDir, root)
 	fmt.Println("==> Applying the updated repository to this system...")
@@ -712,13 +712,13 @@ func applyRepo(repoDir, root string) error {
 
 func findOrCloneRepo(branch string) (string, error) {
 	// 1. Check ASURA_SRC_DIR environment variable override
-	if env := os.Getenv("ASURA_SRC_DIR"); env != "" && isAsuraRepo(env) {
+	if env := os.Getenv("ASURA_SRC_DIR"); env != "" && isTorenRepo(env) {
 		return env, nil
 	}
 
 	// 1b. The checkout this system was last applied from (apply-repo records it).
 	if b, err := os.ReadFile(appliedSourceFile); err == nil {
-		if p := strings.TrimSpace(string(b)); p != "" && isAsuraRepo(p) && canWriteRepo(p) {
+		if p := strings.TrimSpace(string(b)); p != "" && isTorenRepo(p) && canWriteRepo(p) {
 			return p, nil
 		}
 	}
@@ -726,7 +726,7 @@ func findOrCloneRepo(branch string) (string, error) {
 	// 2. Check current directory or git root
 	if out, err := exec.Command("git", "rev-parse", "--show-toplevel").Output(); err == nil {
 		top := strings.TrimSpace(string(out))
-		if isAsuraRepo(top) {
+		if isTorenRepo(top) {
 			return top, nil
 		}
 	}
@@ -735,39 +735,39 @@ func findOrCloneRepo(branch string) (string, error) {
 	home := os.Getenv("HOME")
 	candidates := []string{
 		filepath.Join(home, "code", "Toren-Linux"),
-		filepath.Join(home, "code", "asura", "Toren-Linux"),
+		filepath.Join(home, "code", "toren", "Toren-Linux"),
 		filepath.Join(home, "Toren-Linux"),
-		filepath.Join(home, ".cache", "asura", "source"),
-		"/usr/src/asura",
-		"/usr/share/asura",
-		"/var/cache/asura/source",
+		filepath.Join(home, ".cache", "toren", "source"),
+		"/usr/src/toren",
+		"/usr/share/toren",
+		"/var/cache/toren/source",
 	}
 	if sudoUser := os.Getenv("SUDO_USER"); sudoUser != "" && sudoUser != "root" {
 		userHome := filepath.Join("/home", sudoUser)
 		candidates = append([]string{
 			filepath.Join(userHome, "code", "Toren-Linux"),
-			filepath.Join(userHome, "code", "asura", "Toren-Linux"),
+			filepath.Join(userHome, "code", "toren", "Toren-Linux"),
 			filepath.Join(userHome, "Toren-Linux"),
 		}, candidates...)
 	}
 	// A checkout this user cannot write (a root-owned clone left by an
-	// earlier `sudo asura update`) cannot be pulled into: skip it, and clone
+	// earlier `sudo toren update`) cannot be pulled into: skip it, and clone
 	// a copy of the user's own below.
 	for _, c := range candidates {
-		if isAsuraRepo(c) && canWriteRepo(c) {
+		if isTorenRepo(c) && canWriteRepo(c) {
 			return c, nil
 		}
 	}
 
 	// 4. Clone to cache directory if not found locally. Under sudo the clone
 	// is the invoking user's, in their cache, made as them: a root-owned clone
-	// is one the user's own `asura update` can never pull into.
-	cacheDir := filepath.Join(home, ".cache", "asura", "source")
+	// is one the user's own `toren update` can never pull into.
+	cacheDir := filepath.Join(home, ".cache", "toren", "source")
 	cloneAs := ""
 	if os.Geteuid() == 0 {
-		cacheDir = "/var/cache/asura/source"
+		cacheDir = "/var/cache/toren/source"
 		if u := os.Getenv("SUDO_USER"); u != "" && u != "root" {
-			cacheDir = filepath.Join("/home", u, ".cache", "asura", "source")
+			cacheDir = filepath.Join("/home", u, ".cache", "toren", "source")
 			cloneAs = u
 		}
 	}
@@ -788,9 +788,9 @@ func findOrCloneRepo(branch string) (string, error) {
 	return cacheDir, nil
 }
 
-// repoGit runs git in repoDir as the checkout's owner. `sudo asura update`
+// repoGit runs git in repoDir as the checkout's owner. `sudo toren update`
 // otherwise writes root-owned objects into the user's own checkout, after which
-// the user's `asura update` fails with "Permission denied".
+// the user's `toren update` fails with "Permission denied".
 func repoGit(repoDir string, args ...string) *exec.Cmd {
 	full := append([]string{"-c", "safe.directory=*", "-C", repoDir}, args...)
 	if os.Geteuid() == 0 {
@@ -808,7 +808,7 @@ func canWriteRepo(path string) bool {
 	return syscall.Access(filepath.Join(path, ".git"), 2 /* W_OK */) == nil
 }
 
-func isAsuraRepo(path string) bool {
+func isTorenRepo(path string) bool {
 	if path == "" {
 		return false
 	}

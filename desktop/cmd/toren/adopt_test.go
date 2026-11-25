@@ -64,7 +64,7 @@ func TestAdoptLifecycleExecuteVerifyUndo(t *testing.T) {
 	}
 
 	// Verify state.json exists
-	statePath := filepath.Join(tmpRoot, "etc", "asura", "adopt", "state.json")
+	statePath := filepath.Join(tmpRoot, "etc", "toren", "adopt", "state.json")
 	if _, err := os.Stat(statePath); err != nil {
 		t.Fatalf("expected state.json at %s, got error: %v", statePath, err)
 	}
@@ -74,9 +74,9 @@ func TestAdoptLifecycleExecuteVerifyUndo(t *testing.T) {
 	if _, err := os.Stat(sessionPath); err != nil {
 		t.Fatalf("expected toren.desktop at %s", sessionPath)
 	}
-	portalPath := filepath.Join(tmpRoot, "usr", "share", "xdg-desktop-portal", "asura-portals.conf")
+	portalPath := filepath.Join(tmpRoot, "usr", "share", "xdg-desktop-portal", "toren-portals.conf")
 	if _, err := os.Stat(portalPath); err != nil {
-		t.Fatalf("expected asura-portals.conf at %s", portalPath)
+		t.Fatalf("expected toren-portals.conf at %s", portalPath)
 	}
 
 	// 2. Verify check passes
@@ -91,12 +91,12 @@ func TestAdoptLifecycleExecuteVerifyUndo(t *testing.T) {
 		t.Fatalf("runAdoptUndo failed with code %d", urc)
 	}
 
-	// Verify toren.desktop and asura-portals.conf removed
+	// Verify toren.desktop and toren-portals.conf removed
 	if _, err := os.Stat(sessionPath); !os.IsNotExist(err) {
 		t.Fatalf("expected toren.desktop to be removed after undo")
 	}
 	if _, err := os.Stat(portalPath); !os.IsNotExist(err) {
-		t.Fatalf("expected asura-portals.conf to be removed after undo")
+		t.Fatalf("expected toren-portals.conf to be removed after undo")
 	}
 
 	// Verify original files restored byte-for-byte

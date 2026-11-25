@@ -4,25 +4,25 @@ import (
 	"reflect"
 	"testing"
 
-	"asura/desktop/internal/runner/runnertest"
+	"toren/desktop/internal/runner/runnertest"
 )
 
-func TestAsuraCommands(t *testing.T) {
+func TestTorenCommands(t *testing.T) {
 	config := `
-# bind = SUPER, X, exec, asura-commented-out
-bind = SUPER, Space, exec, asura ipc call asura togglePopover launcher
-bind = SUPER, 1, exec, asura-workspace focus 1
-bind = SUPER, 2, exec, asura-workspace focus 2
-bindr = ALT, Tab, exec, [float] asura-app terminal
+# bind = SUPER, X, exec, toren-commented-out
+bind = SUPER, Space, exec, toren ipc call toren togglePopover launcher
+bind = SUPER, 1, exec, toren-workspace focus 1
+bind = SUPER, 2, exec, toren-workspace focus 2
+bindr = ALT, Tab, exec, [float] toren-app terminal
 bind = SUPER, A, exec, hyprctl dispatch togglefloating
 bind = ,XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
 bind = SUPER, Q, killactive,
-exec-once = command -v asura-monitor >/dev/null 2>&1 && asura-monitor autoscale
-exec-once = /usr/bin/asura-welcome --if-first-run
-exec-once = /usr/share/asura/session/asura-activate
+exec-once = command -v toren-monitor >/dev/null 2>&1 && toren-monitor autoscale
+exec-once = /usr/bin/toren-welcome --if-first-run
+exec-once = /usr/share/toren/session/toren-activate
 `
-	want := []string{"asura", "asura-app", "asura-welcome", "asura-workspace"}
-	if got := asuraCommands(config); !reflect.DeepEqual(got, want) {
+	want := []string{"toren", "toren-app", "toren-welcome", "toren-workspace"}
+	if got := torenCommands(config); !reflect.DeepEqual(got, want) {
 		t.Errorf("got %v, want %v", got, want)
 	}
 }

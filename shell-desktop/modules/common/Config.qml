@@ -210,7 +210,7 @@ Singleton {
                         property real y: 100
                     }
                 }
-                property string wallpaperPath: "/usr/share/asura/backgrounds/eva-berserk.jpg"
+                property string wallpaperPath: "/usr/share/toren/backgrounds/eva-berserk.jpg"
                 property string thumbnailPath: ""
                 property bool hideWhenFullscreen: true
                 property JsonObject parallax: JsonObject {

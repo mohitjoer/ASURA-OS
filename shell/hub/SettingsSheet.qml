@@ -478,7 +478,7 @@ Item {
                                                 // hands the shell its placement mode: the look becomes draggable
                                                 // on the desktop, which no slider in here can be.
                                                 if (srow.r.key === "vizPlace")
-                                                    Spawn.run(["asura-shell", "visualizer-place"]);
+                                                    Spawn.run(["toren-shell", "visualizer-place"]);
                                             }
                                         }
                                     }
@@ -935,7 +935,7 @@ Item {
                                                 anchors.verticalCenter: parent.verticalCenter
                                                 elide: Text.ElideRight
                                                 readonly property string cmd: String(sheet.val(srow.r))
-                                                text: cmd.length ? cmd : I18n.tr("asura-tunes (YouTube Music)")
+                                                text: cmd.length ? cmd : I18n.tr("toren-tunes (YouTube Music)")
                                                 color: cmd.length ? Tokens.ink : Tokens.inkMuted
                                                 font.family: Tokens.ui
                                                 font.pixelSize: 12
@@ -947,7 +947,7 @@ Item {
                                         Item {
                                             id: locRoot
                                             anchors.fill: parent
-                                            readonly property string stateDir: (Quickshell.env("XDG_STATE_HOME") || (Quickshell.env("HOME") + "/.local/state")) + "/asura"
+                                            readonly property string stateDir: (Quickshell.env("XDG_STATE_HOME") || (Quickshell.env("HOME") + "/.local/state")) + "/toren"
 
                                             Rectangle {
                                                 id: locField

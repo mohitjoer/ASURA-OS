@@ -8,7 +8,7 @@ import (
 )
 
 // Client is the Hub's handle on the compositor. upstream ran a provider binary per
-// compositor and spoke JSON to it; Asura has the one compositor, so the
+// compositor and spoke JSON to it; Toren has the one compositor, so the
 // provider is this package and a call is a function call. The method set is the
 // seam's, unchanged, so the callers read the same either way.
 //

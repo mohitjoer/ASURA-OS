@@ -24,10 +24,10 @@ import (
 // There is no "mode", no per-layer look knobs and no scene order: a wall is one
 // effect and one layer stack, layers[0] is always the cut subject, and every
 // idea (edge, shadow, quality, motion) lives once in stage.json. Both effects
-// share the asura-stage cut-out engine, the per-wall registry, and the artifact
+// share the toren-stage cut-out engine, the per-wall registry, and the artifact
 // tree under ~/Pictures/Stage. Generation is slow, so it runs on a coalescing
 // worker off the wallpaper hot path; the finished subject is folded into
-// asura-wallpaper's wallpaper frame under the unchanged `depth` wire for pixel-lock
+// toren-wallpaper's wallpaper frame under the unchanged `depth` wire for pixel-lock
 // (Depth only), and the full editor state rides the `stage` topic QML renders
 // from.
 
@@ -62,7 +62,7 @@ type stageWall struct {
 	Layers []stageLayer `json:"layers,omitempty"`
 }
 
-// stageWalls is the daemon-owned registry at ~/.local/state/asura/stage-walls.json.
+// stageWalls is the daemon-owned registry at ~/.local/state/toren/stage-walls.json.
 // `current` mirrors the wallpaper on screen now so the shell can key its lookup.
 type stageWalls struct {
 	Current string               `json:"current"`
@@ -125,7 +125,7 @@ func logStage(what string, err error) {
 
 // --- paths -----------------------------------------------------------------
 
-func stageWallsPath() string { return filepath.Join(stateDir(), "asura", "stage-walls.json") }
+func stageWallsPath() string { return filepath.Join(stateDir(), "toren", "stage-walls.json") }
 func stageDir() string       { return filepath.Join(os.Getenv("HOME"), "Pictures", "Stage") }
 
 func stageStem(source string) string {
@@ -139,7 +139,7 @@ func stageBackgroundOut(source string) string {
 	return filepath.Join(stageWallDir(source), "background.png")
 }
 func stageIndexPath(source string) string { return filepath.Join(stageWallDir(source), ".index.json") }
-func stageProgressPath() string           { return filepath.Join(stateDir(), "asura", "stage", "progress") }
+func stageProgressPath() string           { return filepath.Join(stateDir(), "toren", "stage", "progress") }
 
 // --- shared fs helpers -----------------------------------------------------
 
@@ -251,7 +251,7 @@ func saveStageIndex(source string, idx stageIndex) {
 // motion) is the shell's; the daemon reads only quality, at each generation.
 func stageConfig() stageQuality {
 	def := stageQualityFor("draft")
-	dir := asuraConfigDir()
+	dir := torenConfigDir()
 	if dir == "" {
 		return def
 	}
@@ -283,7 +283,7 @@ func stageQualityFor(tier string) stageQuality {
 
 // --- engine ----------------------------------------------------------------
 
-// stageEngineBin resolves the asura-stage helper. ASURA_STAGE_ENGINE is the test /
+// stageEngineBin resolves the toren-stage helper. ASURA_STAGE_ENGINE is the test /
 // out-of-tree seam; a dev run reaches it under ASURA_SHELL_DIR; otherwise it is
 // on PATH once packaged.
 func stageEngineBin() string {
@@ -291,12 +291,12 @@ func stageEngineBin() string {
 		return bin
 	}
 	if dir := os.Getenv("ASURA_SHELL_DIR"); dir != "" {
-		p := filepath.Join(dir, "scripts", "asura-stage")
+		p := filepath.Join(dir, "scripts", "toren-stage")
 		if isFile(p) {
 			return p
 		}
 	}
-	return "asura-stage"
+	return "toren-stage"
 }
 
 // stageEngineAvailable probes the runtime on a deadline: a hung helper must
@@ -529,7 +529,7 @@ func (d *daemon) stageWorker() {
 }
 
 // stageTargets are the still wallpapers on screen (default + per-output),
-// skipping videos and live-claimed slots, each paired with its asura-wallpaper slot.
+// skipping videos and live-claimed slots, each paired with its toren-wallpaper slot.
 func (d *daemon) stageTargets() []stageTarget {
 	f := d.wallFrame()
 	var out []stageTarget
@@ -549,7 +549,7 @@ func (d *daemon) stageTargets() []stageTarget {
 // engine, so a switch reuses a stage instantly but never auto-generates; gen
 // (an enable) reuses when present and only generates what is missing; force (a
 // quality change, refresh, or manual re-cut) regenerates. The finished subject
-// is folded to asura-wallpaper under the `depth` wire for the Depth effect only;
+// is folded to toren-wallpaper under the `depth` wire for the Depth effect only;
 // Parallax renders from the topic and clears the fold so the backdrop covers the
 // wallpaper's own subject. A failure leaves the effect off with a logged reason
 // and is never fatal.
@@ -790,7 +790,7 @@ func restField(line string, n int) string {
 // stageSetEffect records the three-way effect for the current wallpaper and
 // schedules a reconcile. Enabling never re-cuts: it reuses a saved cut when one
 // exists and only generates what is missing, so switching Depth<->Parallax is
-// instant. Off clears the asura-wallpaper overlay but keeps the layer arrangement for a
+// instant. Off clears the toren-wallpaper overlay but keeps the layer arrangement for a
 // later re-enable. The write is synchronous so the shell's control reflects at
 // once.
 func (d *daemon) stageSetEffect(eff stageEffect) {
@@ -992,7 +992,7 @@ type stageWallsV1 struct {
 }
 
 func stageMigrationMarker() string {
-	return filepath.Join(stateDir(), "asura", "migrations", "asura-stage-v2")
+	return filepath.Join(stateDir(), "toren", "migrations", "toren-stage-v2")
 }
 
 // migrateStage folds the v1 Stage state into v2 once, gated by the marker.
@@ -1012,7 +1012,7 @@ func migrateStage() {
 		logStage("migrate marker dir", err)
 		return
 	}
-	if err := os.WriteFile(marker, []byte("asura-stage v2 migration complete\n"), 0o644); err != nil {
+	if err := os.WriteFile(marker, []byte("toren-stage v2 migration complete\n"), 0o644); err != nil {
 		logStage("migrate marker", err)
 	}
 }
@@ -1064,7 +1064,7 @@ type legacyParallaxWalls struct {
 	Layers map[string][]legacyParallaxLayer `json:"layers"`
 }
 
-func legacyDepthWallsPath() string { return filepath.Join(stateDir(), "asura", "depth-walls.json") }
+func legacyDepthWallsPath() string { return filepath.Join(stateDir(), "toren", "depth-walls.json") }
 func legacyDepthDir() string       { return filepath.Join(os.Getenv("HOME"), "Pictures", "Depth") }
 func legacyParallaxDir() string    { return filepath.Join(os.Getenv("HOME"), "Pictures", "Parallax") }
 func legacyLayersPath() string     { return filepath.Join(legacyParallaxDir(), "layers.pz") }
@@ -1329,7 +1329,7 @@ func stageMotionAmount(motion map[string]any) string {
 // box that skipped v1), deriving the quality tier from their model+matting. The
 // file is GUI-owned, so nothing is created when there is nothing to fold.
 func migrateStageSettings() {
-	dir := asuraConfigDir()
+	dir := torenConfigDir()
 	if dir == "" {
 		return
 	}

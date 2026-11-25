@@ -1,4 +1,4 @@
-// asura-store normalizes six product catalogues (lockscreens, plugins, bundles,
+// toren-store normalizes six product catalogues (lockscreens, plugins, bundles,
 // rices, bar styles, and fastfetch styles) into one JSON contract the Quickshell
 // app renders without per-category logic. These types are that contract; their
 // field names and JSON tags match docs/store.md and are consumed unchanged by

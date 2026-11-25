@@ -1,7 +1,6 @@
 package main
 
 import (
-	"asura/desktop/cmd/toren-hubd/internal/wm"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,10 +11,11 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"toren/desktop/cmd/toren-hubd/internal/wm"
 )
 
 // rice = a named, versioned look document for the whole desktop. it captures a
-// curated view of the four user-owned stores under ~/.config/asura (hypr.json,
+// curated view of the four user-owned stores under ~/.config/toren (hypr.json,
 // shell.json, theme.json, launcher.json) plus assets (wallpaper, launcher hero,
 // cursor, fonts), so a whole desktop look can be saved, applied, shared, and
 // reverted in one click. see docs/superpowers/specs (local).
@@ -61,22 +61,22 @@ type Rice struct {
 	Layers      map[string]json.RawMessage `json:"layers,omitempty"`
 }
 
-func asuraConfigDir() string {
+func torenConfigDir() string {
 	base := os.Getenv("XDG_CONFIG_HOME")
 	if base == "" {
 		base = filepath.Join(os.Getenv("HOME"), ".config")
 	}
-	return filepath.Join(base, "asura")
+	return filepath.Join(base, "toren")
 }
 
-func ricesDir() string            { return filepath.Join(asuraConfigDir(), "rices") }
-func shellStorePath() string      { return filepath.Join(asuraConfigDir(), "shell.json") }
-func launcherStorePath() string   { return filepath.Join(asuraConfigDir(), "launcher.json") }
-func widgetsStorePath() string    { return filepath.Join(asuraConfigDir(), "widgets.json") }
-func visualizerStorePath() string { return filepath.Join(asuraConfigDir(), "visualizer.json") }
-func decorStorePath() string      { return filepath.Join(asuraConfigDir(), "decor.json") }
-func brandStorePath() string      { return filepath.Join(asuraConfigDir(), "brand.json") }
-func wallpaperStorePath() string  { return filepath.Join(asuraConfigDir(), "asura-wallpaper.json") }
+func ricesDir() string            { return filepath.Join(torenConfigDir(), "rices") }
+func shellStorePath() string      { return filepath.Join(torenConfigDir(), "shell.json") }
+func launcherStorePath() string   { return filepath.Join(torenConfigDir(), "launcher.json") }
+func widgetsStorePath() string    { return filepath.Join(torenConfigDir(), "widgets.json") }
+func visualizerStorePath() string { return filepath.Join(torenConfigDir(), "visualizer.json") }
+func decorStorePath() string      { return filepath.Join(torenConfigDir(), "decor.json") }
+func brandStorePath() string      { return filepath.Join(torenConfigDir(), "brand.json") }
+func wallpaperStorePath() string  { return filepath.Join(torenConfigDir(), "toren-wallpaper.json") }
 func ricePath(slug string) string {
 	return filepath.Join(ricesDir(), slug, "rice.json")
 }
@@ -245,10 +245,10 @@ func currentUser() string {
 	return ""
 }
 
-// asuraVersion is the running Asura base version (the createdWith tag). Best
-// effort: an empty string when the asura CLI is not on PATH (e.g. tests).
-func asuraVersion() string {
-	out, err := exec.Command("asura", "version").Output()
+// torenVersion is the running Toren base version (the createdWith tag). Best
+// effort: an empty string when the toren CLI is not on PATH (e.g. tests).
+func torenVersion() string {
+	out, err := exec.Command("toren", "version").Output()
 	if err != nil {
 		return ""
 	}
@@ -289,7 +289,7 @@ func stateHome() string {
 
 // currentWallpaper reads the path the shell recorded for the live wallpaper.
 func currentWallpaper() string {
-	b, err := os.ReadFile(filepath.Join(stateHome(), "asura-wallpaper"))
+	b, err := os.ReadFile(filepath.Join(stateHome(), "toren-wallpaper"))
 	if err != nil {
 		return ""
 	}
@@ -319,7 +319,7 @@ func liveWallDir() string { return filepath.Join(os.Getenv("HOME"), "Pictures", 
 // from the same per-video wallpaper tune the shell samples its palette at, so
 // the rice preview shows the frame the user actually tuned the look around.
 func previewFrameOffset(video string) string {
-	b, err := os.ReadFile(filepath.Join(stateHome(), "asura-walls.json"))
+	b, err := os.ReadFile(filepath.Join(stateHome(), "toren-walls.json"))
 	if err != nil {
 		return "1"
 	}
@@ -400,7 +400,7 @@ func bundleDecorAssets(dir string, decor map[string]any) {
 // the live desktop). a missing or invalid asset clears the picture; the decor
 // still applies.
 func rehydrateDecorAssets(riceDir, slug string, decor map[string]any) {
-	out := filepath.Join(asuraConfigDir(), "rice-assets", slug)
+	out := filepath.Join(torenConfigDir(), "rice-assets", slug)
 	for _, v := range decor {
 		ent, ok := v.(map[string]any)
 		if !ok {
@@ -429,7 +429,7 @@ func rehydrateRiceAsset(riceDir, slug, ref string) (string, bool) {
 		return "", false
 	}
 	name := strings.TrimPrefix(ref, "rice://")
-	dst := filepath.Join(asuraConfigDir(), "rice-assets", slug, name)
+	dst := filepath.Join(torenConfigDir(), "rice-assets", slug, name)
 	if validAssetName(name) && isFile(filepath.Join(riceDir, name)) &&
 		copyFile(filepath.Join(riceDir, name), dst) == nil {
 		return dst, true
@@ -481,7 +481,7 @@ func captureRice(name string, layers []string) (Rice, error) {
 		Slug:        slug,
 		Name:        strings.TrimSpace(name),
 		Author:      currentUser(),
-		CreatedWith: asuraVersion(),
+		CreatedWith: torenVersion(),
 		Look: map[string]map[string]any{
 			"hypr":            pick(hy, riceHyprLook),
 			"shell":           omit(readJSONMap(shellStorePath()), riceShellOmit),
@@ -490,7 +490,7 @@ func captureRice(name string, layers []string) (Rice, error) {
 			"visualizer":      extractStore(visualizerStorePath(), nil),
 			"decor":           extractStore(decorStorePath(), nil),
 			"theme":           readJSONMap(themeStatePath()),
-			"asura-wallpaper": pick(readJSONMap(wallpaperStorePath()), []string{"matugen"}),
+			"toren-wallpaper": pick(readJSONMap(wallpaperStorePath()), []string{"matugen"}),
 		},
 	}
 	if len(layers) == 1 && layers[0] == "all" {
@@ -555,7 +555,7 @@ func captureRice(name string, layers []string) (Rice, error) {
 		}
 	}
 	if r.Color.Mode == "fixed" {
-		if copyFile(filepath.Join(asuraCacheDir(), "colors.json"), filepath.Join(dir, "palette.json")) != nil {
+		if copyFile(filepath.Join(torenCacheDir(), "colors.json"), filepath.Join(dir, "palette.json")) != nil {
 			r.Color.Mode = "wallpaper" // no cached palette: follow the wallpaper instead
 			r.Color.Palette = ""
 		}
@@ -656,14 +656,14 @@ func readPalette(path string) map[string]string {
 // a byte-for-byte revert (not an allowlisted merge). that is what makes
 // "restore my original setup" trustworthy.
 var backupStores = []string{
-	"desktop.json", "shell.json", "launcher.json", "theme.json", "asura-wallpaper.json",
+	"desktop.json", "shell.json", "launcher.json", "theme.json", "toren-wallpaper.json",
 	"widgets.json", "visualizer.json", "decor.json", "brand.json", "profile.json",
 }
 
 func snapshotStores(slot string) error {
 	dir := filepath.Join(ricesDir(), slot)
 	for _, f := range backupStores {
-		src := filepath.Join(asuraConfigDir(), f)
+		src := filepath.Join(torenConfigDir(), f)
 		if !isFile(src) {
 			continue
 		}
@@ -674,7 +674,7 @@ func snapshotStores(slot string) error {
 	if wp := currentWallpaper(); wp != "" {
 		_ = atomicWrite(filepath.Join(dir, "wallpaper.path"), []byte(wp), 0o644)
 	}
-	// the fastfetch readout and the qylock skin live outside ~/.config/asura, so
+	// the fastfetch readout and the qylock skin live outside ~/.config/toren, so
 	// snapshot them explicitly to keep a revert whole.
 	if isFile(fastfetchConfigPath()) {
 		_ = copyFile(fastfetchConfigPath(), filepath.Join(dir, "fastfetch.jsonc"))
@@ -704,7 +704,7 @@ func restoreRice(slot string) error {
 		if !isFile(src) {
 			continue
 		}
-		if err := copyFile(src, filepath.Join(asuraConfigDir(), f)); err != nil {
+		if err := copyFile(src, filepath.Join(torenConfigDir(), f)); err != nil {
 			return err
 		}
 		restored = true
@@ -713,9 +713,9 @@ func restoreRice(slot string) error {
 		return fmt.Errorf("no backup to restore at %q", slot)
 	}
 	if b, err := os.ReadFile(filepath.Join(dir, "wallpaper.path")); err == nil && isFile(strings.TrimSpace(string(b))) {
-		_ = riceRun("asura-wallpaper", "wallpaper", "set", strings.TrimSpace(string(b)))
+		_ = riceRun("toren-wallpaper", "wallpaper", "set", strings.TrimSpace(string(b)))
 	} else {
-		_ = riceRun("asura-wallpaper", "wallpaper", "repaint")
+		_ = riceRun("toren-wallpaper", "wallpaper", "repaint")
 	}
 	if src := filepath.Join(dir, "fastfetch.jsonc"); isFile(src) {
 		_ = copyFile(src, fastfetchConfigPath())
@@ -821,9 +821,9 @@ func applyRice(slug string, layers []string) error {
 			return fmt.Errorf("apply decor look: %w", err)
 		}
 	}
-	if len(r.Look["asura-wallpaper"]) > 0 {
-		if err := overlayStore(wallpaperStorePath(), r.Look["asura-wallpaper"], nil); err != nil {
-			return fmt.Errorf("apply asura-wallpaper look: %w", err)
+	if len(r.Look["toren-wallpaper"]) > 0 {
+		if err := overlayStore(wallpaperStorePath(), r.Look["toren-wallpaper"], nil); err != nil {
+			return fmt.Errorf("apply toren-wallpaper look: %w", err)
 		}
 	}
 
@@ -848,7 +848,7 @@ func applyRice(slug string, layers []string) error {
 		_ = os.MkdirAll(destDir, 0o755)
 		dst := filepath.Join(destDir, r.Slug+filepath.Ext(r.Assets.Wallpaper))
 		if copyFile(filepath.Join(dir, r.Assets.Wallpaper), dst) == nil {
-			_ = riceRun("asura-wallpaper", "wallpaper", "set", dst)
+			_ = riceRun("toren-wallpaper", "wallpaper", "set", dst)
 		}
 	}
 	// Colour is set AFTER the wallpaper: `wallpaper set` re-derives the palette
@@ -886,7 +886,7 @@ func applyRice(slug string, layers []string) error {
 		if pal := readPalette(filepath.Join(dir, r.Color.Palette)); pal != nil {
 			writePalette(pal)
 		}
-		_ = riceRun("asura-wallpaper", "wallpaper", "repaint")
+		_ = riceRun("toren-wallpaper", "wallpaper", "repaint")
 	} else {
 		selectShellTheme("Wallpaper")
 		st := riceThemeState()
@@ -894,7 +894,7 @@ func applyRice(slug string, layers []string) error {
 		saveThemeState(st)
 	}
 	if r.Assets.Hero != "" {
-		dst := filepath.Join(asuraConfigDir(), "rice-hero"+filepath.Ext(r.Assets.Hero))
+		dst := filepath.Join(torenConfigDir(), "rice-hero"+filepath.Ext(r.Assets.Hero))
 		if copyFile(filepath.Join(dir, r.Assets.Hero), dst) == nil {
 			setLauncherHero(dst)
 		}
@@ -961,8 +961,8 @@ func setActiveRice(slug string) { _ = atomicWrite(activePath(), []byte(slug), 0o
 
 // reapplyRiceEmblem lands the active rice's fastfetch emblem again when the
 // readout is back on the shipped brand mark. Boxes riced before applyRice used
-// the user-owned asura-logo path had the rice's emblem copied over the shipped
-// fastfetch-emblem.png, which every update re-laid; `asura doctor` calls this
+// the user-owned toren-logo path had the rice's emblem copied over the shipped
+// fastfetch-emblem.png, which every update re-laid; `toren doctor` calls this
 // so one update after the fix restores the rice's logo. A logo the user imported
 // themselves (any other source) is never touched. Returns the stored source, or
 // "" when nothing needed doing.
@@ -984,7 +984,7 @@ func reapplyRiceEmblem() (string, error) {
 // --- the UI-facing list ----------------------------------------------------
 
 // riceListEntry is a rice plus the fields the Rices tab needs: compatibility
-// against the running Asura, whether it is the applied rice, a preview URL,
+// against the running Toren, whether it is the applied rice, a preview URL,
 // and whether its wallpaper is a live (video) wall.
 type riceListEntry struct {
 	Rice
@@ -999,7 +999,7 @@ func listRiceEntries() []riceListEntry {
 	out := []riceListEntry{}
 	for _, r := range listRices() {
 		e := riceListEntry{
-			Rice: r, Compat: riceCompat(r.CreatedWith, asuraVersion()), Active: r.Slug == active,
+			Rice: r, Compat: riceCompat(r.CreatedWith, torenVersion()), Active: r.Slug == active,
 			Live: isVideo(r.Assets.Wallpaper),
 		}
 		dir := filepath.Join(ricesDir(), r.Slug)
@@ -1063,7 +1063,7 @@ func homeRel(p string) string {
 // and the outputs regenerated from them) plus the assets it carries, each
 // flagged by whether the rice actually provides it.
 func riceTouches(r Rice, dir string) []riceTouch {
-	cfg := asuraConfigDir()
+	cfg := torenConfigDir()
 	touches := []riceTouch{
 		{homeRel(filepath.Join(cfg, "hypr.json")), "config", "window", "Windows: decoration and motion", len(r.Look["hypr"]) > 0},
 		{homeRel(filepath.Join(cfg, "shell.json")), "config", "widgets", "Shell: bar skin and modules", len(r.Look["shell"]) > 0},
@@ -1076,7 +1076,7 @@ func riceTouches(r Rice, dir string) []riceTouch {
 	}
 	if r.Color.Mode == "fixed" {
 		touches = append(touches,
-			riceTouch{homeRel(filepath.Join(asuraCacheDir(), "colors.json")), "output", "refresh", "Colour palette (asura cache)", true},
+			riceTouch{homeRel(filepath.Join(torenCacheDir(), "colors.json")), "output", "refresh", "Colour palette (toren cache)", true},
 			riceTouch{homeRel(kittyThemePath()), "output", "terminal", "kitty colours", true},
 		)
 	}
@@ -1194,7 +1194,7 @@ func exportReadme(r Rice) string {
 		name = r.Slug
 	}
 	var b strings.Builder
-	fmt.Fprintf(&b, "Asura rice: %s\n", name)
+	fmt.Fprintf(&b, "Toren rice: %s\n", name)
 	if r.Author != "" {
 		fmt.Fprintf(&b, "By %s\n", r.Author)
 	}
@@ -1220,7 +1220,7 @@ func exportReadme(r Rice) string {
 	if len(r.Look["decor"]) > 0 {
 		b.WriteString("  decor-*      the desktop decors' pictures\n")
 	}
-	fmt.Fprintf(&b, "\nDrop this folder into ~/.config/asura/rices/ and apply it from\nAsura Settings > Appearance > Rices, or `asura-hubd rice apply %s`.\n", r.Slug)
+	fmt.Fprintf(&b, "\nDrop this folder into ~/.config/toren/rices/ and apply it from\nToren Settings > Appearance > Rices, or `toren-hubd rice apply %s`.\n", r.Slug)
 	return b.String()
 }
 

@@ -4,11 +4,11 @@
 # The vendored files are byte-identical to a pinned upstream commit. That is
 # the whole point: a vendored file is a shipped file, and the project's rule
 # is that a shipped file is never edited in place. A change to a vendored
-# component is a configuration value, an overlay file Asura owns, or a patch
+# component is a configuration value, an overlay file Toren owns, or a patch
 # in shell/vendor/patches/ — never a hand edit of a vendored file.
 #
 # This script is the only thing that writes into the vendored paths, and it
-# writes exactly what upstream has. `asura doctor` verifies the result
+# writes exactly what upstream has. `toren doctor` verifies the result
 # against the hashes in the manifest, so a hand edit cannot survive.
 #
 # Usage:
@@ -24,7 +24,7 @@ set -eu
 
 REPO_ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 VENDOR_DIR="$REPO_ROOT/shell/vendor"
-CACHE="${ASURA_VENDOR_CACHE:-${XDG_CACHE_HOME:-$HOME/.cache}/asura/vendor}"
+CACHE="${ASURA_VENDOR_CACHE:-${XDG_CACHE_HOME:-$HOME/.cache}/toren/vendor}"
 
 # ---------------------------------------------------------------- the pins
 #
@@ -64,10 +64,10 @@ SHAPES_LICENCE="LICENSE.apache-2.0"
 #
 # `modules/common/Appearance.qml` and `modules/common/Config.qml` are NOT in
 # this list on purpose. They are the two files upstream's components read for
-# their colours and their settings, and Asura supplies its own at those same
+# their colours and their settings, and Toren supplies its own at those same
 # paths — a monochrome token bridge and a GSettings-backed configuration.
 # That is the whole of the re-theme and the re-bind: no vendored file is
-# modified, and upstream's components read Asura's palette and Asura's
+# modified, and upstream's components read Toren's palette and Toren's
 # settings because they were told to.
 II_PATHS="
 modules/common
@@ -89,35 +89,35 @@ services
 GlobalStates.qml
 "
 
-# Files inside a vendored path that Asura supplies instead.
+# Files inside a vendored path that Toren supplies instead.
 #
 # These four are the whole of the re-theme and the re-bind, and they are the
 # reason no vendored file needs a patch:
 #
-#   Appearance.qml  upstream's theme singleton. Asura's version exposes the
-#                   same property names, sourced from Asura's monochrome
-#                   tokens, so upstream's components draw in Asura's palette
+#   Appearance.qml  upstream's theme singleton. Toren's version exposes the
+#                   same property names, sourced from Toren's monochrome
+#                   tokens, so upstream's components draw in Toren's palette
 #                   without being edited.
 #   Config.qml      upstream's settings singleton, which reads a JSON file of
-#                   its own. Asura's version exposes the same `options.*`
+#                   its own. Toren's version exposes the same `options.*`
 #                   shape, sourced from GSettings, so upstream's components
-#                   read Asura's settings store — and there is still exactly
+#                   read Toren's settings store — and there is still exactly
 #                   one settings store in the desktop.
 #   GlobalStates.qml upstream's shell-root state singleton. It sits at the
-#                   shell root, which is Asura's, and it imports the whole
+#                   shell root, which is Toren's, and it imports the whole
 #                   service graph, which closes a cycle through the modules
 #                   directory: the services reach back into the modules, and
-#                   the modules reach back into the root. Asura's version
+#                   the modules reach back into the root. Toren's version
 #                   carries the same surface-open flags and nothing else.
 #   AppIcon.qml     upstream's application-icon widget, which is a KDE
 #                   Frameworks `Kirigami.Icon`. The base layer carries no
 #                   KDE Frameworks, and one widget is not a reason to put an
-#                   application framework on the desktop. Asura's version
+#                   application framework on the desktop. Toren's version
 #                   has the same two properties — a source and a size — and
 #                   nothing else.
 #   MaterialSymbol.qml
 #                   upstream's Material Symbols icon widget, which asks for a
-#                   font the base layer does not carry. Asura's version maps
+#                   font the base layer does not carry. Toren's version maps
 #                   the Material Symbol names onto the Font Awesome 4.7
 #                   codepoints the archive's font has, so the vendored
 #                   components' icons resolve instead of rendering nothing.
@@ -125,12 +125,12 @@ GlobalStates.qml
 #                   upstream's screenshot-command builder. The one difference
 #                   is the OCR binary's name: upstream calls `tesseract`, and
 #                   on Void that name belongs to a game — the OCR engine is
-#                   packaged as `tesseract-ocr`, which is what Asura's version
+#                   packaged as `tesseract-ocr`, which is what Toren's version
 #                   calls. Every other branch is upstream's, unchanged.
 #   regionSelector/RegionSelector.qml
 #                   upstream's region-selector entry point, which registers
 #                   one IPC handler and one global shortcut for each of its
-#                   five actions. Asura's version reaches one action — text
+#                   five actions. Toren's version reaches one action — text
 #                   recognition — through the shell's own IPC bridge, because
 #                   the desktop's other halves of the other actions already
 #                   exist elsewhere and an entry point for a missing command
@@ -140,13 +140,13 @@ GlobalStates.qml
 #                   IPC handler and three global shortcuts and calls its
 #                   Session singleton for each of eight actions — logout by
 #                   killing every window and the compositor, poweroff through
-#                   loginctl. Asura's version registers none of them, carries
+#                   loginctl. Toren's version registers none of them, carries
 #                   the four actions the desktop has (lock through the
 #                   daemon's hyprlock; logout, reboot and shutdown through
 #                   the shell's confirmation dialog), and leaves the rest
 #                   out for the same reason as the selector's.
 #
-# They are Asura's files, in Asura's tree, at upstream's paths. That is the
+# They are Toren's files, in Toren's tree, at upstream's paths. That is the
 # overlay: the vendored components are upstream's, the context they run in is
 # ours.
 EXCLUDE_FILES="
@@ -232,7 +232,7 @@ cmd_sync() {
     staging=$(mktemp -d)
     trap 'rm -rf "$staging"' EXIT
 
-    # Asura supplies the files that carry the design, the settings and the
+    # Toren supplies the files that carry the design, the settings and the
     # shell's own state. They live at upstream's paths, so they are set aside
     # BEFORE the copy and put back after it — otherwise the copy overwrites
     # the very files that make the copy work.
@@ -276,7 +276,7 @@ cmd_sync() {
           "$REPO_ROOT/shell/$SHAPES_DEST/example.qml" \
           "$REPO_ROOT/shell/$SHAPES_DEST/example-squircle.qml"
 
-    # Put Asura's own files back.
+    # Put Toren's own files back.
     for e in $EXCLUDE_FILES; do
         if [ -f "$overlay/$e" ]; then
             mkdir -p "$(dirname "$REPO_ROOT/shell/$e")"
@@ -296,7 +296,7 @@ cmd_sync() {
     log "vendored $(ii_file_list | wc -l) + $(shapes_file_list | wc -l) files"
 }
 
-# The manifest. Machine-readable, and the input to `asura doctor`'s
+# The manifest. Machine-readable, and the input to `toren doctor`'s
 # byte-identity check: if a vendored file is edited by hand, its hash stops
 # matching and the doctor reports it.
 write_manifest() {
@@ -305,7 +305,7 @@ write_manifest() {
         echo "# The vendored upstream component tree."
         echo "#"
         echo "# Generated by shell/vendor/vendor.sh. Do not edit by hand: the"
-        echo "# hashes below are what \`asura doctor\` checks the tree against."
+        echo "# hashes below are what \`toren doctor\` checks the tree against."
         echo "schema: 1"
         echo "components:"
         echo "  - name: $II_NAME"

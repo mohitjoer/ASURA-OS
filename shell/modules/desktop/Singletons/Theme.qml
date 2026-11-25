@@ -7,17 +7,17 @@ import qs.Ui.Singletons as Ui
 // every colour resolved from the daemon palette through Scheme so the clock,
 // its card and the right-click menu follow the active theme (a fixed named
 // scheme or the live wallpaper) instead of a hardcoded tint. `brand` stays the
-// fixed vermillion identity (the Asura seal and the clock's deliberate "brand"
+// fixed vermillion identity (the Toren seal and the clock's deliberate "brand"
 // accent option); `accent` is the live system accent the interactive chrome
 // paints with. motion = the shell's morph curve (OutExpo).
 Singleton {
     // brand: fixed vermillion identity. Never themes -- that is the point. Used
-    // by the Asura seal and the clock's deliberate "brand" accent option.
+    // by the Toren seal and the clock's deliberate "brand" accent option.
     readonly property color brand: "#e2342a"
     readonly property color sun:   "#e2342a"
     readonly property color gold:  "#d9a441"
 
-    // accent: the live system accent (the palette's primary role). Asura keeps
+    // accent: the live system accent (the palette's primary role). Toren keeps
     // colour on the frame, not the content, so the menu chrome no longer tints
     // its selected/on states with it -- those invert (see `bone` below). Only a
     // widget's own live colour (resize grips, active surfaces) still paints here.
@@ -78,13 +78,13 @@ Singleton {
     readonly property string font:   Config.widgetFont.length > 0 ? Config.widgetFont : "Space Grotesk"
     readonly property string fontJp: "Noto Sans CJK JP"
     readonly property string mono:   "JetBrainsMono Nerd Font"
-    // brand mark + name, user-overridable via ~/.config/asura/brand.json (Shell ->
-    // Global). defaults to the Asura seal / "Asura". BrandMark renders `mark`, or
-    // `markSource` (an image) when set. Asura's own apps never read these.
+    // brand mark + name, user-overridable via ~/.config/toren/brand.json (Shell ->
+    // Global). defaults to the Toren seal / "Toren". BrandMark renders `mark`, or
+    // `markSource` (an image) when set. Toren's own apps never read these.
     readonly property string mark: Config.markText.length > 0 ? Config.markText : "A"
     readonly property string markSource: Config.markImage
     readonly property bool markTint: Config.markTint
-    readonly property string brandName: Config.brandName.length > 0 ? Config.brandName : "Asura"
+    readonly property string brandName: Config.brandName.length > 0 ? Config.brandName : "Toren"
     readonly property int radius: 0
     // rounded corners for the menu card and its tiles (the sidebar radiusWidget
     // idiom); the sharp `radius: 0` above stays the clock-face default.

@@ -42,7 +42,7 @@ Flow {
             }
 
             Text {
-                objectName: "asura-store-status-" + labelRow.modelData
+                objectName: "toren-store-status-" + labelRow.modelData
                 text: I18n.tr(labelRow.modelData)
                 textFormat: Text.PlainText
                 color: Tokens.inkDim

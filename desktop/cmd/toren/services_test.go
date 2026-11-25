@@ -38,23 +38,23 @@ func serviceSandbox(t *testing.T, installed bool) *[]string {
 
 func TestEnableLinksTheServiceAndDisableUnlinksIt(t *testing.T) {
 	ran := serviceSandbox(t, true)
-	if code := asuraEnable([]string{"ssh"}); code != exitOK {
+	if code := torenEnable([]string{"ssh"}); code != exitOK {
 		t.Fatalf("enable: %d", code)
 	}
 	if serviceState(switchableServices["ssh"]) != "on" {
 		t.Fatal("sshd is not linked")
 	}
-	if code := asuraEnable([]string{"ssh"}); code != exitOK || len(*ran) != 1 {
+	if code := torenEnable([]string{"ssh"}); code != exitOK || len(*ran) != 1 {
 		t.Fatalf("a second enable should change nothing: %v", *ran)
 	}
-	if code := asuraDisable([]string{"ssh"}); code != exitOK || serviceState(switchableServices["ssh"]) != "off" {
+	if code := torenDisable([]string{"ssh"}); code != exitOK || serviceState(switchableServices["ssh"]) != "off" {
 		t.Fatalf("disable: %d", code)
 	}
 }
 
 func TestEnableInstallsAMissingPackageFirst(t *testing.T) {
 	ran := serviceSandbox(t, false)
-	asuraEnable([]string{"ssh"})
+	torenEnable([]string{"ssh"})
 	if len(*ran) == 0 || (*ran)[0] != "xbps-install -Sy openssh" {
 		t.Fatalf("ran %v", *ran)
 	}
@@ -62,10 +62,10 @@ func TestEnableInstallsAMissingPackageFirst(t *testing.T) {
 
 func TestEnableRefusesUnknownServicesAndOnesWithNoDefinition(t *testing.T) {
 	serviceSandbox(t, true)
-	if code := asuraEnable([]string{"teleport"}); code != exitUsage {
+	if code := torenEnable([]string{"teleport"}); code != exitUsage {
 		t.Fatalf("unknown: %d", code)
 	}
-	if code := asuraEnable([]string{"tailscale"}); code != exitFail {
+	if code := torenEnable([]string{"tailscale"}); code != exitFail {
 		t.Fatalf("no /etc/sv/tailscaled: %d", code)
 	}
 }

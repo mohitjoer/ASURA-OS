@@ -14,7 +14,7 @@ import (
 
 // shellDir (ASURA_SHELL_DIR): the shell tree of a repo checkout, for a daemon
 // talking to a Quickshell started from it. Empty on an installed box, where the
-// tree is /usr/share/asura/shell.
+// tree is /usr/share/toren/shell.
 var shellDir = os.Getenv("ASURA_SHELL_DIR")
 
 // shellRoot is the tree the running shell was started on; its path is what
@@ -23,7 +23,7 @@ func shellRoot() string {
 	if shellDir != "" {
 		return shellDir
 	}
-	return "/usr/share/asura/shell"
+	return "/usr/share/toren/shell"
 }
 
 var frameBarMenuIDs = map[string]bool{
@@ -241,8 +241,8 @@ func spawnLocker() error {
 	argv := []string{}
 	home, _ := os.UserHomeDir()
 	for _, conf := range []string{
-		filepath.Join(home, ".config", "asura", "hyprland", "hyprlock.conf"),
-		"/usr/share/asura/hyprland/hyprlock.conf",
+		filepath.Join(home, ".config", "toren", "hyprland", "hyprlock.conf"),
+		"/usr/share/toren/hyprland/hyprlock.conf",
 	} {
 		if _, err := os.Stat(conf); err == nil {
 			argv = []string{"-c", conf}

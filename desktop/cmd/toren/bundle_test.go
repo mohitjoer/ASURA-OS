@@ -78,7 +78,7 @@ func TestBundleInstallSnapshotsInstallsFlatpaksAndEnablesServices(t *testing.T) 
 
 func TestBundleRejectsUnknownNames(t *testing.T) {
 	fakeBundles(t, nil, nil, nil)
-	if code := asuraBundle([]string{"install", "dev", "everything"}); code != exitUsage {
+	if code := torenBundle([]string{"install", "dev", "everything"}); code != exitUsage {
 		t.Fatalf("code %d", code)
 	}
 }
@@ -94,7 +94,7 @@ func TestEveryBundleServiceIsSwitchable(t *testing.T) {
 	for name, b := range bundles {
 		for _, s := range b.Services {
 			if _, ok := switchableServices[s]; !ok {
-				t.Errorf("bundle %s switches on %q, which asura enable does not know", name, s)
+				t.Errorf("bundle %s switches on %q, which toren enable does not know", name, s)
 			}
 		}
 	}

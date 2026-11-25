@@ -1,17 +1,17 @@
 #!/bin/sh
 # The screenshot tool: capture, annotate, copy or save.
 #
-# A wrapper for the same reason asura-hub is one: `quickshell -p` on the entry
+# A wrapper for the same reason toren-hub is one: `quickshell -p` on the entry
 # file is the whole program, and the entry file is at the shell's root so the
 # `qs.*` imports resolve. The flock keeps one instance, so a second press of the
 # key while the overlay is up does nothing instead of stacking a second overlay.
 #
-#	asura-shot                          region, or the window under the pointer
-#	ASURA_SHOT_MODE=monitor asura-shot  a whole monitor
+#	toren-shot                          region, or the window under the pointer
+#	ASURA_SHOT_MODE=monitor toren-shot  a whole monitor
 set -eu
 
 QUICKSHELL_BIN=${ASURA_QUICKSHELL:-/usr/bin/quickshell}
-ENTRY=/usr/share/asura/shell/shot.qml
+ENTRY=/usr/share/toren/shell/shot.qml
 
 # Virtual machine graphics fallback:
 # Under virtualized GPU drivers (vmwgfx / VirtualBox VMSVGA), QtWayland fails
@@ -28,9 +28,9 @@ if [ -z "${LIBGL_ALWAYS_SOFTWARE:-}" ]; then
 fi
 
 if [ ! -x "$QUICKSHELL_BIN" ]; then
-    echo "asura-shot: $QUICKSHELL_BIN is not installed." >&2
-    echo "asura-shot: the editor is drawn by Quickshell, which Asura builds." >&2
+    echo "toren-shot: $QUICKSHELL_BIN is not installed." >&2
+    echo "toren-shot: the editor is drawn by Quickshell, which Toren builds." >&2
     exit 1
 fi
 
-exec flock -n -o /tmp/asura-shot.lock "$QUICKSHELL_BIN" -p "$ENTRY"
+exec flock -n -o /tmp/toren-shot.lock "$QUICKSHELL_BIN" -p "$ENTRY"

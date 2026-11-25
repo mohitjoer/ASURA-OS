@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Daemon verbs and IPC functions the tree calls must exist: `asura|asura-shell|asura-hubd|
-asura-wallpaper VERB` needs VERB as a quoted word ("clip-copy " is a prefix match) in desktop/cmd/NAME/*.go;
+"""Daemon verbs and IPC functions the tree calls must exist: `toren|toren-shell|toren-hubd|
+toren-wallpaper VERB` needs VERB as a quoted word ("clip-copy " is a prefix match) in desktop/cmd/NAME/*.go;
 `ipc call TARGET FN` needs an IpcHandler in shell/ declaring both. First word only. --report: exit 0."""
 import glob, os, re, sys
 sys.dont_write_bytecode = True

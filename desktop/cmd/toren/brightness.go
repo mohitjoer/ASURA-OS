@@ -14,14 +14,14 @@ import (
 
 	"golang.org/x/sys/unix"
 
-	"asura/desktop/internal/backlight"
+	"toren/desktop/internal/backlight"
 )
 
 func init() {
-	register("brightness", "screen and keyboard backlight, with no group to join", asuraBrightness)
+	register("brightness", "screen and keyboard backlight, with no group to join", torenBrightness)
 }
 
-const brightnessUsage = `Usage: asura brightness <command> [--device panel|kbd|NAME]
+const brightnessUsage = `Usage: toren brightness <command> [--device panel|kbd|NAME]
 
   get                 the level, as a percentage
   set VALUE           40 or 40% to go there; +5, -5, 5%+ or 5%- to step
@@ -52,14 +52,14 @@ type brightnessEnv struct {
 	State string
 }
 
-func asuraBrightness(args []string) int {
+func torenBrightness(args []string) int {
 	sys := backlight.System()
 	if root := os.Getenv("ASURA_SYSFS_ROOT"); root != "" {
 		sys = backlight.Sysfs{Root: root}
 	}
-	state := filepath.Join(os.TempDir(), fmt.Sprintf("asura-%d", os.Getuid()))
+	state := filepath.Join(os.TempDir(), fmt.Sprintf("toren-%d", os.Getuid()))
 	if rt := os.Getenv("XDG_RUNTIME_DIR"); rt != "" {
-		state = filepath.Join(rt, "asura")
+		state = filepath.Join(rt, "toren")
 	}
 	return runBrightness(args, brightnessEnv{
 		Sys: sys, Chain: backlight.DefaultChain(), Out: os.Stdout, Err: os.Stderr, State: state,
@@ -78,14 +78,14 @@ func runBrightness(args []string, e brightnessEnv) int {
 			return exitOK
 		case arg == "--device" || arg == "-d":
 			if i++; i >= len(args) {
-				fmt.Fprintln(e.Err, "asura brightness: --device needs a name")
+				fmt.Fprintln(e.Err, "toren brightness: --device needs a name")
 				return exitUsage
 			}
 			device = args[i]
 		case strings.HasPrefix(arg, "--device="):
 			device = strings.TrimPrefix(arg, "--device=")
 		case strings.HasPrefix(arg, "--"):
-			fmt.Fprintf(e.Err, "asura brightness: unknown flag %s\n", arg)
+			fmt.Fprintf(e.Err, "toren brightness: unknown flag %s\n", arg)
 			return exitUsage
 		case verb == "":
 			verb = arg
@@ -113,12 +113,12 @@ func runBrightness(args []string, e brightnessEnv) int {
 		return e.list()
 	case "set":
 		if len(values) != 1 {
-			fmt.Fprintln(e.Err, "asura brightness set: needs one value, such as 40% or +5")
+			fmt.Fprintln(e.Err, "toren brightness set: needs one value, such as 40% or +5")
 			return exitUsage
 		}
 		req, err := backlight.ParseRequest(values[0])
 		if err != nil {
-			fmt.Fprintln(e.Err, "asura brightness set:", err)
+			fmt.Fprintln(e.Err, "toren brightness set:", err)
 			return exitUsage
 		}
 		return e.change(device, req, false)
@@ -138,12 +138,12 @@ func runBrightness(args []string, e brightnessEnv) int {
 				return e.change(device, backlight.Request{Relative: true, Value: sign * n}, false)
 			}
 		}
-		fmt.Fprintf(e.Err, "asura brightness %s: takes one step size, such as 10\n", verb)
+		fmt.Fprintf(e.Err, "toren brightness %s: takes one step size, such as 10\n", verb)
 		return exitUsage
 	case "":
 		fmt.Fprint(e.Err, brightnessUsage)
 	default:
-		fmt.Fprintf(e.Err, "asura brightness: unknown command %q\n\n%s", verb, brightnessUsage)
+		fmt.Fprintf(e.Err, "toren brightness: unknown command %q\n\n%s", verb, brightnessUsage)
 	}
 	return exitUsage
 }
@@ -163,10 +163,10 @@ func (e brightnessEnv) pick(name string) (backlight.Device, bool) {
 		what = "no keyboard backlight on this machine"
 	default:
 		d, ok = e.Sys.Find(name)
-		what = fmt.Sprintf("no backlight named %q (`asura brightness list` shows them)", name)
+		what = fmt.Sprintf("no backlight named %q (`toren brightness list` shows them)", name)
 	}
 	if !ok {
-		fmt.Fprintln(e.Err, "asura brightness:", what)
+		fmt.Fprintln(e.Err, "toren brightness:", what)
 	}
 	return d, ok
 }
@@ -203,7 +203,7 @@ func (e brightnessEnv) change(device string, req backlight.Request, byDefault bo
 
 	raw := d.Target(req)
 	if _, err := e.Chain.Write(ctx, d, raw); err != nil {
-		e.report(d.Name, "could not set %s to %d of %d: %v\n  `asura brightness list` shows which route each device has", d.Name, raw, d.Max, err)
+		e.report(d.Name, "could not set %s to %d of %d: %v\n  `toren brightness list` shows which route each device has", d.Name, raw, d.Max, err)
 		return exitFail
 	}
 	if fresh, ok := e.Sys.Find(d.Class + "/" + d.Name); ok {
@@ -277,5 +277,5 @@ func (e brightnessEnv) report(device, format string, args ...any) {
 		}
 		_ = os.WriteFile(stamp, []byte(strconv.FormatInt(now, 10)), 0o600)
 	}
-	fmt.Fprintf(e.Err, "asura brightness: "+format+"\n", args...)
+	fmt.Fprintf(e.Err, "toren brightness: "+format+"\n", args...)
 }

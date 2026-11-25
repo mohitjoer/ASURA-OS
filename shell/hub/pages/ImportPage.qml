@@ -11,8 +11,8 @@ import "../Combos.js" as Combos
 
 // Import config (TOOLS, ADVANCED). The drop-and-go migration wizard: bring an
 // existing setup (a folder, a drop, an existing ~/.config, or a git URL) onto
-// Asura, layer it over the defaults, resolve the keybind clashes in place, and
-// keep it reversible. The engine is `asura-hubd import` (scan/apply/undo); this
+// Toren, layer it over the defaults, resolve the keybind clashes in place, and
+// keep it reversible. The engine is `toren-hubd import` (scan/apply/undo); this
 // page is one of its two front doors. It never parses config itself: scan hands
 // back the model and the conflicts (each with a stable `norm` the UI echoes and
 // never computes), apply takes the decisions and reports the exact change set,
@@ -40,7 +40,7 @@ Item {
     // bindings that read them refresh, the way the Keybinds editor swaps arrays.
     property var scan: null
     property var appInclude: ({})        // app id -> bool (absent = included)
-    property var conflictDecision: ({})  // norm -> "asura" | "mine" | { remap }
+    property var conflictDecision: ({})  // norm -> "toren" | "mine" | { remap }
 
     // the ApplyResult / UndoResult reported back, and the decisions we posted.
     property var applyResult: null
@@ -48,8 +48,8 @@ Item {
     property bool undone: false
     property string pendingDecisions: ""
 
-    // a previous non-Asura setup sitting in the running provider's config tree
-    // (Asura writes a generated config, never a hand-rolled monolith), offered as
+    // a previous non-Toren setup sitting in the running provider's config tree
+    // (Toren writes a generated config, never a hand-rolled monolith), offered as
     // a one-tap source. Only meaningful on a desktop whose format import reads.
     property bool autoDetected: false
     property string urlText: ""
@@ -57,7 +57,7 @@ Item {
 
     // The desktop the user runs and the root of its config tree, both read off the
     // provider's declared config files rather than named here. The importer turns a
-    // hand-rolled monolith's keybinds and rules into Asura settings, so it only
+    // hand-rolled monolith's keybinds and rules into Toren settings, so it only
     // lands on a desktop whose own config is that same format.
     readonly property var configFiles: Settings.configFiles || []
     readonly property string providerName: Settings.provider
@@ -124,7 +124,7 @@ Item {
             for (var j = 0; j < cs.length; j++) {
                 var c = cs[j];
                 out.push({ app: a.name, norm: c.norm, combo: c.combo,
-                    asura: c.asura || ({}), mine: c.mine || ({}), kind: c.kind });
+                    toren: c.toren || ({}), mine: c.mine || ({}), kind: c.kind });
             }
         }
         return out;
@@ -156,10 +156,10 @@ Item {
     }
 
     // the segment a conflict's current decision maps to ("" = still on the safe
-    // Asura default, nothing highlighted).
+    // Toren default, nothing highlighted).
     function segCurrent(norm) {
         var d = pg.conflictDecision[norm];
-        if (d === "asura") return "Keep Asura's";
+        if (d === "toren") return "Keep Toren's";
         if (d === "mine") return "Use mine";
         if (d && d.remap) return "Remap";
         return "";
@@ -173,7 +173,7 @@ Item {
         pg.conflictDecision = m;
     }
     function chooseSegment(norm, label) {
-        if (label === "Keep Asura's") pg.setDecision(norm, "asura");
+        if (label === "Keep Toren's") pg.setDecision(norm, "toren");
         else if (label === "Use mine") pg.setDecision(norm, "mine");
         else if (label === "Remap") pg.startRemap(norm);
     }
@@ -213,7 +213,7 @@ Item {
     }
     function tierNote(t) {
         if (t === "deep")
-            return I18n.tr("Keybinds and window rules become Asura settings; raw config layers into hyprland/user.conf and wins.");
+            return I18n.tr("Keybinds and window rules become Toren settings; raw config layers into hyprland/user.conf and wins.");
         if (t === "layer")
             return I18n.tr("Layered into this app's override file, which already wins over the shipped config.");
         return I18n.tr("Dropped into this app's override slot, clearly labelled, applied as-is.");
@@ -263,7 +263,7 @@ Item {
         pg.conflictDecision = ({});
         pg.busy = true;
         pg.busyLabel = I18n.tr("Scanning your config");
-        scanProc.command = ["asura-hubd", "import", "scan", arg];
+        scanProc.command = ["toren-hubd", "import", "scan", arg];
         scanProc.running = true;
     }
     function buildDecisions() {
@@ -287,14 +287,14 @@ Item {
         pg.busy = true;
         pg.busyLabel = I18n.tr("Applying and backing up");
         applyProc.stdinEnabled = true;
-        applyProc.command = ["asura-hubd", "import", "apply", "-"];
+        applyProc.command = ["toren-hubd", "import", "apply", "-"];
         applyProc.running = true;
     }
     function undo() {
         pg.errorMsg = "";
         pg.busy = true;
         pg.busyLabel = I18n.tr("Undoing the import");
-        undoProc.command = ["asura-hubd", "import", "undo"];
+        undoProc.command = ["toren-hubd", "import", "undo"];
         undoProc.running = true;
     }
     function reloadDesktop() { if (pg.hub) pg.hub.wmAct("config.reload"); }
@@ -474,7 +474,7 @@ Item {
             Image {
                 width: 12; height: 12
                 anchors.verticalCenter: parent.verticalCenter
-                source: Qt.resolvedUrl("../../assets/asura-logo-on-dark.svg")
+                source: Qt.resolvedUrl("../../assets/toren-logo-on-dark.svg")
                 sourceSize.width: 24; sourceSize.height: 24
                 fillMode: Image.PreserveAspectFit
                 smooth: true
@@ -610,7 +610,7 @@ Item {
                 width: parent.width - Tokens.s3
                 spacing: Tokens.s4
 
-                // What Asura can bring over, on the same row rhythm as every other
+                // What Toren can bring over, on the same row rhythm as every other
                 // sheet in the Hub: a card with value rows parted by hairlines,
                 // rather than a bespoke plate with its own tighter spacing.
                 SettingCard {
@@ -620,7 +620,7 @@ Item {
 
                     Repeater {
                         model: [
-                            { app: "Hyprland", note: "keybinds and window rules become Asura settings; the rest layers into hyprland/user.conf and wins" },
+                            { app: "Hyprland", note: "keybinds and window rules become Toren settings; the rest layers into hyprland/user.conf and wins" },
                             { app: "Kitty", note: "kitty.conf, layered into kitty/user.conf" },
                             { app: "Fish", note: "config.fish, functions and conf.d, layered into fish/user.fish" },
                             { app: "Fastfetch", note: "config.jsonc, layered into fastfetch/user.jsonc" },
@@ -638,7 +638,7 @@ Item {
                     }
                 }
 
-                // the auto-detect banner: an existing non-Asura setup in ~/.config.
+                // the auto-detect banner: an existing non-Toren setup in ~/.config.
                 Plate {
                     width: srcCol.width
                     height: Math.max(72, banRow.implicitHeight + Tokens.s4 * 2)
@@ -948,7 +948,7 @@ Item {
                                     id: seg
                                     anchors.right: parent.right
                                     anchors.verticalCenter: parent.verticalCenter
-                                    options: ["Keep Asura's", "Use mine", "Remap"]
+                                    options: ["Keep Toren's", "Use mine", "Remap"]
                                     current: pg.segCurrent(confRow.modelData.norm)
                                     onChose: (label) => pg.chooseSegment(confRow.modelData.norm, label)
                                 }
@@ -956,7 +956,7 @@ Item {
 
                             Text {
                                 width: parent.width
-                                text: "Asura" + ": " + (confRow.modelData.asura.desc || I18n.tr("a shipped shortcut"))
+                                text: "Toren" + ": " + (confRow.modelData.toren.desc || I18n.tr("a shipped shortcut"))
                                 color: Tokens.inkDim; font.family: Tokens.ui
                                 font.pixelSize: Tokens.fSmall; wrapMode: Text.WordWrap
                             }
@@ -1104,7 +1104,7 @@ Item {
                         Rectangle { width: parent.width; height: 1; color: Tokens.lineSoft }
                         Text {
                             width: parent.width
-                            text: I18n.tr("Every file this touches is copied into ~/.config/asura/import-backups first, so the whole import can be undone from the next step.")
+                            text: I18n.tr("Every file this touches is copied into ~/.config/toren/import-backups first, so the whole import can be undone from the next step.")
                             color: Tokens.inkMuted; font.family: Tokens.ui
                             font.pixelSize: Tokens.fSmall; wrapMode: Text.WordWrap; lineHeight: 1.3
                         }

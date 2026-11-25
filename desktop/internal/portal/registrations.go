@@ -11,7 +11,7 @@ import (
 //
 // The architecture record enforces the base-layer boundary as a closed list
 // rather than an absolute, because a handful of files must live outside
-// /usr/share/asura/ and /etc/asura/: a systemd unit directory, a GLib schema
+// /usr/share/toren/ and /etc/toren/: a systemd unit directory, a GLib schema
 // directory, the login manager's fixed config directory. Those files are
 // registrations, and a registration is a pointer and never a place to put
 // content.
@@ -36,31 +36,31 @@ type Registration struct {
 // registrations are the pointers this milestone ships, and the fixed directory
 // each one has to live in.
 //
-// The list is the reason the check can be mechanical: "everything Asura
+// The list is the reason the check can be mechanical: "everything Toren
 // registers outside its own two directories" is a closed set, so a registration
 // that is not on it is a finding rather than something nobody thought to look.
 var registrations = []Registration{
 	{
 		Name:       "session file",
 		Path:       "/usr/share/wayland-sessions/toren.desktop",
-		Target:     "/usr/share/asura/session/toren.desktop",
+		Target:     "/usr/share/toren/session/toren.desktop",
 		Sanctioned: true,
 	},
 	{
 		Name:       "portal preference",
-		Path:       "/usr/share/xdg-desktop-portal/asura-portals.conf",
-		Target:     "/usr/share/asura/session/asura-portals.conf",
+		Path:       "/usr/share/xdg-desktop-portal/toren-portals.conf",
+		Target:     "/usr/share/toren/session/toren-portals.conf",
 		Sanctioned: true,
 	},
 	{
 		Name:       "shell schema",
-		Path:       "/usr/share/glib-2.0/schemas/org.asura.shell.gschema.xml",
+		Path:       "/usr/share/glib-2.0/schemas/org.toren.shell.gschema.xml",
 		Target:     "",
 		Sanctioned: true,
 	},
 	{
 		Name:       "desktop schema",
-		Path:       "/usr/share/glib-2.0/schemas/org.asura.desktop.gschema.xml",
+		Path:       "/usr/share/glib-2.0/schemas/org.toren.desktop.gschema.xml",
 		Target:     "",
 		Sanctioned: true,
 	},
@@ -105,7 +105,7 @@ func CheckRegistrations(env RegistrationEnv) []RegistrationFinding {
 			findings = append(findings, RegistrationFinding{
 				Name: registration.Name,
 				Path: registration.Path,
-				Reason: "this path is outside /usr/share/asura/ and /etc/asura/ " +
+				Reason: "this path is outside /usr/share/toren/ and /etc/toren/ " +
 					"and is not on the sanctioned list in docs/architecture.md",
 			})
 			continue
@@ -157,7 +157,7 @@ func CheckRegistrations(env RegistrationEnv) []RegistrationFinding {
 const unitRegistrationDir = "/usr/lib/systemd/user/"
 
 // shippedUnits lists the unit files the package ships under
-// /usr/share/asura/units beyond the ones the closed list above names. A later
+// /usr/share/toren/units beyond the ones the closed list above names. A later
 // lane adding a unit is then checked without this file being edited for it.
 func shippedUnits(env RegistrationEnv) []string {
 	known := map[string]bool{}
@@ -166,7 +166,7 @@ func shippedUnits(env RegistrationEnv) []string {
 			known[filepath.Base(registration.Target)] = true
 		}
 	}
-	entries, err := os.ReadDir(env.path("/usr/share/asura/units"))
+	entries, err := os.ReadDir(env.path("/usr/share/toren/units"))
 	if err != nil {
 		return nil
 	}
@@ -227,11 +227,11 @@ func CheckUnits(env RegistrationEnv) []RegistrationFinding {
 
 	// ASURA runs its session under runit (system/runit/user-services), not
 	// systemd: there are no units of its own to check unless a package ships
-	// one under /usr/share/asura/units, which this still covers.
+	// one under /usr/share/toren/units, which this still covers.
 	var units []struct{ name, path string }
 	for _, name := range shippedUnits(env) {
 		if strings.HasSuffix(name, ".service") {
-			units = append(units, struct{ name, path string }{name, "/usr/share/asura/units/" + name})
+			units = append(units, struct{ name, path string }{name, "/usr/share/toren/units/" + name})
 		}
 	}
 
@@ -256,16 +256,16 @@ func CheckUnits(env RegistrationEnv) []RegistrationFinding {
 		}
 	}
 
-	// The shell's own content. `quickshell -p /usr/share/asura/shell` exits
+	// The shell's own content. `quickshell -p /usr/share/toren/shell` exits
 	// cleanly and immediately when that directory is empty or missing, so a
 	// missing config directory produces no error from the unit, no entry in the
 	// journal beyond a line nobody reads, and a login with no shell on it. It is
 	// checked here for the same reason the ExecStart targets are: a missing input
 	// is only visible before the login, not during it.
 	findings = append(findings, checkDirectory(env, "shell configuration",
-		"/usr/share/asura/shell")...)
+		"/usr/share/toren/shell")...)
 	findings = append(findings, checkDirectory(env, "desktop shell",
-		"/usr/share/asura/shell-desktop")...)
+		"/usr/share/toren/shell-desktop")...)
 
 	return findings
 }

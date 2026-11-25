@@ -1,6 +1,6 @@
-# Asura OS zsh configuration
-[[ ${__ASURA_ZSH_LOADED:-0} == 1 ]] && return
-__ASURA_ZSH_LOADED=1
+# Toren OS zsh configuration
+[[ ${__TOREN_ZSH_LOADED:-0} == 1 ]] && return
+__TOREN_ZSH_LOADED=1
 
 typeset -U path
 path=(
@@ -35,12 +35,12 @@ unset _editor
 
 [[ -o interactive ]] || return
 
-_asura_cfg=${XDG_CONFIG_HOME:-$HOME/.config}
+_toren_cfg=${XDG_CONFIG_HOME:-$HOME/.config}
 _cache=${XDG_CACHE_HOME:-$HOME/.cache}/zsh
 mkdir -p "$_cache"
 
 # Helper: evaluate and cache CLI init hooks, invalidating only when binary mtime changes
-_asura_cache_eval() {
+_toren_cache_eval() {
   local tool="$1"
   shift
   local bin_path cache_file
@@ -52,22 +52,41 @@ _asura_cache_eval() {
   source "$cache_file"
 }
 
-# A starship.toml of the user's own (at $_asura_cfg/starship.toml) wins over the packaged one.
-# The packaged starship.toml lives at $_asura_cfg/toren/apps/starship/starship.toml or asura/
-if [[ -z $STARSHIP_CONFIG ]]; then
-  if [[ -e $_asura_cfg/starship.toml ]]; then
-    export STARSHIP_CONFIG=$_asura_cfg/starship.toml
-  elif [[ -e $_asura_cfg/toren/apps/starship/starship.toml ]]; then
-    export STARSHIP_CONFIG=$_asura_cfg/toren/apps/starship/starship.toml
-  elif [[ -e $_asura_cfg/asura/apps/starship/starship.toml ]]; then
-    export STARSHIP_CONFIG=$_asura_cfg/asura/apps/starship/starship.toml
-  fi
+# Determine prompt: starship (default) or oh-my-zsh
+_prompt_choice="starship"
+if [[ -r "$_toren_cfg/zsh/toren-prompt" ]]; then
+  _prompt_choice=$(<"$_toren_cfg/zsh/toren-prompt")
 fi
 
-_asura_cache_eval starship starship init zsh
-_asura_cache_eval zoxide zoxide init zsh --cmd cd
-_asura_cache_eval mise mise activate zsh
-_asura_cache_eval fzf fzf --zsh
+if [[ "$_prompt_choice" == "oh-my-zsh" ]]; then
+  export ZSH="${ZSH:-$HOME/.oh-my-zsh}"
+  if [[ ! -d "$ZSH" && -d "$_toren_cfg/zsh/oh-my-zsh" ]]; then
+    export ZSH="$_toren_cfg/zsh/oh-my-zsh"
+  elif [[ ! -d "$ZSH" && -d "/usr/share/oh-my-zsh" ]]; then
+    export ZSH="/usr/share/oh-my-zsh"
+  fi
+  if [[ -f "$ZSH/oh-my-zsh.sh" ]]; then
+    ZSH_THEME="${ZSH_THEME:-robbyrussell}"
+    source "$ZSH/oh-my-zsh.sh"
+  elif command -v starship >/dev/null 2>&1; then
+    _toren_cache_eval starship starship init zsh
+  fi
+else
+  # Starship prompt (default)
+  if [[ -z $STARSHIP_CONFIG ]]; then
+    if [[ -e $_toren_cfg/starship.toml ]]; then
+      export STARSHIP_CONFIG=$_toren_cfg/starship.toml
+    elif [[ -e $_toren_cfg/toren/apps/starship/starship.toml ]]; then
+      export STARSHIP_CONFIG=$_toren_cfg/toren/apps/starship/starship.toml
+    elif [[ -e /usr/share/toren/apps/starship/starship.toml ]]; then
+      export STARSHIP_CONFIG=/usr/share/toren/apps/starship/starship.toml
+    fi
+  fi
+  _toren_cache_eval starship starship init zsh
+fi
+_toren_cache_eval zoxide zoxide init zsh --cmd cd
+_toren_cache_eval mise mise activate zsh
+_toren_cache_eval fzf fzf --zsh
 
 autoload -Uz compinit
 # Skip expensive security directory audits on every shell launch if dump is under 24 hours old
@@ -89,7 +108,7 @@ if [[ -r /usr/share/zsh-history-substring-search/zsh-history-substring-search.zs
 fi
 
 # Atuin for enhanced history (cached init)
-_asura_cache_eval atuin atuin init zsh --disable-up-arrow
+_toren_cache_eval atuin atuin init zsh --disable-up-arrow
 
 # Sourced last: the highlighter wraps the widgets that exist when it loads.
 if [[ -r /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
@@ -136,10 +155,10 @@ fast() {
 
 if [[ -o interactive ]] && command -v fastfetch >/dev/null 2>&1; then
   # Display system summary on top-level terminal launch, suppressing in subshells
-  if [[ -z "$__ASURA_FASTFETCH_SHOWN" ]]; then
+  if [[ -z "$__TOREN_FASTFETCH_SHOWN" ]]; then
     # Suppress fastfetch on bare console login (tty1) before graphical session starts
     if [[ -n "$WAYLAND_DISPLAY" || -n "$DISPLAY" || "$XDG_SESSION_TYPE" == "wayland" || "$(tty 2>/dev/null)" != "/dev/tty1" ]]; then
-      export __ASURA_FASTFETCH_SHOWN=1
+      export __TOREN_FASTFETCH_SHOWN=1
       fastfetch
     fi
   fi
@@ -162,4 +181,7 @@ if [[ -n $GHOSTTY_RESOURCES_DIR ]]; then
   source "$GHOSTTY_RESOURCES_DIR"/shell-integration/zsh/ghostty-integration
 fi
 
-unset _asura_cfg _cache
+# User overrides if present
+[[ -r "$_toren_cfg/zsh/user.zsh" ]] && source "$_toren_cfg/zsh/user.zsh"
+
+unset _toren_cfg _cache

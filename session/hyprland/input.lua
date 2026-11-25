@@ -33,4 +33,4 @@ hl.gesture({ fingers = 3, direction = "horizontal", action = "workspace" })
 -- Hyprland enables every touchpad again when it rereads its config, and `exec`
 -- (unlike exec-once) runs on every reload, so a pad turned off with the Fn key
 -- stays off. It does nothing when the pad is on.
-hl.exec_cmd("asura-touchpad restore")
+hl.exec_cmd("toren-touchpad restore")

@@ -1,7 +1,7 @@
-// Command asura-sysd is the privileged system daemon for Asura OS.
+// Command toren-sysd is the privileged system daemon for Toren OS.
 //
-// It runs as root under /var/service/asura-sysd and provides a Unix socket
-// at /run/asura/sysd.sock for the unprivileged user session (asura-userd) and CLI.
+// It runs as root under /var/service/toren-sysd and provides a Unix socket
+// at /run/toren/sysd.sock for the unprivileged user session (toren-userd) and CLI.
 package main
 
 import (
@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	socketPath = "/run/asura/sysd.sock"
+	socketPath = "/run/toren/sysd.sock"
 	version    = "0.1-beta"
 )
 
@@ -57,7 +57,7 @@ func main() {
 		fmt.Println(string(data))
 	case "power":
 		if len(os.Args) < 3 {
-			fmt.Fprintln(os.Stderr, "usage: asura-sysd power <performance|balanced|power>")
+			fmt.Fprintln(os.Stderr, "usage: toren-sysd power <performance|balanced|power>")
 			os.Exit(2)
 		}
 		if err := applyPowerProfile(os.Args[2]); err != nil {
@@ -68,7 +68,7 @@ func main() {
 	case "-h", "--help", "help":
 		printUsage()
 	case "version", "-v", "--version":
-		fmt.Printf("asura-sysd %s\n", version)
+		fmt.Printf("toren-sysd %s\n", version)
 	default:
 		printUsage()
 		os.Exit(2)
@@ -76,26 +76,26 @@ func main() {
 }
 
 func printUsage() {
-	fmt.Fprintf(os.Stderr, `asura-sysd — Toren Linux Privileged System Daemon
+	fmt.Fprintf(os.Stderr, `toren-sysd — Toren Linux Privileged System Daemon
 
 Usage:
-  asura-sysd run           run the daemon listening on %s
-  asura-sysd scan          scan and display PCI hardware info
-  asura-sysd power <mode>  set CPU governor and power state (performance, balanced, power)
-  asura-sysd version       show daemon version
+  toren-sysd run           run the daemon listening on %s
+  toren-sysd scan          scan and display PCI hardware info
+  toren-sysd power <mode>  set CPU governor and power state (performance, balanced, power)
+  toren-sysd version       show daemon version
 `, socketPath)
 }
 
 func runDaemon() {
-	if err := os.MkdirAll("/run/asura", 0755); err != nil {
-		fmt.Fprintf(os.Stderr, "asura-sysd: failed to create /run/asura: %v\n", err)
+	if err := os.MkdirAll("/run/toren", 0755); err != nil {
+		fmt.Fprintf(os.Stderr, "toren-sysd: failed to create /run/toren: %v\n", err)
 		os.Exit(1)
 	}
 	_ = os.Remove(socketPath)
 
 	listener, err := net.Listen("unix", socketPath)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "asura-sysd: failed to listen on %s: %v\n", socketPath, err)
+		fmt.Fprintf(os.Stderr, "toren-sysd: failed to listen on %s: %v\n", socketPath, err)
 		os.Exit(1)
 	}
 	defer os.Remove(socketPath)
@@ -115,7 +115,7 @@ func runDaemon() {
 		os.Exit(0)
 	}()
 
-	fmt.Printf("asura-sysd: listening on %s\n", socketPath)
+	fmt.Printf("toren-sysd: listening on %s\n", socketPath)
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
@@ -159,7 +159,7 @@ func handleConnection(conn net.Conn) {
 		line, err := reader.ReadBytes('\n')
 		if err != nil {
 			if !isBenignDisconnect(err) {
-				fmt.Fprintf(os.Stderr, "asura-sysd: read error: %v\n", err)
+				fmt.Fprintf(os.Stderr, "toren-sysd: read error: %v\n", err)
 			}
 			return
 		}
@@ -318,7 +318,7 @@ func applyPowerProfile(profile string) error {
 
 	// Battery charge threshold and NVIDIA runtime PM are owned by udev rules
 	// (99-battery-threshold.rules and 80-nvidia-pm.rules), which persist them
-	// across reboots and AC plug events. asura-sysd does not duplicate them.
+	// across reboots and AC plug events. toren-sysd does not duplicate them.
 
 	return nil
 }

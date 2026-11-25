@@ -1,4 +1,4 @@
-// ASURA overlay (shell-desktop/asura/vendor.sh OVERLAYS): the desktop's general settings
+// ASURA overlay (shell-desktop/toren/vendor.sh OVERLAYS): the desktop's general settings
 // without the AI/weeb policies (their sidebar is not part of ASURA).
 import QtQuick
 import Quickshell

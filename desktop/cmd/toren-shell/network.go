@@ -82,7 +82,7 @@ type savedConn struct {
 func (d *daemon) startNetwork() {
 	conn, err := dbus.ConnectSystemBus()
 	if err != nil {
-		log.Printf("asura-shell: network disabled: %v", err)
+		log.Printf("toren-shell: network disabled: %v", err)
 		return
 	}
 	n := &networkState{conn: conn, topic: d.registerTopic("network")}
@@ -92,7 +92,7 @@ func (d *daemon) startNetwork() {
 	// all live under nmPath, and nothing else does, so a single rule feeds the
 	// coalescing republisher without a firehose of unrelated system signals.
 	if err := conn.AddMatchSignal(dbus.WithMatchPathNamespace(dbus.ObjectPath(nmPath))); err != nil {
-		log.Printf("asura-shell: network signal match failed: %v", err)
+		log.Printf("toren-shell: network signal match failed: %v", err)
 	}
 	sigs := make(chan *dbus.Signal, 64)
 	conn.Signal(sigs)
@@ -858,7 +858,7 @@ func dnsHelperArgs(provider string, custom []string) ([]string, error) {
 
 // dnsPackagedHelper is the installed helper path. A package var (not a literal)
 // so a test can point it at an absent path and reach the dev-checkout fallbacks.
-var dnsPackagedHelper = "/usr/bin/asura-dns"
+var dnsPackagedHelper = "/usr/bin/toren-dns"
 
 func dnsHelperPath() string {
 	// Prefer the packaged helper: the polkit rule is installed for it and it is
@@ -867,12 +867,12 @@ func dnsHelperPath() string {
 		return dnsPackagedHelper
 	}
 	if shellDir != "" {
-		return filepath.Join(shellDir, "..", "system", "helpers", "network", "asura-dns")
+		return filepath.Join(shellDir, "..", "system", "helpers", "network", "toren-dns")
 	}
 	if executable, err := os.Executable(); err == nil {
-		return filepath.Join(filepath.Dir(executable), "asura-dns")
+		return filepath.Join(filepath.Dir(executable), "toren-dns")
 	}
-	return "asura-dns"
+	return "toren-dns"
 }
 
 func dnsProviderForServers(servers []string) string {

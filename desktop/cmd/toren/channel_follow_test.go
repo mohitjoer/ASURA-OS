@@ -204,7 +204,7 @@ func TestThePublishingStageDoesNotGateUpdates(t *testing.T) {
 			t.Errorf("%q should not gate updates", name)
 		}
 	}
-	for _, name := range []string{"Go — desktop module", "ISO — build Asura OS", "Contract — full suite"} {
+	for _, name := range []string{"Go — desktop module", "ISO — build Toren OS", "Contract — full suite"} {
 		if publishingCheck(name) {
 			t.Errorf("%q must gate updates", name)
 		}

@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"asura/desktop/internal/wm"
+	"toren/desktop/internal/wm"
 )
 
 // A focus frame warms the cache; a focus frame with an empty output clears it.

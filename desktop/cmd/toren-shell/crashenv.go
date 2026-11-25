@@ -2,7 +2,7 @@ package main
 
 import "os"
 
-// asura-shell is launched from the desktop and runs quickshell for the Hub and
+// toren-shell is launched from the desktop and runs quickshell for the Hub and
 // for every IPC call, so it can inherit the desktop's Quickshell crash-recovery
 // handle. Left in place, `quickshell -p hub.qml` relaunches the desktop config
 // instead of the Hub. Upstream reads __QUICKSHELL_CRASH_INFO_FD before it parses

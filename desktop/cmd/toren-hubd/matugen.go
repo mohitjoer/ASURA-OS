@@ -17,7 +17,7 @@ type matugenConfig struct {
 	Prefer           string          `json:"prefer"`           // "dominant" or "vibrant"
 	SchemeType       string          `json:"schemeType"`       // matugen -t variant
 	SourceColorIndex int             `json:"sourceColorIndex"` // 0..4
-	ThemeAsuraApps   bool            `json:"themeAsuraApps"`   // theme Asura's native shell & apps
+	ThemeTorenApps   bool            `json:"themeTorenApps"`   // theme Toren's native shell & apps
 	Templates        map[string]bool `json:"templates"`        // app -> bool
 }
 
@@ -133,7 +133,7 @@ func defaultMatugenConfig() matugenConfig {
 		Prefer:           "saturation",
 		SchemeType:       "scheme-tonal-spot",
 		SourceColorIndex: 0,
-		ThemeAsuraApps:   true,
+		ThemeTorenApps:   true,
 		Templates: map[string]bool{
 			"btop":        true,
 			"qt":          true,
@@ -157,7 +157,7 @@ func defaultMatugenConfig() matugenConfig {
 			"alacritty":   true,
 			"tmux":        true,
 			"sidra":       true,
-			"asura-tunes": true,
+			"toren-tunes": true,
 		},
 	}
 }
@@ -167,7 +167,7 @@ func matugenConfigPath() string {
 	if base == "" {
 		base = filepath.Join(os.Getenv("HOME"), ".config")
 	}
-	return filepath.Join(base, "asura", "matugen.json")
+	return filepath.Join(base, "toren", "matugen.json")
 }
 
 func steamThemeReady() bool {
@@ -208,7 +208,7 @@ func runMatugenCmd(args []string) error {
 			return fmt.Errorf("matugen set requires JSON argument")
 		}
 		// Merge onto what is stored, never onto a zero struct: the caller sends the
-		// knobs its page owns, and a key it omits (themeAsuraApps, the roster) would
+		// knobs its page owns, and a key it omits (themeTorenApps, the roster) would
 		// otherwise be written as Go's zero value and silently turn app theming off.
 		cfg := loadMatugenConfig()
 		if err := json.Unmarshal([]byte(args[1]), &cfg); err != nil {
@@ -220,7 +220,7 @@ func runMatugenCmd(args []string) error {
 		// divergent colors.json.
 		return saveMatugenConfig(cfg)
 	case "render-apps":
-		pal := readPalette(filepath.Join(asuraCacheDir(), "colors.json"))
+		pal := readPalette(filepath.Join(torenCacheDir(), "colors.json"))
 		if pal != nil {
 			cfg := loadMatugenConfig()
 			renderActiveTemplates(cfg, pal)
@@ -234,7 +234,7 @@ func runMatugenCmd(args []string) error {
 // renderActiveTemplates generates matugen configs for enabled templates
 func renderActiveTemplates(cfg matugenConfig, pal map[string]string) {
 	matugenDir := filepath.Join(configHome(), "matugen")
-	cacheDir := filepath.Join(cacheHome(), "asura")
+	cacheDir := filepath.Join(cacheHome(), "toren")
 	_ = os.MkdirAll(cacheDir, 0o755)
 
 	// Ensure all target output directories exist

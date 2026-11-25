@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-// plugin_audit.go is the static audit `asura plugin audit` and `asura plugin
+// plugin_audit.go is the static audit `toren plugin audit` and `toren plugin
 // install` run over a plugin tree, on top of the manifest checks in plugin.go.
 // Ported under GPL-3.0. It reads bytes only; it never
 // executes anything from the plugin. Each finding carries a stable rule id, the
@@ -56,8 +56,8 @@ var pluginBlockingRules = map[string]bool{
 // without declaring them in dependencies.commands. Everything else it runs must
 // be in its own bin/ or in dependencies.commands.
 var pluginCommandAllowlist = map[string]bool{
-	"asura": true, "asura-shell": true, "asura-plugins-place": true,
-	"asura-store": true, "notify-send": true, "xdg-open": true,
+	"toren": true, "toren-shell": true, "toren-plugins-place": true,
+	"toren-store": true, "notify-send": true, "xdg-open": true,
 	"wl-copy": true, "wl-paste": true, "sh": true, "bash": true, "jq": true,
 	"cat": true, "grep": true, "sed": true, "awk": true, "head": true,
 	"tail": true, "sleep": true, "date": true, "nmcli": true, "pactl": true,
@@ -446,12 +446,12 @@ func pluginNormalizeCmd(s string) string {
 
 // pluginAuditConfigWrite flags references to files a plugin must never write:
 // shell config, ssh keys, /etc, and shell rc files. plugins.json is allowed when
-// the line hands it to asura-plugins-place, the sanctioned placement tool.
+// the line hands it to toren-plugins-place, the sanctioned placement tool.
 func pluginAuditConfigWrite(p string, line int, code string, add func(rule, p string, line int, msg string)) {
 	if strings.Contains(code, "shell.json") {
 		add("config-write", p, line, "references shell.json; settings go through pluginApi.saveSetting (R5)")
 	}
-	if strings.Contains(code, "plugins.json") && !strings.Contains(code, "asura-plugins-place") {
+	if strings.Contains(code, "plugins.json") && !strings.Contains(code, "toren-plugins-place") {
 		add("config-write", p, line, "references plugins.json; settings go through pluginApi.saveSetting (R5)")
 	}
 	if strings.Contains(code, "~/.ssh") {

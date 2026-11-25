@@ -51,7 +51,7 @@ func TestSafeModeConfigStructure(t *testing.T) {
 	}
 
 	// Verify no quickshell or heavy desktop shell is autostarted
-	if strings.Contains(content, "quickshell") || strings.Contains(content, "asura-activate") {
+	if strings.Contains(content, "quickshell") || strings.Contains(content, "toren-activate") {
 		t.Errorf("safe-mode.conf must NOT autostart quickshell or desktop shell")
 	}
 
@@ -94,7 +94,7 @@ func TestSafeModeDesktopEntry(t *testing.T) {
 	if !strings.Contains(d, "Name=Toren Linux (safe mode)") {
 		t.Errorf("desktop entry missing Name=Toren Linux (safe mode)")
 	}
-	if !strings.Contains(d, "Exec=/usr/share/asura/session/asura-session-safe") {
+	if !strings.Contains(d, "Exec=/usr/share/toren/session/toren-session-safe") {
 		t.Errorf("desktop entry missing correct Exec path")
 	}
 

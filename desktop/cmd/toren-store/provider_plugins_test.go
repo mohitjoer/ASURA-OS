@@ -21,7 +21,7 @@ func TestPluginIDGrammar(t *testing.T) {
 }
 
 func TestThemeIDGrammar(t *testing.T) {
-	for _, id := range []string{"a", "asura-dark", "mocha.luna", "n-2_o.1"} {
+	for _, id := range []string{"a", "toren-dark", "mocha.luna", "n-2_o.1"} {
 		if !themeIDRe.MatchString(id) {
 			t.Errorf("%q should match the theme id grammar", id)
 		}
@@ -52,7 +52,7 @@ func TestPluginProviderInstalled(t *testing.T) {
 		t.Fatalf("empty install root should list no plugins, got %+v", items)
 	}
 
-	if err := os.MkdirAll(filepath.Join(tmp, "asura", "plugins", "realwidget"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(tmp, "toren", "plugins", "realwidget"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	items, _, err = p.Load(context.Background(), false)
@@ -75,13 +75,13 @@ func TestThemeProviderInstalledAndActive(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", cfg)
 	t.Setenv("ASURA_CATALOG_DIR", filepath.Join(tmp, "catalog"))
 
-	if err := os.MkdirAll(filepath.Join(tmp, "asura", "themes", "obsidian"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(tmp, "toren", "themes", "obsidian"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.MkdirAll(filepath.Join(cfg, "asura", "current"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(cfg, "toren", "current"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(cfg, "asura", "current", "theme.name"), []byte("obsidian\n"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(cfg, "toren", "current", "theme.name"), []byte("obsidian\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -98,7 +98,7 @@ func TestThemeProviderInstalledAndActive(t *testing.T) {
 	}
 	for _, it := range items {
 		switch it.ID {
-		case "asura-dark", "asura-cyber", "catppuccin-mocha", "tokyo-night", "nord-aurora":
+		case "toren-dark", "toren-cyber", "catppuccin-mocha", "tokyo-night", "nord-aurora":
 			t.Errorf("phantom theme %q is offered nowhere in the shell and must not be listed", it.ID)
 		}
 	}
@@ -109,10 +109,10 @@ func TestThemeProviderInstalledAndActive(t *testing.T) {
 	}
 	// ...and the legacy bare theme.name must not override the current-theme
 	// file: with both present, the current one wins.
-	if err := os.MkdirAll(filepath.Join(tmp, ".config", "asura"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(tmp, ".config", "toren"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(tmp, ".config", "asura", "theme.name"), []byte("elsewhere\n"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(tmp, ".config", "toren", "theme.name"), []byte("elsewhere\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	items, _, err = p.Load(context.Background(), false)

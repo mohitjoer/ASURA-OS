@@ -96,7 +96,7 @@ func runDaemon() error {
 	cfg := loadConfig()
 	sock := socketPath()
 	_ = os.MkdirAll(filepath.Dir(sock), 0o755)
-	// A bare `asura-wallpaper` in a terminal must not steal the session daemon's
+	// A bare `toren-wallpaper` in a terminal must not steal the session daemon's
 	// socket: the interloper restores the saved wallpaper over the live one
 	// and dies with the terminal, leaving the picker with no daemon at all.
 	// When a daemon answers the socket, bow out; a stale socket left by a
@@ -109,7 +109,7 @@ func runDaemon() error {
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(os.Stderr, "asura-wallpaper: listening on %s\n", sock)
+	fmt.Fprintf(os.Stderr, "toren-wallpaper: listening on %s\n", sock)
 
 	d := &daemon{
 		cfg:            cfg,
@@ -178,7 +178,7 @@ func runDaemon() error {
 		}
 		d.rescan(false)
 		d.playlists.resumeAll()
-		d.broadcast("asura-wallpaper.wall.scan_done", map[string]interface{}{})
+		d.broadcast("toren-wallpaper.wall.scan_done", map[string]interface{}{})
 	}()
 	go d.watchConfig()
 	go d.watchLibrary()
@@ -344,7 +344,7 @@ func (d *daemon) resetCache() {
 	cacheDir := cfg.cacheDir()
 	for _, sub := range []string{"wallpaper/thumbs", "wallpaper/thumbs-sm", "wallpaper/video-thumbs", "wallpaper/anim"} {
 		if err := os.RemoveAll(filepath.Join(cacheDir, sub)); err != nil {
-			fmt.Fprintf(os.Stderr, "asura-wallpaper: cache reset: %v\n", err)
+			fmt.Fprintf(os.Stderr, "toren-wallpaper: cache reset: %v\n", err)
 		}
 	}
 	// A playing clip reads its transcode from this cache: stop it first, then
@@ -356,7 +356,7 @@ func (d *daemon) resetCache() {
 	}
 	pruneLivewallCache(0)
 	d.store.replaceAll(map[string]Entry{})
-	d.broadcast("asura-wallpaper.wall.cache", map[string]interface{}{"status": "started", "progress": 0, "total": 0})
+	d.broadcast("toren-wallpaper.wall.cache", map[string]interface{}{"status": "started", "progress": 0, "total": 0})
 	if playing {
 		d.restoreOutputs()
 	}
@@ -383,17 +383,17 @@ func (d *daemon) rescan(force bool) {
 	cfg := d.config()
 	prior := d.store.snapshotEntries()
 	fresh, err := ScanDirs(cfg.wallpaperDir(), cfg.videoDir(), cfg.cacheDir(), prior, func(e Entry) {
-		d.broadcast("asura-wallpaper.wall.cached", e)
+		d.broadcast("toren-wallpaper.wall.cached", e)
 	})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "asura-wallpaper: scan: %v\n", err)
+		fmt.Fprintf(os.Stderr, "toren-wallpaper: scan: %v\n", err)
 		return
 	}
 	d.store.replaceAll(fresh)
-	d.broadcast("asura-wallpaper.wall.cache", map[string]interface{}{"status": "ready", "count": len(fresh)})
+	d.broadcast("toren-wallpaper.wall.cache", map[string]interface{}{"status": "ready", "count": len(fresh)})
 }
 
-// watchConfig reloads asura-wallpaper.json on change with a small debounce, mirroring
+// watchConfig reloads toren-wallpaper.json on change with a small debounce, mirroring
 // the Rust daemon's config watcher.
 func (d *daemon) watchConfig() {
 	var last time.Time
@@ -411,6 +411,6 @@ func (d *daemon) watchConfig() {
 		d.cfgMu.Lock()
 		d.cfg = fresh
 		d.cfgMu.Unlock()
-		d.broadcast("asura-wallpaper.wall.config_changed", map[string]interface{}{})
+		d.broadcast("toren-wallpaper.wall.config_changed", map[string]interface{}{})
 	}
 }

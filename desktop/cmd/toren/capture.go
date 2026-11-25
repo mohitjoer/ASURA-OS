@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"asura/hardware/probe"
+	"toren/hardware/probe"
 )
 
 // captureAllow is the set of sysfs attributes a capture may write.

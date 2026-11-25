@@ -11,7 +11,7 @@ import (
 // asks whether the session starts and whether the binds reach the shell, and
 // both facts now live beside the entry file, not in it.
 func TestInstalledCompositorConfigReadsTheSplitConfig(t *testing.T) {
-	const entry = "/usr/share/asura/hyprland/hyprland.conf"
+	const entry = "/usr/share/toren/hyprland/hyprland.conf"
 	root := t.TempDir()
 	dir := filepath.Join(root, filepath.Dir(entry))
 	if err := os.MkdirAll(dir, 0o755); err != nil {
@@ -19,8 +19,8 @@ func TestInstalledCompositorConfigReadsTheSplitConfig(t *testing.T) {
 	}
 	for name, body := range map[string]string{
 		"hyprland.conf":  "source = autostart.conf\nsource = binds.conf\n",
-		"autostart.conf": "exec-once = /usr/share/asura/session/asura-activate\n",
-		"binds.conf":     "bind = SUPER, Space, exec, asura ipc call asura togglePopover launcher\n",
+		"autostart.conf": "exec-once = /usr/share/toren/session/toren-activate\n",
+		"binds.conf":     "bind = SUPER, Space, exec, toren ipc call toren togglePopover launcher\n",
 	} {
 		if err := os.WriteFile(filepath.Join(dir, name), []byte(body), 0o644); err != nil {
 			t.Fatal(err)
@@ -31,7 +31,7 @@ func TestInstalledCompositorConfigReadsTheSplitConfig(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range []string{"exec-once = /usr/share/asura/session/asura-activate", "asura ipc call"} {
+	for _, want := range []string{"exec-once = /usr/share/toren/session/toren-activate", "toren ipc call"} {
 		if !strings.Contains(got, want) {
 			t.Errorf("the split config lacks %q:\n%s", want, got)
 		}

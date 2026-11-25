@@ -1,13 +1,13 @@
-// asura-vm-ssh: the remote (SSH/VPS) data plane for the asura-vm hub. It is a small,
+// toren-vm-ssh: the remote (SSH/VPS) data plane for the toren-vm hub. It is a small,
 // dependency-free CLI invoked as subcommands by the QML front end; it wraps the
 // system OpenSSH tools (ssh, ssh -G, ssh-add, ssh-keygen, ssh-copy-id) plus an
 // agentless /proc health probe and prints JSON to stdout, human errors to
 // stderr, exiting nonzero on failure. Connection facts come from ~/.ssh/config
-// (resolved via `ssh -G`); asura-vm-owned metadata lives in a sidecar JSON, and
+// (resolved via `ssh -G`); toren-vm-owned metadata lives in a sidecar JSON, and
 // GUI-added hosts go into an Include'd file so the CLI and GUI never diverge and
 // the user's hand-written config is never rewritten.
 //
-// Usage: asura-vm-ssh <verb> [args]
+// Usage: toren-vm-ssh <verb> [args]
 //
 //	list                     JSON array of hosts (ssh_config + sidecar merge)
 //	ping <alias>             TCP reachability + latency
@@ -18,8 +18,8 @@
 //	keys                     agent + local pubkey fingerprints
 //	copyid <alias> [pubkey]  ssh-copy-id (interactive)
 //	keygen <name> [type]     generate a convenience key (no passphrase)
-//	add <json>               add/replace a asura-vm-managed host
-//	remove <alias>           drop a asura-vm-managed host
+//	add <json>               add/replace a toren-vm-managed host
+//	remove <alias>           drop a toren-vm-managed host
 //	knownremove <alias>      ssh-keygen -R the resolved hostname
 package main
 
@@ -62,14 +62,14 @@ func out(v any) {
 // die reports a human-readable error on stderr and exits nonzero; never a stack
 // trace, so a missing file/tool degrades gracefully for the GUI.
 func die(format string, a ...any) {
-	fmt.Fprintf(os.Stderr, "asura-vm-ssh: "+format+"\n", a...)
+	fmt.Fprintf(os.Stderr, "toren-vm-ssh: "+format+"\n", a...)
 	os.Exit(1)
 }
 
 func main() {
 	args := os.Args[1:]
 	if len(args) == 0 {
-		die("usage: asura-vm-ssh <list|ping|pingall|probe|probeall|appcheck|appcheckall|pveguests|pveaction|connect|keys|copyid|keygen|setpass|clearpass|add|remove|knownremove|tunnel> [args]")
+		die("usage: toren-vm-ssh <list|ping|pingall|probe|probeall|appcheck|appcheckall|pveguests|pveaction|connect|keys|copyid|keygen|setpass|clearpass|add|remove|knownremove|tunnel> [args]")
 	}
 	cmd, rest := args[0], args[1:]
 	switch cmd {
@@ -118,7 +118,7 @@ func main() {
 
 func needAlias(rest []string, verb string) string {
 	if len(rest) < 1 {
-		die("usage: asura-vm-ssh %s <alias>", verb)
+		die("usage: toren-vm-ssh %s <alias>", verb)
 	}
 	return rest[0]
 }
@@ -135,9 +135,9 @@ func home() string {
 
 func sshDir() string          { return filepath.Join(home(), ".ssh") }
 func sshConfigPath() string   { return filepath.Join(sshDir(), "config") }
-func includeFilePath() string { return filepath.Join(sshDir(), "config.d", "asura-vm") }
+func includeFilePath() string { return filepath.Join(sshDir(), "config.d", "toren-vm") }
 func sidecarPath() string {
-	return filepath.Join(home(), ".config", "asura", "asura-vm", "remotes.json")
+	return filepath.Join(home(), ".config", "toren", "toren-vm", "remotes.json")
 }
 
 // expandTilde turns a leading ~ into $HOME so Go can open the path itself.
@@ -177,7 +177,7 @@ func nonInteractiveOpts() []string {
 		"-o", "ConnectTimeout=6",
 		"-o", "StrictHostKeyChecking=accept-new",
 		"-o", "ControlMaster=auto",
-		"-o", "ControlPath=~/.ssh/asura-vm-%r@%h:%p",
+		"-o", "ControlPath=~/.ssh/toren-vm-%r@%h:%p",
 		"-o", "ControlPersist=60",
 	}
 }
@@ -190,7 +190,7 @@ func passwordOpts() []string {
 		"-o", "ConnectTimeout=6",
 		"-o", "StrictHostKeyChecking=accept-new",
 		"-o", "ControlMaster=auto",
-		"-o", "ControlPath=~/.ssh/asura-vm-%r@%h:%p",
+		"-o", "ControlPath=~/.ssh/toren-vm-%r@%h:%p",
 		"-o", "ControlPersist=60",
 		"-o", "NumberOfPasswordPrompts=1",
 		"-o", "PreferredAuthentications=publickey,password",
@@ -218,7 +218,7 @@ type Host struct {
 	Auth         string   `json:"auth,omitempty"`
 }
 
-// Meta is the asura-vm-owned sidecar entry, keyed by alias in remotes.json.
+// Meta is the toren-vm-owned sidecar entry, keyed by alias in remotes.json.
 type Meta struct {
 	Group  string   `json:"group"`
 	Tags   []string `json:"tags"`
@@ -860,7 +860,7 @@ func cmdPveGuests(alias string) {
 
 func cmdPveAction(rest []string) {
 	if len(rest) < 5 {
-		die("usage: asura-vm-ssh pveaction <alias> <node> <qemu|lxc> <vmid> <start|stop|shutdown|reboot>")
+		die("usage: toren-vm-ssh pveaction <alias> <node> <qemu|lxc> <vmid> <start|stop|shutdown|reboot>")
 	}
 	alias, node, typ, vmid, action := rest[0], rest[1], rest[2], rest[3], rest[4]
 	if typ != "qemu" && typ != "lxc" {
@@ -897,7 +897,7 @@ func sshArgv(alias string) []string {
 
 func cmdConnect(rest []string) {
 	if len(rest) < 1 {
-		die("usage: asura-vm-ssh connect <alias> [--cmd]")
+		die("usage: toren-vm-ssh connect <alias> [--cmd]")
 	}
 	alias := rest[0]
 	if len(rest) > 1 && rest[1] == "--cmd" {
@@ -907,7 +907,7 @@ func cmdConnect(rest []string) {
 	argv := terminalArgv(alias)
 	cmd := exec.Command(argv[0], argv[1:]...)
 	// Setsid detaches the child into its own session so the terminal survives
-	// asura-vm exiting; nil stdio wires it to /dev/null.
+	// toren-vm exiting; nil stdio wires it to /dev/null.
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
 	cmd.Env = connectEnv(alias) // adds SSH_ASKPASS for a saved-password host
 	if err := cmd.Start(); err != nil {
@@ -924,24 +924,24 @@ func connectArgv(alias string) []string {
 }
 
 // terminalArgv wraps the connect command in the user's terminal, which
-// `asura-app terminal --` picks (ghostty unless the Hub says otherwise). A
+// `toren-app terminal --` picks (ghostty unless the Hub says otherwise). A
 // failed connect holds on the error via a local read, since a bare terminal
 // drops into a login shell that buries it.
 func terminalArgv(alias string) []string {
 	hold := `"$@" || { printf "\n── press enter to close ──\n"; read _; }`
 	prog := append([]string{"sh", "-c", hold, "_"}, connectArgv(alias)...)
-	return append([]string{"asura-app", "terminal", "--"}, prog...)
+	return append([]string{"toren-app", "terminal", "--"}, prog...)
 }
 
 // --- saved passwords (Secret Service keyring) ------------------------------
 
-// secretAttr keys asura-vm's entries in the login keyring; the alias is the value
+// secretAttr keys toren-vm's entries in the login keyring; the alias is the value
 // so one lookup finds a host's password. The secret lives only in the Secret
 // Service -- never in the sidecar JSON, ssh_config, argv, or a file.
-const secretAttr = "asura-vm-alias"
+const secretAttr = "toren-vm-alias"
 
 func storeSecret(alias, pw string) error {
-	cmd := exec.Command("secret-tool", "store", "--label", "asura-vm: "+alias, secretAttr, alias)
+	cmd := exec.Command("secret-tool", "store", "--label", "toren-vm: "+alias, secretAttr, alias)
 	cmd.Stdin = strings.NewReader(pw)
 	return cmd.Run()
 }
@@ -1080,7 +1080,7 @@ func parseKeyLine(ln string) (bits int, fingerprint, typ, comment string, ok boo
 
 func cmdCopyID(rest []string) {
 	if len(rest) < 1 {
-		die("usage: asura-vm-ssh copyid <alias> [pubkey]")
+		die("usage: toren-vm-ssh copyid <alias> [pubkey]")
 	}
 	alias := rest[0]
 	pub := ""
@@ -1112,7 +1112,7 @@ func cmdCopyID(rest []string) {
 
 func cmdKeygen(rest []string) {
 	if len(rest) < 1 {
-		die("usage: asura-vm-ssh keygen <name> [type]")
+		die("usage: toren-vm-ssh keygen <name> [type]")
 	}
 	name := rest[0]
 	typ := "ed25519"
@@ -1127,7 +1127,7 @@ func cmdKeygen(rest []string) {
 	}
 	// -N "" means no passphrase: these are GUI-generated convenience keys; the
 	// user should still ssh-copy-id and can add a passphrase later.
-	cmd := exec.Command("ssh-keygen", "-t", typ, "-f", key, "-C", name+"@asura", "-N", "")
+	cmd := exec.Command("ssh-keygen", "-t", typ, "-f", key, "-C", name+"@toren", "-N", "")
 	if b, err := cmd.CombinedOutput(); err != nil {
 		die("ssh-keygen: %v: %s", err, strings.TrimSpace(string(b)))
 	}
@@ -1156,11 +1156,11 @@ func cmdKnownRemove(alias string) {
 	out(map[string]any{"ok": true})
 }
 
-// --- add / remove (asura-vm-managed include + sidecar) ----------------------
+// --- add / remove (toren-vm-managed include + sidecar) ----------------------
 
 func cmdAdd(rest []string) {
 	if len(rest) < 1 {
-		die("usage: asura-vm-ssh add <json>")
+		die("usage: toren-vm-ssh add <json>")
 	}
 	var h Host
 	if err := json.Unmarshal([]byte(rest[0]), &h); err != nil {
@@ -1188,7 +1188,7 @@ func cmdAdd(rest []string) {
 	replaced := false
 	for i := range blocks {
 		if blocks[i].alias == h.Alias {
-			blocks[i] = stanza // replace a prior asura-vm stanza for this alias
+			blocks[i] = stanza // replace a prior toren-vm stanza for this alias
 			replaced = true
 			break
 		}
@@ -1261,19 +1261,19 @@ func stanzaLines(h Host) []string {
 	return lines
 }
 
-// incBlock is one Host stanza in the asura-vm include file.
+// incBlock is one Host stanza in the toren-vm include file.
 type incBlock struct {
 	alias string
 	lines []string
 }
 
-// loadInclude parses the asura-vm include file into a header (lines before the
+// loadInclude parses the toren-vm include file into a header (lines before the
 // first Host) and one block per stanza. A missing file yields the managed header.
 func loadInclude(path string) ([]string, []incBlock) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return []string{
-			"# Managed by asura-vm. Do not edit; use the asura-vm app or `asura-vm-ssh add`/`asura-vm-ssh remove`.",
+			"# Managed by toren-vm. Do not edit; use the toren-vm app or `toren-vm-ssh add`/`toren-vm-ssh remove`.",
 			"",
 		}, nil
 	}
@@ -1378,13 +1378,13 @@ func atomicWrite(path string, data []byte, perm os.FileMode) {
 		die("mkdir %s: %v", dir, err)
 	}
 	if old, err := os.ReadFile(path); err == nil {
-		// dotfile-prefixed backup: a `asura-vm.bak` next to the asura-vm include
-		// would be pulled in by `Include config.d/*`; `.asura-vm.bak` is skipped
+		// dotfile-prefixed backup: a `toren-vm.bak` next to the toren-vm include
+		// would be pulled in by `Include config.d/*`; `.toren-vm.bak` is skipped
 		// by ssh's glob(3), so backups never pollute the resolved config.
 		bak := filepath.Join(dir, "."+filepath.Base(path)+".bak")
 		os.WriteFile(bak, old, perm) // best-effort backup
 	}
-	tmp, err := os.CreateTemp(dir, ".asura-vm-ssh-*")
+	tmp, err := os.CreateTemp(dir, ".toren-vm-ssh-*")
 	if err != nil {
 		die("temp file: %v", err)
 	}
@@ -1424,14 +1424,14 @@ type Tunnel struct {
 	Opened int64  `json:"opened"`
 }
 
-// stateDir is the XDG state home for asura-vm (defaults to ~/.local/state); the
+// stateDir is the XDG state home for toren-vm (defaults to ~/.local/state); the
 // tunnels file lives here rather than in ~/.config since it is runtime state,
 // not user configuration.
 func stateDir() string {
 	if x := os.Getenv("XDG_STATE_HOME"); x != "" {
-		return filepath.Join(x, "asura", "asura-vm")
+		return filepath.Join(x, "toren", "toren-vm")
 	}
-	return filepath.Join(home(), ".local", "state", "asura", "asura-vm")
+	return filepath.Join(home(), ".local", "state", "toren", "toren-vm")
 }
 
 func tunnelsPath() string { return filepath.Join(stateDir(), "tunnels.json") }
@@ -1593,7 +1593,7 @@ func parseSpec(spec string) (kind, flag, arg string) {
 
 func cmdTunnel(rest []string) {
 	if len(rest) < 1 {
-		die("usage: asura-vm-ssh tunnel <open|list|close|closeall> [args]")
+		die("usage: toren-vm-ssh tunnel <open|list|close|closeall> [args]")
 	}
 	sub, args := rest[0], rest[1:]
 	switch sub {
@@ -1613,13 +1613,13 @@ func cmdTunnel(rest []string) {
 // cmdTunnelOpen validates the spec, spawns a detached `ssh -N` forward, and
 // records it. It spawns WITHOUT -f: ssh stays in the foreground of its own
 // session (Setsid, which also makes it its own process-group leader) so
-// cmd.Process.Pid IS the tunnel pid and the group survives asura-vm exiting. A
+// cmd.Process.Pid IS the tunnel pid and the group survives toren-vm exiting. A
 // forward that can't bind (ExitOnForwardFailure)
 // or fails auth (BatchMode) exits within ~1s, so we wait ~800ms and, if it has
 // already died, surface the captured stderr instead of recording a dead tunnel.
 func cmdTunnelOpen(rest []string) {
 	if len(rest) < 2 {
-		die("usage: asura-vm-ssh tunnel open <alias> <spec>")
+		die("usage: toren-vm-ssh tunnel open <alias> <spec>")
 	}
 	alias, spec := rest[0], rest[1]
 	if !validHost(alias) || strings.HasPrefix(alias, "-") {
@@ -1640,7 +1640,7 @@ func cmdTunnelOpen(rest []string) {
 	}
 	cmd := exec.Command("ssh", argv...)
 	// Setsid detaches ssh into its own new session AND new process group (pgid ==
-	// pid): it survives asura-vm exiting, and close can SIGTERM the whole group by
+	// pid): it survives toren-vm exiting, and close can SIGTERM the whole group by
 	// -pid. (Adding Setpgid too is redundant and in fact EPERMs on Linux, since
 	// setpgid on a fresh session leader is not permitted.)
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
@@ -1701,7 +1701,7 @@ func cmdTunnelList(rest []string) {
 
 func cmdTunnelClose(rest []string) {
 	if len(rest) < 1 {
-		die("usage: asura-vm-ssh tunnel close <id>")
+		die("usage: toren-vm-ssh tunnel close <id>")
 	}
 	id := rest[0]
 	ts := readTunnels()

@@ -5,7 +5,7 @@ import "Singletons"
 // The machine's ticket: a boarding-pass hero on a flat, hairline-framed stage
 // (the brutalist shadow and ember frame die: the frame just brightens to
 // lineStrong while running). Left is the tear-off stub: the OS mark, the hanko
-// when the machine is sealed (asura-vm's one rationed splash of red), the split-flap
+// when the machine is sealed (toren-vm's one rationed splash of red), the split-flap
 // power word. A punched perforation column separates it from the manifest: the
 // machine's name in the window's serif, an IATA-style field grid of the real
 // hardware, and the annunciator matrix reporting each subsystem.

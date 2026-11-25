@@ -15,23 +15,23 @@ import (
 	"time"
 )
 
-// `asura migrate` runs the one-time fixes an installed machine needs to get
+// `toren migrate` runs the one-time fixes an installed machine needs to get
 // from an older ASURA to this one (migrations/ in the repository, installed at
-// /usr/share/asura/migrations). Each is a shell script named by the Unix time
+// /usr/share/toren/migrations). Each is a shell script named by the Unix time
 // it was written, so they run in order, whose first line after the shebang is
 // an `echo` saying what it does.
 //
-//	system/  once per machine, as root; done ones recorded in /var/lib/asura/migrations
-//	user/    once per user, as that user; recorded in ~/.local/state/asura/migrations
+//	system/  once per machine, as root; done ones recorded in /var/lib/toren/migrations
+//	user/    once per user, as that user; recorded in ~/.local/state/toren/migrations
 //
 // A migration is recorded only when it exits 0, so a failed one runs again on
 // the next update. A fresh install records every migration it ships as done
 // (the ISO build), since it already starts in the current state.
 
-const migrateUsage = `Usage: asura migrate [--system | --user] [--pending | --list | --mark-done]
+const migrateUsage = `Usage: toren migrate [--system | --user] [--pending | --list | --mark-done]
 
 Runs the one-time fixes this machine has not run yet: system migrations as
-root (through sudo), then the user's. asura update runs it after applying ASURA.
+root (through sudo), then the user's. toren update runs it after applying ASURA.
 
   --system     only the machine's migrations (as root)
   --user       only this user's migrations
@@ -41,13 +41,13 @@ root (through sudo), then the user's. asura update runs it after applying ASURA.
 `
 
 var (
-	migrationsDir        = "/usr/share/asura/migrations"
-	systemMigrationState = "/var/lib/asura/migrations"
+	migrationsDir        = "/usr/share/toren/migrations"
+	systemMigrationState = "/var/lib/toren/migrations"
 	migrationNameRe      = regexp.MustCompile(`^[0-9]{10,}\.sh$`)
 )
 
 func init() {
-	register("migrate", "run the one-time fixes this machine has not had yet", asuraMigrate)
+	register("migrate", "run the one-time fixes this machine has not had yet", torenMigrate)
 }
 
 type migration struct {
@@ -71,7 +71,7 @@ func migrationDirs(kind string) (string, string) {
 		if base == "" {
 			base = filepath.Join(homeDir(), ".local", "state")
 		}
-		state = filepath.Join(base, "asura", "migrations")
+		state = filepath.Join(base, "toren", "migrations")
 	}
 	return filepath.Join(tree, kind), state
 }
@@ -134,7 +134,7 @@ func migrationFailed(state, name string) bool {
 	return err == nil
 }
 
-func asuraMigrate(args []string) int {
+func torenMigrate(args []string) int {
 	kinds := []string{"system", "user"}
 	mode := "run"
 	for _, a := range args {
@@ -204,7 +204,7 @@ func migrateAs(kind, mode string) int {
 		}
 		u, err := user.Lookup(name)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "asura migrate:", err)
+			fmt.Fprintln(os.Stderr, "toren migrate:", err)
 			return exitFail
 		}
 		return runSelf(append([]string{"sudo", "-u", name, "env", "HOME=" + u.HomeDir, selfPath(), "migrate", flag}, extra...))
@@ -219,7 +219,7 @@ func selfPath() string {
 	if p, err := os.Executable(); err == nil {
 		return p
 	}
-	return "asura"
+	return "toren"
 }
 
 func runSelf(argv []string) int {
@@ -229,7 +229,7 @@ func runSelf(argv []string) int {
 		if exit, ok := err.(*exec.ExitError); ok {
 			return exit.ExitCode()
 		}
-		fmt.Fprintln(os.Stderr, "asura migrate:", err)
+		fmt.Fprintln(os.Stderr, "toren migrate:", err)
 		return exitFail
 	}
 	return exitOK
@@ -240,7 +240,7 @@ func runSelf(argv []string) int {
 func runMigrations(kind string, out, errOut io.Writer) int {
 	list, err := listMigrations(kind)
 	if err != nil {
-		fmt.Fprintln(errOut, "asura migrate:", err)
+		fmt.Fprintln(errOut, "toren migrate:", err)
 		return exitFail
 	}
 	_, state := migrationDirs(kind)
@@ -255,7 +255,7 @@ func runMigrations(kind string, out, errOut io.Writer) int {
 		return exitOK
 	}
 	if err := os.MkdirAll(state, 0o755); err != nil {
-		fmt.Fprintln(errOut, "asura migrate:", err)
+		fmt.Fprintln(errOut, "toren migrate:", err)
 		return exitFail
 	}
 	logPath := filepath.Join(filepath.Dir(state), "migrate.log")
@@ -287,7 +287,7 @@ func runMigrations(kind string, out, errOut io.Writer) int {
 		}
 		_ = os.Remove(filepath.Join(state, m.Name+".failed"))
 		if err := os.WriteFile(filepath.Join(state, m.Name), []byte(time.Now().UTC().Format(time.RFC3339)+"\n"), 0o644); err != nil {
-			fmt.Fprintln(errOut, "asura migrate:", err)
+			fmt.Fprintln(errOut, "toren migrate:", err)
 			return exitFail
 		}
 	}
@@ -299,17 +299,17 @@ func runMigrations(kind string, out, errOut io.Writer) int {
 func markMigrationsDone(kind string) int {
 	list, err := listMigrations(kind)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura migrate:", err)
+		fmt.Fprintln(os.Stderr, "toren migrate:", err)
 		return exitFail
 	}
 	_, state := migrationDirs(kind)
 	if err := os.MkdirAll(state, 0o755); err != nil {
-		fmt.Fprintln(os.Stderr, "asura migrate:", err)
+		fmt.Fprintln(os.Stderr, "toren migrate:", err)
 		return exitFail
 	}
 	for _, m := range list {
 		if err := os.WriteFile(filepath.Join(state, m.Name), []byte("marked done\n"), 0o644); err != nil {
-			fmt.Fprintln(os.Stderr, "asura migrate:", err)
+			fmt.Fprintln(os.Stderr, "toren migrate:", err)
 			return exitFail
 		}
 	}
@@ -322,7 +322,7 @@ func markMigrationsDone(kind string) int {
 func reportMigrations(kind, mode string, out io.Writer) int {
 	list, err := listMigrations(kind)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura migrate:", err)
+		fmt.Fprintln(os.Stderr, "toren migrate:", err)
 		return exitFail
 	}
 	_, state := migrationDirs(kind)

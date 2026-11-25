@@ -7,7 +7,7 @@
 set -euo pipefail
 
 app="Google Lens"
-prog="asura-cmd-google-lens"
+prog="toren-cmd-google-lens"
 # A missing tool is a notification, because the shell runs this with nowhere to
 # print, plus exit 127 (the shell's "command not found") with the apt package
 # named. notify-send is checked first and on its own: it is the one tool whose
@@ -42,7 +42,7 @@ tmp="$input_file"
 if [[ -z $tmp ]]; then
   need grim
   need slurp
-  shot="$(mktemp "${XDG_RUNTIME_DIR:-/tmp}/asura-google-lens.XXXXXX.png")"
+  shot="$(mktemp "${XDG_RUNTIME_DIR:-/tmp}/toren-google-lens.XXXXXX.png")"
   tmp="$shot"
 fi
 

@@ -15,7 +15,7 @@ PanelWindow {
     anchors { top: true; bottom: true; left: true; right: true }
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.namespace: "asura-gpu"
+    WlrLayershell.namespace: "toren-gpu"
 
     readonly property int barBottom: root.v2BarHeight
     readonly property int gap: 6
@@ -273,6 +273,6 @@ PanelWindow {
 
     Process {
         id: sysmonRunner
-        command: ["asura-app", "terminal", "--", "btop"]
+        command: ["toren-app", "terminal", "--", "btop"]
     }
 }

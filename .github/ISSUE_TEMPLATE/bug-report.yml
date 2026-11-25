@@ -1,5 +1,5 @@
 name: Bug report
-description: Something in Asura does not behave as documented. For problems with one specific laptop, use the hardware support form instead.
+description: Something in Toren does not behave as documented. For problems with one specific laptop, use the hardware support form instead.
 title: "[bug]: "
 labels:
   - bug
@@ -18,13 +18,13 @@ body:
       label: Where is the problem
       description: Pick the narrowest one that fits.
       options:
-        - "`asura` control tool"
-        - "`asura-shell` — bar, dock, launcher, widgets"
-        - "`asura-hub` — settings application"
-        - "Updater and rollback — `asura update`, `asura rollback`, `asura doctor`"
+        - "`toren` control tool"
+        - "`toren-shell` — bar, dock, launcher, widgets"
+        - "`toren-hub` — settings application"
+        - "Updater and rollback — `toren update`, `toren rollback`, `toren doctor`"
         - "Installer or ISO"
         - "Packaging and APT repository"
-        - "Hardware detection — `asura hardware report`, `asura hardware match`"
+        - "Hardware detection — `toren hardware report`, `toren hardware match`"
         - "Base layer / Ubuntu package interaction"
         - "Documentation"
         - "Other"
@@ -34,9 +34,9 @@ body:
   - type: input
     id: version
     attributes:
-      label: Asura version
-      description: Output of `asura --version`, or the ISO filename you booted.
-      placeholder: asura 0.1.0-beta.1
+      label: Toren version
+      description: Output of `toren --version`, or the ISO filename you booted.
+      placeholder: toren 0.1.0-beta.1
     validations:
       required: true
 
@@ -52,7 +52,7 @@ body:
   - type: dropdown
     id: context
     attributes:
-      label: How are you running Asura
+      label: How are you running Toren
       options:
         - Installed system
         - Live ISO, booted without installing
@@ -84,7 +84,7 @@ body:
       description: The shortest sequence that shows it every time, starting from a known state.
       placeholder: |
         1. Boot the ISO
-        2. `asura update`
+        2. `toren update`
         3. Reboot
         4. Close and open the lid
     validations:
@@ -95,7 +95,7 @@ body:
     attributes:
       label: Logs and output
       description: |
-        `asura doctor` output, `journalctl -b -u <unit>`, `asura --version`, and the exact
+        `toren doctor` output, `journalctl -b -u <unit>`, `toren --version`, and the exact
         command output you are quoting. Please redact serials, MAC addresses, hostnames and
         home directory paths.
       render: shell

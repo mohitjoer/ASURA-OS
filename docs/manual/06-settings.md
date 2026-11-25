@@ -7,9 +7,9 @@
 - **Your desktop settings file** is `~/.config/illogical-impulse/config.json`;
   the Settings app writes it, and the desktop reloads it when it changes.
 - **Hyprland** (gaps, borders, window rules, monitors, keyboard layout): put
-  your changes in `~/.config/asura/hyprland/user.conf`; it is read after
+  your changes in `~/.config/toren/hyprland/user.conf`; it is read after
   Toren's, so yours win. `hyprctl reload` applies them.
 - **From a terminal**: `toren config get|set SCHEMA KEY [VALUE]`.
 
-Never edit files under `/usr/share/asura`: every update replaces them. Your
+Never edit files under `/usr/share/toren`: every update replaces them. Your
 files in your home folder survive every update.

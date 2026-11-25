@@ -97,7 +97,7 @@ var (
 // generatedNames are the files this backend or the user owns. They are never
 // read back as the shipped binds, or a rebind would be built from a rebind.
 var generatedNames = map[string]bool{
-	"settings.conf": true, "rebinds.conf": true, "user.conf": true, "asura.conf": true,
+	"settings.conf": true, "rebinds.conf": true, "user.conf": true, "toren.conf": true,
 }
 
 // PackagedConfigPath is the hyprland.conf the session loads.
@@ -106,14 +106,14 @@ func PackagedConfigPath() string {
 		return p
 	}
 	for _, p := range []string{
-		"/usr/share/asura/hyprland/hyprland.conf",
+		"/usr/share/toren/hyprland/hyprland.conf",
 		filepath.Join(HyprConfigDir(), "hyprland.conf"),
 	} {
 		if fileExists(p) {
 			return p
 		}
 	}
-	return "/usr/share/asura/hyprland/hyprland.conf"
+	return "/usr/share/toren/hyprland/hyprland.conf"
 }
 
 func expandHome(p string) string {
@@ -421,7 +421,7 @@ func synthesise(c CatalogBind, chord string) []confBind {
 			press += ","
 		}
 	case BindShell:
-		press = "exec, asura ipc call asura " + c.Action
+		press = "exec, toren ipc call toren " + c.Action
 		if c.Argument != "" {
 			press += " " + c.Argument
 		}
@@ -435,7 +435,7 @@ func synthesise(c CatalogBind, chord string) []confBind {
 	}
 	out := []confBind{{chord: chord, rest: press}}
 	if c.ReleaseAction != "" {
-		out = append(out, confBind{flags: "r", chord: chord, rest: "exec, asura ipc call asura " + c.ReleaseAction})
+		out = append(out, confBind{flags: "r", chord: chord, rest: "exec, toren ipc call toren " + c.ReleaseAction})
 	}
 	return out
 }

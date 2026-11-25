@@ -25,13 +25,13 @@ import (
 // specification gives: the session's theme, the themes it inherits, Adwaita,
 // and hicolor last as the fallback every application installs into.
 //
-// "asura icons" prints the whole index as one JSON object and needs no daemon.
-// The shell asks the daemon's "asura-shell icons" first and falls back to this
+// "toren icons" prints the whole index as one JSON object and needs no daemon.
+// The shell asks the daemon's "toren-shell icons" first and falls back to this
 // one, so icons resolve whether or not the daemon is up. The index and the
 // lookup order are ported from upstream icons (GPL-3.0).
 
 func init() {
-	register("icons", "the icon index the shell draws from, as JSON", asuraIcons)
+	register("icons", "the icon index the shell draws from, as JSON", torenIcons)
 }
 
 // iconIndex is the whole answer: the active theme, its resolved inheritance
@@ -82,19 +82,19 @@ func iconBetter(a, b iconCand) bool {
 	return false
 }
 
-const iconsUsage = `asura icons — the icon index the shell draws from
+const iconsUsage = `toren icons — the icon index the shell draws from
 
 Usage:
-  asura icons          print every icon name and its file, as JSON
-  asura icons NAME...  print the file each name resolves to, one per line
+  toren icons          print every icon name and its file, as JSON
+  toren icons NAME...  print the file each name resolves to, one per line
 
 The index follows the session's icon theme, the themes it inherits, Adwaita and
 hicolor. An unknown name prints an empty line.
 `
 
-// asuraIcons is the CLI entry. With no names it prints the whole index as
+// torenIcons is the CLI entry. With no names it prints the whole index as
 // JSON; with names it prints one resolved path per line.
-func asuraIcons(args []string) int {
+func torenIcons(args []string) int {
 	if len(args) == 1 && (args[0] == "-h" || args[0] == "--help") {
 		fmt.Print(iconsUsage)
 		return exitOK
@@ -104,7 +104,7 @@ func asuraIcons(args []string) int {
 	if len(args) == 0 {
 		encoded, err := json.Marshal(index)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "asura icons:", err)
+			fmt.Fprintln(os.Stderr, "toren icons:", err)
 			return exitFail
 		}
 		fmt.Println(string(encoded))

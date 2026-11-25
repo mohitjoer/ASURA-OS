@@ -14,7 +14,7 @@ import (
 func TestCurrentSchemeReportsFollow(t *testing.T) {
 	dir := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", dir)
-	tp := filepath.Join(dir, "asura", "theme.json")
+	tp := filepath.Join(dir, "toren", "theme.json")
 	if err := os.MkdirAll(filepath.Dir(tp), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -52,14 +52,14 @@ func TestSchemeFollowRoundTrips(t *testing.T) {
 	}
 }
 
-func TestApplyAsuraThemeUsesAsuraFrameBarLook(t *testing.T) {
+func TestApplyTorenThemeUsesTorenFrameBarLook(t *testing.T) {
 	dir := t.TempDir()
 	t.Setenv("HOME", dir)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(dir, "config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(dir, "cache"))
 	t.Setenv("PATH", "")
 
-	shellPath := filepath.Join(dir, "config", "asura", "shell.json")
+	shellPath := filepath.Join(dir, "config", "toren", "shell.json")
 	if err := os.MkdirAll(filepath.Dir(shellPath), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -67,13 +67,13 @@ func TestApplyAsuraThemeUsesAsuraFrameBarLook(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := applyAsuraTheme(); err != nil {
+	if err := applyTorenTheme(); err != nil {
 		t.Fatal(err)
 	}
 	got := readJSONMap(shellPath)
 	frameBars := got["frameBars"].(map[string]any)
-	if frameBars["style"] != "asura-frame" {
-		t.Fatalf("frameBars.style = %v, want asura-frame", frameBars["style"])
+	if frameBars["style"] != "toren-frame" {
+		t.Fatalf("frameBars.style = %v, want toren-frame", frameBars["style"])
 	}
 	if frameBars["rails"].(map[string]any)["top"].(map[string]any)["size"] != float64(44) {
 		t.Fatalf("frameBars was not preserved: %v", frameBars)

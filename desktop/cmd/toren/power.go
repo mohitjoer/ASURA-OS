@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-const powerUsage = `Usage: asura power <verb> [arguments...]
+const powerUsage = `Usage: toren power <verb> [arguments...]
 
 Verbs:
   status                print current power supply state, governor, and profile
@@ -25,10 +25,10 @@ Verbs:
 var powerPrivileged = runPrivileged
 
 func init() {
-	register("power", "manage CPU governors, energy preference, battery thresholds, and sleep modes", asuraPower)
+	register("power", "manage CPU governors, energy preference, battery thresholds, and sleep modes", torenPower)
 }
 
-func asuraPower(args []string) int {
+func torenPower(args []string) int {
 	if len(args) == 0 {
 		return runPowerStatus()
 	}
@@ -59,7 +59,7 @@ func asuraPower(args []string) int {
 		fmt.Fprint(os.Stdout, powerUsage)
 		return exitOK
 	default:
-		fmt.Fprintf(os.Stderr, "asura power: unknown verb %q\n\n%s", args[0], powerUsage)
+		fmt.Fprintf(os.Stderr, "toren power: unknown verb %q\n\n%s", args[0], powerUsage)
 		return exitUsage
 	}
 }
@@ -154,12 +154,12 @@ func setPowerProfile(profile string) int {
 		epp = "balance_performance"
 		platformProfile = "balanced"
 	default:
-		fmt.Fprintf(os.Stderr, "asura power profile: unknown profile %q (choose: balanced, performance, battery)\n", profile)
+		fmt.Fprintf(os.Stderr, "toren power profile: unknown profile %q (choose: balanced, performance, battery)\n", profile)
 		return exitUsage
 	}
 
 	if applyViaSysd(governor, epp, profile) {
-		fmt.Printf("Power profile set to %s (via asura-sysd)\n", profile)
+		fmt.Printf("Power profile set to %s (via toren-sysd)\n", profile)
 		return exitOK
 	}
 
@@ -192,7 +192,7 @@ func setPowerProfile(profile string) int {
 		return exitOK
 	}
 
-	fmt.Printf("Power profile requested: %s (requires asura-sysd or root privileges)\n", profile)
+	fmt.Printf("Power profile requested: %s (requires toren-sysd or root privileges)\n", profile)
 	return exitOK
 }
 
@@ -232,7 +232,7 @@ func getBatteryThreshold() int {
 func setBatteryThreshold(arg string) int {
 	pct, err := strconv.Atoi(strings.TrimSuffix(strings.TrimSpace(arg), "%"))
 	if err != nil || pct < 20 || pct > 100 {
-		fmt.Fprintf(os.Stderr, "asura power threshold: invalid percentage %q (must be 20-100)\n", arg)
+		fmt.Fprintf(os.Stderr, "toren power threshold: invalid percentage %q (must be 20-100)\n", arg)
 		return exitUsage
 	}
 
@@ -286,7 +286,7 @@ func getSleepMode() int {
 func setSleepMode(mode string) int {
 	mode = strings.ToLower(strings.TrimSpace(mode))
 	if mode != "s2idle" && mode != "deep" {
-		fmt.Fprintf(os.Stderr, "asura power sleep: invalid mode %q (must be 's2idle' or 'deep')\n", mode)
+		fmt.Fprintf(os.Stderr, "toren power sleep: invalid mode %q (must be 's2idle' or 'deep')\n", mode)
 		return exitUsage
 	}
 
@@ -296,7 +296,7 @@ func setSleepMode(mode string) int {
 }
 
 func applyViaSysd(gov, epp, profile string) bool {
-	sockPath := "/run/asura/sysd.sock"
+	sockPath := "/run/toren/sysd.sock"
 	conn, err := net.DialTimeout("unix", sockPath, 200*time.Millisecond)
 	if err != nil {
 		return false

@@ -140,7 +140,7 @@ Item {
                         tip: I18n.tr("Lock")
                         tipBelow: true
                         onClicked: {
-                            Quickshell.execDetached(["asura-shell", "lock"]);
+                            Quickshell.execDetached(["toren-shell", "lock"]);
                             if (root.closePanel)
                                 root.closePanel();
                         }
@@ -301,7 +301,7 @@ Item {
                     hasPage: true
                     pageTip: I18n.tr("Keyboard settings")
                     onToggled: Wm.cycleKeyboardLayout()
-                    onPageRequested: Quickshell.execDetached(["asura-hub", "input"])
+                    onPageRequested: Quickshell.execDetached(["toren-hub", "input"])
                 }
                 Menus.QsTile {
                     visible: Wm.caps.liveConfigEval === true || Toggles.gameMode

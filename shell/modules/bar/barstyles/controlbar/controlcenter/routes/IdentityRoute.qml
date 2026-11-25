@@ -131,7 +131,7 @@ Item {
                                         sourceSize.width: 28
                                         sourceSize.height: 28
                                         fillMode: Image.PreserveAspectFit
-                                        source: Qt.resolvedUrl("../../../../../../assets/asura-logo-on-dark.svg")
+                                        source: Qt.resolvedUrl("../../../../../../assets/toren-logo-on-dark.svg")
                                     }
 
                                     Text {

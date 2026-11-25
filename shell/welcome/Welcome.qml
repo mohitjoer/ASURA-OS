@@ -9,7 +9,7 @@ import "Singletons"
 // Left half is the constant chrome (brand lockup, progress) laid over the art;
 // the right half carries the current step (header + body) and the tour navigation.
 // Paper and ink throughout: the scrims are the paper flooding over the backdrop,
-// and there is no accent colour (Asura is strictly monochrome).
+// and there is no accent colour (Toren is strictly monochrome).
 // Shown once on first login (autostart guards a state flag), and dismissible any
 // time (Escape / Skip / close) -- the daemon marks it seen after this window exits.
 Rectangle {
@@ -37,14 +37,14 @@ Rectangle {
     function goTo(i) { if (i >= 0 && i <= lastStep) step = i; }
     function finish() { Qt.quit(); }
 
-    // Open Asura Settings, then close the tour. The daemon starts the Hub (or
+    // Open Toren Settings, then close the tour. The daemon starts the Hub (or
     // raises it if it is already open), so it outlives this process, and it is
     // the same path Super+, takes.
     function openHubAndFinish() { hubProc.running = true; quitFallback.restart(); }
 
     Process {
         id: hubProc
-        command: ["asura-shell", "hub", "open"]
+        command: ["toren-shell", "hub", "open"]
         environment: Spawn.env
         onExited: Qt.quit()
     }

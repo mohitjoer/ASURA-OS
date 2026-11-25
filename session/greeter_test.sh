@@ -7,7 +7,7 @@
 # it is "does it come up anyway". Every branch that fails has to fall back to
 # plain Weston rather than exit.
 #
-# It is run rather than unit-tested, for the same reason asura-session is: the
+# It is run rather than unit-tested, for the same reason toren-session is: the
 # properties are about how /bin/sh behaves, and the only way to know that is to
 # run it.
 #
@@ -123,7 +123,7 @@ run_greeter >/dev/null
 rc=0; grep -q '^locker=false$' "$WORK/weston.ini" || rc=$?
 check "the session locker is off" $rc
 
-rc=0; grep -q 'command=.*/usr/bin/quickshell -p /usr/share/asura/greeter$' \
+rc=0; grep -q 'command=.*/usr/bin/quickshell -p /usr/share/toren/greeter$' \
     "$WORK/weston.ini" || rc=$?
 check "the login surface is named" $rc
 

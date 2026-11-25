@@ -8,9 +8,9 @@ import (
 )
 
 // TestResetDesktopBackupAndRestore verifies:
-// 1. asura reset --desktop backs up user desktop configs to a dated backup folder
+// 1. toren reset --desktop backs up user desktop configs to a dated backup folder
 // 2. Original user configurations are cleared/reset
-// 3. asura reset --restore BACKUP restores original user configs byte-for-byte
+// 3. toren reset --restore BACKUP restores original user configs byte-for-byte
 func TestResetDesktopBackupAndRestore(t *testing.T) {
 	tmpHome := t.TempDir()
 
@@ -21,19 +21,19 @@ func TestResetDesktopBackupAndRestore(t *testing.T) {
 	fakeWallsState := []byte(`{"wallpaper": "neon-city.png", "blur": 15}`)
 
 	iiPath := filepath.Join(tmpHome, ".config", "illogical-impulse", "config.json")
-	userConfPath := filepath.Join(tmpHome, ".config", "asura", "hyprland", "user.conf")
-	userEditsPath := filepath.Join(tmpHome, ".config", "asura", "user_edits", "shell.json")
-	wallsStatePath := filepath.Join(tmpHome, ".local", "state", "asura", "asura-walls.json")
+	userConfPath := filepath.Join(tmpHome, ".config", "toren", "hyprland", "user.conf")
+	userEditsPath := filepath.Join(tmpHome, ".config", "toren", "user_edits", "shell.json")
+	wallsStatePath := filepath.Join(tmpHome, ".local", "state", "toren", "toren-walls.json")
 
 	mustWriteFile(t, iiPath, fakeIIConfig, 0o644)
 	mustWriteFile(t, userConfPath, fakeUserConf, 0o644)
 	mustWriteFile(t, userEditsPath, fakeUserEdits, 0o644)
 	mustWriteFile(t, wallsStatePath, fakeWallsState, 0o644)
 
-	// Step 1: Run `asura reset --desktop --root <tmpHome>`
-	code := asuraReset([]string{"--desktop", "--root", tmpHome})
+	// Step 1: Run `toren reset --desktop --root <tmpHome>`
+	code := torenReset([]string{"--desktop", "--root", tmpHome})
 	if code != exitOK {
-		t.Fatalf("asuraReset --desktop returned exit code %d, want %d", code, exitOK)
+		t.Fatalf("torenReset --desktop returned exit code %d, want %d", code, exitOK)
 	}
 
 	// Verify original files are gone/reset
@@ -51,7 +51,7 @@ func TestResetDesktopBackupAndRestore(t *testing.T) {
 	}
 
 	// Verify backup was created
-	backupsBase := filepath.Join(tmpHome, ".local", "state", "asura", "backups")
+	backupsBase := filepath.Join(tmpHome, ".local", "state", "toren", "backups")
 	entries, err := os.ReadDir(backupsBase)
 	if err != nil || len(entries) == 0 {
 		t.Fatalf("expected backup directory in %s, got err: %v, count: %d", backupsBase, err, len(entries))
@@ -59,10 +59,10 @@ func TestResetDesktopBackupAndRestore(t *testing.T) {
 
 	backupDir := filepath.Join(backupsBase, entries[0].Name())
 
-	// Step 2: Run `asura reset --restore <backupDir> --root <tmpHome>`
-	codeRestore := asuraReset([]string{"--restore", backupDir, "--root", tmpHome})
+	// Step 2: Run `toren reset --restore <backupDir> --root <tmpHome>`
+	codeRestore := torenReset([]string{"--restore", backupDir, "--root", tmpHome})
 	if codeRestore != exitOK {
-		t.Fatalf("asuraReset --restore returned exit code %d, want %d", codeRestore, exitOK)
+		t.Fatalf("torenReset --restore returned exit code %d, want %d", codeRestore, exitOK)
 	}
 
 	// Step 3: Verify byte-for-byte restoration of all backed up files

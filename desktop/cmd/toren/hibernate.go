@@ -13,10 +13,10 @@ import (
 	"syscall"
 )
 
-// Hibernation support for Asura OS:
-//   asura hibernate status
-//   asura hibernate setup
-//   asura hibernate remove
+// Hibernation support for Toren OS:
+//   toren hibernate status
+//   toren hibernate setup
+//   toren hibernate remove
 //
 // Safe, opt-in hibernation with Btrfs subvolume (@swap) or ext4 swapfile,
 // resume offset calculation, GRUB command line configuration, and dracut resume module.
@@ -30,11 +30,11 @@ var (
 	hibernateLockdown    = "/sys/kernel/security/lockdown"
 	hibernateSwaps       = "/proc/swaps"
 	hibernateMeminfo     = "/proc/meminfo"
-	hibernateReadyMarker = "/run/asura/hibernate.ready"
+	hibernateReadyMarker = "/run/toren/hibernate.ready"
 	hibernatePrivileged  = runPrivileged
 )
 
-const hibernateUsage = `Usage: asura hibernate [status | setup | remove]
+const hibernateUsage = `Usage: toren hibernate [status | setup | remove]
 
 Configures or removes safe system hibernation.
 
@@ -45,10 +45,10 @@ Configures or removes safe system hibernation.
 `
 
 func init() {
-	register("hibernate", "manage system hibernation, swapfile, and resume configuration", asuraHibernate)
+	register("hibernate", "manage system hibernation, swapfile, and resume configuration", torenHibernate)
 }
 
-func asuraHibernate(args []string) int {
+func torenHibernate(args []string) int {
 	if len(args) == 0 || args[0] == "status" {
 		return runHibernateStatus()
 	}
@@ -64,7 +64,7 @@ func asuraHibernate(args []string) int {
 		fmt.Print(hibernateUsage)
 		return exitOK
 	default:
-		fmt.Fprintf(os.Stderr, "asura hibernate: unknown verb %q\n\n%s", args[0], hibernateUsage)
+		fmt.Fprintf(os.Stderr, "toren hibernate: unknown verb %q\n\n%s", args[0], hibernateUsage)
 		return exitUsage
 	}
 }
@@ -272,7 +272,7 @@ func runHibernateStatus() int {
 		return exitOK
 	}
 
-	fmt.Println("\nHibernation is not set up. Run 'sudo asura hibernate setup' to enable.")
+	fmt.Println("\nHibernation is not set up. Run 'sudo toren hibernate setup' to enable.")
 	return exitOK
 }
 
@@ -318,45 +318,45 @@ func getDeviceUUID(devPath string) (string, error) {
 
 func runHibernateSetup() int {
 	if os.Geteuid() != 0 {
-		fmt.Fprintln(os.Stderr, "asura hibernate setup: requires root privileges (run with sudo)")
+		fmt.Fprintln(os.Stderr, "toren hibernate setup: requires root privileges (run with sudo)")
 		return exitFail
 	}
 
 	// 1. Refusal checks
 	// Check Secure Boot lockdown
 	if data, err := os.ReadFile(hibernateLockdown); err == nil && isSecureBootLockedDown(string(data)) {
-		fmt.Fprintln(os.Stderr, "asura hibernate: Secure Boot lockdown prevents hibernation")
+		fmt.Fprintln(os.Stderr, "toren hibernate: Secure Boot lockdown prevents hibernation")
 		return exitFail
 	}
 
 	// Check kernel power state
 	powerStateBytes, err := os.ReadFile(hibernatePowerState)
 	if err != nil || !isHibernationSupported(string(powerStateBytes)) {
-		fmt.Fprintln(os.Stderr, "asura hibernate: running kernel does not support hibernation (disk state missing)")
+		fmt.Fprintln(os.Stderr, "toren hibernate: running kernel does not support hibernation (disk state missing)")
 		return exitFail
 	}
 
 	// Check root filesystem
 	rootDev, fsType, isLuks, err := getRootDeviceAndFS()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "asura hibernate: %v\n", err)
+		fmt.Fprintf(os.Stderr, "toren hibernate: %v\n", err)
 		return exitFail
 	}
 
 	if fsType != "btrfs" && fsType != "ext4" {
-		fmt.Fprintf(os.Stderr, "asura hibernate: root filesystem must be Btrfs or ext4 (found %s)\n", fsType)
+		fmt.Fprintf(os.Stderr, "toren hibernate: root filesystem must be Btrfs or ext4 (found %s)\n", fsType)
 		return exitFail
 	}
 
 	// Determine required swap size (RAM size in MB)
 	memBytes, err := os.ReadFile(hibernateMeminfo)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "asura hibernate: reading meminfo: %v\n", err)
+		fmt.Fprintf(os.Stderr, "toren hibernate: reading meminfo: %v\n", err)
 		return exitFail
 	}
 	ramMB, err := parseMemTotalMB(string(memBytes))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "asura hibernate: %v\n", err)
+		fmt.Fprintf(os.Stderr, "toren hibernate: %v\n", err)
 		return exitFail
 	}
 	swapSizeMB := ramMB + 512
@@ -364,12 +364,12 @@ func runHibernateSetup() int {
 	// Check disk free space
 	var stat syscall.Statfs_t
 	if err := syscall.Statfs("/", &stat); err != nil {
-		fmt.Fprintf(os.Stderr, "asura hibernate: checking disk space: %v\n", err)
+		fmt.Fprintf(os.Stderr, "toren hibernate: checking disk space: %v\n", err)
 		return exitFail
 	}
 	freeMB := (stat.Bavail * uint64(stat.Bsize)) / (1024 * 1024)
 	if freeMB < swapSizeMB+2048 {
-		fmt.Fprintf(os.Stderr, "asura hibernate: not enough free space on root filesystem (requires %d MB, available %d MB)\n", swapSizeMB+2048, freeMB)
+		fmt.Fprintf(os.Stderr, "toren hibernate: not enough free space on root filesystem (requires %d MB, available %d MB)\n", swapSizeMB+2048, freeMB)
 		return exitFail
 	}
 
@@ -377,7 +377,7 @@ func runHibernateSetup() int {
 	fmt.Println("Taking pre-hibernation system snapshot...")
 	snapPath, err := createBtrfsSnapshotAs(snapshotManual)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "asura hibernate: warning taking snapshot: %v\n", err)
+		fmt.Fprintf(os.Stderr, "toren hibernate: warning taking snapshot: %v\n", err)
 	} else if snapPath != "" {
 		fmt.Printf("System snapshot created: %s\n", snapPath)
 	}
@@ -416,12 +416,12 @@ func runHibernateSetup() int {
 			_ = exec.Command("chattr", "+C", swapfilePath).Run()
 			_ = exec.Command("btrfs", "property", "set", swapfilePath, "compression", "none").Run()
 			if err := exec.Command("fallocate", "-l", fmt.Sprintf("%dM", swapSizeMB), swapfilePath).Run(); err != nil {
-				fmt.Fprintf(os.Stderr, "asura hibernate: creating swapfile: %v\n", err)
+				fmt.Fprintf(os.Stderr, "toren hibernate: creating swapfile: %v\n", err)
 				return exitFail
 			}
 			_ = os.Chmod(swapfilePath, 0o600)
 			if err := exec.Command("mkswap", swapfilePath).Run(); err != nil {
-				fmt.Fprintf(os.Stderr, "asura hibernate: formatting swap: %v\n", err)
+				fmt.Fprintf(os.Stderr, "toren hibernate: formatting swap: %v\n", err)
 				return exitFail
 			}
 		}
@@ -429,12 +429,12 @@ func runHibernateSetup() int {
 		// Compute resume offset on Btrfs
 		out, err := exec.Command("btrfs", "inspect-internal", "map-swapfile", "-r", swapfilePath).Output()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "asura hibernate: computing swapfile offset: %v\n", err)
+			fmt.Fprintf(os.Stderr, "toren hibernate: computing swapfile offset: %v\n", err)
 			return exitFail
 		}
 		offset, err := parseBtrfsSwapfileOffset(string(out))
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "asura hibernate: %v\n", err)
+			fmt.Fprintf(os.Stderr, "toren hibernate: %v\n", err)
 			return exitFail
 		}
 		resumeOffset = offset
@@ -459,7 +459,7 @@ func runHibernateSetup() int {
 		fmt.Printf("Creating %d MB ext4 swapfile at %s...\n", swapSizeMB, swapfilePath)
 		if err := exec.Command("fallocate", "-l", fmt.Sprintf("%dM", swapSizeMB), swapfilePath).Run(); err != nil {
 			if err := exec.Command("dd", "if=/dev/zero", "of="+swapfilePath, "bs=1M", fmt.Sprintf("count=%d", swapSizeMB)).Run(); err != nil {
-				fmt.Fprintf(os.Stderr, "asura hibernate: creating ext4 swapfile: %v\n", err)
+				fmt.Fprintf(os.Stderr, "toren hibernate: creating ext4 swapfile: %v\n", err)
 				return exitFail
 			}
 		}
@@ -469,12 +469,12 @@ func runHibernateSetup() int {
 		// Compute offset via filefrag
 		out, err := exec.Command("filefrag", "-v", swapfilePath).Output()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "asura hibernate: computing ext4 swap offset: %v\n", err)
+			fmt.Fprintf(os.Stderr, "toren hibernate: computing ext4 swap offset: %v\n", err)
 			return exitFail
 		}
 		offset, err := parseExt4SwapfileOffset(string(out))
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "asura hibernate: %v\n", err)
+			fmt.Fprintf(os.Stderr, "toren hibernate: %v\n", err)
 			return exitFail
 		}
 		resumeOffset = offset
@@ -498,7 +498,7 @@ func runHibernateSetup() int {
 	} else {
 		rootUUID, err := getDeviceUUID(rootDev)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "asura hibernate: finding root UUID: %v\n", err)
+			fmt.Fprintf(os.Stderr, "toren hibernate: finding root UUID: %v\n", err)
 			return exitFail
 		}
 		resumeDevice = "UUID=" + rootUUID
@@ -508,12 +508,12 @@ func runHibernateSetup() int {
 	fmt.Printf("Configuring GRUB resume=%s resume_offset=%s...\n", resumeDevice, resumeOffset)
 	grubData, err := os.ReadFile(hibernateGrubDefault)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "asura hibernate: reading %s: %v\n", hibernateGrubDefault, err)
+		fmt.Fprintf(os.Stderr, "toren hibernate: reading %s: %v\n", hibernateGrubDefault, err)
 		return exitFail
 	}
 	newGrubData := updateGrubCmdline(string(grubData), resumeDevice, resumeOffset)
 	if err := os.WriteFile(hibernateGrubDefault, []byte(newGrubData), 0o644); err != nil {
-		fmt.Fprintf(os.Stderr, "asura hibernate: writing %s: %v\n", hibernateGrubDefault, err)
+		fmt.Fprintf(os.Stderr, "toren hibernate: writing %s: %v\n", hibernateGrubDefault, err)
 		return exitFail
 	}
 
@@ -521,7 +521,7 @@ func runHibernateSetup() int {
 	fmt.Println("Regenerating GRUB configuration...")
 	if err := hibernatePrivileged("update-grub"); err != nil {
 		if err := hibernatePrivileged("grub-mkconfig", "-o", "/boot/grub/grub.cfg"); err != nil {
-			fmt.Fprintf(os.Stderr, "asura hibernate: updating grub: %v\n", err)
+			fmt.Fprintf(os.Stderr, "toren hibernate: updating grub: %v\n", err)
 		}
 	}
 
@@ -530,14 +530,14 @@ func runHibernateSetup() int {
 	_ = os.MkdirAll(filepath.Dir(hibernateDracutConf), 0o755)
 	dracutContent := `add_dracutmodules+=" resume "` + "\n"
 	if err := os.WriteFile(hibernateDracutConf, []byte(dracutContent), 0o644); err != nil {
-		fmt.Fprintf(os.Stderr, "asura hibernate: writing %s: %v\n", hibernateDracutConf, err)
+		fmt.Fprintf(os.Stderr, "toren hibernate: writing %s: %v\n", hibernateDracutConf, err)
 		return exitFail
 	}
 
 	// Rebuild initramfs
 	fmt.Println("Rebuilding initramfs with dracut...")
 	if err := hibernatePrivileged("dracut", "--force"); err != nil {
-		fmt.Fprintf(os.Stderr, "asura hibernate: rebuilding initramfs: %v\n", err)
+		fmt.Fprintf(os.Stderr, "toren hibernate: rebuilding initramfs: %v\n", err)
 	}
 
 	// Mark ready
@@ -551,7 +551,7 @@ func runHibernateSetup() int {
 
 func runHibernateRemove() int {
 	if os.Geteuid() != 0 {
-		fmt.Fprintln(os.Stderr, "asura hibernate remove: requires root privileges (run with sudo)")
+		fmt.Fprintln(os.Stderr, "toren hibernate remove: requires root privileges (run with sudo)")
 		return exitFail
 	}
 

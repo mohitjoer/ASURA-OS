@@ -147,7 +147,7 @@ func clipCacheDir() string {
 	if base == "" {
 		base = filepath.Join(os.Getenv("HOME"), ".cache")
 	}
-	return filepath.Join(base, "asura", "clipboard")
+	return filepath.Join(base, "toren", "clipboard")
 }
 
 // clipStateDir holds the persisted history: the entry index and one file of
@@ -158,7 +158,7 @@ func clipStateDir() string {
 	if base == "" {
 		base = filepath.Join(os.Getenv("HOME"), ".local", "state")
 	}
-	return filepath.Join(base, "asura", "clipboard")
+	return filepath.Join(base, "toren", "clipboard")
 }
 
 func (s *clipState) indexPath() string { return filepath.Join(s.stateDir, "index.json") }
@@ -816,7 +816,7 @@ func isClipWatcherCmdline(argv []string, self string) bool {
 	return hasSelf && hasIngest
 }
 
-// runClipIngest is the wl-paste --watch helper (asura-shell __clip-ingest). It
+// runClipIngest is the wl-paste --watch helper (toren-shell __clip-ingest). It
 // reads the best-typed current selection and streams it to the daemon on its own
 // line, so the bytes never reach a command line. A cleared or password-manager
 // (sensitive) selection is skipped.
@@ -968,7 +968,7 @@ func (s *clipState) pruneIfDue(on bool, now time.Time) bool {
 }
 
 // clipCopy is the `clip-copy <mime> <path>` control verb: the daemon reads the
-// file, sets the selection, and stores it in history. Capture and asura-shot call
+// file, sets the selection, and stores it in history. Capture and toren-shot call
 // it so the copy is owned by the persistent daemon, not a short-lived app whose
 // exit would clear the selection.
 func (d *daemon) clipCopy(cmd string) string {

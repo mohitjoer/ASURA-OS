@@ -10,7 +10,7 @@ import (
 	"syscall"
 )
 
-const gpuUsage = `Usage: asura gpu <verb> [arguments...]
+const gpuUsage = `Usage: toren gpu <verb> [arguments...]
 
 Verbs:
   status                   report detected GPUs, drivers, and runtime power status
@@ -21,7 +21,7 @@ Verbs:
 var gpuPrivileged = runPrivileged
 
 func init() {
-	register("gpu", "inspect GPUs and run commands offloaded to discrete graphics", asuraGpu)
+	register("gpu", "inspect GPUs and run commands offloaded to discrete graphics", torenGpu)
 }
 
 type GPUInfo struct {
@@ -34,7 +34,7 @@ type GPUInfo struct {
 	PowerState    string `json:"power_state,omitempty"`
 }
 
-func asuraGpu(args []string) int {
+func torenGpu(args []string) int {
 	if len(args) == 0 {
 		fmt.Fprint(os.Stderr, gpuUsage)
 		return exitUsage
@@ -51,7 +51,7 @@ func asuraGpu(args []string) int {
 		fmt.Fprint(os.Stdout, gpuUsage)
 		return exitOK
 	default:
-		fmt.Fprintf(os.Stderr, "asura gpu: unknown verb %q\n\n%s", args[0], gpuUsage)
+		fmt.Fprintf(os.Stderr, "toren gpu: unknown verb %q\n\n%s", args[0], gpuUsage)
 		return exitUsage
 	}
 }
@@ -189,7 +189,7 @@ func runGpuSwitch(args []string) int {
 			fmt.Println("GPU mode set to integrated.")
 		}
 	default:
-		fmt.Fprintf(os.Stderr, "asura gpu switch: unknown mode %q (must be hybrid, integrated, or discrete)\n", mode)
+		fmt.Fprintf(os.Stderr, "toren gpu switch: unknown mode %q (must be hybrid, integrated, or discrete)\n", mode)
 		return exitUsage
 	}
 
@@ -198,14 +198,14 @@ func runGpuSwitch(args []string) int {
 
 func runGpuOffload(args []string) int {
 	if len(args) == 0 {
-		fmt.Fprintln(os.Stderr, "asura gpu run: command required")
+		fmt.Fprintln(os.Stderr, "toren gpu run: command required")
 		return exitUsage
 	}
 
 	targetBin := args[0]
 	path, err := exec.LookPath(targetBin)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "asura gpu run: executable %q not found: %v\n", targetBin, err)
+		fmt.Fprintf(os.Stderr, "toren gpu run: executable %q not found: %v\n", targetBin, err)
 		return exitFail
 	}
 
@@ -250,7 +250,7 @@ func execSubprocess(path string, args []string, env []string) int {
 			}
 			return exitFail
 		}
-		fmt.Fprintf(os.Stderr, "asura gpu run error: %v\n", err)
+		fmt.Fprintf(os.Stderr, "toren gpu run error: %v\n", err)
 		return exitFail
 	}
 	return exitOK

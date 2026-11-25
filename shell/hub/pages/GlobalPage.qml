@@ -80,7 +80,7 @@ Item {
     }
     Process {
         id: shellRestart
-        command: ["sh", "-c", "asura-user-services restart quickshell 2>/dev/null || pkill -HUP asura-shell 2>/dev/null || true"]
+        command: ["sh", "-c", "toren-user-services restart quickshell 2>/dev/null || pkill -HUP toren-shell 2>/dev/null || true"]
     }
     // set-timezone talks to systemd-timedated over D-Bus; the shipped polkit
     // rule authorises it for the active user, so no password prompt.

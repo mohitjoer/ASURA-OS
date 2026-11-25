@@ -17,7 +17,7 @@ import (
 // beyond a raw list of desktop entries: it is a compositor shell, not a
 // software centre, and it will not grow one. So the shell asks the tool that
 // already knows how to read a machine's files, and the answer is the same list
-// `asura apps` prints for a person.
+// `toren apps` prints for a person.
 //
 // The .desktop files are read here rather than by a library, because the
 // format is a handful of keys in two kinds of section and a dependency that
@@ -27,7 +27,7 @@ import (
 // What is listed is what a launcher offers, by the rules of the desktop entry
 // specification: an application, with a name and a command, not Hidden and not
 // NoDisplay, that this desktop is allowed to show (OnlyShowIn and NotShowIn are
-// read against XDG_CURRENT_DESKTOP, which the Asura session sets to Asura)
+// read against XDG_CURRENT_DESKTOP, which the Toren session sets to Toren)
 // and whose TryExec, if it names one, is really installed. The directories are
 // searched in the specification's order, so a user's file shadows a system one,
 // and Flatpak's export directories are searched even when the session's
@@ -91,9 +91,9 @@ type appEnv struct {
 
 // currentAppEnv reads the session's desktop and locale.
 //
-// An unset XDG_CURRENT_DESKTOP is read as Asura rather than as nothing: a
+// An unset XDG_CURRENT_DESKTOP is read as Toren rather than as nothing: a
 // shell started from a terminal, or a test, has no session variable, and a
-// launcher that then hid every OnlyShowIn=Asura application would be wrong in
+// launcher that then hid every OnlyShowIn=Toren application would be wrong in
 // the one place nobody would think to look.
 func currentAppEnv() appEnv {
 	var desktops []string
@@ -103,7 +103,7 @@ func currentAppEnv() appEnv {
 		}
 	}
 	if len(desktops) == 0 {
-		desktops = []string{"Asura"}
+		desktops = []string{"Toren"}
 	}
 	return appEnv{desktops: desktops, locales: desktopLocaleSuffixes(), installed: desktopTryExecInstalled}
 }
@@ -699,13 +699,13 @@ func (r *iconResolver) reference(icon string) string {
 // configApps prints the applications on this machine, as JSON.
 func configApps(args []string) int {
 	if len(args) != 0 {
-		fmt.Fprintln(os.Stderr, "asura apps: takes no arguments")
+		fmt.Fprintln(os.Stderr, "toren apps: takes no arguments")
 		return exitUsage
 	}
 
 	encoded, err := json.MarshalIndent(listApplications(), "", "  ")
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura apps:", err)
+		fmt.Fprintln(os.Stderr, "toren apps:", err)
 		return exitFail
 	}
 	fmt.Println(string(encoded))

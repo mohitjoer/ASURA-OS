@@ -9,11 +9,11 @@ import (
 	"strings"
 	"time"
 
-	"asura/desktop/internal/overlay"
+	"toren/desktop/internal/overlay"
 )
 
-// asuraReset drops user edits or resets the desktop configuration back to ASURA defaults.
-func asuraReset(args []string) int {
+// torenReset drops user edits or resets the desktop configuration back to ASURA defaults.
+func torenReset(args []string) int {
 	set := newFlags("reset", resetUsage)
 	var (
 		root    = set.String("root", "", "operate on a tree under this directory")
@@ -27,14 +27,14 @@ func asuraReset(args []string) int {
 
 	paths, err := overlayPaths(*root)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura reset:", err)
+		fmt.Fprintln(os.Stderr, "toren reset:", err)
 		return exitFail
 	}
 
 	// 1. Restore a previous backup
 	if *restore != "" {
 		if *desktop || len(positional) > 0 {
-			fmt.Fprintln(os.Stderr, "asura reset: --restore cannot be combined with other arguments")
+			fmt.Fprintln(os.Stderr, "toren reset: --restore cannot be combined with other arguments")
 			return exitUsage
 		}
 		return restoreDesktopBackup(*restore, *root, paths)
@@ -43,7 +43,7 @@ func asuraReset(args []string) int {
 	// 2. Reset desktop configuration to defaults
 	if *desktop {
 		if len(positional) > 0 {
-			fmt.Fprintln(os.Stderr, "asura reset: --desktop takes no positional path")
+			fmt.Fprintln(os.Stderr, "toren reset: --desktop takes no positional path")
 			return exitUsage
 		}
 		return resetDesktopConfig(*root, paths)
@@ -51,12 +51,12 @@ func asuraReset(args []string) int {
 
 	// 3. Reset one overlay file back to base
 	if len(positional) != 1 {
-		fmt.Fprintln(os.Stderr, "asura reset: specify a file path, --desktop, or --restore BACKUP")
+		fmt.Fprintln(os.Stderr, "toren reset: specify a file path, --desktop, or --restore BACKUP")
 		return exitUsage
 	}
 
 	if err := overlay.Reset(paths, positional[0]); err != nil {
-		fmt.Fprintln(os.Stderr, "asura reset:", err)
+		fmt.Fprintln(os.Stderr, "toren reset:", err)
 		return exitFail
 	}
 	fmt.Printf("%s is back to the base\n", positional[0])
@@ -81,22 +81,22 @@ func resolveUserHome(root string) string {
 // resetDesktopConfig backs up user desktop configuration and restores packaged defaults.
 func resetDesktopConfig(root string, paths overlay.Paths) int {
 	home := resolveUserHome(root)
-	stateDir := filepath.Join(home, ".local", "state", "asura")
+	stateDir := filepath.Join(home, ".local", "state", "toren")
 	backupsBase := filepath.Join(stateDir, "backups")
 	stamp := time.Now().UTC().Format("20060102-150405")
 	backupDir := filepath.Join(backupsBase, "desktop-"+stamp)
 
 	if err := os.MkdirAll(backupDir, 0o755); err != nil {
-		fmt.Fprintf(os.Stderr, "asura reset: failed to create backup dir: %v\n", err)
+		fmt.Fprintf(os.Stderr, "toren reset: failed to create backup dir: %v\n", err)
 		return exitFail
 	}
 
 	// Managed desktop targets relative to home
 	targets := []string{
 		filepath.Join(".config", "illogical-impulse"),
-		filepath.Join(".config", "asura", "hyprland"),
-		filepath.Join(".config", "asura", "user_edits"),
-		filepath.Join(".local", "state", "asura"),
+		filepath.Join(".config", "toren", "hyprland"),
+		filepath.Join(".config", "toren", "user_edits"),
+		filepath.Join(".local", "state", "toren"),
 		filepath.Join(".local", "state", "quickshell"),
 	}
 
@@ -106,21 +106,21 @@ func resetDesktopConfig(root string, paths overlay.Paths) int {
 			continue
 		}
 		dst := filepath.Join(backupDir, rel)
-		// When backing up ~/.local/state/asura, skip the backups folder itself
+		// When backing up ~/.local/state/toren, skip the backups folder itself
 		skip := ""
-		if rel == filepath.Join(".local", "state", "asura") {
+		if rel == filepath.Join(".local", "state", "toren") {
 			skip = backupsBase
 		}
 		if err := copyTree(src, dst, skip); err != nil {
-			fmt.Fprintf(os.Stderr, "asura reset: failed to backup %s: %v\n", rel, err)
+			fmt.Fprintf(os.Stderr, "toren reset: failed to backup %s: %v\n", rel, err)
 			return exitFail
 		}
 	}
 
 	// Clean out old user desktop settings and state
 	_ = os.RemoveAll(filepath.Join(home, ".config", "illogical-impulse"))
-	_ = os.RemoveAll(filepath.Join(home, ".config", "asura", "hyprland"))
-	_ = os.RemoveAll(filepath.Join(home, ".config", "asura", "user_edits"))
+	_ = os.RemoveAll(filepath.Join(home, ".config", "toren", "hyprland"))
+	_ = os.RemoveAll(filepath.Join(home, ".config", "toren", "user_edits"))
 	_ = os.RemoveAll(filepath.Join(home, ".local", "state", "quickshell"))
 
 	// Clean entries in stateDir preserving the backups directory
@@ -148,7 +148,7 @@ func resetDesktopConfig(root string, paths overlay.Paths) int {
 func restoreDesktopBackup(backupDir, root string, paths overlay.Paths) int {
 	info, err := os.Stat(backupDir)
 	if err != nil || !info.IsDir() {
-		fmt.Fprintf(os.Stderr, "asura reset: backup directory not found: %s\n", backupDir)
+		fmt.Fprintf(os.Stderr, "toren reset: backup directory not found: %s\n", backupDir)
 		return exitFail
 	}
 
@@ -174,7 +174,7 @@ func restoreDesktopBackup(backupDir, root string, paths overlay.Paths) int {
 	})
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "asura reset: restore failed: %v\n", err)
+		fmt.Fprintf(os.Stderr, "toren reset: restore failed: %v\n", err)
 		return exitFail
 	}
 

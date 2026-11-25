@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-// A second `asura-wallpaper` in a terminal must refuse to start while a daemon is
+// A second `toren-wallpaper` in a terminal must refuse to start while a daemon is
 // live on the socket, never steal it: the interloper restores the saved
 // wallpaper over the running one and dies with the terminal, leaving the
 // picker with no daemon at all.
@@ -32,7 +32,7 @@ func TestRunDaemonRefusesWhileLive(t *testing.T) {
 
 // a stale socket left by a dead daemon must not block the rebind.
 func TestDaemonLiveFalseOnStaleSocket(t *testing.T) {
-	sock := filepath.Join(t.TempDir(), "asura-wallpaper.sock")
+	sock := filepath.Join(t.TempDir(), "toren-wallpaper.sock")
 	if err := os.WriteFile(sock, []byte(""), 0o600); err != nil {
 		t.Fatal(err)
 	}

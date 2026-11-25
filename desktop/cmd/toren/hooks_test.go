@@ -13,7 +13,7 @@ func TestRunUserHooks(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
 	t.Setenv("XDG_STATE_HOME", filepath.Join(home, ".local", "state"))
 
-	hookDir := filepath.Join(home, ".config", "asura", "hooks", "post-theme")
+	hookDir := filepath.Join(home, ".config", "toren", "hooks", "post-theme")
 	_ = os.MkdirAll(hookDir, 0o755)
 
 	markerFile := filepath.Join(home, "marker.txt")
@@ -62,17 +62,17 @@ func TestHookCLI(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
 
 	// List with no hooks
-	if code := asuraHook([]string{"list"}); code != exitOK {
-		t.Errorf("asura hook list exited %d", code)
+	if code := torenHook([]string{"list"}); code != exitOK {
+		t.Errorf("toren hook list exited %d", code)
 	}
 
 	// Run with missing event
-	if code := asuraHook([]string{"run"}); code != exitUsage {
-		t.Errorf("asura hook run with no event exited %d", code)
+	if code := torenHook([]string{"run"}); code != exitUsage {
+		t.Errorf("toren hook run with no event exited %d", code)
 	}
 
 	// Run with valid event
-	if code := asuraHook([]string{"run", "post-login"}); code != exitOK {
-		t.Errorf("asura hook run post-login exited %d", code)
+	if code := torenHook([]string{"run", "post-login"}); code != exitOK {
+		t.Errorf("toren hook run post-login exited %d", code)
 	}
 }

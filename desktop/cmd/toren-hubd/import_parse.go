@@ -127,7 +127,7 @@ func parseHyprland(src string) ([]scanItem, hyprScan) {
 }
 
 // parseBind splits `MODS, KEY, DISPATCHER, ARGS` (args may hold commas) and maps
-// the native dispatcher onto the hub Keybind model. killactive is Asura's
+// the native dispatcher onto the hub Keybind model. killactive is Toren's
 // "close"; anything outside the four ingestable dispatchers stays raw.
 func parseBind(val, raw string) importBind {
 	f := splitNCommaTrim(val, 4)
@@ -228,10 +228,10 @@ func splitColonPath(key string) []string {
 }
 
 // hyprConflicts flags every imported chord that clashes: shipped (shadows a
-// Asura bind) takes priority over duplicate (repeats an earlier imported chord),
+// Toren bind) takes priority over duplicate (repeats an earlier imported chord),
 // one row per chord, keyed by the stable norm.
 func hyprConflicts(binds []importBind) []scanConflict {
-	shipped := asuraShipped()
+	shipped := torenShipped()
 	seen := map[string]importBind{}
 	done := map[string]bool{}
 	out := []scanConflict{}
@@ -243,7 +243,7 @@ func hyprConflicts(binds []importBind) []scanConflict {
 		if si, ok := shipped[n]; ok {
 			out = append(out, scanConflict{
 				Combo: b.Combo, Norm: n,
-				Asura: conflictAsura{Action: si.Action, Desc: si.Desc},
+				Toren: conflictToren{Action: si.Action, Desc: si.Desc},
 				Mine:  conflictMine{Raw: b.Raw, Desc: b.Desc},
 				Kind:  "shipped",
 			})
@@ -253,7 +253,7 @@ func hyprConflicts(binds []importBind) []scanConflict {
 		if first, ok := seen[n]; ok {
 			out = append(out, scanConflict{
 				Combo: b.Combo, Norm: n,
-				Asura: conflictAsura{Action: first.Action, Desc: first.Desc},
+				Toren: conflictToren{Action: first.Action, Desc: first.Desc},
 				Mine:  conflictMine{Raw: b.Raw, Desc: b.Desc},
 				Kind:  "duplicate",
 			})

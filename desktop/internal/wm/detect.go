@@ -10,7 +10,7 @@ import (
 // The only place allowed to care which compositor is running. It resolves an
 // identity into a provider name once; every later decision reads Caps.
 
-// Provider names name an executable (asura-wm-<name>) for the providers that
+// Provider names name an executable (toren-wm-<name>) for the providers that
 // are not built in, so they are part of the on-disk contract.
 const ProviderHyprland = "hyprland"
 
@@ -29,7 +29,7 @@ type Detection struct {
 	Source string
 }
 
-// Detect resolves the active provider. Asura is a Hyprland desktop, so the
+// Detect resolves the active provider. Toren is a Hyprland desktop, so the
 // answer is Hyprland unless ASURA_WM names another provider; what varies is
 // only whether the compositor is live, and that is probed rather than assumed.
 //

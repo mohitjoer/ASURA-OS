@@ -4,10 +4,10 @@ import QtQuick.Controls
 import qs.Ui
 import qs.Ui.Singletons
 
-// The harbour rail: asura-vm's one always-present chrome. A framed masthead seal,
+// The harbour rail: toren-vm's one always-present chrome. A framed masthead seal,
 // the fleet nav (Latin name and kanji seal side by side, the live berth taking
 // the sheet's // lead on a bone plate), and a scannable foot plate. The same
-// title-block grammar the Hub rail carries, flying asura-vm's colours.
+// title-block grammar the Hub rail carries, flying toren-vm's colours.
 Item {
     id: rail
 

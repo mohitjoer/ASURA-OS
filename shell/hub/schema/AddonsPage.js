@@ -3,8 +3,8 @@
 // AddonsPage as data. Generated from the page it replaces: the placement rows
 // are what its detail view exposes for an installed plugin, the declared-rows
 // entry records that a plugin's manifest can add its own settings, and the
-// management row names the commands that really run — `asura plugin install`
-// and `asura plugin remove`, which the store's plugins category delegates to.
+// management row names the commands that really run — `toren plugin install`
+// and `toren plugin remove`, which the store's plugins category delegates to.
 // Descriptions are written by hand; the inventory carries engineering notes,
 // which are not user copy.
 
@@ -16,7 +16,7 @@ var rows = [
         "label": "Enabled",
         "desc": "Runs the add-on; off keeps it installed but idle",
         "ctl": "sw",
-        "src": "plugins.json (via `asura-plugins-place <id> enabled <true|false>`)"
+        "src": "plugins.json (via `toren-plugins-place <id> enabled <true|false>`)"
     },
     {
         "tab": "detail",
@@ -25,7 +25,7 @@ var rows = [
         "label": "Show as",
         "desc": "Where it appears: popout, wallpaper tile or bar glyph",
         "ctl": "seg",
-        "src": "plugins.json (via `asura-plugins-place <id> host <hostName>`)",
+        "src": "plugins.json (via `toren-plugins-place <id> host <hostName>`)",
         "opts": [
             "framePopout",
             "desktopWidget",
@@ -40,7 +40,7 @@ var rows = [
         "label": "(plugin-declared, field.label, falling back to field.key)",
         "desc": "Each add-on defines its own; applied live",
         "ctl": "custom",
-        "src": "plugins.json (via `asura-plugins-place <id> settings <json>`, one single-key object per change, jq-merged into the existing settings object)",
+        "src": "plugins.json (via `toren-plugins-place <id> settings <json>`, one single-key object per change, jq-merged into the existing settings object)",
         "unit": "none"
     },
     {
@@ -50,6 +50,6 @@ var rows = [
         "label": "Update / Remove",
         "desc": "Refreshes or removes it; placement stays as set",
         "ctl": "action",
-        "src": "`asura plugin install <repo> --yes` (update) / `asura plugin remove <id>` (remove); `asura-store install|remove plugins <id>` delegates to them"
+        "src": "`toren plugin install <repo> --yes` (update) / `toren plugin remove <id>` (remove); `toren-store install|remove plugins <id>` delegates to them"
     }
 ];

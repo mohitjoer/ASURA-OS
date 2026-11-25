@@ -130,9 +130,9 @@ func TestRunLockRejectsMovedStoreCommands(t *testing.T) {
 	}
 }
 
-// writeLockReceipt drops a minimal Asura Store lockscreen receipt: the fields
+// writeLockReceipt drops a minimal Toren Store lockscreen receipt: the fields
 // receiptLockSlug reads (destination + file destinations), matching the on-disk
-// shape asura-store writes.
+// shape toren-store writes.
 func writeLockReceipt(t *testing.T, receiptsDir, id, destination string, fileDests ...string) {
 	t.Helper()
 	if err := os.MkdirAll(receiptsDir, 0o755); err != nil {
@@ -282,7 +282,7 @@ func TestReceiptLockSlug(t *testing.T) {
 	}{
 		{"tape", "qylock/themes/clockwork-tape", "Main.qml", "clockwork-tape"},
 		{"wrapped", "qylock/themes/wrapped", "content/Main.qml", "wrapped/content"},
-		{"foreign", "asura/rices/foo", "Main.qml", ""},
+		{"foreign", "toren/rices/foo", "Main.qml", ""},
 	}
 	for _, c := range cases {
 		writeLockReceipt(t, receipts, c.id, c.destination, c.mainDest)

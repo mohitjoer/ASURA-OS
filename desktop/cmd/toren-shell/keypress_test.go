@@ -121,7 +121,7 @@ func TestKeyComposerReleasesHeldKeysWhenSourceLeaves(t *testing.T) {
 	}
 }
 
-func TestKeyComposerUsesAsuraModifierOrder(t *testing.T) {
+func TestKeyComposerUsesTorenModifierOrder(t *testing.T) {
 	var c keyComposer
 	c.handle(125, 1, "shortcuts") // Super down.
 	c.handle(42, 1, "shortcuts")  // Shift down.
@@ -640,7 +640,7 @@ func TestStartKeypressRegistersIPC(t *testing.T) {
 // A Hub theme edit must merge into the latest daemon-owned document; replacing
 // the object would silently throw away the placement written by desktop drag.
 func TestKeypressSettingsPatchPreservesPlacement(t *testing.T) {
-	path := filepath.Join(t.TempDir(), "asura", "keypresses.json")
+	path := filepath.Join(t.TempDir(), "toren", "keypresses.json")
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		t.Fatal(err)
 	}

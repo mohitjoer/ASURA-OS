@@ -4,7 +4,7 @@ import qs.services
 import QtQuick
 import QtQuick.Layouts
 
-// ASURA overlay (shell-desktop/asura/vendor.sh OVERLAYS): the battery, at the very
+// ASURA overlay (shell-desktop/toren/vendor.sh OVERLAYS): the battery, at the very
 // end of the bar, in the style of the resources: a drawn battery whose fill is
 // the charge, and the percentage in a fixed-width monospace figure. Charging
 // shows a bolt and the accent colour; low and not charging turns the error

@@ -21,10 +21,10 @@ func stubCatalogue(t *testing.T, catalogue, store string) {
 	t.Setenv("XDG_RUNTIME_DIR", dir)
 	t.Setenv("HYPRLAND_INSTANCE_SIGNATURE", "")
 	if store != "" {
-		if err := os.MkdirAll(filepath.Join(dir, "asura"), 0o755); err != nil {
+		if err := os.MkdirAll(filepath.Join(dir, "toren"), 0o755); err != nil {
 			t.Fatal(err)
 		}
-		if err := os.WriteFile(filepath.Join(dir, "asura", "desktop.json"), []byte(store), 0o644); err != nil {
+		if err := os.WriteFile(filepath.Join(dir, "toren", "desktop.json"), []byte(store), 0o644); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -45,7 +45,7 @@ const testCatalogue = `{
     {"id":"close","category":"windows","label":"Close window","chord":"SUPER + Q","kind":"wm","action":"killactive"},
     {"id":"terminal","category":"apps","label":"Terminal","hint":"Open a terminal","chord":"SUPER + Return","kind":"app","action":"ghostty"},
     {"id":"fullscreen","category":"windows","label":"Fullscreen","chord":"SUPER + F","kind":"wm","action":"fullscreen","argument":"0"},
-    {"id":"volume-up","category":"apps","label":"Volume up","chord":"XF86AudioRaiseVolume","kind":"app","action":"asura-volume"}
+    {"id":"volume-up","category":"apps","label":"Volume up","chord":"XF86AudioRaiseVolume","kind":"app","action":"toren-volume"}
   ]
 }`
 

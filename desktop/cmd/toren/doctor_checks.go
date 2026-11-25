@@ -11,9 +11,9 @@ import (
 	"strconv"
 	"strings"
 
-	"asura/desktop/internal/runner"
-	"asura/hardware/probe"
-	"asura/hardware/quirks"
+	"toren/desktop/internal/runner"
+	"toren/hardware/probe"
+	"toren/hardware/quirks"
 )
 
 // Two checks for faults that say nothing when they happen. A keybind whose
@@ -26,17 +26,17 @@ import (
 // window rule in brackets.
 var configExec = regexp.MustCompile(`(?m)^\s*(?:execr?(?:-once)?\s*=|bind[a-z]*\s*=[^,\n]*,[^,\n]*,\s*exec\s*,)\s*(?:\[[^\]\n]*\]\s*)?(\S+)`)
 
-// asuraCommands names the Asura commands a compositor config runs, by bare
+// torenCommands names the Toren commands a compositor config runs, by bare
 // name. Anything else it runs (ghostty, wpctl) is the base layer's, and a
 // command guarded by `command -v` is already degrading on purpose.
-func asuraCommands(config string) []string {
+func torenCommands(config string) []string {
 	seen := map[string]bool{}
 	for _, match := range configExec.FindAllStringSubmatch(config, -1) {
 		word := match[1]
 		if strings.HasPrefix(word, "/usr/bin/") {
 			word = filepath.Base(word)
 		}
-		if word == "asura" || strings.HasPrefix(word, "asura-") {
+		if word == "toren" || strings.HasPrefix(word, "toren-") {
 			seen[word] = true
 		}
 	}
@@ -48,19 +48,19 @@ func asuraCommands(config string) []string {
 	return names
 }
 
-// reportCommands checks that every Asura command the compositor runs is
+// reportCommands checks that every Toren command the compositor runs is
 // installed where the compositor's PATH finds it. The session's PATH has no
 // ~/.local/bin, so /usr/bin is the only place that counts.
 func reportCommands(root string) int {
 	fmt.Println()
 	fmt.Println("Commands")
-	config, err := installedCompositorConfig(root, "/usr/share/asura/hyprland/hyprland.conf")
+	config, err := installedCompositorConfig(root, "/usr/share/toren/hyprland/hyprland.conf")
 	if err != nil {
 		fmt.Println("  the compositor's configuration is not installed; nothing to check")
 		return exitOK
 	}
 
-	names := asuraCommands(config)
+	names := torenCommands(config)
 	problems := 0
 	for _, name := range names {
 		info, err := os.Stat(filepath.Join(root, "/usr/bin", name))
@@ -76,11 +76,11 @@ func reportCommands(root string) int {
 	if problems > 0 {
 		return exitFail
 	}
-	fmt.Printf("  all %d asura command(s) the compositor runs are installed\n", len(names))
+	fmt.Printf("  all %d toren command(s) the compositor runs are installed\n", len(names))
 	return exitOK
 }
 
-// recommendedAbsent returns the recommended packages of the asura packages
+// recommendedAbsent returns the recommended packages of the toren packages
 // that are not installed on Void Linux via xbps-query.
 func recommendedAbsent(run runner.Func) ([]string, int, error) {
 	out, err := run("xbps-query", "-l")
@@ -149,7 +149,7 @@ func recommendedAbsent(run runner.Func) ([]string, int, error) {
 	return absent, len(recommended), nil
 }
 
-// reportDeps lists what the asura desktop recommends and this machine lacks.
+// reportDeps lists what the toren desktop recommends and this machine lacks.
 func reportDeps(root string, run runner.Func) int {
 	fmt.Println()
 	fmt.Println("Dependencies (XBPS)")
@@ -175,9 +175,9 @@ func reportDeps(root string, run runner.Func) int {
 func reportVoidRepo(root string) int {
 	fmt.Println()
 	fmt.Println("Repository (XBPS)")
-	path := filepath.Join(root, "/etc/xbps.d/asura.conf")
+	path := filepath.Join(root, "/etc/xbps.d/toren.conf")
 	if _, err := os.Stat(path); err != nil {
-		path = filepath.Join(root, "/usr/share/xbps.d/asura.conf")
+		path = filepath.Join(root, "/usr/share/xbps.d/toren.conf")
 	}
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -196,7 +196,7 @@ func reportVoidRepo(root string) int {
 func reportRunitServices(root string) int {
 	fmt.Println()
 	fmt.Println("User Services (runit)")
-	svcDir := filepath.Join(root, "/usr/share/asura/runit/services")
+	svcDir := filepath.Join(root, "/usr/share/toren/runit/services")
 	entries, err := os.ReadDir(svcDir)
 	if err != nil {
 		svcDir = filepath.Join(root, "system/runit/user-services")
@@ -369,7 +369,7 @@ func reportUserAudioServices(root string, fix bool) int {
 	audioServices := []string{"pipewire", "wireplumber"}
 	problems := 0
 
-	userSvcDir := filepath.Join(root, "/usr/share/asura/runit/services")
+	userSvcDir := filepath.Join(root, "/usr/share/toren/runit/services")
 	for _, svc := range audioServices {
 		present := false
 		if root == "" {
@@ -607,7 +607,7 @@ func reportHardwarePower(root string, fix bool) int {
 }
 
 // reportDesktopShell checks the desktop shell the session will start: which
-// one org.asura.shell desktop-shell picks, that its tree is installed, and,
+// one org.toren.shell desktop-shell picks, that its tree is installed, and,
 // for the desktop, what its look depends on (matugen, a generated palette, the
 // compositor look) and whether it is crashing in a loop.
 func reportDesktopShell(root string, run runner.Func) int {
@@ -617,21 +617,21 @@ func reportDesktopShell(root string, run runner.Func) int {
 
 	choice := os.Getenv("ASURA_DESKTOP_SHELL")
 	if choice == "" && root == "" {
-		if out, err := run("gsettings", "get", "org.asura.shell", "desktop-shell"); err == nil {
+		if out, err := run("gsettings", "get", "org.toren.shell", "desktop-shell"); err == nil {
 			choice = strings.Trim(strings.TrimSpace(out), "'")
 		}
 	}
 	if choice == "" {
 		choice = "desktop"
 	}
-	dir := "/usr/share/asura/shell"
+	dir := "/usr/share/toren/shell"
 	if choice == "desktop" {
-		dir = "/usr/share/asura/shell-desktop"
+		dir = "/usr/share/toren/shell-desktop"
 	}
-	fmt.Printf("  %-18s %s (org.asura.shell desktop-shell)\n", "chosen", choice)
+	fmt.Printf("  %-18s %s (org.toren.shell desktop-shell)\n", "chosen", choice)
 	if _, err := os.Stat(filepath.Join(root, dir, "shell.qml")); err != nil {
 		problems++
-		fmt.Printf("  %-18s %s/shell.qml is missing; the desktop cannot start (asura update --force)\n", "installed", dir)
+		fmt.Printf("  %-18s %s/shell.qml is missing; the desktop cannot start (toren update --force)\n", "installed", dir)
 	} else {
 		fmt.Printf("  %-18s %s\n", "installed", dir)
 	}
@@ -642,10 +642,10 @@ func reportDesktopShell(root string, run runner.Func) int {
 		return exitOK
 	}
 
-	for _, f := range []string{"asura/AsuraBridge.qml", "asura/first-run.sh", "asura/hyprland.conf", "matugen/config.toml"} {
+	for _, f := range []string{"toren/TorenBridge.qml", "toren/first-run.sh", "toren/hyprland.conf", "matugen/config.toml"} {
 		if _, err := os.Stat(filepath.Join(root, dir, f)); err != nil {
 			problems++
-			fmt.Printf("  %-18s %s/%s is missing (asura update reinstalls it)\n", "ASURA bridge", dir, f)
+			fmt.Printf("  %-18s %s/%s is missing (toren update reinstalls it)\n", "ASURA bridge", dir, f)
 		}
 	}
 	if _, err := exec.LookPath("matugen"); err != nil && root == "" {
@@ -671,18 +671,18 @@ func reportDesktopShell(root string, run runner.Func) int {
 	} else {
 		fmt.Printf("  %-18s generated from the wallpaper\n", "palette")
 	}
-	look, _ := os.ReadFile(filepath.Join(home, ".config", "asura", "hyprland", "shell.conf"))
+	look, _ := os.ReadFile(filepath.Join(home, ".config", "toren", "hyprland", "shell.conf"))
 	if strings.Contains(string(look), "shell-desktop") {
 		fmt.Printf("  %-18s desktop compositor look is loaded\n", "compositor look")
 	} else {
-		fmt.Printf("  %-18s not loaded yet (asura refresh, or log in again)\n", "compositor look")
+		fmt.Printf("  %-18s not loaded yet (toren refresh, or log in again)\n", "compositor look")
 	}
-	if b, err := os.ReadFile(filepath.Join(state, "asura", "desktop-quick-exits")); err == nil {
+	if b, err := os.ReadFile(filepath.Join(state, "toren", "desktop-quick-exits")); err == nil {
 		if n, _ := strconv.Atoi(strings.TrimSpace(string(b))); n >= 3 {
 			problems++
 			fmt.Printf("  %-18s desktop keeps exiting and restarting; see %s\n", "crash loop",
-				filepath.Join(state, "asura", "quickshell.log"))
-			fmt.Printf("  %-18s after fixing it: rm %s/asura/desktop-*; sv restart ~/.config/service/quickshell\n", "", state)
+				filepath.Join(state, "toren", "quickshell.log"))
+			fmt.Printf("  %-18s after fixing it: rm %s/toren/desktop-*; sv restart ~/.config/service/quickshell\n", "", state)
 		}
 	}
 	if problems > 0 {
@@ -708,9 +708,9 @@ func reportMigrationState(root string) int {
 		case len(failed) > 0:
 			code = exitFail
 			fmt.Printf("  %-8s %d FAILED (%s); see %s\n", kind, len(failed), strings.Join(failed, ", "), migrationLog(kind))
-			fmt.Printf("  %-8s asura update (or asura migrate) runs them again\n", "")
+			fmt.Printf("  %-8s toren update (or toren migrate) runs them again\n", "")
 		case pending > 0:
-			fmt.Printf("  %-8s %d pending; the next asura update runs them\n", kind, pending)
+			fmt.Printf("  %-8s %d pending; the next toren update runs them\n", kind, pending)
 		default:
 			fmt.Printf("  %-8s all done\n", kind)
 		}
@@ -758,7 +758,7 @@ func reportFingerprint(root string) int {
 
 	if pamConfigured && !fprintdAvailable {
 		fmt.Println("  problem           PAM has fingerprint auth enabled, but fprintd/pam_fprintd.so is MISSING")
-		fmt.Println("  fix               run 'asura disable fingerprint' to restore PAM, or 'xbps-install -Sy fprintd'")
+		fmt.Println("  fix               run 'toren disable fingerprint' to restore PAM, or 'xbps-install -Sy fprintd'")
 		return exitFail
 	}
 
@@ -813,7 +813,7 @@ func reportHardwareQuirks(root string) int {
 	if len(matchedLayers) == 0 {
 		if len(staleLayers) > 0 {
 			fmt.Printf("  applied           %s (no longer matches current hardware)\n", strings.Join(staleLayers, ", "))
-			fmt.Println("  fix               run 'asura hardware quirks remove' to clean stale configuration")
+			fmt.Println("  fix               run 'toren hardware quirks remove' to clean stale configuration")
 		} else {
 			fmt.Println("  model             no specific hardware quirks matched (standard profile in use)")
 		}
@@ -833,12 +833,12 @@ func reportHardwareQuirks(root string) int {
 
 	if len(staleLayers) > 0 {
 		fmt.Printf("  stale applied     %s (no longer matches current hardware)\n", strings.Join(staleLayers, ", "))
-		fmt.Println("  fix               run 'asura hardware quirks remove' or 'asura hardware quirks apply' to re-sync")
+		fmt.Println("  fix               run 'toren hardware quirks remove' or 'toren hardware quirks apply' to re-sync")
 	} else if allMatchedApplied {
 		fmt.Println("  status            applied and active")
 	} else {
 		fmt.Println("  status            available (unapplied layers detected)")
-		fmt.Println("  fix               run 'asura hardware quirks apply' to apply all matched hardware layers")
+		fmt.Println("  fix               run 'toren hardware quirks apply' to apply all matched hardware layers")
 	}
 
 	return exitOK
@@ -846,7 +846,7 @@ func reportHardwareQuirks(root string) int {
 
 // reportAdoption reports whether this machine is an adopted Void Linux installation.
 func reportAdoption(root string) int {
-	statePath := filepath.Join(root, "etc", "asura", "adopt", "state.json")
+	statePath := filepath.Join(root, "etc", "toren", "adopt", "state.json")
 	data, err := os.ReadFile(statePath)
 	if err != nil {
 		return exitOK

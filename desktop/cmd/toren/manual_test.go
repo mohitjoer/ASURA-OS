@@ -34,16 +34,16 @@ func TestManualShowsAChapterByNameOrNumber(t *testing.T) {
 	manualDir = "../../../docs/manual"
 	var shown string
 	manualPager = func(text string) error { shown = text; return nil }
-	if code := asuraManual([]string{"updates"}); code != exitOK || !strings.HasPrefix(shown, "# Updates") {
+	if code := torenManual([]string{"updates"}); code != exitOK || !strings.HasPrefix(shown, "# Updates") {
 		t.Fatalf("by name: %d %.30q", code, shown)
 	}
-	if code := asuraManual([]string{"4"}); code != exitOK || !strings.HasPrefix(shown, "# Updates") {
+	if code := torenManual([]string{"4"}); code != exitOK || !strings.HasPrefix(shown, "# Updates") {
 		t.Fatalf("by number: %d %.30q", code, shown)
 	}
-	if code := asuraManual([]string{"--all"}); code != exitOK || !strings.Contains(shown, "# When something goes wrong") {
+	if code := torenManual([]string{"--all"}); code != exitOK || !strings.Contains(shown, "# When something goes wrong") {
 		t.Fatal("--all lacks the last chapter")
 	}
-	if code := asuraManual([]string{"nonsense"}); code != exitUsage {
+	if code := torenManual([]string{"nonsense"}); code != exitUsage {
 		t.Fatalf("unknown: %d", code)
 	}
 }

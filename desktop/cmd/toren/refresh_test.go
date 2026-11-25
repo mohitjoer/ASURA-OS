@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"asura/desktop/internal/runner/runnertest"
+	"toren/desktop/internal/runner/runnertest"
 )
 
 // The update's last step: services re-synced without touching runit's state or
@@ -34,8 +34,8 @@ func TestRefresh(t *testing.T) {
 	}
 	write(filepath.Join(src, "quickshell", "run"), "new run\n", 0o755)
 	write(filepath.Join(src, "quickshell", "log", "run"), "new log\n", 0o755)
-	write(filepath.Join(src, "asurad", "run"), "daemon\n", 0o755)
-	write(filepath.Join(src, "asurad", "down"), "", 0o644)
+	write(filepath.Join(src, "torend", "run"), "daemon\n", 0o755)
+	write(filepath.Join(src, "torend", "down"), "", 0o644)
 
 	svc := filepath.Join(home, ".config", "service")
 	write(filepath.Join(svc, "quickshell", "run"), "old run\n", 0o755)
@@ -52,14 +52,14 @@ func TestRefresh(t *testing.T) {
 		Out("env HYPRLAND_INSTANCE_SIGNATURE=sig1 hyprctl reload", "ok").
 		Fail(shellRestart, runnertest.Exit(1, "timeout: run: quickshell\n")).
 		Out("pkill -x quickshell", "").
-		Out("sv status "+filepath.Join(svc, "asurad"), "run: asurad\n").
-		Out("sv restart "+filepath.Join(svc, "asurad"), "")
+		Out("sv status "+filepath.Join(svc, "torend"), "run: torend\n").
+		Out("sv restart "+filepath.Join(svc, "torend"), "")
 
 	var out, errOut bytes.Buffer
 	if code := refreshMain(&out, &errOut, fake.Run); code != exitOK {
 		t.Fatalf("exit %d; stderr %q; stdout %q", code, errOut.String(), out.String())
 	}
-	for _, w := range []string{"services:   2 synced", "compositor: reloaded", "shell:      restarted", "daemons:    restarted asurad"} {
+	for _, w := range []string{"services:   2 synced", "compositor: reloaded", "shell:      restarted", "daemons:    restarted torend"} {
 		if !strings.Contains(out.String(), w) {
 			t.Errorf("stdout lacks %q:\n%s", w, out.String())
 		}
@@ -70,20 +70,20 @@ func TestRefresh(t *testing.T) {
 	if b, _ := os.ReadFile(filepath.Join(svc, "quickshell", "supervise", "stat")); string(b) != "run\n" {
 		t.Errorf("runit state was touched: %q", b)
 	}
-	if _, err := os.Stat(filepath.Join(svc, "asurad", "down")); err == nil {
+	if _, err := os.Stat(filepath.Join(svc, "torend", "down")); err == nil {
 		t.Error("an installed `down` was copied over the user's choice")
 	}
-	b, _ := os.ReadFile(filepath.Join(home, ".config", "asura", "hyprland", "shell.conf"))
+	b, _ := os.ReadFile(filepath.Join(home, ".config", "toren", "hyprland", "shell.conf"))
 	if !strings.Contains(string(b), "source = "+look) {
 		t.Errorf("shell.conf does not source the desktop look: %q", b)
 	}
 
 	// ASURA's own shell: the look file is empty of sources.
-	t.Setenv("ASURA_DESKTOP_SHELL", "asura")
+	t.Setenv("ASURA_DESKTOP_SHELL", "toren")
 	if err := writeShellLook(runnertest.New().Run); err != nil {
 		t.Fatal(err)
 	}
-	b, _ = os.ReadFile(filepath.Join(home, ".config", "asura", "hyprland", "shell.conf"))
+	b, _ = os.ReadFile(filepath.Join(home, ".config", "toren", "hyprland", "shell.conf"))
 	if strings.Contains(string(b), "source") {
 		t.Errorf("ASURA's shell got the desktop look: %q", b)
 	}

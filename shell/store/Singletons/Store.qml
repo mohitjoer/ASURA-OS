@@ -55,7 +55,7 @@ Singleton {
         error = "";
         _catalogOutput = "";
         _catalogError = "";
-        catalogProc.command = force ? ["asura-store", "catalog", "--refresh"] : ["asura-store", "catalog"];
+        catalogProc.command = force ? ["toren-store", "catalog", "--refresh"] : ["toren-store", "catalog"];
         catalogProc.running = true;
     }
 
@@ -104,7 +104,7 @@ Singleton {
         installError = "";
         installErrorKey = "";
         _installError = "";
-        installProc.command = ["asura-store", "install", String(item.category), String(item.id)];
+        installProc.command = ["toren-store", "install", String(item.category), String(item.id)];
         installProc.running = true;
     }
 
@@ -120,7 +120,7 @@ Singleton {
         installProc.running = false;
     }
 
-    // One {"stage","percent"} line per step from `asura-store install|remove`.
+    // One {"stage","percent"} line per step from `toren-store install|remove`.
     function _progress(line) {
         try {
             const step = JSON.parse(line);
@@ -144,7 +144,7 @@ Singleton {
         installError = "";
         installErrorKey = "";
         _installError = "";
-        installProc.command = ["asura-store", "remove", String(item.category), String(item.id)];
+        installProc.command = ["toren-store", "remove", String(item.category), String(item.id)];
         installProc.running = true;
     }
 
@@ -184,7 +184,7 @@ Singleton {
     function openSettings(item) {
         if (!item)
             return;
-        Quickshell.execDetached(["asura-store", "settings", String(item.category), String(item.id)]);
+        Quickshell.execDetached(["toren-store", "settings", String(item.category), String(item.id)]);
     }
 
     Component.onCompleted: {
@@ -273,7 +273,7 @@ Singleton {
         interval: 350
         onTriggered: {
             root._searchOutput = "";
-            searchProc.command = ["asura-store", "search", root._searchQuery];
+            searchProc.command = ["toren-store", "search", root._searchQuery];
             searchProc.running = true;
         }
     }
@@ -294,7 +294,7 @@ Singleton {
 
     Process {
         id: checkProc
-        command: ["asura-store", "check"]
+        command: ["toren-store", "check"]
         stdout: StdioCollector { onStreamFinished: root._checkOutput = text }
         onExited: code => {
             if (code !== 0)

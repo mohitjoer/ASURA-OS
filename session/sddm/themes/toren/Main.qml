@@ -20,21 +20,21 @@ Rectangle {
     property string message: ""
     property bool failed: false
 
-    // SDDM lists sessions alphabetically. Asura goes first and is preselected,
+    // SDDM lists sessions alphabetically. Toren goes first and is preselected,
     // so the greeter never makes the user hunt for the desktop they installed.
     function rebuild() {
-        var asura = []
+        var toren = []
         var rest = []
         for (var i = 0; i < probe.count; ++i) {
             var s = probe.itemAt(i)
             if (!s)
                 continue
-            if (/(^|\/)asura\.desktop$/.test(s.file))
-                asura.push({ row: i, name: s.name })
+            if (/(^|\/)toren\.desktop$/.test(s.file))
+                toren.push({ row: i, name: s.name })
             else
                 rest.push({ row: i, name: s.name })
         }
-        sessions = asura.concat(rest)
+        sessions = toren.concat(rest)
         sessionPos = 0
     }
 
@@ -87,7 +87,7 @@ Rectangle {
 
     Image {
         anchors.fill: parent
-        source: "file:///usr/share/asura/backgrounds/eva-berserk.jpg"
+        source: "file:///usr/share/toren/backgrounds/eva-berserk.jpg"
         fillMode: Image.Stretch
         asynchronous: true
     }

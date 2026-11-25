@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"asura/desktop/internal/runner"
+	"toren/desktop/internal/runner"
 )
 
-const holdUsage = `Usage: asura hold [package...]
+const holdUsage = `Usage: toren hold [package...]
 
 Hold packages back from updates, or list packages currently held.
 
@@ -19,21 +19,21 @@ xbps-install will not upgrade it during system updates.
 When called with no arguments, lists all packages currently on hold.
 `
 
-const unholdUsage = `Usage: asura unhold <package...>
+const unholdUsage = `Usage: toren unhold <package...>
 
 Release held packages so system updates can upgrade them.
 `
 
 func init() {
-	register("hold", "hold packages back from updates, or list held packages", asuraHold)
-	register("unhold", "release held packages so updates can upgrade them", asuraUnhold)
+	register("hold", "hold packages back from updates, or list held packages", torenHold)
+	register("unhold", "release held packages so updates can upgrade them", torenUnhold)
 }
 
-func asuraHold(args []string) int {
+func torenHold(args []string) int {
 	return holdMain(args, os.Stdout, os.Stderr, runner.Exec(30*time.Minute))
 }
 
-func asuraUnhold(args []string) int {
+func torenUnhold(args []string) int {
 	return unholdMain(args, os.Stdout, os.Stderr, runner.Exec(30*time.Minute))
 }
 
@@ -49,7 +49,7 @@ func holdMain(args []string, out, errOut io.Writer, run runner.Func) int {
 		argv := []string{"xbps-query", "-H"}
 		outText, err := run(argv[0], argv[1:]...)
 		if err != nil {
-			fmt.Fprintf(errOut, "asura hold: %v\n", err)
+			fmt.Fprintf(errOut, "toren hold: %v\n", err)
 			return exitFail
 		}
 		trimmed := strings.TrimSpace(outText)
@@ -68,7 +68,7 @@ func holdMain(args []string, out, errOut io.Writer, run runner.Func) int {
 		if strings.TrimSpace(outText) != "" {
 			fmt.Fprintln(errOut, strings.TrimSpace(outText))
 		}
-		fmt.Fprintf(errOut, "asura hold: %v\n", err)
+		fmt.Fprintf(errOut, "toren hold: %v\n", err)
 		return exitFail
 	}
 	if strings.TrimSpace(outText) != "" {
@@ -98,7 +98,7 @@ func unholdMain(args []string, out, errOut io.Writer, run runner.Func) int {
 		if strings.TrimSpace(outText) != "" {
 			fmt.Fprintln(errOut, strings.TrimSpace(outText))
 		}
-		fmt.Fprintf(errOut, "asura unhold: %v\n", err)
+		fmt.Fprintf(errOut, "toren unhold: %v\n", err)
 		return exitFail
 	}
 	if strings.TrimSpace(outText) != "" {

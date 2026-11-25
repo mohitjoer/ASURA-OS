@@ -14,11 +14,11 @@ func TestXbpsChannel(t *testing.T) {
 		want    string
 		wantErr string
 	}{
-		{"channel key", "channel=stable\nrepository=https://repo.asuraos.dev/current\n", "stable", ""},
-		{"repository key", "repository=https://repo.asuraos.dev/current\n", "https://repo.asuraos.dev/current", ""},
-		{"comment and spacing", "# Asura OS\n  repository = https://repo.asuraos.dev/testing  \n", "https://repo.asuraos.dev/testing", ""},
+		{"channel key", "channel=stable\nrepository=https://repo.torenos.dev/current\n", "stable", ""},
+		{"repository key", "repository=https://repo.torenos.dev/current\n", "https://repo.torenos.dev/current", ""},
+		{"comment and spacing", "# Toren OS\n  repository = https://repo.torenos.dev/testing  \n", "https://repo.torenos.dev/testing", ""},
 		{"empty file", "# Only comments\n\n", "", "names no channel or repository"},
-		{"not configured", "", "", "no Asura repository is configured"},
+		{"not configured", "", "", "no Toren repository is configured"},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
@@ -48,10 +48,10 @@ func TestXbpsChannel(t *testing.T) {
 
 // `set` is not built; it must say so rather than succeed.
 func TestChannelOnlyHasGet(t *testing.T) {
-	if code := asuraChannel([]string{"set", "testing"}); code != exitUsage {
-		t.Errorf("asura channel set exits %d, want %d", code, exitUsage)
+	if code := torenChannel([]string{"set", "testing"}); code != exitUsage {
+		t.Errorf("toren channel set exits %d, want %d", code, exitUsage)
 	}
-	if code := asuraChannel(nil); code != exitUsage {
-		t.Errorf("asura channel with no verb exits %d, want %d", code, exitUsage)
+	if code := torenChannel(nil); code != exitUsage {
+		t.Errorf("toren channel with no verb exits %d, want %d", code, exitUsage)
 	}
 }

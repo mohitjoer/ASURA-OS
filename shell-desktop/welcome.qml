@@ -920,7 +920,7 @@ ApplicationWindow {
                                     titleText: "Chromium"
                                     badgeText: Translation.tr("Browser")
                                     descText: Translation.tr("GPU-accelerated Wayland web browser")
-                                    command: ["asura-app", "browser"]
+                                    command: ["toren-app", "browser"]
                                 }
 
                                 AppToolCard {
@@ -928,7 +928,7 @@ ApplicationWindow {
                                     titleText: "Ghostty"
                                     badgeText: Translation.tr("Terminal")
                                     descText: Translation.tr("Fast, GPU-accelerated modern terminal")
-                                    command: ["asura-app", "terminal"]
+                                    command: ["toren-app", "terminal"]
                                 }
 
                                 AppToolCard {
@@ -936,7 +936,7 @@ ApplicationWindow {
                                     titleText: "Neovim"
                                     badgeText: Translation.tr("Editor")
                                     descText: Translation.tr("Extensible modal terminal code editor")
-                                    command: ["asura-app", "editor"]
+                                    command: ["toren-app", "editor"]
                                 }
 
                                 AppToolCard {
@@ -944,7 +944,7 @@ ApplicationWindow {
                                     titleText: "Thunar"
                                     badgeText: Translation.tr("Files")
                                     descText: Translation.tr("Lightweight file manager with archive plugins")
-                                    command: ["asura-app", "files"]
+                                    command: ["toren-app", "files"]
                                 }
 
                                 AppToolCard {
@@ -952,7 +952,7 @@ ApplicationWindow {
                                     titleText: "Toren Store"
                                     badgeText: Translation.tr("Store")
                                     descText: Translation.tr("Package manager, components & shell extensions")
-                                    command: ["asura-store"]
+                                    command: ["toren-store"]
                                 }
 
                                 AppToolCard {
@@ -960,7 +960,7 @@ ApplicationWindow {
                                     titleText: "Toren Settings"
                                     badgeText: Translation.tr("Control")
                                     descText: Translation.tr("System preferences, displays, audio & keybinds")
-                                    command: ["asura-shell", "hub", "open"]
+                                    command: ["toren-shell", "hub", "open"]
                                 }
 
                                 Item { Layout.fillHeight: true }
@@ -992,7 +992,7 @@ ApplicationWindow {
                                     titleText: "Neovim"
                                     badgeText: Translation.tr("CLI Editor")
                                     descText: Translation.tr("Modal terminal editor with extensible LSP plugins")
-                                    command: ["asura-app", "terminal", "--", "nvim"]
+                                    command: ["toren-app", "terminal", "--", "nvim"]
                                 }
 
                                 AppToolCard {
@@ -1000,7 +1000,7 @@ ApplicationWindow {
                                     titleText: "btop"
                                     badgeText: Translation.tr("Monitor")
                                     descText: Translation.tr("Modern resource monitor for CPU, GPU, RAM & nets")
-                                    command: ["asura-app", "terminal", "--", "btop"]
+                                    command: ["toren-app", "terminal", "--", "btop"]
                                 }
 
                                 AppToolCard {
@@ -1008,7 +1008,7 @@ ApplicationWindow {
                                     titleText: "Mise"
                                     badgeText: Translation.tr("Runtimes")
                                     descText: Translation.tr("Polyglot toolchain manager (Node, Python, Go, Rust)")
-                                    command: ["asura-app", "terminal", "--", "mise"]
+                                    command: ["toren-app", "terminal", "--", "mise"]
                                 }
 
                                 AppToolCard {
@@ -1016,7 +1016,7 @@ ApplicationWindow {
                                     titleText: "Docker & Podman"
                                     badgeText: Translation.tr("Containers")
                                     descText: Translation.tr("OCI container engines & Docker Compose included")
-                                    command: ["asura-app", "terminal", "--", "podman", "version"]
+                                    command: ["toren-app", "terminal", "--", "podman", "version"]
                                 }
 
                                 AppToolCard {
@@ -1024,7 +1024,7 @@ ApplicationWindow {
                                     titleText: "Zsh + Starship"
                                     badgeText: Translation.tr("Shell")
                                     descText: Translation.tr("Fast prompt with syntax highlighting & autosuggest")
-                                    command: ["asura-app", "terminal"]
+                                    command: ["toren-app", "terminal"]
                                 }
 
                                 AppToolCard {
@@ -1032,7 +1032,7 @@ ApplicationWindow {
                                     titleText: "Fastfetch & Atuin"
                                     badgeText: Translation.tr("CLI Tools")
                                     descText: Translation.tr("System specs overview and shell history search")
-                                    command: ["asura-app", "terminal", "--", "fastfetch"]
+                                    command: ["toren-app", "terminal", "--", "fastfetch"]
                                 }
 
                                 Item { Layout.fillHeight: true }
@@ -1089,56 +1089,56 @@ ApplicationWindow {
                                 comboText: "Super + Space"
                                 titleText: Translation.tr("App Launcher")
                                 descText: Translation.tr("Search apps and commands")
-                                command: ["asura-shell", "launcher"]
+                                command: ["toren-shell", "launcher"]
                             }
 
                             ShortcutCard {
                                 comboText: "Super + Enter"
                                 titleText: Translation.tr("Terminal")
                                 descText: Translation.tr("Ghostty shell window")
-                                command: ["asura-app", "terminal"]
+                                command: ["toren-app", "terminal"]
                             }
 
                             ShortcutCard {
                                 comboText: "Super + B"
                                 titleText: Translation.tr("Browser")
                                 descText: Translation.tr("Default Chromium web browser")
-                                command: ["asura-app", "browser"]
+                                command: ["toren-app", "browser"]
                             }
 
                             ShortcutCard {
                                 comboText: "Super + I"
                                 titleText: Translation.tr("Toren Settings")
                                 descText: Translation.tr("System preferences & devices")
-                                command: ["asura-shell", "hub", "open"]
+                                command: ["toren-shell", "hub", "open"]
                             }
 
                             ShortcutCard {
                                 comboText: "Ctrl+Shift+Esc"
                                 titleText: Translation.tr("System Monitor")
                                 descText: Translation.tr("btop task manager")
-                                command: ["asura-app", "terminal", "--", "btop"]
+                                command: ["toren-app", "terminal", "--", "btop"]
                             }
 
                             ShortcutCard {
                                 comboText: "Super + Esc"
                                 titleText: Translation.tr("Quick Controls")
                                 descText: Translation.tr("Audio, network, power menu")
-                                command: ["asura-shell", "quicksettings"]
+                                command: ["toren-shell", "quicksettings"]
                             }
 
                             ShortcutCard {
                                 comboText: "Super+Shift+S"
                                 titleText: Translation.tr("Screen Snip")
                                 descText: Translation.tr("Area screenshot to clipboard")
-                                command: ["asura-cmd-snip"]
+                                command: ["toren-cmd-snip"]
                             }
 
                             ShortcutCard {
                                 comboText: "Super + L"
                                 titleText: Translation.tr("Lock Session")
                                 descText: Translation.tr("Lock the Wayland display")
-                                command: ["asura-shell", "lock"]
+                                command: ["toren-shell", "lock"]
                             }
                         }
                     }
@@ -1214,13 +1214,13 @@ ApplicationWindow {
                                 RippleButtonWithIcon {
                                     materialIcon: "settings"
                                     mainText: Translation.tr("Open Settings")
-                                    onClicked: root.runCmd(["asura-shell", "hub", "open"])
+                                    onClicked: root.runCmd(["toren-shell", "hub", "open"])
                                 }
 
                                 RippleButtonWithIcon {
                                     materialIcon: "terminal"
                                     mainText: Translation.tr("Open Terminal")
-                                    onClicked: root.runCmd(["asura-app", "terminal"])
+                                    onClicked: root.runCmd(["toren-app", "terminal"])
                                 }
 
                                 RippleButtonWithIcon {

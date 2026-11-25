@@ -5,7 +5,7 @@ import "testing"
 // TestParseFlagsAcceptsFlagsAfterPositionals pins a bug this tool actually had.
 //
 // The standard flag package stops at the first non-flag argument, so
-// "asura reset ghostty/config --root DIR" dropped the --root flag entirely and
+// "toren reset ghostty/config --root DIR" dropped the --root flag entirely and
 // the command reported "needs exactly one path" while the flag it printed was
 // silently the default. A person typing a command by hand hits that every time.
 func TestParseFlagsAcceptsFlagsAfterPositionals(t *testing.T) {

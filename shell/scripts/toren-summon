@@ -3,11 +3,11 @@
 # it if it isn't running yet. Single-instance apps (flock + quickshell) otherwise
 # strand their window on whatever workspace they first opened on, so re-pressing
 # the keybind from another workspace appears to do nothing.
-#   asura-summon <window-title> <launch command...>
+#   toren-summon <window-title> <launch command...>
 #
 # The raise path matches by title: every Quickshell window shares one app id
 # (org.quickshell), so a title is the only thing that tells them apart. Hyprland
-# is asked directly, since it is the only compositor Asura runs on. A window
+# is asked directly, since it is the only compositor Toren runs on. A window
 # that matches is always focused, so a partial raise never falls through to the
 # launch and opens a duplicate; when nothing matches (or hyprctl or jq is not
 # there to ask) the launch command runs instead, and the flock in that command
@@ -15,7 +15,7 @@
 set -uo pipefail
 
 title="${1:?window title required}"; shift
-[ "$#" -gt 0 ] || { echo "asura-summon: launch command required" >&2; exit 2; }
+[ "$#" -gt 0 ] || { echo "toren-summon: launch command required" >&2; exit 2; }
 
 summon() {
 	local clients addr ws

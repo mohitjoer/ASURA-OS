@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"asura/desktop/internal/settings"
+	"toren/desktop/internal/settings"
 )
 
 // TestCamelCaseKeepsTheFirstWord pins the naming the shell reads settings by.
@@ -116,9 +116,9 @@ func TestConfigValuesIsJSONTheShellCanRead(t *testing.T) {
 		t.Fatalf("the output is not JSON: %v\n%s", err, out)
 	}
 
-	shell, ok := values["org.asura.shell"]
+	shell, ok := values["org.toren.shell"]
 	if !ok {
-		t.Fatalf("no org.asura.shell in the output: %v", values)
+		t.Fatalf("no org.toren.shell in the output: %v", values)
 	}
 
 	// A number, because the shell compares an edge against a number.
@@ -136,8 +136,8 @@ func TestConfigValuesIsJSONTheShellCanRead(t *testing.T) {
 
 	// The desktop's schema too: the colour scheme lives there, and a shell
 	// that could not read it would be a shell with no dark mode.
-	if _, ok := values["org.asura.desktop"]["colorScheme"]; !ok {
-		t.Errorf("no colorScheme in org.asura.desktop: %v", values["org.asura.desktop"])
+	if _, ok := values["org.toren.desktop"]["colorScheme"]; !ok {
+		t.Errorf("no colorScheme in org.toren.desktop: %v", values["org.toren.desktop"])
 	}
 }
 
@@ -159,7 +159,7 @@ func TestConfigSetAcceptsAnEnumByItsNumber(t *testing.T) {
 		t.Fatalf("loading the schemas: %v", err)
 	}
 
-	ref := settings.Ref{Schema: "org.asura.desktop", Key: "color-scheme"}
+	ref := settings.Ref{Schema: "org.toren.desktop", Key: "color-scheme"}
 	key, schema, err := catalogue.Lookup(ref)
 	if err != nil {
 		t.Fatalf("looking the key up: %v", err)

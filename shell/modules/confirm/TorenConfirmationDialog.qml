@@ -6,7 +6,7 @@ import Quickshell.Wayland
 import qs.Services
 import qs.Ui.Singletons
 
-// Session-action confirmation dialog (contract 13 sec 2c). A asura-dialog layer
+// Session-action confirmation dialog (contract 13 sec 2c). A toren-dialog layer
 // surface holding one centred box: a 2px outline, radiusWindow corners, a centred
 // wrapping title at the large label size (fontLg) with 40px vertical and 20px
 // horizontal margins, then a two-button row where both buttons expand to split
@@ -40,7 +40,7 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Top
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
-    WlrLayershell.namespace: "asura-dialog"
+    WlrLayershell.namespace: "toren-dialog"
 
     anchors { top: true; bottom: true; left: true; right: true }
 

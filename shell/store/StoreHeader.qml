@@ -1,7 +1,7 @@
 import QtQuick
 import qs.Ui.Singletons
 
-// The store's app bar, in two tiers. Tier 1 carries identity (the Asura mark and
+// The store's app bar, in two tiers. Tier 1 carries identity (the Toren mark and
 // wordmark), a persistent search field with a magnifier, and the account
 // actions (Library, Refresh). Tier 2 is the category navigation as bone-invert
 // plates (the design system's Tabs idiom), so every section stays visible
@@ -77,7 +77,7 @@ Item {
             color: Tokens.ink
             visible: act.current || act.activeFocus
         }
-        // Attention dot: upstream (asura-store) has advanced past what the user
+        // Attention dot: upstream (toren-store) has advanced past what the user
         // last pulled. Fixed alert red so it always reads as "something new".
         Rectangle {
             visible: act.flagged
@@ -174,7 +174,7 @@ Item {
 
         Rectangle {
             id: searchBox
-            objectName: "asura-store-header-search"
+            objectName: "toren-store-header-search"
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
             width: Math.min(460, header.width * 0.42)
@@ -202,7 +202,7 @@ Item {
 
             TextInput {
                 id: searchField
-                objectName: "asura-store-header-search-field"
+                objectName: "toren-store-header-search-field"
                 anchors {
                     left: mag.right; leftMargin: Tokens.s2
                     right: countLabel.left; rightMargin: Tokens.s2
@@ -266,13 +266,13 @@ Item {
             spacing: Tokens.s5
 
             HeaderAction {
-                objectName: "asura-store-header-library"
+                objectName: "toren-store-header-library"
                 label: header.libraryLabel
                 current: header.view === "library"
                 onTriggered: header.activateLibrary()
             }
             HeaderAction {
-                objectName: "asura-store-header-refresh"
+                objectName: "toren-store-header-refresh"
                 label: header.refreshing ? I18n.tr("SYNCING") : I18n.tr("REFRESH")
                 current: header.refreshing
                 flagged: header.updateAvailable && !header.refreshing
@@ -295,7 +295,7 @@ Item {
 
         Flickable {
             id: navScroll
-            objectName: "asura-store-header-categories"
+            objectName: "toren-store-header-categories"
             anchors { fill: parent; leftMargin: Tokens.s6; rightMargin: Tokens.s6 }
             contentWidth: navRow.width
             contentHeight: height
@@ -317,7 +317,7 @@ Item {
                 spacing: Tokens.s2
 
                 NavPlate {
-                    objectName: "asura-store-header-discover"
+                    objectName: "toren-store-header-discover"
                     label: I18n.tr("DISCOVER")
                     active: header.view === "discover" && header.categoryID === "" && !header.searchActive
                     anchors.verticalCenter: parent.verticalCenter
@@ -328,7 +328,7 @@ Item {
                     delegate: NavPlate {
                         required property var modelData
                         required property int index
-                        objectName: "asura-store-header-category-" + String(modelData.id || "")
+                        objectName: "toren-store-header-category-" + String(modelData.id || "")
                         label: String(modelData.name || modelData.id || "").toUpperCase()
                         active: header.view === "discover" && header.categoryID === String(modelData.id || "") && !header.searchActive
                         anchors.verticalCenter: parent.verticalCenter

@@ -1,7 +1,7 @@
-// Package svcmgr is how Asura's tools drive the session's user services.
+// Package svcmgr is how Toren's tools drive the session's user services.
 //
-// In Asura OS on Void Linux, that is sv(8) standing in front of the services seeded
-// into ~/.config/service under turnstile's runsvdir / asura-user-services.
+// In Toren OS on Void Linux, that is sv(8) standing in front of the services seeded
+// into ~/.config/service under turnstile's runsvdir / toren-user-services.
 package svcmgr
 
 import (
@@ -37,20 +37,20 @@ func New(kind Kind, run Runner) *Manager {
 	return &Manager{Kind: Runit, run: run}
 }
 
-// Detect answers Runit on Asura OS.
+// Detect answers Runit on Toren OS.
 func Detect() Kind {
 	return Runit
 }
 
 // unitService maps legacy unit names to the runit service directory name.
 var unitService = map[string]string{
-	"asura-shell.service":          "quickshell",
-	"asurad.service":               "asurad",
-	"asura-hubd.service":           "asura-hubd",
-	"asura-wallpaper.service":      "asura-wallpaper",
-	"asura-idle.service":           "asura-idle",
-	"asura-palette-bridge.service": "asura-palette-bridge",
-	"asura-portal.service":         "portal",
+	"toren-shell.service":          "quickshell",
+	"torend.service":               "torend",
+	"toren-hubd.service":           "toren-hubd",
+	"toren-wallpaper.service":      "toren-wallpaper",
+	"toren-idle.service":           "toren-idle",
+	"toren-palette-bridge.service": "toren-palette-bridge",
+	"toren-portal.service":         "portal",
 }
 
 // RunitServiceName maps a unit name to its runit service directory name.

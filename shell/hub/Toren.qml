@@ -4,9 +4,9 @@ pragma ComponentBehavior: Bound
 // The one way this window changes a setting.
 //
 // Every control calls this rather than writing through GSettings. That is the
-// architecture record's rule — the shell daemon and asura-hub are the only
+// architecture record's rule — the shell daemon and toren-hub are the only
 // writers, and hand-editing dconf causes drift — but the deeper reason is that
-// `asura config set` validates against the key's type, range and enum before
+// `toren config set` validates against the key's type, range and enum before
 // it writes. A control that wrote dconf itself could put 999999 in a bar height
 // that declares a maximum of 96, and nothing would report it until the shell
 // laid out its bar using it.
@@ -24,7 +24,7 @@ import Quickshell
 import Quickshell.Io
 
 Singleton {
-    id: asura
+    id: toren
 
     // A write has been tried and has reported back.
     //
@@ -88,7 +88,7 @@ Singleton {
         exitCode = -1
         errorRead = false
 
-        process.command = ["asura", "config", "set", job.schema, job.name, job.value]
+        process.command = ["toren", "config", "set", job.schema, job.name, job.value]
         process.running = true
     }
 
@@ -99,7 +99,7 @@ Singleton {
     // for the other.
     function settle() {
         if (reported || !current) return
-        if (asura.exitCode < 0 || !asura.errorRead) return
+        if (toren.exitCode < 0 || !toren.errorRead) return
 
         reported = true
 
@@ -107,7 +107,7 @@ Singleton {
         current = null
         writing = false
 
-        const failed = asura.exitCode !== 0
+        const failed = toren.exitCode !== 0
         const message = failed ? process.stderr.text.trim() : ""
 
         settled(job.qualified, job.value, failed, message)
@@ -126,23 +126,23 @@ Singleton {
             // the stream closed, so the text is whole.
             waitForEnd: true
             onStreamFinished: {
-                asura.errorRead = true
-                asura.settle()
+                toren.errorRead = true
+                toren.settle()
             }
         }
 
         onExited: (code) => {
-            asura.exitCode = code
-            asura.settle()
+            toren.exitCode = code
+            toren.settle()
         }
 
         // A process that cannot be started at all never exits, so the exit
         // never comes. The setting tool missing is a refusal like any other
         // and has to be reported as one.
-        onRunningChanged: if (!running && asura.exitCode < 0) {
-            asura.exitCode = 1
-            asura.errorRead = true
-            asura.settle()
+        onRunningChanged: if (!running && toren.exitCode < 0) {
+            toren.exitCode = 1
+            toren.errorRead = true
+            toren.settle()
         }
     }
 }

@@ -21,11 +21,11 @@ func newMachine(t *testing.T) *machine {
 	t.Helper()
 	root := t.TempDir()
 	paths := Paths{
-		Base:   filepath.Join(root, "usr", "share", "asura"),
-		Etc:    filepath.Join(root, "etc", "asura"),
-		Config: filepath.Join(root, "home", ".config", "asura"),
-		Edits:  filepath.Join(root, "home", ".config", "asura", "user_edits"),
-		State:  filepath.Join(root, "home", ".local", "state", "asura"),
+		Base:   filepath.Join(root, "usr", "share", "toren"),
+		Etc:    filepath.Join(root, "etc", "toren"),
+		Config: filepath.Join(root, "home", ".config", "toren"),
+		Edits:  filepath.Join(root, "home", ".config", "toren", "user_edits"),
+		State:  filepath.Join(root, "home", ".local", "state", "toren"),
 	}
 	return &machine{t: t, paths: paths}
 }

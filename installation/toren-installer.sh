@@ -45,7 +45,7 @@ while [ $# -gt 0 ]; do
 			shift
 			;;
 		-h|--help|help)
-			echo "Usage: asura-installer [options] [TARGET_DISK]"
+			echo "Usage: toren-installer [options] [TARGET_DISK]"
 			echo "Options:"
 			echo "  --config FILE          unattended answer file (YAML or key=value)"
 			echo "  --alongside            install alongside existing OS in free space"
@@ -58,7 +58,7 @@ while [ $# -gt 0 ]; do
 			;;
 		-*)
 			echo "Unknown option: $1" >&2
-			echo "Usage: asura-installer [--config FILE] [--alongside] [--dry-run] [--encrypt|--no-encrypt] [TARGET_DISK]" >&2
+			echo "Usage: toren-installer [--config FILE] [--alongside] [--dry-run] [--encrypt|--no-encrypt] [TARGET_DISK]" >&2
 			exit 1
 			;;
 		*)
@@ -143,8 +143,8 @@ if [ -t 0 ]; then
 	SAVED_STTY=$(stty -g 2>/dev/null || true)
 fi
 
-DISKS_FILE=$(mktemp 2>/dev/null || echo "/tmp/asura-disks.$$")
-TARGET_DIR="/mnt/asura-target"
+DISKS_FILE=$(mktemp 2>/dev/null || echo "/tmp/toren-disks.$$")
+TARGET_DIR="/mnt/toren-target"
 
 cleanup_installer() {
 	exit_code=$?
@@ -169,8 +169,8 @@ cleanup_installer() {
 		umount "$TARGET_DIR" 2>/dev/null || true
 		rmdir "$TARGET_DIR" 2>/dev/null || true
 	fi
-	if [ -b /dev/mapper/asura_root ]; then
-		cryptsetup close asura_root 2>/dev/null || true
+	if [ -b /dev/mapper/toren_root ]; then
+		cryptsetup close toren_root 2>/dev/null || true
 	fi
 	if [ "$exit_code" -ne 0 ] && [ "$DRY_RUN" -eq 0 ]; then
 		printf "\n${RED}${BOLD}Installation failed (exit code %s). Cleaned up mounts.${RESET}\n" "$exit_code"
@@ -200,8 +200,8 @@ on_signal() {
 		umount "$TARGET_DIR" 2>/dev/null || true
 		rmdir "$TARGET_DIR" 2>/dev/null || true
 	fi
-	if [ -b /dev/mapper/asura_root ]; then
-		cryptsetup close asura_root 2>/dev/null || true
+	if [ -b /dev/mapper/toren_root ]; then
+		cryptsetup close toren_root 2>/dev/null || true
 	fi
 	printf "\n"
 	exit 130
@@ -225,7 +225,7 @@ if [ "$DRY_RUN" -eq 1 ]; then
 fi
 
 if [ "$(id -u)" -ne 0 ] && [ "$DRY_RUN" -eq 0 ]; then
-	printf "${RED}asura-installer: must be run as root (e.g. sudo asura install)${RESET}\n" >&2
+	printf "${RED}toren-installer: must be run as root (e.g. sudo toren install)${RESET}\n" >&2
 	exit 1
 fi
 
@@ -410,18 +410,18 @@ if [ -n "$CFG_HOSTNAME" ]; then
 	HOSTNAME_INPUT="$CFG_HOSTNAME"
 	printf "Hostname (unattended): %s\n" "$HOSTNAME_INPUT"
 else
-	printf "Enter system hostname [default: asura-os]: "
-	read -r HOSTNAME_INPUT || HOSTNAME_INPUT="asura-os"
-	[ -z "$HOSTNAME_INPUT" ] && HOSTNAME_INPUT="asura-os"
+	printf "Enter system hostname [default: toren-os]: "
+	read -r HOSTNAME_INPUT || HOSTNAME_INPUT="toren-os"
+	[ -z "$HOSTNAME_INPUT" ] && HOSTNAME_INPUT="toren-os"
 fi
 
 if [ -n "$CFG_USER" ]; then
 	USERNAME_INPUT="$CFG_USER"
 	printf "Primary user (unattended): %s\n" "$USERNAME_INPUT"
 else
-	printf "Enter primary username [default: asura]: "
-	read -r USERNAME_INPUT || USERNAME_INPUT="asura"
-	[ -z "$USERNAME_INPUT" ] && USERNAME_INPUT="asura"
+	printf "Enter primary username [default: toren]: "
+	read -r USERNAME_INPUT || USERNAME_INPUT="toren"
+	[ -z "$USERNAME_INPUT" ] && USERNAME_INPUT="toren"
 fi
 
 USER_PASS=""
@@ -628,7 +628,7 @@ printf "${WHITE}│${RESET} Bootloader:     ${BOLD}%-44s${RESET} ${WHITE}│${RE
 printf "${WHITE}│${RESET} Encryption:     ${BOLD}%-44s${RESET} ${WHITE}│${RESET}\n" "$ENCRYPT_DISPLAY"
 printf "${WHITE}│${RESET} Filesystem:     ${BOLD}%-44s${RESET} ${WHITE}│${RESET}\n" "$FS_DISPLAY"
 printf "${WHITE}│${RESET} Hostname:       ${BOLD}%-44s${RESET} ${WHITE}│${RESET}\n" "$HOSTNAME_INPUT"
-printf "${WHITE}│${RESET} User Account:   ${BOLD}%-44s${RESET} ${WHITE}│${RESET}\n" "$USERNAME_INPUT (wheel, asura-hw)"
+printf "${WHITE}│${RESET} User Account:   ${BOLD}%-44s${RESET} ${WHITE}│${RESET}\n" "$USERNAME_INPUT (wheel, toren-hw)"
 printf "${WHITE}│${RESET} Root Account:   ${BOLD}%-44s${RESET} ${WHITE}│${RESET}\n" "$ROOT_STATUS"
 printf "${WHITE}╰──────────────────────────────────────────────────────────────╯${RESET}\n\n"
 
@@ -640,17 +640,17 @@ if [ "$DRY_RUN" -eq 1 ]; then
 		printf "  3. Allocate partition(s) into contiguous unallocated free space on %s\n" "$TARGET_DISK"
 		if [ "$ENCRYPT_DISK" -eq 1 ]; then
 			printf "     Format unencrypted /boot partition and root partition with LUKS2 (argon2id, label ASURA_CRYPT)\n"
-			printf "     Open LUKS container as /dev/mapper/asura_root\n"
+			printf "     Open LUKS container as /dev/mapper/toren_root\n"
 		fi
 		printf "  4. Format root filesystem with %s (never wipe disk or existing partitions)\n" "$FS_DISPLAY"
 		if [ "$FS_CHOICE" != "2" ]; then
 			printf "     Create Btrfs subvolumes: @ -> /, @home -> /home, @snapshots -> /.snapshots\n"
 		fi
-		printf "  5. Deploy rootfs via rsync to /mnt/asura-target\n"
+		printf "  5. Deploy rootfs via rsync to /mnt/toren-target\n"
 		printf "  6. Configure fstab with persistent UUIDs, preserve ESP without formatting\n"
 		printf "  7. Set credentials: user '%s' password, root: %s\n" "$USERNAME_INPUT" "$ROOT_STATUS"
 		printf "  8. Configure GRUB with os-prober enabled (GRUB_DISABLE_OS_PROBER=false) to detect existing OS\n"
-		printf "  9. Install GRUB EFI to EFI/Asura without overwriting fallback EFI/BOOT/BOOTX64.EFI\n\n"
+		printf "  9. Install GRUB EFI to EFI/Toren without overwriting fallback EFI/BOOT/BOOTX64.EFI\n\n"
 	elif [ "$ENCRYPT_DISK" -eq 1 ]; then
 		if [ "$IS_UEFI" -eq 1 ]; then
 			printf "  1. Partition %s (GPT: 512MB ESP, 1GB unencrypted /boot, LUKS2 root)\n" "$TARGET_DISK"
@@ -658,12 +658,12 @@ if [ "$DRY_RUN" -eq 1 ]; then
 			printf "  1. Partition %s (MBR: 1GB unencrypted /boot with boot flag, LUKS2 root)\n" "$TARGET_DISK"
 		fi
 		printf "  2. Format root partition with LUKS2 (argon2id, label ASURA_CRYPT)\n"
-		printf "  3. Open LUKS container as /dev/mapper/asura_root\n"
-		printf "  4. Format /boot with ext4 and /dev/mapper/asura_root with %s\n" "$FS_DISPLAY"
+		printf "  3. Open LUKS container as /dev/mapper/toren_root\n"
+		printf "  4. Format /boot with ext4 and /dev/mapper/toren_root with %s\n" "$FS_DISPLAY"
 		if [ "$FS_CHOICE" != "2" ]; then
 			printf "     Create Btrfs subvolumes: @ -> /, @home -> /home, @snapshots -> /.snapshots\n"
 		fi
-		printf "  5. Deploy rootfs via rsync to /mnt/asura-target\n"
+		printf "  5. Deploy rootfs via rsync to /mnt/toren-target\n"
 		printf "  6. Configure /etc/crypttab, dracut crypt module, fstab with persistent UUIDs, and GRUB rd.luks.uuid\n"
 		printf "  7. Set credentials: user '%s' password, root: %s\n" "$USERNAME_INPUT" "$ROOT_STATUS"
 		printf "  8. Remove live-only configs (agetty autologin, NOPASSWD, live session files)\n"
@@ -674,7 +674,7 @@ if [ "$DRY_RUN" -eq 1 ]; then
 		if [ "$FS_CHOICE" != "2" ]; then
 			printf "     Create Btrfs subvolumes: @ -> /, @home -> /home, @snapshots -> /.snapshots\n"
 		fi
-		printf "  3. Deploy rootfs via rsync to /mnt/asura-target\n"
+		printf "  3. Deploy rootfs via rsync to /mnt/toren-target\n"
 		printf "  4. Configure fstab with persistent UUIDs, regenerate initramfs, install GRUB\n"
 		printf "  5. Set credentials: user '%s' password, root: %s\n" "$USERNAME_INPUT" "$ROOT_STATUS"
 		printf "  6. Remove live-only configs (agetty autologin, NOPASSWD, live session files)\n"
@@ -715,7 +715,7 @@ if [ "$DUAL_BOOT" -eq 1 ]; then
 	if [ "$ENCRYPT_DISK" -eq 1 ]; then
 		boot_end=$((slice_start + 1024))
 		parted -s "$TARGET_DISK" mkpart "ASURA_BOOT" ext4 "${slice_start}MiB" "${boot_end}MiB"
-		parted -s "$TARGET_DISK" mkpart "AsuraRoot" "${boot_end}MiB" "${slice_end}MiB"
+		parted -s "$TARGET_DISK" mkpart "TorenRoot" "${boot_end}MiB" "${slice_end}MiB"
 		# Find newly created partition names
 		new_parts=$(lsblk -l -n -o NAME,TYPE "$TARGET_DISK" 2>/dev/null | grep 'part' | awk '{print $1}' | tail -n2)
 		p_boot_name=$(echo "$new_parts" | head -n1)
@@ -723,7 +723,7 @@ if [ "$DUAL_BOOT" -eq 1 ]; then
 		PART_BOOT="/dev/$p_boot_name"
 		PART_ROOT_RAW="/dev/$p_root_name"
 	else
-		parted -s "$TARGET_DISK" mkpart "AsuraRoot" "${slice_start}MiB" "${slice_end}MiB"
+		parted -s "$TARGET_DISK" mkpart "TorenRoot" "${slice_start}MiB" "${slice_end}MiB"
 		new_part_name=$(lsblk -l -n -o NAME,TYPE "$TARGET_DISK" 2>/dev/null | grep 'part' | awk '{print $1}' | tail -n1)
 		PART_ROOT_RAW="/dev/$new_part_name"
 		PART_BOOT=""
@@ -738,7 +738,7 @@ else
 			parted -s "$TARGET_DISK" mkpart "ESP" fat32 1MiB 513MiB
 			parted -s "$TARGET_DISK" set 1 esp on
 			parted -s "$TARGET_DISK" mkpart "ASURA_BOOT" ext4 513MiB 1537MiB
-			parted -s "$TARGET_DISK" mkpart "AsuraRoot" 1537MiB 100%
+			parted -s "$TARGET_DISK" mkpart "TorenRoot" 1537MiB 100%
 		else
 			parted -s "$TARGET_DISK" mklabel msdos
 			parted -s "$TARGET_DISK" mkpart primary ext4 1MiB 1025MiB
@@ -750,7 +750,7 @@ else
 			parted -s "$TARGET_DISK" mklabel gpt
 			parted -s "$TARGET_DISK" mkpart "ESP" fat32 1MiB 513MiB
 			parted -s "$TARGET_DISK" set 1 esp on
-			parted -s "$TARGET_DISK" mkpart "AsuraRoot" 513MiB 100%
+			parted -s "$TARGET_DISK" mkpart "TorenRoot" 513MiB 100%
 		else
 			parted -s "$TARGET_DISK" mklabel msdos
 			parted -s "$TARGET_DISK" mkpart primary 1MiB 100%
@@ -819,8 +819,8 @@ if [ "$ENCRYPT_DISK" -eq 1 ]; then
 
 	printf "  Encrypting root partition (%s) with LUKS2 (argon2id)...\n" "$PART_ROOT_RAW"
 	printf '%s' "$LUKS_PASS" | cryptsetup luksFormat --type luks2 --pbkdf argon2id --label ASURA_CRYPT --batch-mode --key-file=- "$PART_ROOT_RAW"
-	printf '%s' "$LUKS_PASS" | cryptsetup open --key-file=- "$PART_ROOT_RAW" asura_root
-	PART_ROOT_FS="/dev/mapper/asura_root"
+	printf '%s' "$LUKS_PASS" | cryptsetup open --key-file=- "$PART_ROOT_RAW" toren_root
+	PART_ROOT_FS="/dev/mapper/toren_root"
 else
 	PART_ROOT_FS="$PART_ROOT_RAW"
 fi
@@ -834,7 +834,7 @@ if [ "$FS_CHOICE" != "2" ] && command -v mkfs.btrfs >/dev/null 2>&1; then
 	BTRFS_BASE_OPTS="defaults,noatime,compress=zstd:1"
 	
 	# Temporary mount to create subvolumes
-	TMP_BTRFS="/mnt/asura-subvols.$$"
+	TMP_BTRFS="/mnt/toren-subvols.$$"
 	mkdir -p "$TMP_BTRFS"
 	mount -t btrfs "$PART_ROOT_FS" "$TMP_BTRFS"
 	btrfs subvolume create "$TMP_BTRFS/@"
@@ -899,12 +899,12 @@ if [ "$ENCRYPT_DISK" -eq 1 ]; then
 		exit 1
 	fi
 	# Configure /etc/crypttab with UUID and discard support
-	echo "asura_root UUID=$LUKS_UUID none luks,discard" > "$TARGET_DIR/etc/crypttab"
+	echo "toren_root UUID=$LUKS_UUID none luks,discard" > "$TARGET_DIR/etc/crypttab"
 	chmod 0600 "$TARGET_DIR/etc/crypttab"
 
 	# Configure dracut crypt module drop-in
 	mkdir -p "$TARGET_DIR/etc/dracut.conf.d"
-	cat >"$TARGET_DIR/etc/dracut.conf.d/40-asura-crypt.conf" <<'EOF'
+	cat >"$TARGET_DIR/etc/dracut.conf.d/40-toren-crypt.conf" <<'EOF'
 add_dracutmodules+=" crypt "
 install_items+=" /etc/crypttab "
 EOF
@@ -978,23 +978,23 @@ BUG_REPORT_URL="https://github.com/mohitjoer/Toren-Linux/issues"
 EOF
 
 # Purge live installer artifacts and markers
-rm -f "$TARGET_DIR/etc/asura-live" "$TARGET_DIR/etc/toren-live"
-rm -f "$TARGET_DIR/usr/bin/asura-installer"
+rm -f "$TARGET_DIR/etc/toren-live" "$TARGET_DIR/etc/toren-live"
+rm -f "$TARGET_DIR/usr/bin/toren-installer"
 rm -f "$TARGET_DIR/usr/bin/void-installer"
-rm -f "$TARGET_DIR/usr/share/applications/asura-installer.desktop" "$TARGET_DIR/usr/share/applications/toren-installer.desktop"
-rm -f "$TARGET_DIR/home"/*/Desktop/asura-installer.desktop "$TARGET_DIR/home"/*/Desktop/toren-installer.desktop 2>/dev/null || true
-rm -f "$TARGET_DIR/etc/skel/Desktop/asura-installer.desktop" "$TARGET_DIR/etc/skel/Desktop/toren-installer.desktop" 2>/dev/null || true
+rm -f "$TARGET_DIR/usr/share/applications/toren-installer.desktop" "$TARGET_DIR/usr/share/applications/toren-installer.desktop"
+rm -f "$TARGET_DIR/home"/*/Desktop/toren-installer.desktop "$TARGET_DIR/home"/*/Desktop/toren-installer.desktop 2>/dev/null || true
+rm -f "$TARGET_DIR/etc/skel/Desktop/toren-installer.desktop" "$TARGET_DIR/etc/skel/Desktop/toren-installer.desktop" 2>/dev/null || true
 
 # Ensure dedicated hardware and docker groups exist on target
 chroot "$TARGET_DIR" getent group toren-hw >/dev/null 2>&1 || chroot "$TARGET_DIR" groupadd -r toren-hw || true
-chroot "$TARGET_DIR" getent group asura-hw >/dev/null 2>&1 || chroot "$TARGET_DIR" groupadd -r asura-hw
+chroot "$TARGET_DIR" getent group toren-hw >/dev/null 2>&1 || chroot "$TARGET_DIR" groupadd -r toren-hw
 chroot "$TARGET_DIR" getent group docker >/dev/null 2>&1 || chroot "$TARGET_DIR" groupadd -r docker || true
 
 # Record live user hash from running environment to verify against later
-LIVE_SHADOW_HASH=$(grep -E '^(toren|asura):' /etc/shadow 2>/dev/null | head -n 1 | cut -d: -f2 || true)
+LIVE_SHADOW_HASH=$(grep -E '^(toren|toren):' /etc/shadow 2>/dev/null | head -n 1 | cut -d: -f2 || true)
 
 # Completely purge live user account, credentials, and live home directory from target
-for live_user in toren asura; do
+for live_user in toren toren; do
 	if chroot "$TARGET_DIR" id -u "$live_user" >/dev/null 2>&1 && [ "$live_user" != "$USERNAME_INPUT" ]; then
 		chroot "$TARGET_DIR" userdel -r "$live_user" >/dev/null 2>&1 || true
 	fi
@@ -1005,9 +1005,9 @@ done
 
 # User account creation on target
 if ! chroot "$TARGET_DIR" id -u "$USERNAME_INPUT" >/dev/null 2>&1; then
-	chroot "$TARGET_DIR" useradd -m -s /bin/zsh -G wheel,_seatd,video,audio,input,storage,network,asura-hw,docker "$USERNAME_INPUT"
+	chroot "$TARGET_DIR" useradd -m -s /bin/zsh -G wheel,_seatd,video,audio,input,storage,network,toren-hw,docker "$USERNAME_INPUT"
 else
-	chroot "$TARGET_DIR" usermod -aG wheel,_seatd,video,audio,input,storage,network,asura-hw,docker "$USERNAME_INPUT"
+	chroot "$TARGET_DIR" usermod -aG wheel,_seatd,video,audio,input,storage,network,toren-hw,docker "$USERNAME_INPUT"
 fi
 
 # Set password for primary user with explicit SHA512 encryption or pre-computed hash
@@ -1040,11 +1040,11 @@ fi
 rm -f "$TARGET_DIR/etc/shadow-" "$TARGET_DIR/etc/passwd-" "$TARGET_DIR/etc/group-" "$TARGET_DIR/etc/gshadow-"
 
 # Purge live-only configurations, live sudoers, polkit rules, and autologin from installed system
-rm -f "$TARGET_DIR/etc/sudoers.d/99-asura-live" "$TARGET_DIR/etc/sudoers.d/99-void-live" "$TARGET_DIR/etc/sudoers.d/"*live*
-rm -f "$TARGET_DIR/etc/polkit-1/rules.d/asura-live.rules"
+rm -f "$TARGET_DIR/etc/sudoers.d/99-toren-live" "$TARGET_DIR/etc/sudoers.d/99-void-live" "$TARGET_DIR/etc/sudoers.d/"*live*
+rm -f "$TARGET_DIR/etc/polkit-1/rules.d/toren-live.rules"
 rm -f "$TARGET_DIR/etc/default/live.conf"
 rm -f "$TARGET_DIR/etc/sv/agetty-tty1/conf"
-rm -f "$TARGET_DIR/etc/profile.d/asura-autologin.sh"
+rm -f "$TARGET_DIR/etc/profile.d/toren-autologin.sh"
 rm -f "$TARGET_DIR/home/$USERNAME_INPUT/.hushlogin" 2>/dev/null || true
 rm -f "$TARGET_DIR/etc/skel/.hushlogin" 2>/dev/null || true
 rm -rf "$TARGET_DIR/tmp"/* "$TARGET_DIR/var/tmp"/*
@@ -1052,7 +1052,7 @@ rm -rf "$TARGET_DIR/tmp"/* "$TARGET_DIR/var/tmp"/*
 # Replace live MOTD, issue, and issue.net with installed system banners
 cat >"$TARGET_DIR/etc/motd" <<'MOTD'
        #                    #         Toren Linux Beta 001
-     %##                    ##%       https://asuraos.dev
+     %##                    ##%       https://torenos.dev
     ####   %%%%%%%%%%%%%%   ####
   ######% %%%%%%%%%%%%%%%% %######    Robust. Minimal. Kinetic.
 %###########% %%%%%%%%  ###########%
@@ -1077,7 +1077,7 @@ cat >"$TARGET_DIR/etc/issue" <<'ISSUE'
      %##                    ##%       Kernel \r on an \m (\l)
     ####   %%%%%%%%%%%%%%   ####
   ######% %%%%%%%%%%%%%%%% %######    Robust. Minimal. Kinetic.
-%###########% %%%%%%%%  ###########%  https://asuraos.dev
+%###########% %%%%%%%%  ###########%  https://torenos.dev
  %###########          ###########%
      ########  @@@@@@  ########
    %% ########%      %######## %%%
@@ -1109,8 +1109,8 @@ fi
 # a password. Every other sudo call still asks for one. The drop-in name sorts
 # after "wheel" on purpose: sudo applies the LAST matching entry, so a file
 # sorted before wheel would be overridden by wheel's password rule.
-cat >"$TARGET_DIR/etc/sudoers.d/zz-asura-session" <<'SUDOERS'
-# Asura's session: the boot splash is dismissed by asura-session before the
+cat >"$TARGET_DIR/etc/sudoers.d/zz-toren-session" <<'SUDOERS'
+# Toren's session: the boot splash is dismissed by toren-session before the
 # compositor claims KMS. plymouthd runs as root, so these exact commands are
 # the only passwordless privileges the session needs. Both spellings are
 # granted because sudo resolves a bare name through secure_path, where
@@ -1119,7 +1119,7 @@ cat >"$TARGET_DIR/etc/sudoers.d/zz-asura-session" <<'SUDOERS'
 Cmnd_Alias ASURA_SESSION_PLYMOUTH = /usr/bin/plymouth --quit, /usr/sbin/plymouth --quit, /usr/bin/killall -9 plymouthd, /usr/sbin/killall -9 plymouthd, /usr/bin/pkill -9 -x plymouthd, /usr/sbin/pkill -9 -x plymouthd
 %wheel ALL=(root) NOPASSWD: ASURA_SESSION_PLYMOUTH
 SUDOERS
-chmod 0440 "$TARGET_DIR/etc/sudoers.d/zz-asura-session"
+chmod 0440 "$TARGET_DIR/etc/sudoers.d/zz-toren-session"
 
 # Enable core system runit services
 mkdir -p "$TARGET_DIR/etc/runit/runsvdir/default"
@@ -1132,11 +1132,11 @@ done
 # Ensure wpa_supplicant does not run as a standalone service (managed by NetworkManager)
 rm -f "$TARGET_DIR/etc/runit/runsvdir/default/wpa_supplicant" "$TARGET_DIR/var/service/wpa_supplicant"
 
-# The quickest Void mirror for this machine (asura mirror; updates keep it).
+# The quickest Void mirror for this machine (toren mirror; updates keep it).
 # Best effort: offline, or no mirror answering, keeps ASURA's default.
-if [ -x "$TARGET_DIR/usr/bin/asura" ]; then
+if [ -x "$TARGET_DIR/usr/bin/toren" ]; then
 	echo "Choosing the quickest package mirror..."
-	timeout 60 chroot "$TARGET_DIR" /usr/bin/asura mirror fastest >/dev/null 2>&1 || true
+	timeout 60 chroot "$TARGET_DIR" /usr/bin/toren mirror fastest >/dev/null 2>&1 || true
 fi
 
 # Layer 3 Tuning: Configure zramen zstd compression
@@ -1171,7 +1171,7 @@ fi
 mkdir -p "$TARGET_DIR/etc/plymouth" "$TARGET_DIR/etc/dracut.conf.d"
 cat >"$TARGET_DIR/etc/plymouth/plymouthd.conf" <<'EOF'
 [Daemon]
-Theme=asura
+Theme=toren
 ShowDelay=0
 DeviceTimeout=8
 EOF
@@ -1182,10 +1182,10 @@ add_drivers+=" vboxvideo vmwgfx bochs virtio_gpu qxl simpledrm "
 install_optional_items+=" /usr/lib/plymouth/script.so /usr/lib/plymouth/label.so /usr/lib/plymouth/label-pango.so /usr/lib/plymouth/renderers/drm.so /usr/lib/plymouth/renderers/frame-buffer.so /etc/fonts/fonts.conf /etc/fonts/local.conf /usr/share/fonts/TTF/DejaVuSans.ttf /usr/share/fonts/TTF/DejaVuSans-Bold.ttf /usr/share/fonts/TTF/DejaVuSansMono.ttf "
 EOF
 
-if [ -d "$TARGET_DIR/usr/share/plymouth/themes/asura" ]; then
-	ln -sf /usr/share/plymouth/themes/asura/asura.plymouth "$TARGET_DIR/usr/share/plymouth/themes/default.plymouth" 2>/dev/null || true
+if [ -d "$TARGET_DIR/usr/share/plymouth/themes/toren" ]; then
+	ln -sf /usr/share/plymouth/themes/toren/toren.plymouth "$TARGET_DIR/usr/share/plymouth/themes/default.plymouth" 2>/dev/null || true
 fi
-chroot "$TARGET_DIR" plymouth-set-default-theme asura 2>/dev/null || true
+chroot "$TARGET_DIR" plymouth-set-default-theme toren 2>/dev/null || true
 
 # Bind mounts for chroot maintenance and hardware detection
 mount --bind /dev "$TARGET_DIR/dev"
@@ -1193,8 +1193,8 @@ mount --bind /proc "$TARGET_DIR/proc"
 mount --bind /sys "$TARGET_DIR/sys"
 
 # Apply hardware quirks across matched layers if this machine matches known profiles
-if [ -x "$TARGET_DIR/usr/bin/asura" ]; then
-	chroot "$TARGET_DIR" /usr/bin/asura hardware quirks apply >/dev/null 2>&1 || true
+if [ -x "$TARGET_DIR/usr/bin/toren" ]; then
+	chroot "$TARGET_DIR" /usr/bin/toren hardware quirks apply >/dev/null 2>&1 || true
 fi
 
 printf "${GREEN}✓ Host, services, and accounts configured.${RESET}\n"
@@ -1220,12 +1220,12 @@ printf "${GREEN}✓ Kernel and initramfs verified in /boot.${RESET}\n"
 
 printf "${WHITE}${BOLD}[5/5] Installing bootloader (%s)...${RESET}\n" "$BOOT_DISPLAY"
 
-# The Asura snapshot GRUB snippet goes into /etc/grub.d before grub-mkconfig
+# The Toren snapshot GRUB snippet goes into /etc/grub.d before grub-mkconfig
 # runs, so the first grub.cfg already has it.
-if [ -d "$TARGET_DIR/usr/share/asura/session/grub" ]; then
+if [ -d "$TARGET_DIR/usr/share/toren/session/grub" ]; then
 	mkdir -p "$TARGET_DIR/etc/grub.d"
-	cp "$TARGET_DIR/usr/share/asura/session/grub"/* "$TARGET_DIR/etc/grub.d/" 2>/dev/null || true
-	chmod +x "$TARGET_DIR/etc/grub.d"/40_toren_snapshots "$TARGET_DIR/etc/grub.d"/40_asura_snapshots 2>/dev/null || true
+	cp "$TARGET_DIR/usr/share/toren/session/grub"/* "$TARGET_DIR/etc/grub.d/" 2>/dev/null || true
+	chmod +x "$TARGET_DIR/etc/grub.d"/40_toren_snapshots "$TARGET_DIR/etc/grub.d"/40_toren_snapshots 2>/dev/null || true
 fi
 
 if [ "$IS_UEFI" -eq 1 ]; then
@@ -1233,13 +1233,13 @@ if [ "$IS_UEFI" -eq 1 ]; then
 		mkdir -p "$TARGET_DIR/sys/firmware/efi/efivars"
 		mount -t efivarfs efivarfs "$TARGET_DIR/sys/firmware/efi/efivars" 2>/dev/null || true
 	fi
-	chroot "$TARGET_DIR" grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Asura --recheck
+	chroot "$TARGET_DIR" grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Toren --recheck
 	mkdir -p "$TARGET_DIR/boot/efi/EFI/BOOT"
 	if [ "$DUAL_BOOT" -eq 0 ]; then
-		if [ -f "$TARGET_DIR/boot/efi/EFI/Asura/grubx64.efi" ]; then
-			cp -f "$TARGET_DIR/boot/efi/EFI/Asura/grubx64.efi" "$TARGET_DIR/boot/efi/EFI/BOOT/BOOTX64.EFI"
-		elif [ -f "$TARGET_DIR/boot/efi/EFI/asura/grubx64.efi" ]; then
-			cp -f "$TARGET_DIR/boot/efi/EFI/asura/grubx64.efi" "$TARGET_DIR/boot/efi/EFI/BOOT/BOOTX64.EFI"
+		if [ -f "$TARGET_DIR/boot/efi/EFI/Toren/grubx64.efi" ]; then
+			cp -f "$TARGET_DIR/boot/efi/EFI/Toren/grubx64.efi" "$TARGET_DIR/boot/efi/EFI/BOOT/BOOTX64.EFI"
+		elif [ -f "$TARGET_DIR/boot/efi/EFI/toren/grubx64.efi" ]; then
+			cp -f "$TARGET_DIR/boot/efi/EFI/toren/grubx64.efi" "$TARGET_DIR/boot/efi/EFI/BOOT/BOOTX64.EFI"
 		fi
 	else
 		printf "  Dual-boot mode: preserving existing fallback bootloader at EFI/BOOT/BOOTX64.EFI\n"
@@ -1296,7 +1296,7 @@ if [ "$ENCRYPT_DISK" -eq 1 ]; then
 	if [ -s "$TARGET_DIR/etc/crypttab" ] && grep -q "$LUKS_UUID" "$TARGET_DIR/etc/crypttab"; then
 		if lsinitrd "$INITRD_IMG" 2>/dev/null | grep -qE "crypt|cryptsetup"; then
 			V_CRYPT="PASS"
-		elif [ -f "$TARGET_DIR/etc/dracut.conf.d/40-asura-crypt.conf" ]; then
+		elif [ -f "$TARGET_DIR/etc/dracut.conf.d/40-toren-crypt.conf" ]; then
 			V_CRYPT="PASS"
 		fi
 	fi
@@ -1338,7 +1338,7 @@ fi
 umount "$TARGET_DIR"
 
 if [ "$ENCRYPT_DISK" -eq 1 ]; then
-	cryptsetup close asura_root 2>/dev/null || true
+	cryptsetup close toren_root 2>/dev/null || true
 fi
 
 cat <<EOF

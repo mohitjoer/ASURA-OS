@@ -19,7 +19,7 @@ import (
 // store compares it against the last acknowledged revision to light the refresh
 // dot only on a genuine change.
 //
-// Asura Store catalog revision hashing.
+// Toren Store catalog revision hashing.
 
 func catalogRevision(cat Catalog) string {
 	lines := make([]string, 0, len(cat.Items))
@@ -78,10 +78,10 @@ func provenanceFingerprint(it *Item) string {
 // seenRevisionPath is the last catalogue revision the user has looked at.
 func seenRevisionPath() string {
 	if b := os.Getenv("XDG_CACHE_HOME"); b != "" {
-		return filepath.Join(b, "asura-store", "seen-revision")
+		return filepath.Join(b, "toren-store", "seen-revision")
 	}
 	home, _ := os.UserHomeDir()
-	return filepath.Join(home, ".cache", "asura-store", "seen-revision")
+	return filepath.Join(home, ".cache", "toren-store", "seen-revision")
 }
 
 func readSeenRevision() string {

@@ -1,7 +1,7 @@
 import QtQuick
 import qs.Ui.Singletons
 
-// A page head, sized to its own content: the eyebrow lead (a rule, the Asura mark,
+// A page head, sized to its own content: the eyebrow lead (a rule, the Toren mark,
 // a tracked label), the Fraunces title, and an optional blurb. Because it reports
 // its real implicitHeight, the toolbar or content anchored below it can never
 // ride up into the title -- one head grammar, spaced the same on every plate.

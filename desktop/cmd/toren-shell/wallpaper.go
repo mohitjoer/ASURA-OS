@@ -14,12 +14,12 @@ import (
 
 // The depth-cutout policy lives here in the Go daemon (per-wall registry,
 // engine runs, the depth IPC verbs), but the wallpaper surface itself lives in
-// asura-wallpaper, the Rust wallpaper daemon. This bridge keeps the two honest: the
-// daemon mirrors asura-wallpaper's published wallpaper frame to know what is on screen,
+// toren-wallpaper, the Rust wallpaper daemon. This bridge keeps the two honest: the
+// daemon mirrors toren-wallpaper's published wallpaper frame to know what is on screen,
 // and hands finished cutouts back over `depth set` / `depth clear`, which
-// asura-wallpaper folds into the frame the shell's QML renders.
+// toren-wallpaper folds into the frame the shell's QML renders.
 
-// wallpaperFrameEntry is the slice of asura-wallpaper's wallpaper frame the depth worker
+// wallpaperFrameEntry is the slice of toren-wallpaper's wallpaper frame the depth worker
 // needs: the source path and whether a live player owns the slot.
 type wallpaperFrameEntry struct {
 	Path  string `json:"path"`
@@ -28,7 +28,7 @@ type wallpaperFrameEntry struct {
 	Depth string `json:"depth"`
 }
 
-// wallpaperFrame mirrors asura-wallpaper's `{default, outputs}` wallpaper topic frame.
+// wallpaperFrame mirrors toren-wallpaper's `{default, outputs}` wallpaper topic frame.
 type wallpaperFrame struct {
 	Default wallpaperFrameEntry            `json:"default"`
 	Outputs map[string]wallpaperFrameEntry `json:"outputs"`
@@ -39,11 +39,11 @@ func wallpaperSock() string {
 	if dir == "" {
 		dir = "/tmp"
 	}
-	return filepath.Join(dir, "asura-wallpaper.sock")
+	return filepath.Join(dir, "toren-wallpaper.sock")
 }
 
-// wallpaperCmd sends one command line to asura-wallpaper and returns its single reply
-// line. Timeouts are short: asura-wallpaper answers surface commands from memory, and a
+// wallpaperCmd sends one command line to toren-wallpaper and returns its single reply
+// line. Timeouts are short: toren-wallpaper answers surface commands from memory, and a
 // hung daemon must never wedge the depth worker.
 func wallpaperCmd(line string) (string, error) {
 	conn, err := net.DialTimeout("unix", wallpaperSock(), 2*time.Second)
@@ -61,20 +61,20 @@ func wallpaperCmd(line string) (string, error) {
 	}
 	reply = strings.TrimSpace(reply)
 	if strings.HasPrefix(reply, "err") {
-		return "", fmt.Errorf("asura-wallpaper: %s", reply)
+		return "", fmt.Errorf("toren-wallpaper: %s", reply)
 	}
 	return reply, nil
 }
 
 // currentWall is the wallpaper the depth registry keys off: the default
-// (broadcast) wallpaper of the last frame asura-wallpaper published.
+// (broadcast) wallpaper of the last frame toren-wallpaper published.
 func (d *daemon) currentWall() string {
 	d.wallMu.Lock()
 	defer d.wallMu.Unlock()
 	return d.wall.Default.Path
 }
 
-// wallFrame returns a copy of the last frame seen from asura-wallpaper.
+// wallFrame returns a copy of the last frame seen from toren-wallpaper.
 func (d *daemon) wallFrame() wallpaperFrame {
 	d.wallMu.Lock()
 	defer d.wallMu.Unlock()
@@ -86,7 +86,7 @@ func (d *daemon) wallFrame() wallpaperFrame {
 	return f
 }
 
-// depthPublish hands a finished cutout to asura-wallpaper. asura-wallpaper validates the source
+// depthPublish hands a finished cutout to toren-wallpaper. toren-wallpaper validates the source
 // is still the one on screen (a switch mid-generation drops the stale cut) and
 // republishes the wallpaper frame with the depth fields set. The revision is
 // the cutout's mtime, so a regenerated file at the same path still busts the
@@ -103,7 +103,7 @@ func (d *daemon) depthPublish(slot, source, out string) {
 	}
 }
 
-// depthClear drops every slot's cutout from asura-wallpaper's frame.
+// depthClear drops every slot's cutout from toren-wallpaper's frame.
 func (d *daemon) depthClear() {
 	if _, err := wallpaperCmd("depth clear"); err != nil {
 		fmt.Fprintf(os.Stderr, "depthClear: %v\n", err)
@@ -144,13 +144,13 @@ func missingDepth(f wallpaperFrame) bool {
 	return false
 }
 
-// consumeWallpaperFrames mirrors asura-wallpaper's wallpaper topic into d.wall and
+// consumeWallpaperFrames mirrors toren-wallpaper's wallpaper topic into d.wall and
 // wakes the workers: a changed picture reschedules the stage cutout AND the
 // palette pass (the dynamic matugen pipeline follows the wallpaper), while a
 // frame that merely lost its subject fold re-arms the stage worker alone. That
 // worker only reuses or clears on such a wake (it never auto-recuts), so a
 // spurious wake settles immediately: an unchanged publish is suppressed by
-// asura-wallpaper's topic and the chain goes quiet.
+// toren-wallpaper's topic and the chain goes quiet.
 func (d *daemon) consumeWallpaperFrames(r io.Reader) {
 	sc := bufio.NewScanner(r)
 	for sc.Scan() {
@@ -173,10 +173,10 @@ func (d *daemon) consumeWallpaperFrames(r io.Reader) {
 	_ = sc.Err()
 }
 
-// watchWallpaper subscribes to asura-wallpaper's wallpaper topic for the daemon's life,
-// reconnecting with a small backoff (asura-wallpaper restarts independently). The
+// watchWallpaper subscribes to toren-wallpaper's wallpaper topic for the daemon's life,
+// reconnecting with a small backoff (toren-wallpaper restarts independently). The
 // retained frame arrives on every connect, so the cache reseeds itself and the
-// worker re-publishes cutouts a restarted asura-wallpaper lost.
+// worker re-publishes cutouts a restarted toren-wallpaper lost.
 func (d *daemon) watchWallpaper() {
 	const minBackoff = 150 * time.Millisecond
 	const maxBackoff = 5 * time.Second

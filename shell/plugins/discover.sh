@@ -4,8 +4,8 @@
 #   { "id", "dir", "version", "manifest": {...}, "placement": {...} }
 # sources, first wins on duplicate id:
 #   $ASURA_PLUGINS_DIR (dev override, colon-separated)
-#   ~/.local/share/asura/plugins
-# placement + per-plugin settings live in ~/.config/asura/plugins.json:
+#   ~/.local/share/toren/plugins
+# placement + per-plugin settings live in ~/.config/toren/plugins.json:
 #   { "<id>": { "enabled": bool, "host": "...", "<host>": {...}, "key": "...",
 #               "settings": {...} } }
 # no entry or enabled=false = skipped. the shell only loads what the user
@@ -23,7 +23,7 @@ set -euo pipefail
 
 cfg_home="${XDG_CONFIG_HOME:-$HOME/.config}"
 data_home="${XDG_DATA_HOME:-$HOME/.local/share}"
-installed_root="$data_home/asura/plugins"
+installed_root="$data_home/toren/plugins"
 
 all=0
 [ "${1:-}" = "--all" ] && all=1
@@ -61,8 +61,8 @@ done
 
 # missing, empty or unreadable reads as empty text and parses to nothing.
 user_src=/dev/null
-if [ -s "$cfg_home/asura/plugins.json" ] && [ -r "$cfg_home/asura/plugins.json" ]; then
-	user_src="$cfg_home/asura/plugins.json"
+if [ -s "$cfg_home/toren/plugins.json" ] && [ -r "$cfg_home/toren/plugins.json" ]; then
+	user_src="$cfg_home/toren/plugins.json"
 fi
 
 # the path list travels as one separator-joined string: the record separator

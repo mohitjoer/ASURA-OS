@@ -24,8 +24,8 @@ for key in list(db):
         db[name] = db.pop(key)
         fixed.append(name)
 if fixed:
-    with open(path + ".asura-new", "wb") as f:
+    with open(path + ".toren-new", "wb") as f:
         plistlib.dump(db, f)
-    os.replace(path + ".asura-new", path)
+    os.replace(path + ".toren-new", path)
     print("registered under their names: " + " ".join(fixed))
 PY

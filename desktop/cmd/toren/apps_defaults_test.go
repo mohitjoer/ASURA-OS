@@ -49,13 +49,13 @@ func TestAppsDefaultsAppliesWhatTheUserOwnsAndOnlyPrintsTheRest(t *testing.T) {
 	// Ptyxis is the current choice and Ghostty is registered, so only --set is needed.
 	calls := defaultsFakeMachine(t, "Value: /usr/bin/ptyxis\n\nAlternative: GHOSTTY\nPriority: 50")
 
-	// "asura apps defaults" must reach this command through the built-in "apps".
+	// "toren apps defaults" must reach this command through the built-in "apps".
 	if code := run([]string{"apps", "defaults", "--check"}); code != exitOK {
-		t.Fatalf("asura apps defaults --check exited %d", code)
+		t.Fatalf("toren apps defaults --check exited %d", code)
 	}
 	var check bytes.Buffer
 	runAppsDefaults(&check, true)
-	list := filepath.Join(home, ".config", "asura-xdg-terminals.list")
+	list := filepath.Join(home, ".config", "toren-xdg-terminals.list")
 	if _, err := os.Stat(list); err == nil {
 		t.Error("--check wrote the terminal list")
 	}
@@ -90,8 +90,8 @@ func TestAppsDefaultsAppliesWhatTheUserOwnsAndOnlyPrintsTheRest(t *testing.T) {
 	shown := out.String()
 	for _, want := range []string{
 		"sudo update-alternatives --set x-terminal-emulator " + defaultsGhostty,
-		"config-file = ?~/.config/asura/apps/ghostty/config",
-		`. "$HOME/.config/asura/apps/zsh/toren.zsh"`,
+		"config-file = ?~/.config/toren/apps/ghostty/config",
+		`. "$HOME/.config/toren/apps/zsh/toren.zsh"`,
 	} {
 		if !strings.Contains(shown, want) {
 			t.Errorf("output lacks %q:\n%s", want, shown)
@@ -110,8 +110,8 @@ func TestAppsDefaultsAppliesWhatTheUserOwnsAndOnlyPrintsTheRest(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	write(filepath.Join(home, ".config", "ghostty", "config"), "config-file = ?~/.config/asura/apps/ghostty/config\n")
-	write(filepath.Join(home, ".zshrc"), `. "$HOME/.config/asura/apps/zsh/toren.zsh"`+"\n")
+	write(filepath.Join(home, ".config", "ghostty", "config"), "config-file = ?~/.config/toren/apps/ghostty/config\n")
+	write(filepath.Join(home, ".zshrc"), `. "$HOME/.config/toren/apps/zsh/toren.zsh"`+"\n")
 	out.Reset()
 	runAppsDefaults(&out, false)
 	if strings.Contains(out.String(), "add this line") {

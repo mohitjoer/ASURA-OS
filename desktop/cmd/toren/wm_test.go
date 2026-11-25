@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"asura/desktop/internal/wm"
+	"toren/desktop/internal/wm"
 )
 
 // The wiring is checked against a client with no provider, so nothing reaches
@@ -45,7 +45,7 @@ func TestWmWithNoProvider(t *testing.T) {
 		for _, args := range [][]string{nil, {"state"}, {"act"}} {
 			var out, errOut bytes.Buffer
 			if code := wmMain(args, none, &out, &errOut); code != exitUsage {
-				t.Errorf("asura wm %v exits %d, want %d", args, code, exitUsage)
+				t.Errorf("toren wm %v exits %d, want %d", args, code, exitUsage)
 			}
 		}
 	})

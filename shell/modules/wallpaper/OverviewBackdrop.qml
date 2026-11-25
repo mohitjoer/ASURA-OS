@@ -12,7 +12,7 @@ import "Singletons"
 // backdrop region, so the surface is composited there.
 //
 // It sits BELOW the desktop's own opaque wallpaper (modules/desktop, the
-// asura-widgets Bottom-layer surface), so with the overview closed it is
+// toren-widgets Bottom-layer surface), so with the overview closed it is
 // completely covered and the desktop reads exactly as before; only the overview,
 // which exposes the backdrop, reveals it.
 //
@@ -57,7 +57,7 @@ Item {
         color: "transparent"
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Background
-        WlrLayershell.namespace: "asura-overview-backdrop"
+        WlrLayershell.namespace: "toren-overview-backdrop"
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
         anchors {

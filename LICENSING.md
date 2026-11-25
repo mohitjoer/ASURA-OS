@@ -7,14 +7,14 @@ clear before you build on Toren. For policy regarding use of the project's name,
 
 ## Summary
 
-| What | Licence | Where it is recorded |
-|---|---|---|
-| Toren's own code | GPL-3.0 | [`LICENSE`](LICENSE) |
-| The base layer and every Void Linux package | whatever each package declares | `/usr/share/doc/<pkg>/copyright` on an installed system |
-| The shell's engine, built by Toren | LGPL-3.0-only | the built package's own copyright file; see below |
-| The shell's surfaces — the vendored upstream components | GPL-3.0-only and Apache-2.0, by component | `shell/vendor/COPYING`, `shell/vendor/LICENSE.apache-2.0` and the manifest's per-component record; see below |
-| Firmware blobs | mixed: most free, some proprietary, each separately licensed | per-package copyright files; see below |
-| Hardware profiles in `system/hardware/profiles/` | GPL-3.0 by convention, but data is data | the profile's own `license:` field |
+| What                                                    | Licence                                                      | Where it is recorded                                                                                         |
+| ------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| Toren's own code                                        | GPL-3.0                                                      | [`LICENSE`](LICENSE)                                                                                         |
+| The base layer and every Void Linux package             | whatever each package declares                               | `/usr/share/doc/<pkg>/copyright` on an installed system                                                      |
+| The shell's engine, built by Toren                      | LGPL-3.0-only                                                | the built package's own copyright file; see below                                                            |
+| The shell's surfaces — the vendored upstream components | GPL-3.0-only and Apache-2.0, by component                    | `shell/vendor/COPYING`, `shell/vendor/LICENSE.apache-2.0` and the manifest's per-component record; see below |
+| Firmware blobs                                          | mixed: most free, some proprietary, each separately licensed | per-package copyright files; see below                                                                       |
+| Hardware profiles in `system/hardware/profiles/`        | GPL-3.0 by convention, but data is data                      | the profile's own `license:` field                                                                           |
 
 The shell is two things, and the table is where the two are kept apart. The **engine** is
 Quickshell: an LGPL-3.0-only binary, built by Toren and shipped unmodified. The **surfaces**
@@ -101,7 +101,7 @@ The obligation under LGPL-3 is short, and Toren's build satisfies it:
 
 The practical consequence for a rebase: a base layer that gains a `quickshell` package ends
 this exception, the way the base layer's own `quickshell` package already does in the
-releases after 26.04. The manifest's `asura_built:` key is the thing that notices, and
+releases after 26.04. The manifest's `toren_built:` key is the thing that notices, and
 that is the point of it.
 
 **One thing this section used to get wrong.** It said that the shell was the only thing in
@@ -120,10 +120,10 @@ upstream commit, and every file in it is listed with a hash in
 
 ### What is vendored, and at which commit
 
-| Component | Upstream | Licence | Pinned commit | Vendored as |
-|---|---|---|---|---|
-| The "ii" Quickshell configuration | [`end-4/dots-hyprland`](https://github.com/end-4/dots-hyprland) | GPL-3.0-only | `2f2a376fdb2ad738bf55f693dd0b474b64bb0ab8` | `shell/modules/`, `shell/services/` |
-| The rounded-polygon widget kit | [`end-4/rounded-polygon-qmljs`](https://github.com/end-4/rounded-polygon-qmljs) | Apache-2.0 | `e31ec4cb4ebf6a46b267f5c42eabf6874916fa16` | `shell/modules/common/widgets/shapes/` |
+| Component                         | Upstream                                                                        | Licence      | Pinned commit                              | Vendored as                            |
+| --------------------------------- | ------------------------------------------------------------------------------- | ------------ | ------------------------------------------ | -------------------------------------- |
+| The "ii" Quickshell configuration | [`end-4/dots-hyprland`](https://github.com/end-4/dots-hyprland)                 | GPL-3.0-only | `2f2a376fdb2ad738bf55f693dd0b474b64bb0ab8` | `shell/modules/`, `shell/services/`    |
+| The rounded-polygon widget kit    | [`end-4/rounded-polygon-qmljs`](https://github.com/end-4/rounded-polygon-qmljs) | Apache-2.0   | `e31ec4cb4ebf6a46b267f5c42eabf6874916fa16` | `shell/modules/common/widgets/shapes/` |
 
 The two licence texts sit with the tree in the repository: `shell/vendor/COPYING` is the
 GPL-3.0 text, copied verbatim from the upstream repository at the pinned commit, and
@@ -138,12 +138,12 @@ and a file that has been edited by hand fails it.
 GPL-3.0 §5 is what governs a distributed work that is based on the component, and §6 is what
 governs the object code. The obligations that apply here, and where each is discharged:
 
-| Obligation | How Toren meets it |
-|---|---|
-| §4 — convey the licence with the work | `shell/vendor/COPYING` is the component's own licence text, copied from the upstream commit. It has to travel in the package with the tree, not merely live in the repository |
-| §5(a) — carry prominent notices that the work was modified, with a date | The manifest names each component, its upstream, its pinned commit and the fact that the vendored files themselves are unmodified; Toren's changes to the composed shell are the overlay files, which are Toren's own code and are named as such. The package's copyright file has to carry the same record |
-| §5(c) — licence the entire work as a whole under the GPL | The composed shell is GPL-3.0: Toren's own code is GPL-3.0 and the "ii" component is GPL-3.0-only. The Apache-2.0 component keeps its own licence and is licensed separately, as §4 of that licence allows |
-| §5(d) — interactive interfaces display Appropriate Legal Notices | Upstream's own interfaces do not display them, and the licence says that a work need not make them do so where the program it is based on does not. Toren does not add them, and records that it does not rather than leaving the question open |
+| Obligation                                                                  | How Toren meets it                                                                                                                                                                                                                                                                                                                         |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| §4 — convey the licence with the work                                       | `shell/vendor/COPYING` is the component's own licence text, copied from the upstream commit. It has to travel in the package with the tree, not merely live in the repository                                                                                                                                                              |
+| §5(a) — carry prominent notices that the work was modified, with a date     | The manifest names each component, its upstream, its pinned commit and the fact that the vendored files themselves are unmodified; Toren's changes to the composed shell are the overlay files, which are Toren's own code and are named as such. The package's copyright file has to carry the same record                                |
+| §5(c) — licence the entire work as a whole under the GPL                    | The composed shell is GPL-3.0: Toren's own code is GPL-3.0 and the "ii" component is GPL-3.0-only. The Apache-2.0 component keeps its own licence and is licensed separately, as §4 of that licence allows                                                                                                                                 |
+| §5(d) — interactive interfaces display Appropriate Legal Notices            | Upstream's own interfaces do not display them, and the licence says that a work need not make them do so where the program it is based on does not. Toren does not add them, and records that it does not rather than leaving the question open                                                                                            |
 | §6(d) — offer the corresponding source at the same place as the object code | The corresponding source of the composed shell is this repository: the vendored tree byte-identical at the pinned commit, the three overlay files, any patch in `shell/vendor/patches/`, and the recipe that builds the engine. Toren publishes the repository beside the packages, so the source is offered in the same way the binary is |
 
 ### The re-theme is a modification, and its source is the repository
@@ -168,11 +168,11 @@ means the corresponding source is the repository, with nothing to reconstruct.
 The shapes kit is under Apache-2.0, and Toren has **not** modified it: every file is
 byte-identical to the pinned commit. So the obligations are the simpler ones.
 
-| Obligation | How Toren meets it |
-|---|---|
-| §4(a) — give recipients a copy of the licence | `shell/vendor/LICENSE.apache-2.0`, copied verbatim from the upstream commit |
-| §4(b) — mark modified files | Nothing is modified, so there is nothing to mark. The manifest records the component as unmodified at the pinned commit, which is the stronger statement |
-| §4(d) — carry the NOTICE file, if the work has one | Upstream ships no NOTICE file at the pinned commit, so there is none to carry |
+| Obligation                                         | How Toren meets it                                                                                                                                       |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| §4(a) — give recipients a copy of the licence      | `shell/vendor/LICENSE.apache-2.0`, copied verbatim from the upstream commit                                                                              |
+| §4(b) — mark modified files                        | Nothing is modified, so there is nothing to mark. The manifest records the component as unmodified at the pinned commit, which is the stronger statement |
+| §4(d) — carry the NOTICE file, if the work has one | Upstream ships no NOTICE file at the pinned commit, so there is none to carry                                                                            |
 
 ### Where the attribution has to travel
 
@@ -228,7 +228,7 @@ Consequences you must accept if you redistribute Toren:
   the third-party notices file. **That rule is changed, deliberately, and the reason is
   worth stating rather than leaving as a silent amendment.**
 
-  A package under `release/` is the right answer for code Toren *builds* — something with
+  A package under `release/` is the right answer for code Toren _builds_ — something with
   its own build system, its own dependencies, its own release cadence, and its own licence
   that Toren would otherwise have to re-derive. Vendoring into the repository is the right
   answer for a different thing: source that ships as source, that is read and configured

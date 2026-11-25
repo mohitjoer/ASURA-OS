@@ -1,4 +1,4 @@
--- Environment for everything the compositor launches. asura-session exports
+-- Environment for everything the compositor launches. toren-session exports
 -- most of this already; it is repeated so a compositor started by hand (a dev
 -- checkout) behaves the same. The values must stay equal to the ones there.
 hl.env("XCURSOR_THEME", "Adwaita")
@@ -6,8 +6,8 @@ hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_THEME", "Adwaita")
 hl.env("HYPRCURSOR_SIZE", "24")
 
-hl.env("XDG_CURRENT_DESKTOP", "Asura")
-hl.env("XDG_SESSION_DESKTOP", "asura")
+hl.env("XDG_CURRENT_DESKTOP", "Toren")
+hl.env("XDG_SESSION_DESKTOP", "toren")
 hl.env("XDG_SESSION_TYPE", "wayland")
 
 hl.env("GDK_BACKEND", "wayland")

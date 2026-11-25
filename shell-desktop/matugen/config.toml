@@ -8,40 +8,40 @@
 # hyprlang), hyprlock colours and fuzzel (not used by ASURA), and KDE (needs
 # kde-material-you-colors, which ASURA does not ship).
 #
-# Templates are read from the installed shell, so an `asura update` that brings
+# Templates are read from the installed shell, so an `toren update` that brings
 # new templates applies them without touching this file.
 
 [config]
 version_check = false
 
 [templates.m3colors]
-input_path = '/usr/share/asura/shell-desktop/matugen/templates/colors.json'
+input_path = '/usr/share/toren/shell-desktop/matugen/templates/colors.json'
 output_path = '~/.local/state/quickshell/user/generated/colors.json'
 
-[templates.asuracolors]
-input_path = '/usr/share/asura/shell-desktop/matugen/templates/colors.json'
-output_path = '~/.cache/asura/colors.json'
+[templates.torencolors]
+input_path = '/usr/share/toren/shell-desktop/matugen/templates/colors.json'
+output_path = '~/.cache/toren/colors.json'
 
 [templates.ghostty]
-input_path = '/usr/share/asura/shell/matugen/templates/ghostty.conf'
-output_path = '~/.config/asura/apps/ghostty/colors'
+input_path = '/usr/share/toren/shell/matugen/templates/ghostty.conf'
+output_path = '~/.config/toren/apps/ghostty/colors'
 
 [templates.ghostty_user]
-input_path = '/usr/share/asura/shell/matugen/templates/ghostty.conf'
+input_path = '/usr/share/toren/shell/matugen/templates/ghostty.conf'
 output_path = '~/.config/ghostty/colors'
 
 [templates.btop]
-input_path = '/usr/share/asura/shell/matugen/templates/btop.theme'
-output_path = '~/.config/btop/themes/asura.theme'
+input_path = '/usr/share/toren/shell/matugen/templates/btop.theme'
+output_path = '~/.config/btop/themes/toren.theme'
 
 [templates.wallpaper]
-input_path = '/usr/share/asura/shell-desktop/matugen/templates/wallpaper.txt'
+input_path = '/usr/share/toren/shell-desktop/matugen/templates/wallpaper.txt'
 output_path = '~/.local/state/quickshell/user/generated/wallpaper/path.txt'
 
 [templates.gtk3]
-input_path = '/usr/share/asura/shell-desktop/matugen/templates/gtk-3.0/gtk.css'
+input_path = '/usr/share/toren/shell-desktop/matugen/templates/gtk-3.0/gtk.css'
 output_path = '~/.config/gtk-3.0/gtk.css'
 
 [templates.gtk4]
-input_path = '/usr/share/asura/shell-desktop/matugen/templates/gtk-4.0/gtk.css'
+input_path = '/usr/share/toren/shell-desktop/matugen/templates/gtk-4.0/gtk.css'
 output_path = '~/.config/gtk-4.0/gtk.css'

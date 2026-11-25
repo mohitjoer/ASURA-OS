@@ -10,7 +10,7 @@ import (
 func TestPruneLivewallCache(t *testing.T) {
 	dir := t.TempDir()
 	t.Setenv("XDG_CACHE_HOME", dir)
-	cache := filepath.Join(dir, "asura", "wallpaper", "livewall")
+	cache := filepath.Join(dir, "toren", "wallpaper", "livewall")
 	if err := os.MkdirAll(cache, 0o755); err != nil {
 		t.Fatal(err)
 	}

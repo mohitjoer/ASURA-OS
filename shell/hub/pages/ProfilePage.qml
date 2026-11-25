@@ -9,7 +9,7 @@ import qs.Ui.Singletons
 import "../Singletons"
 
 // Profile / System Specifications page.
-// Shows system specs, Asura OS version, and live update status.
+// Shows system specs, Toren OS version, and live update status.
 Item {
     id: pg
 
@@ -49,7 +49,7 @@ Item {
             Image {
                 width: 12; height: 12
                 anchors.verticalCenter: parent.verticalCenter
-                source: Qt.resolvedUrl(Tokens.light ? "../../assets/asura-logo.svg" : "../../assets/asura-logo-on-dark.svg")
+                source: Qt.resolvedUrl(Tokens.light ? "../../assets/toren-logo.svg" : "../../assets/toren-logo-on-dark.svg")
                 sourceSize.width: 24; sourceSize.height: 24
                 fillMode: Image.PreserveAspectFit
                 smooth: true

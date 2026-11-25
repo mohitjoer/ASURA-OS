@@ -6,7 +6,7 @@ import (
 	"os/exec"
 )
 
-// runGpuMux routes `asura-hubd gpu mux get|set` to the asura-gpu helper.
+// runGpuMux routes `toren-hubd gpu mux get|set` to the toren-gpu helper.
 // The Hub GPU page polls `gpu mux get` to detect if the laptop has a
 // hardware display-routing switch (e.g. ASUS ROG / TUF WMI mux, Lenovo Legion,
 // apple-gmux, or vga_switcheroo), and displays the Hybrid/Discrete switch if capable.
@@ -14,7 +14,7 @@ func runGpuMux(args []string) error {
 	if len(args) == 0 {
 		return fmt.Errorf("gpu mux needs get|set")
 	}
-	bin := asuraGpuBin()
+	bin := torenGpuBin()
 	switch args[0] {
 	case "get":
 		cmd := exec.Command(bin, "mux", "get")

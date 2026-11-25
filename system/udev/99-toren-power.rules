@@ -1,10 +1,10 @@
-# Asura OS Udev Power Rules
+# Toren OS Udev Power Rules
 
 # Automatically switches system power profiles and manages NVIDIA dGPU D3cold state.
 
 # 1. AC Adapter status changes (restricted to Mains/AC wall power, ignoring wireless peripherals)
-SUBSYSTEM=="power_supply", ATTR{type}=="Mains", ATTR{online}=="1", RUN+="/usr/bin/asura power ac"
-SUBSYSTEM=="power_supply", ATTR{type}=="Mains", ATTR{online}=="0", RUN+="/usr/bin/asura power bat"
+SUBSYSTEM=="power_supply", ATTR{type}=="Mains", ATTR{online}=="1", RUN+="/usr/bin/toren power ac"
+SUBSYSTEM=="power_supply", ATTR{type}=="Mains", ATTR{online}=="0", RUN+="/usr/bin/toren power bat"
 
 # 2. NVIDIA PCIe Runtime Power Management is owned by 80-nvidia-pm.rules
 # (bind-time, TEST=="power/control"). Not duplicated here.

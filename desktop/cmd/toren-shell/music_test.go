@@ -400,7 +400,7 @@ func TestCanvasFileFor(t *testing.T) {
 	if got := canvasFileFor(id); got != "" {
 		t.Fatalf("empty library: got %q, want empty", got)
 	}
-	cdir := filepath.Join(dir, "asura", "canvas")
+	cdir := filepath.Join(dir, "toren", "canvas")
 	if err := os.MkdirAll(cdir, 0o755); err != nil {
 		t.Fatal(err)
 	}

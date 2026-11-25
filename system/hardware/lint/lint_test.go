@@ -162,7 +162,7 @@ func TestTierOneCannotBeClaimed(t *testing.T) {
 }
 
 func TestTierOneWithMaintainerPasses(t *testing.T) {
-	body := strings.Replace(validProfile, "tier: 2", "tier: 1\nmaintainer: \"Asura Core Team\"", 1)
+	body := strings.Replace(validProfile, "tier: 2", "tier: 1\nmaintainer: \"Toren Core Team\"", 1)
 	findings := Lint(write(t, "asus-rog-strix-g16-2024.yaml", body))
 	if _, fired := rules(findings)["profile/tier-claimed"]; fired {
 		t.Errorf("a maintainer-verified tier 1 profile was refused: %v", findings)

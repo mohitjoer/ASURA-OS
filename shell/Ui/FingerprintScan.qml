@@ -1,9 +1,9 @@
 import QtQuick
 import QtQuick.Shapes
 
-// CANONICAL copy (Asura.Ui): used by the shell polkit surface and the Hub
+// CANONICAL copy (Toren.Ui): used by the shell polkit surface and the Hub
 // enroll UI. The standalone offline lock bundle keeps a byte-identical mirror at
-// asura/lockscreen/qylock/quickshell-lockscreen/FingerprintScan.qml (it cannot
+// toren/lockscreen/qylock/quickshell-lockscreen/FingerprintScan.qml (it cannot
 // import qs.Ui; it vendors its deps, like SddmComponents). Keep in sync.
 //
 // Shared fingerprint scan / unlock visual. Self-contained (QtQuick +

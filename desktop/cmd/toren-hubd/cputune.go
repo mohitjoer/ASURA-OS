@@ -1,12 +1,12 @@
 package main
 
-// cputune.go: `asura-hubd cpu ...`, the Machine page's CPU power-profile and
+// cputune.go: `toren-hubd cpu ...`, the Machine page's CPU power-profile and
 // battery surface. Idle timeouts are not here: hypridle drives them from the
-// org.asura.desktop idle keys, and nothing reads power.json. Unlike gputune.go it probes no hardware itself: asura-power
+// org.toren.desktop idle keys, and nothing reads power.json. Unlike gputune.go it probes no hardware itself: toren-power
 // is the single source of truth for the knob set, so this only shells out to
-// `asura-power capabilities --json` / `profile get` and reshapes the result
+// `toren-power capabilities --json` / `profile get` and reshapes the result
 // into the []Tunable the page already renders. cpuTunables is the pure reshape
-// and is unit-tested without executing asura-power.
+// and is unit-tested without executing toren-power.
 
 import (
 	"encoding/json"
@@ -14,9 +14,9 @@ import (
 	"os/exec"
 )
 
-const asuraPowerBin = "asura-power"
+const torenPowerBin = "toren-power"
 
-// cpuCaps mirrors `asura-power capabilities --json`. Every knob is a pointer so
+// cpuCaps mirrors `toren-power capabilities --json`. Every knob is a pointer so
 // an absent capability key drops its Tunable rather than rendering an empty row.
 type cpuCaps struct {
 	ActiveProfile string      `json:"activeProfile"`
@@ -46,7 +46,7 @@ type sliderCap struct {
 	Current float64 `json:"current"`
 }
 
-// profileDef is one profile's stored definition from `asura-power profile get`.
+// profileDef is one profile's stored definition from `toren-power profile get`.
 // A missing key means "unset": the reshape falls back to the live capability
 // value, never a forced default.
 type profileDef struct {
@@ -66,9 +66,9 @@ func runCpu(args []string) error {
 		}
 		return cpuSwitch(args[1])
 	}
-	// every other verb calls asura-power
-	if _, err := exec.LookPath(asuraPowerBin); err != nil {
-		return unavailable("cpu "+args[0], asuraPowerBin+" is not installed", args[1:])
+	// every other verb calls toren-power
+	if _, err := exec.LookPath(torenPowerBin); err != nil {
+		return unavailable("cpu "+args[0], torenPowerBin+" is not installed", args[1:])
 	}
 	switch args[0] {
 	case "caps":
@@ -92,7 +92,7 @@ func runCpu(args []string) error {
 // cpuSwitch changes the LIVE power profile. The write goes through the shell
 // daemon, not straight at ppd: the daemon is the single owner of the user's
 // pick (it banks it for the reboot restore, keeps game mode's stash intact,
-// and re-applies the Asura CPU definition after ppd settles). A second, raw
+// and re-applies the Toren CPU definition after ppd settles). A second, raw
 // writer would silently undo all three.
 func cpuSwitch(profile string) error {
 	return daemonCall("powerprofiles.setProfile", map[string]string{"profile": profile}, nil)
@@ -124,9 +124,9 @@ func cpuActiveReport() error {
 
 func readCapabilities() (cpuCaps, error) {
 	var caps cpuCaps
-	out, err := exec.Command(asuraPowerBin, "capabilities", "--json").Output()
+	out, err := exec.Command(torenPowerBin, "capabilities", "--json").Output()
 	if err != nil {
-		return caps, fmt.Errorf("asura-power capabilities: %w", err)
+		return caps, fmt.Errorf("toren-power capabilities: %w", err)
 	}
 	if err := json.Unmarshal(out, &caps); err != nil {
 		return caps, fmt.Errorf("parse capabilities: %w", err)
@@ -141,7 +141,7 @@ func readProfileDef(profile string) profileDef {
 	if profile == "" {
 		return def
 	}
-	out, err := exec.Command(asuraPowerBin, "profile", "get", profile).Output()
+	out, err := exec.Command(torenPowerBin, "profile", "get", profile).Output()
 	if err != nil {
 		return def
 	}
@@ -218,14 +218,14 @@ func cpuSet(scope, id, value string) error {
 	case "battery":
 		switch id {
 		case "chargeLimit":
-			return ttyRun(asuraPowerBin, "charge-limit", "set", value)
+			return ttyRun(torenPowerBin, "charge-limit", "set", value)
 		case "aspm":
-			return ttyRun(asuraPowerBin, "aspm", "set", value)
+			return ttyRun(torenPowerBin, "aspm", "set", value)
 		default:
 			return fmt.Errorf("unknown battery knob: %s", id)
 		}
 	case "idle":
-		return fmt.Errorf("idle timeouts are the org.asura.desktop idle keys; hypridle reads them, not this verb")
+		return fmt.Errorf("idle timeouts are the org.toren.desktop idle keys; hypridle reads them, not this verb")
 	}
-	return ttyRun(asuraPowerBin, "profile", "set", scope, id, value)
+	return ttyRun(torenPowerBin, "profile", "set", scope, id, value)
 }

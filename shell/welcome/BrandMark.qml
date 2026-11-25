@@ -5,16 +5,16 @@ import qs.Ui.Singletons
 import "Singletons"
 
 // The desktop brand seal, A by default. Users swap it globally (their own
-// glyph/text, or an image) from Asura Settings -> Shell -> Global; stored in
-// ~/.config/asura/brand.json. Asura's own apps (the Hub) never use this and
-// keep the Asura brand. Ink, not an accent: Asura is strictly monochrome.
+// glyph/text, or an image) from Toren Settings -> Shell -> Global; stored in
+// ~/.config/toren/brand.json. Toren's own apps (the Hub) never use this and
+// keep the Toren brand. Ink, not an accent: Toren is strictly monochrome.
 Item {
     id: mark
 
     property real size: 13
     property color color: Tokens.ink
     property int weight: Font.Medium
-    // recolour a single-colour image mark to `color` (matches the tinted Asura mark
+    // recolour a single-colour image mark to `color` (matches the tinted Toren mark
     // idiom); off shows a full-colour logo as-is. no effect in text mode.
     property bool tint: Theme.markTint
 
@@ -37,7 +37,7 @@ Item {
         font.pixelSize: mark.size
     }
 
-    // custom image mark. tint recolours a single-colour logo to `color` (the Asura mark
+    // custom image mark. tint recolours a single-colour logo to `color` (the Toren mark
     // idiom) via an alpha-preserving overlay, so a dark OR light mark both take
     // the accent; tint off shows a full-colour logo as-is.
     Image {

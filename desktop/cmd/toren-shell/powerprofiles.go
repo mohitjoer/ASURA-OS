@@ -55,7 +55,7 @@ type powerProfilesState struct {
 func (d *daemon) startPowerProfiles() {
 	conn, err := dbus.ConnectSystemBus()
 	if err != nil {
-		log.Printf("asura-shell: power profiles disabled: %v", err)
+		log.Printf("toren-shell: power profiles disabled: %v", err)
 		return
 	}
 	p := &powerProfilesState{
@@ -74,7 +74,7 @@ func (d *daemon) startPowerProfiles() {
 		dbus.WithMatchInterface("org.freedesktop.DBus.Properties"),
 		dbus.WithMatchMember("PropertiesChanged"),
 	); err != nil {
-		log.Printf("asura-shell: power profiles signal match failed: %v", err)
+		log.Printf("toren-shell: power profiles signal match failed: %v", err)
 	}
 	sigs := make(chan *dbus.Signal, 8)
 	conn.Signal(sigs)
@@ -112,14 +112,14 @@ func (d *daemon) startPowerProfiles() {
 	// Restore the last pick: ppd resets to a platform default on reboot.
 	if saved != "" && saved != p.activeProfile() {
 		if err := p.setProfile(saved); err != nil {
-			log.Printf("asura-shell: restore power profile %q: %v", saved, err)
+			log.Printf("toren-shell: restore power profile %q: %v", saved, err)
 		}
 	}
 	if shouldSeedBalanced(saved, p.activeProfile(), gameModeActive()) {
 		// setProfile rejects a name ppd does not offer, so a box with no
 		// `balanced` simply logs and keeps what it had.
 		if err := p.setProfile(seedProfile); err != nil {
-			log.Printf("asura-shell: seed power profile %q: %v", seedProfile, err)
+			log.Printf("toren-shell: seed power profile %q: %v", seedProfile, err)
 		} else {
 			p.saved.Store(seedProfile)
 			p.persistProfile(seedProfile)
@@ -193,10 +193,10 @@ func (p *powerProfilesState) setProfile(name string) error {
 }
 
 // persistedProfilePath is the daemon-owned store for the user's last explicit
-// power-profile choice, kept beside power.json but separate so a asura-power
+// power-profile choice, kept beside power.json but separate so a toren-power
 // write of the CPU knobs never clobbers it (and vice versa).
 func persistedProfilePath() string {
-	dir := asuraConfigDir()
+	dir := torenConfigDir()
 	if dir == "" {
 		return ""
 	}
@@ -221,7 +221,7 @@ const (
 	restoreReassertWindow = 12 * time.Second
 )
 
-// gameModeProfilePath mirrors asura-cmd-game-mode's stash file, present only while
+// gameModeProfilePath mirrors toren-cmd-game-mode's stash file, present only while
 // a game-mode override holds the profile at performance. Env overrides match the
 // script's.
 func gameModeProfilePath() string {
@@ -230,13 +230,13 @@ func gameModeProfilePath() string {
 	}
 	dir := os.Getenv("ASURA_STATE_PATH")
 	if dir == "" {
-		dir = filepath.Join(stateDir(), "asura")
+		dir = filepath.Join(stateDir(), "toren")
 	}
 	return filepath.Join(dir, "game-mode.profile")
 }
 
 // gameModeActive reports whether game mode holds the profile. Its switch is
-// Asura's, not the user's, so the daemon neither banks nor fights it; game mode
+// Toren's, not the user's, so the daemon neither banks nor fights it; game mode
 // restores the prior profile on stop.
 func gameModeActive() bool {
 	_, err := os.Stat(gameModeProfilePath())
@@ -247,7 +247,7 @@ func gameModeActive() bool {
 type profileAction int
 
 const (
-	profileNone     profileAction = iota // Asura-caused change; leave it, do not record it
+	profileNone     profileAction = iota // Toren-caused change; leave it, do not record it
 	profilePersist                       // a genuine user pick (either write path); save it
 	profileReassert                      // ppd's boot default landed after restore; put the pick back
 )
@@ -290,7 +290,7 @@ func (p *powerProfilesState) maybeHandleProfileChange() {
 		p.saved.Store(active)
 	case profileReassert:
 		if err := p.setProfile(saved); err != nil {
-			log.Printf("asura-shell: re-assert power profile %q over ppd default %q: %v", saved, active, err)
+			log.Printf("toren-shell: re-assert power profile %q over ppd default %q: %v", saved, active, err)
 		}
 	}
 }
@@ -363,16 +363,16 @@ func profileNames(v any) []string {
 	return out
 }
 
-// applyProfileCmd re-applies a profile's definition through asura-power. It is a
+// applyProfileCmd re-applies a profile's definition through toren-power. It is a
 // package var so a test can record calls without spawning the helper.
 var applyProfileCmd = func(profile string) error {
-	return exec.Command("asura-power", "apply-profile", profile).Run()
+	return exec.Command("toren-power", "apply-profile", profile).Run()
 }
 
-// powerConfigPath is ~/.config/asura/power.json, the CPU/battery knob store the
-// Machine page and asura-power write. Empty when the home dir is unknowable.
+// powerConfigPath is ~/.config/toren/power.json, the CPU/battery knob store the
+// Machine page and toren-power write. Empty when the home dir is unknowable.
 func powerConfigPath() string {
-	dir := asuraConfigDir()
+	dir := torenConfigDir()
 	if dir == "" {
 		return ""
 	}
@@ -433,7 +433,7 @@ func (p *powerProfilesState) scheduleApply() {
 }
 
 // applyActiveProfile writes the user's definition for active to sysfs via
-// asura-power. It runs on the timer goroutine, never the signal goroutine, so a
+// toren-power. It runs on the timer goroutine, never the signal goroutine, so a
 // slow or prompting helper cannot stall signal handling. It no-ops (never execs)
 // when the profile is not configured, and logs a failure at most once per profile.
 func (p *powerProfilesState) applyActiveProfile(active string) {
@@ -446,7 +446,7 @@ func (p *powerProfilesState) applyActiveProfile(active string) {
 	if err := applyProfileCmd(active); err != nil {
 		if p.lastApplyErr != active {
 			p.lastApplyErr = active
-			log.Printf("asura-shell: apply-profile %q failed: %v", active, err)
+			log.Printf("toren-shell: apply-profile %q failed: %v", active, err)
 		}
 		return
 	}

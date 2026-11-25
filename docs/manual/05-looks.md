@@ -1,8 +1,8 @@
 # Looks: themes and wallpapers
 
 ```sh
-asura theme set           # the looks
-asura theme set sakura    # switch
+toren theme set           # the looks
+toren theme set sakura    # switch
 ```
 
 A look sets the wallpaper, light or dark, and the colours, and the bar,

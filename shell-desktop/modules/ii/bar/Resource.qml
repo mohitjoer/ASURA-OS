@@ -3,7 +3,7 @@ import qs.modules.common.widgets
 import QtQuick
 import QtQuick.Layouts
 
-// ASURA overlay (shell-desktop/asura/vendor.sh OVERLAYS): one resource readout,
+// ASURA overlay (shell-desktop/toren/vendor.sh OVERLAYS): one resource readout,
 // in the professional style of the ASURA bar: a short label ("CPU"), the
 // percentage in tabular figures, and a thin usage bar under them that turns
 // the error colour past the warning threshold. Same properties as end-4's

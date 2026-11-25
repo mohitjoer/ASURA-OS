@@ -49,7 +49,7 @@ if [ -n "$UNIT" ]; then
         fi
     else
         # Fall back to runit service status if log file does not exist yet
-        sv status "$UNIT" 2>/dev/null || echo "[asura-journalctl] no log stream found at $LOG_FILE"
+        sv status "$UNIT" 2>/dev/null || echo "[toren-journalctl] no log stream found at $LOG_FILE"
         exit 0
     fi
 else

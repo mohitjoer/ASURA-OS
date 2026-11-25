@@ -45,7 +45,7 @@ Item {
     Process {
         id: cursorEnum
         running: false
-        command: ["asura-hubd", "desktop", "cursors"]
+        command: ["toren-hubd", "desktop", "cursors"]
         stdout: StdioCollector {
             onStreamFinished: {
                 try {
@@ -68,7 +68,7 @@ Item {
     Process {
         id: touchpadStatus
         running: false
-        command: ["asura", "wm", "act", "input.touchpad", "status"]
+        command: ["toren", "wm", "act", "input.touchpad", "status"]
         stdout: StdioCollector {
             onStreamFinished: pg.touchpadOn = String(this.text).trim() !== "off"
         }
@@ -79,7 +79,7 @@ Item {
         onExited: touchpadStatus.running = true
     }
     function setTouchpad(on) {
-        touchpadSet.command = ["asura", "wm", "act", "input.touchpad", on ? "on" : "off"];
+        touchpadSet.command = ["toren", "wm", "act", "input.touchpad", on ? "on" : "off"];
         touchpadSet.running = false;
         touchpadSet.running = true;
     }
@@ -237,7 +237,7 @@ Item {
 
     Process {
         id: layoutsProc
-        command: ["asura-hubd", "desktop", "layouts"]
+        command: ["toren-hubd", "desktop", "layouts"]
         running: true
         stdout: StdioCollector {
             onStreamFinished: {
@@ -258,7 +258,7 @@ Item {
     Process {
         id: variantsProc
         property string forLayout: ""
-        command: ["asura-hubd", "desktop", "variants", forLayout]
+        command: ["toren-hubd", "desktop", "variants", forLayout]
         stdout: StdioCollector {
             onStreamFinished: {
                 var out = [{ "code": "", "name": I18n.tr("Default") }];
@@ -620,7 +620,7 @@ Item {
             Image {
                 width: 12; height: 12
                 anchors.verticalCenter: parent.verticalCenter
-                source: Qt.resolvedUrl("../../assets/asura-logo-on-dark.svg")
+                source: Qt.resolvedUrl("../../assets/toren-logo-on-dark.svg")
                 sourceSize.width: 24; sourceSize.height: 24
                 fillMode: Image.PreserveAspectFit
                 smooth: true

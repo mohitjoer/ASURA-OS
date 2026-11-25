@@ -9,12 +9,12 @@ and converting existing Void Linux systems via `toren adopt`.
 
 Toren Linux supports three distinct ways to get the desktop running:
 
-| Path | Command | Use Case | Disk Changes |
-|---|---|---|---|
-| **Clean Install** | `toren install` | Dedicated drive or new machine | Erases disk, creates GPT/ESP, Btrfs subvolumes |
-| **Install Alongside (Dual-Boot)** | `toren install --alongside` | Coexist with Windows or another Linux | Preserves partition table, uses unallocated free space, reuses ESP |
-| **Unattended Install** | `toren install --config FILE` | Automated lab, VM, or CI deployment | Guided by answer file, passwords never logged in plaintext |
-| **Adopt Existing Void** | `toren adopt` | Convert existing Void Linux glibc installation | In-place, reversible with `toren adopt --undo`, atomic backup |
+| Path                              | Command                       | Use Case                                       | Disk Changes                                                       |
+| --------------------------------- | ----------------------------- | ---------------------------------------------- | ------------------------------------------------------------------ |
+| **Clean Install**                 | `toren install`               | Dedicated drive or new machine                 | Erases disk, creates GPT/ESP, Btrfs subvolumes                     |
+| **Install Alongside (Dual-Boot)** | `toren install --alongside`   | Coexist with Windows or another Linux          | Preserves partition table, uses unallocated free space, reuses ESP |
+| **Unattended Install**            | `toren install --config FILE` | Automated lab, VM, or CI deployment            | Guided by answer file, passwords never logged in plaintext         |
+| **Adopt Existing Void**           | `toren adopt`                 | Convert existing Void Linux glibc installation | In-place, reversible with `toren adopt --undo`, atomic backup      |
 
 ---
 
@@ -24,6 +24,7 @@ The guided system installer is located at `installation/toren-installer.sh` and 
 `toren install` or the application launcher shortcut.
 
 ### Flag Reference
+
 ```sh
 toren-installer [options] [TARGET_DISK]
 
@@ -46,10 +47,11 @@ erasing existing data or breaking Windows Boot Manager.
 
 ```sh
 # Run installer in alongside mode
-sudo asura install --alongside /dev/nvme0n1
+sudo toren install --alongside /dev/nvme0n1
 ```
 
 ### Safety Rules & Guardrails
+
 1. **UEFI Mode Required**: The installer verifies `IS_UEFI=1`. Legacy BIOS / MBR alongside
    installation is strictly refused because partition table sharing risks bootloader corruption.
 2. **GPT Table Required**: Target disk must use GPT. MBR partition tables are refused.
@@ -61,7 +63,7 @@ sudo asura install --alongside /dev/nvme0n1
 5. **ESP Preservation**: The existing EFI System Partition is discovered and preserved. It is
    **never** formatted with `mkfs.vfat`.
 6. **Contiguous Free Space**: Scans for unallocated slices >= 20 GiB. Only the free slice is
-   partitioned into `AsuraRoot` (and `ASURA_BOOT` if encrypted).
+   partitioned into `TorenRoot` (and `ASURA_BOOT` if encrypted).
 7. **GRUB OS-Prober**: Enables `GRUB_DISABLE_OS_PROBER=false` in `/etc/default/grub` so `grub-mkconfig`
    automatically discovers Windows Boot Manager and other installed kernels.
 8. **Preserve Fallback Bootloader**: In dual-boot mode, `/boot/efi/EFI/BOOT/BOOTX64.EFI` is
@@ -74,15 +76,16 @@ sudo asura install --alongside /dev/nvme0n1
 Deploy Toren Linux non-interactively using an answer file. Passwords can be supplied as pre-hashed
 shadow strings (`$6$...`) or plain strings. Passwords and passphrases are **never logged in cleartext**.
 
-### Sample Answer File (`asura-answer.yaml` / properties)
+### Sample Answer File (`toren-answer.yaml` / properties)
+
 ```yaml
 disk: /dev/sda
-mode: alongside          # "alongside" (dual-boot) or "wipe" (clean)
-filesystem: btrfs        # "btrfs" or "ext4"
-encryption: yes          # "yes" or "no"
+mode: alongside # "alongside" (dual-boot) or "wipe" (clean)
+filesystem: btrfs # "btrfs" or "ext4"
+encryption: yes # "yes" or "no"
 luks_password: SuperSecureLuksPass123!
-hostname: asura-station
-user: asura
+hostname: toren-station
+user: toren
 password_hash: $6$rounds=4096$saltsalt$fakehashvalueforunattended123
 timezone: UTC
 locale: en_US.UTF-8
@@ -90,12 +93,13 @@ keyboard: us
 ```
 
 ### Executing Unattended Install
+
 ```sh
 # Dry run to preview the execution plan
-asura install --dry-run --config /path/to/asura-answer.yaml
+toren install --dry-run --config /path/to/toren-answer.yaml
 
 # Execute unattended installation
-sudo asura install --config /path/to/asura-answer.yaml
+sudo toren install --config /path/to/toren-answer.yaml
 ```
 
 ---
@@ -106,26 +110,28 @@ sudo asura install --config /path/to/asura-answer.yaml
 existing Void Linux glibc x86_64 system without reinstalling, repartitioning, or touching the kernel.
 
 ### Commands
+
 ```sh
 # 1. Preflight check (inspects Void, glibc, x86_64, disk space >= 5GB)
-asura adopt --check
+toren adopt --check
 
-# 2. Execute adoption (atomic backup to /etc/asura/adopt/backup/<timestamp>/)
-sudo asura adopt
+# 2. Execute adoption (atomic backup to /etc/toren/adopt/backup/<timestamp>/)
+sudo toren adopt
 
 # 3. Verify deployed session registrations and integrity
-asura adopt --verify
+toren adopt --verify
 
 # 4. Check for obsolete or conflicting display managers
-asura adopt --prune
+toren adopt --prune
 
 # 5. Full rollback (byte-for-byte undo using self-contained restore.sh)
-sudo asura adopt --undo
+sudo toren adopt --undo
 ```
 
 ### Adoption Guardrails
+
 - **Distribution Check**: Strictly requires Void Linux (`/etc/os-release` `ID=void`).
 - **Architecture Check**: Strictly requires `x86_64`.
 - **C Library Check**: Strictly requires `glibc`. Musl installations are refused.
-- **Reversibility**: Generates `/etc/asura/adopt/backup/<timestamp>/restore.sh` and `/etc/asura/adopt/state.json`.
+- **Reversibility**: Generates `/etc/toren/adopt/backup/<timestamp>/restore.sh` and `/etc/toren/adopt/state.json`.
   Running `toren adopt --undo` restores all replaced files byte-for-byte and unregisters Toren session components.

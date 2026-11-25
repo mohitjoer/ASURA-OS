@@ -10,7 +10,7 @@
 
 **untouchable · dominating**
 
-*Ten* is heaven, the highest point of the sky. An asura is that same point. The
+_Ten_ is heaven, the highest point of the sky. An toren is that same point. The
 mark and the name say one thing, and they say it about the architecture as much as the
 project: this is the top of the stack, and it sits above everything it is built on.
 
@@ -36,14 +36,14 @@ care about first.
 
 ### What you need
 
-| | |
-|---|---|
-| CPU | 64-bit x86 (x86_64), Intel or AMD |
-| Memory | 4 GB minimum, 8 GB or more recommended (the live session boots in 2 GB) |
-| Storage | A whole disk for Toren (the installer erases it), 32 GB or more recommended, SSD preferred |
-| Firmware | UEFI or legacy BIOS. **Secure Boot must be turned off** in the firmware settings; it is [not supported yet](docs/system-services.md#secure-boot) |
-| USB stick | 4 GB or larger, for the installer image |
-| Network | Optional for the install, needed for updates |
+|           |                                                                                                                                                  |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| CPU       | 64-bit x86 (x86_64), Intel or AMD                                                                                                                |
+| Memory    | 4 GB minimum, 8 GB or more recommended (the live session boots in 2 GB)                                                                          |
+| Storage   | A whole disk for Toren (the installer erases it), 32 GB or more recommended, SSD preferred                                                       |
+| Firmware  | UEFI or legacy BIOS. **Secure Boot must be turned off** in the firmware settings; it is [not supported yet](docs/system-services.md#secure-boot) |
+| USB stick | 4 GB or larger, for the installer image                                                                                                          |
+| Network   | Optional for the install, needed for updates                                                                                                     |
 
 Check your laptop in the [hardware compatibility matrix](docs/hardware.md) first. Machines without a
 profile get conservative defaults (support tier 3) and may need manual fixes.
@@ -105,7 +105,7 @@ Any of these work:
 Open **Install Toren Linux** from the launcher, or run this in a terminal:
 
 ```bash
-asura install
+toren install
 ```
 
 The installer walks you through choosing the disk, the filesystem (Btrfs with snapshots, or
@@ -127,34 +127,34 @@ Most Linux desktops are a distribution's defaults plus whatever you can find. To
 single coherent opinion: a curated package set, one design language applied everywhere, a
 hardware profile for your specific machine, and an updater that can roll back.
 
-| Layer | Choice |
-|---|---|
-| Base layer | Void Linux x86_64 (glibc) — the substrate only |
-| Init System | runit (system daemons) + user-level runit supervisor (`asura-user-services`) |
-| Seat Management | seatd (`LIBSEAT_BACKEND=seatd`) / elogind |
-| Compositor | Hyprland (Wayland) |
-| Desktop shell | Quickshell (QML) — bar, dock, launcher, popouts, widgets. The engine is built by Toren; the surfaces are vendored open-source components, re-themed to Toren's monochrome design language |
-| Control tools | Go — `toren`, `toren-sysd` (root daemon at `/run/asura/sysd.sock`), `toren-userd` (session daemon), `toren-shell`, `toren-hubd`, `toren-wallpaper`, and `apm` |
-| Settings store | GSettings schemas + dconf, one writer per setting |
-| GPU & Power | `toren gpu` (PCI inspection & `prime-run` offload), `toren power` (profiles & NVIDIA RTX 3050 D3cold management) |
-| Terminal | Ghostty — strictly supported, configured by Toren, never kitty |
-| User shell | zsh + starship |
-| Editor | Neovim |
-| Boot chain | GRUB EFI |
-| Installer | `toren install` / `toren-installer.desktop` guided system installer |
-| Desktop services | pipewire + wireplumber, tlp, NetworkManager, seatd |
-| Portals | `xdg-desktop-portal-hyprland` + `-gtk`, and `-lxqt` for Secret interface |
-| Package manager | XBPS, with first-party repository `asura-xbps-repo`, plus `apm` package manager frontend |
-| Software Store | [Toren Store](https://github.com/Toren-Linux/asura-store) — Graphical showroom window & Go data plane (`toren-store`), multi-provider XBPS/plugin/theme catalogue |
-| Resource Monitor | `btop` — Real-time telemetry, process manager & task manager with Toren adaptive color theming |
-| Agent layer | OpenCode with the Toren skills wired in (`toren-agent`) |
+| Layer            | Choice                                                                                                                                                                                    |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Base layer       | Void Linux x86_64 (glibc) — the substrate only                                                                                                                                            |
+| Init System      | runit (system daemons) + user-level runit supervisor (`toren-user-services`)                                                                                                              |
+| Seat Management  | seatd (`LIBSEAT_BACKEND=seatd`) / elogind                                                                                                                                                 |
+| Compositor       | Hyprland (Wayland)                                                                                                                                                                        |
+| Desktop shell    | Quickshell (QML) — bar, dock, launcher, popouts, widgets. The engine is built by Toren; the surfaces are vendored open-source components, re-themed to Toren's monochrome design language |
+| Control tools    | Go — `toren`, `toren-sysd` (root daemon at `/run/toren/sysd.sock`), `toren-userd` (session daemon), `toren-shell`, `toren-hubd`, `toren-wallpaper`, and `apm`                             |
+| Settings store   | GSettings schemas + dconf, one writer per setting                                                                                                                                         |
+| GPU & Power      | `toren gpu` (PCI inspection & `prime-run` offload), `toren power` (profiles & NVIDIA RTX 3050 D3cold management)                                                                          |
+| Terminal         | Ghostty — strictly supported, configured by Toren, never kitty                                                                                                                            |
+| User shell       | zsh + starship                                                                                                                                                                            |
+| Editor           | Neovim                                                                                                                                                                                    |
+| Boot chain       | GRUB EFI                                                                                                                                                                                  |
+| Installer        | `toren install` / `toren-installer.desktop` guided system installer                                                                                                                       |
+| Desktop services | pipewire + wireplumber, tlp, NetworkManager, seatd                                                                                                                                        |
+| Portals          | `xdg-desktop-portal-hyprland` + `-gtk`, and `-lxqt` for Secret interface                                                                                                                  |
+| Package manager  | XBPS, with first-party repository `toren-xbps-repo`, plus `apm` package manager frontend                                                                                                  |
+| Software Store   | [Toren Store](https://github.com/Toren-Linux/toren-store) — Graphical showroom window & Go data plane (`toren-store`), multi-provider XBPS/plugin/theme catalogue                         |
+| Resource Monitor | `btop` — Real-time telemetry, process manager & task manager with Toren adaptive color theming                                                                                            |
+| Agent layer      | OpenCode with the Toren skills wired in (`toren-agent`)                                                                                                                                   |
 
 ### Why Void Linux is the base layer
 
 Void Linux provides a clean, bloat-free foundation:
 
 1. **glibc x86_64**: Complete binary compatibility with NVIDIA proprietary drivers, Steam, Electron, and modern developer toolchains.
-2. **runit init system**: Fast, predictable service supervision without systemd overhead, paired with Toren's user-level session supervisor (`asura-user-services`).
+2. **runit init system**: Fast, predictable service supervision without systemd overhead, paired with Toren's user-level session supervisor (`toren-user-services`).
 3. **XBPS package manager**: Fast package installation and native binary package generation (`xbps-create`, `xbps-rindex`).
 4. **Hardware reach**: Direct support for hybrid graphics offloading (`prime-run`) and fine-grained power management.
 
@@ -176,11 +176,11 @@ What this costs: Toren writes those surfaces itself. What it simplifies: there i
 Toren publishes support tiers rather than claiming universal support, because no Linux
 distribution supports every laptop. Every machine falls into one of these.
 
-| Tier | Meaning |
-|---|---|
-| **1 — Verified** | Installs, boots, suspend/resume, GPU acceleration, audio and peripherals confirmed by a maintainer. |
-| **2 — Community confirmed** | Working on a contributor's machine, with a profile submitted. Not independently verified. |
-| **3 — Best effort** | No matching profile. Installs conservative defaults: the `generic` kernel, full firmware bundle. May need manual intervention. |
+| Tier                        | Meaning                                                                                                                        |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| **1 — Verified**            | Installs, boots, suspend/resume, GPU acceleration, audio and peripherals confirmed by a maintainer.                            |
+| **2 — Community confirmed** | Working on a contributor's machine, with a profile submitted. Not independently verified.                                      |
+| **3 — Best effort**         | No matching profile. Installs conservative defaults: the `generic` kernel, full firmware bundle. May need manual intervention. |
 
 The `generic` in that row is not prose. It is the same value as `default_for_unknown` in
 [`system/kernel/fleet.yaml`](system/kernel/fleet.yaml), which is the authority for which kernel
@@ -216,19 +216,19 @@ public/              branding assets, wallpapers, and logos
 ```
 
 The desktop source lives under `desktop/`, never in a directory named after one of the
-control tools — a `asura/` directory collides with the built binary of the same name and
+control tools — a `toren/` directory collides with the built binary of the same name and
 silently defeats the repository's own ignore rules.
 
 The four design documents, and what each one decides:
 
-| Document | Decides |
-|---|---|
-| [`docs/architecture.md`](docs/architecture.md) | The stack and the reasoning behind it — settled decisions, rejected options, the base-layer boundary, the portal seam |
-| [`docs/hardware.md`](docs/hardware.md) | Hardware compatibility matrix, supported laptop families, support levels, and submission workflow |
-| [`docs/hardware-detection.md`](docs/hardware-detection.md) | The subsystem that decides whether Toren works on someone else's laptop — probes, matching, PII stripping, tier assignment |
-| [`docs/session.md`](docs/session.md) | The boot and login chain — GRUB through runit to Hyprland, the session entry point, what starts in what order, and who owns logout, suspend and shutdown |
-| [`docs/menu.md`](docs/menu.md) | `toren menu` — the unified "do everything" menu on Super+Alt+Space coordinating apps, setup, themes, updates and power |
-| [`docs/adopting-toren.md`](docs/adopting-toren.md) | `toren adopt` (Legacy — Ubuntu/APT design) — historical in-place adoption design; current installation uses the live ISO and `toren install` |
+| Document                                                   | Decides                                                                                                                                                  |
+| ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`docs/architecture.md`](docs/architecture.md)             | The stack and the reasoning behind it — settled decisions, rejected options, the base-layer boundary, the portal seam                                    |
+| [`docs/hardware.md`](docs/hardware.md)                     | Hardware compatibility matrix, supported laptop families, support levels, and submission workflow                                                        |
+| [`docs/hardware-detection.md`](docs/hardware-detection.md) | The subsystem that decides whether Toren works on someone else's laptop — probes, matching, PII stripping, tier assignment                               |
+| [`docs/session.md`](docs/session.md)                       | The boot and login chain — GRUB through runit to Hyprland, the session entry point, what starts in what order, and who owns logout, suspend and shutdown |
+| [`docs/menu.md`](docs/menu.md)                             | `toren menu` — the unified "do everything" menu on Super+Alt+Space coordinating apps, setup, themes, updates and power                                   |
+| [`docs/adopting-toren.md`](docs/adopting-toren.md)         | `toren adopt` (Legacy — Ubuntu/APT design) — historical in-place adoption design; current installation uses the live ISO and `toren install`             |
 
 [`docs/roadmap.md`](docs/roadmap.md) orders the work.
 
@@ -285,10 +285,10 @@ The legacy in-place adoption design (`toren adopt`) is documented in [`docs/adop
 
 ## Branches
 
-| Branch | Holds |
-|---|---|
-| `main` | Documentation. Design, decisions, hardware framework, project rules. Always reviewable. |
-| `dev-unstable` | Code. The working implementation, merged forward when a milestone completes. |
+| Branch         | Holds                                                                                   |
+| -------------- | --------------------------------------------------------------------------------------- |
+| `main`         | Documentation. Design, decisions, hardware framework, project rules. Always reviewable. |
+| `dev-unstable` | Code. The working implementation, merged forward when a milestone completes.            |
 
 Documentation changes land on `main` directly. Implementation lands on `dev-unstable`. A
 milestone is done when its code has merged forward, not when it is written.

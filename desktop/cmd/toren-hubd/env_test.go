@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"asura/desktop/cmd/toren-hubd/internal/wm"
+	"toren/desktop/cmd/toren-hubd/internal/wm"
 )
 
 func TestEnvSetRemoveAndRisky(t *testing.T) {
@@ -41,7 +41,7 @@ func TestEnvSetRemoveAndRisky(t *testing.T) {
 		t.Errorf("unexpected env var: %+v", o.Env[0])
 	}
 
-	// Verify ~/.config/asura/session/asura-session.env is written
+	// Verify ~/.config/toren/session/toren-session.env is written
 	envFile := wm.SessionEnvPath()
 	b, err := os.ReadFile(envFile)
 	if err != nil {

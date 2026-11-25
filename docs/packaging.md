@@ -11,12 +11,12 @@ The packaging infrastructure resides in `packaging/xbps/`.
 
 Package build instructions are stored as templates in `packaging/xbps/`:
 
-| Package Template | Description |
-|---|---|
-| `asura-desktop.template` | Core desktop control binary (`toren`), configuration schemas, session launchers, and runit service scripts. |
-| `toren-shell.template` | Quickshell UI surfaces, theme tokens, widgets, icons, wallpapers, and Hub backend. |
-| `toren-installer.template` | Guided system installer script, desktop launcher, and partition utilities. |
-| `toren-store.template` | Software store CLI data plane (`toren-store`) and catalog manifests. |
+| Package Template           | Description                                                                                                 |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `toren-desktop.template`   | Core desktop control binary (`toren`), configuration schemas, session launchers, and runit service scripts. |
+| `toren-shell.template`     | Quickshell UI surfaces, theme tokens, widgets, icons, wallpapers, and Hub backend.                          |
+| `toren-installer.template` | Guided system installer script, desktop launcher, and partition utilities.                                  |
+| `toren-store.template`     | Software store CLI data plane (`toren-store`) and catalog manifests.                                        |
 
 ---
 
@@ -28,10 +28,10 @@ The build workflow is driven by `packaging/xbps/build-repo.sh`.
 ### Package Build Pipeline
 
 1. **Compilation**: Binaries are compiled with Go (`go build`) and stripped of debug symbols.
-2. **Directory Staging**: Files are placed into target staging roots following Void filesystem hierarchy (`/usr/bin/`, `/usr/share/asura/`, `/etc/sv/`).
+2. **Directory Staging**: Files are placed into target staging roots following Void filesystem hierarchy (`/usr/bin/`, `/usr/share/toren/`, `/etc/sv/`).
 3. **Metadata Specification**:
    - `architecture`: `x86_64`
-   - `maintainer`: `Toren Linux Team <team@asura-os.org>`
+   - `maintainer`: `Toren Linux Team <team@toren-os.org>`
    - `license`: `GPL-3.0-only`
    - `pkgname` and `version`
 4. **Package Creation**:

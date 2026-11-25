@@ -39,8 +39,8 @@ files:
 services: []
 
 notes:
-  - "Fan and thermal profiles: asus-wmi exposes /sys/firmware/acpi/platform_profile (quiet, balanced, performance), controlled via 'asura power profile'."
+  - "Fan and thermal profiles: asus-wmi exposes /sys/firmware/acpi/platform_profile (quiet, balanced, performance), controlled via 'toren power profile'."
   - "Battery charge limit: /sys/class/power_supply/BAT0/charge_control_end_threshold persists at 80%."
   - "Keyboard backlight: asus::kbd_backlight brightness is mapped to Fn keys and /sys/class/leds/."
-  - "NVIDIA hybrid graphics: RTX 3050 enters D3cold (0W) dynamically when idle. Run applications on dGPU with 'asura gpu run <cmd>'."
+  - "NVIDIA hybrid graphics: RTX 3050 enters D3cold (0W) dynamically when idle. Run applications on dGPU with 'toren gpu run <cmd>'."
   - "asusctl / supergfxctl: Not packaged in Void Linux; kernel native interfaces (asus-wmi and RTD3 sysfs) are used directly."

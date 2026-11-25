@@ -1,10 +1,10 @@
 package main
 
-// gpu.go: the `asura-hubd gpu ...` subcommand. The Hub GPU page calls these to
+// gpu.go: the `toren-hubd gpu ...` subcommand. The Hub GPU page calls these to
 // read the hardware capability verdict, switch graphics mode and tune the card.
 //
 // mux, apply, hook and vm are the GPU-passthrough stack and the ASUS MUX helper.
-// Both need tooling Asura does not ship (Looking Glass, a boot-config writer,
+// Both need tooling Toren does not ship (Looking Glass, a boot-config writer,
 // the gpu-mux helper), so they answer "unavailable" instead of erroring.
 
 import (
@@ -16,9 +16,9 @@ func runGpu(args []string) error {
 	if len(args) == 0 {
 		return fmt.Errorf("gpu needs a subcommand: caps|mode|tune")
 	}
-	// detection, the render-mode writer, the MUX switch and the tuner all go through asura-gpu
-	if _, err := exec.LookPath(asuraGpuBin()); err != nil && args[0] != "apply" && args[0] != "hook" && args[0] != "vm" {
-		return unavailable("gpu "+args[0], asuraGpuBin()+" is not installed", args[1:])
+	// detection, the render-mode writer, the MUX switch and the tuner all go through toren-gpu
+	if _, err := exec.LookPath(torenGpuBin()); err != nil && args[0] != "apply" && args[0] != "hook" && args[0] != "vm" {
+		return unavailable("gpu "+args[0], torenGpuBin()+" is not installed", args[1:])
 	}
 	switch args[0] {
 	case "caps":
@@ -34,7 +34,7 @@ func runGpu(args []string) error {
 	case "mux":
 		return runGpuMux(args[1:])
 	case "apply", "hook", "vm":
-		return unavailable("gpu "+args[0], "GPU passthrough is not set up by Asura yet", args[1:])
+		return unavailable("gpu "+args[0], "GPU passthrough is not set up by Toren yet", args[1:])
 	default:
 		return fmt.Errorf("unknown gpu subcommand: %s", args[0])
 	}

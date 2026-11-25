@@ -1,4 +1,4 @@
-# Asura package manifest for Void Linux base layer.
+# Toren package manifest for Void Linux base layer.
 #
 # Base layer: Void Linux x86_64 (glibc).
 # Package manager: XBPS.
@@ -145,10 +145,10 @@ desktop:
     - libunwind
   exclude:
     # No GNOME components per project rules
-    - gnome-shell: GNOME Shell is forbidden in Asura
-    - gnome-control-center: Asura uses Asura Hub and Hyprland
-    - xdg-desktop-portal-gnome: Asura uses xdg-desktop-portal-hyprland
-    - mutter: Asura uses Hyprland
+    - gnome-shell: GNOME Shell is forbidden in Toren
+    - gnome-control-center: Toren uses Toren Hub and Hyprland
+    - xdg-desktop-portal-gnome: Toren uses xdg-desktop-portal-hyprland
+    - mutter: Toren uses Hyprland
 
 session:
   packages:
@@ -194,7 +194,7 @@ terminal-and-shell:
     - fd
     - bat
   exclude:
-    - kitty: Kitty is strictly forbidden in Asura per agent rules
+    - kitty: Kitty is strictly forbidden in Toren per agent rules
 
 languages:
   packages:
@@ -228,7 +228,7 @@ power-and-hardware-services:
     - brightnessctl
     # Device power saving (USB autosuspend, Wi-Fi, SATA, PCIe runtime PM).
     # CPU governor, EPP and platform profile are excluded in system/tlp.d:
-    # asura-sysd owns those.
+    # toren-sysd owns those.
     - tlp
     - bluez
     - NetworkManager
@@ -241,7 +241,7 @@ power-and-hardware-services:
     - docker-compose
     # Daily-driver basics: clock sync, inbound firewall, removable-media
     # mounting, firmware updates and printing. Services are linked in
-    # installation/build-iso-void.sh and installation/asura-installer.sh.
+    # installation/build-iso-void.sh and installation/toren-installer.sh.
     - chrony
     - nftables
     - udisks2

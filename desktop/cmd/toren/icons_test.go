@@ -320,20 +320,20 @@ func TestIconReferenceKeepsNamesAndPathsApart(t *testing.T) {
 	}
 }
 
-// TestAsuraIconsPrintsTheIndex runs the command against a theme this test
+// TestTorenIconsPrintsTheIndex runs the command against a theme this test
 // writes and reads what it prints, as the shell does.
-func TestAsuraIconsPrintsTheIndex(t *testing.T) {
+func TestTorenIconsPrintsTheIndex(t *testing.T) {
 	home, _ := appsTestSession(t)
 	appsTestWrite(t, filepath.Join(home, "icons", "hicolor", "index.theme"), "[Icon Theme]\nName=hicolor\n")
 	svg := filepath.Join(home, "icons", "hicolor", "scalable", "apps", "demo.svg")
 	appsTestWrite(t, svg, "<svg/>")
 
-	out := iconsTestCapture(t, func() int { return asuraIcons(nil) })
+	out := iconsTestCapture(t, func() int { return torenIcons(nil) })
 	if !strings.Contains(out, `"demo":"`+svg+`"`) || !strings.Contains(out, `"hicolor"`) {
 		t.Errorf("the index does not hold the icon: %.200s", out)
 	}
 
-	out = iconsTestCapture(t, func() int { return asuraIcons([]string{"demo", "nothing"}) })
+	out = iconsTestCapture(t, func() int { return torenIcons([]string{"demo", "nothing"}) })
 	if want := svg + "\n\n"; out != want {
 		t.Errorf("spot check printed %q, want %q", out, want)
 	}

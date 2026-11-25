@@ -45,7 +45,7 @@ func TestReinstallPlan(t *testing.T) {
 func TestReinstallRequiresAppliedCommit(t *testing.T) {
 	tmpRoot := t.TempDir()
 	// No appliedCommit file in tmpRoot
-	code := asuraReinstall([]string{"--root", tmpRoot})
+	code := torenReinstall([]string{"--root", tmpRoot})
 	// Should fail since no commit recorded
 	if code == exitOK {
 		t.Errorf("expected failure when applied-commit is missing, got exitOK")
@@ -55,7 +55,7 @@ func TestReinstallRequiresAppliedCommit(t *testing.T) {
 // TestReinstallDetectsAppliedCommit verifies reading recorded applied-commit.
 func TestReinstallDetectsAppliedCommit(t *testing.T) {
 	tmpRoot := t.TempDir()
-	commitFile := filepath.Join(tmpRoot, "usr", "share", "asura", "applied-commit")
+	commitFile := filepath.Join(tmpRoot, "usr", "share", "toren", "applied-commit")
 	if err := os.MkdirAll(filepath.Dir(commitFile), 0o755); err != nil {
 		t.Fatalf("mkdir: %v", err)
 	}
@@ -69,11 +69,11 @@ func TestReinstallDetectsAppliedCommit(t *testing.T) {
 	}
 }
 
-// TestReinstallExecution verifies that asuraReinstall invokes reinstallApply
+// TestReinstallExecution verifies that torenReinstall invokes reinstallApply
 // targeting the applied commit and root.
 func TestReinstallExecution(t *testing.T) {
 	tmpRoot := t.TempDir()
-	commitFile := filepath.Join(tmpRoot, "usr", "share", "asura", "applied-commit")
+	commitFile := filepath.Join(tmpRoot, "usr", "share", "toren", "applied-commit")
 	if err := os.MkdirAll(filepath.Dir(commitFile), 0o755); err != nil {
 		t.Fatalf("mkdir: %v", err)
 	}
@@ -95,9 +95,9 @@ func TestReinstallExecution(t *testing.T) {
 		return nil
 	}
 
-	code := asuraReinstall([]string{"--root", tmpRoot})
+	code := torenReinstall([]string{"--root", tmpRoot})
 	if code != exitOK {
-		t.Fatalf("asuraReinstall failed with code %d", code)
+		t.Fatalf("torenReinstall failed with code %d", code)
 	}
 	if appliedTarget != tmpRoot {
 		t.Errorf("reinstallApply called with root %q, want %q", appliedTarget, tmpRoot)

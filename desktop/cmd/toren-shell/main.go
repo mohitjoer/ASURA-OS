@@ -1,8 +1,8 @@
-// asura-shell = single control plane for the Asura desktop shell. as
-// `asura-shell daemon` it serves the shell's state (tray, network, clipboard,
+// toren-shell = single control plane for the Toren desktop shell. as
+// `toren-shell daemon` it serves the shell's state (tray, network, clipboard,
 // weather, ...) on one Unix socket and answers its control calls; Quickshell
 // itself is started and restarted by systemd, not by the daemon. as
-// `asura-shell <command>` it forwards that command to the daemon over the
+// `toren-shell <command>` it forwards that command to the daemon over the
 // socket; Hyprland keybinds use this client form.
 package main
 
@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-const sockName = "asura-shell.sock"
+const sockName = "toren-shell.sock"
 
 func sockPath() string {
 	dir := os.Getenv("XDG_RUNTIME_DIR")
@@ -42,7 +42,7 @@ func main() {
 	}
 	if args[0] == "daemon" {
 		if err := runDaemon(); err != nil {
-			fmt.Fprintln(os.Stderr, "asura-shell:", err)
+			fmt.Fprintln(os.Stderr, "toren-shell:", err)
 			os.Exit(1)
 		}
 		return
@@ -65,7 +65,7 @@ func main() {
 		// wallpaper live preview. Runs standalone -- no daemon round trip -- so the
 		// same generator serves apply and preview from one binary.
 		if err := matugenPreview(args[1]); err != nil {
-			fmt.Fprintln(os.Stderr, "asura-shell:", err)
+			fmt.Fprintln(os.Stderr, "toren-shell:", err)
 			os.Exit(1)
 		}
 		return
@@ -78,11 +78,11 @@ func main() {
 		os.Exit(runIcons(args[1:]))
 	}
 	if args[0] == "browser-host" {
-		fmt.Fprintln(os.Stderr, "asura-shell: browser-host: not available on Asura: no browser extension ships with it")
+		fmt.Fprintln(os.Stderr, "toren-shell: browser-host: not available on Toren: no browser extension ships with it")
 		os.Exit(1)
 	}
 	if err := sendCommand(strings.Join(args, " ")); err != nil {
-		fmt.Fprintln(os.Stderr, "asura-shell:", err)
+		fmt.Fprintln(os.Stderr, "toren-shell:", err)
 		os.Exit(1)
 	}
 }
@@ -92,7 +92,7 @@ func main() {
 func sendCommand(line string) error {
 	conn, err := net.DialTimeout("unix", sockPath(), 2*time.Second)
 	if err != nil {
-		return fmt.Errorf("daemon not reachable at %s (is `asura-shell daemon` running?)", sockPath())
+		return fmt.Errorf("daemon not reachable at %s (is `toren-shell daemon` running?)", sockPath())
 	}
 	defer conn.Close()
 	// Generous: a reload waits for the surface to come back and report, and a
@@ -119,7 +119,7 @@ func sendCommand(line string) error {
 }
 
 func usage(w io.Writer) {
-	fmt.Fprint(w, `usage: asura-shell <verb> [args]
+	fmt.Fprint(w, `usage: toren-shell <verb> [args]
 
   daemon                                   run the state daemon (systemd runs this)
   launcher | overview | clipboard | stash | quicksettings | wallpaper-menu
@@ -147,6 +147,6 @@ func usage(w io.Writer) {
   voice                                    dictation toggle (needs voxtype)
   reload | status | ping | quit | signature
 
-not available on Asura: browser-host, unlock-prepare, lock-quiesce, state
+not available on Toren: browser-host, unlock-prepare, lock-quiesce, state
 `)
 }

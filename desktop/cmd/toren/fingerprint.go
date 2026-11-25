@@ -10,16 +10,16 @@ import (
 	"strings"
 )
 
-// Fingerprint login and sudo integration for Asura OS:
-//   asura enable fingerprint
-//   asura disable fingerprint
-//   asura fingerprint [status | enroll | verify | enable | disable]
+// Fingerprint login and sudo integration for Toren OS:
+//   toren enable fingerprint
+//   toren disable fingerprint
+//   toren fingerprint [status | enroll | verify | enable | disable]
 //
 // Rules & safety invariants:
 // - Off by default, reversible with one command.
 // - Never locks a user out.
 // - Installs fprintd and libfprint; refuses clearly when no supported reader is found.
-// - Enrolment: asura fingerprint enroll runs fprintd-enroll for the user;
+// - Enrolment: toren fingerprint enroll runs fprintd-enroll for the user;
 //   nothing changes in PAM until at least one finger is enrolled.
 // - PAM: adds auth sufficient pam_fprintd.so ABOVE the existing password line,
 //   for sudo, the lock screen (hyprlock) and polkit only.
@@ -45,8 +45,8 @@ const (
 	fprintBlock      = fprintBlockBegin + "\n" + fprintBlockLine + "\n" + fprintBlockEnd + "\n"
 )
 
-const fingerprintUsage = `Usage: asura fingerprint [status | enroll | verify | enable | disable]
-       asura enable fingerprint | asura disable fingerprint
+const fingerprintUsage = `Usage: toren fingerprint [status | enroll | verify | enable | disable]
+       toren enable fingerprint | toren disable fingerprint
 
 Manages optional fingerprint authentication.
 
@@ -58,10 +58,10 @@ Manages optional fingerprint authentication.
 `
 
 func init() {
-	register("fingerprint", "manage fingerprint reader, enrolment, and PAM authentication", asuraFingerprint)
+	register("fingerprint", "manage fingerprint reader, enrolment, and PAM authentication", torenFingerprint)
 }
 
-func asuraFingerprint(args []string) int {
+func torenFingerprint(args []string) int {
 	if len(args) == 0 || args[0] == "status" {
 		return runFingerprintStatus()
 	}
@@ -81,7 +81,7 @@ func asuraFingerprint(args []string) int {
 		fmt.Print(fingerprintUsage)
 		return exitOK
 	default:
-		fmt.Fprintf(os.Stderr, "asura fingerprint: unknown verb %q\n\n%s", args[0], fingerprintUsage)
+		fmt.Fprintf(os.Stderr, "toren fingerprint: unknown verb %q\n\n%s", args[0], fingerprintUsage)
 		return exitUsage
 	}
 }
@@ -221,7 +221,7 @@ func applyPamToTarget(targetPath string) error {
 		return nil // already applied
 	}
 
-	backupPath := targetPath + ".asura-fprint-bak"
+	backupPath := targetPath + ".toren-fprint-bak"
 	if _, err := os.Stat(backupPath); os.IsNotExist(err) {
 		if err := os.WriteFile(backupPath, data, 0644); err != nil {
 			// Try privileged if normal write fails
@@ -263,7 +263,7 @@ func revertPamFromTarget(targetPath string) error {
 
 	cleanedContent := removePamBlock(origContent)
 
-	backupPath := targetPath + ".asura-fprint-bak"
+	backupPath := targetPath + ".toren-fprint-bak"
 	backupData, bakErr := os.ReadFile(backupPath)
 
 	// If cleaned content equals backup, we have a byte-for-byte restoration
@@ -350,11 +350,11 @@ func runFingerprintStatus() int {
 
 	if pamActive && !fprintdInstalled {
 		fmt.Println("  WARNING: PAM has fingerprint authentication configured but fprintd is missing!")
-		fmt.Println("           Run 'asura disable fingerprint' to restore PAM safely.")
+		fmt.Println("           Run 'toren disable fingerprint' to restore PAM safely.")
 	} else if hasReader && !enrolled {
-		fmt.Println("  Ready to enroll. Run 'asura fingerprint enroll' to record a finger.")
+		fmt.Println("  Ready to enroll. Run 'toren fingerprint enroll' to record a finger.")
 	} else if enrolled && !pamActive {
-		fmt.Println("  Enrolled but PAM is off. Run 'asura enable fingerprint' to activate.")
+		fmt.Println("  Enrolled but PAM is off. Run 'toren enable fingerprint' to activate.")
 	}
 
 	return exitOK
@@ -363,7 +363,7 @@ func runFingerprintStatus() int {
 func runFingerprintEnable() int {
 	hasReader, desc := hasSupportedFingerprintReader()
 	if !hasReader {
-		fmt.Fprintf(os.Stderr, "asura enable fingerprint: refused — %s\n", desc)
+		fmt.Fprintf(os.Stderr, "toren enable fingerprint: refused — %s\n", desc)
 		return exitFail
 	}
 
@@ -372,7 +372,7 @@ func runFingerprintEnable() int {
 		if !fprintInstalled(pkg) {
 			fmt.Printf("installing %s...\n", pkg)
 			if err := fprintPrivileged("xbps-install", "-Sy", pkg); err != nil {
-				fmt.Fprintf(os.Stderr, "asura enable fingerprint: installing %s: %v\n", pkg, err)
+				fmt.Fprintf(os.Stderr, "toren enable fingerprint: installing %s: %v\n", pkg, err)
 				return exitFail
 			}
 		}
@@ -384,7 +384,7 @@ func runFingerprintEnable() int {
 	if _, err := os.Stat(def); err == nil {
 		if _, err := os.Lstat(link); os.IsNotExist(err) {
 			if err := fprintPrivileged("ln", "-s", def, link); err != nil {
-				fmt.Fprintf(os.Stderr, "asura enable fingerprint: linking service: %v\n", err)
+				fmt.Fprintf(os.Stderr, "toren enable fingerprint: linking service: %v\n", err)
 			}
 		}
 	}
@@ -393,14 +393,14 @@ func runFingerprintEnable() int {
 	if !isFingerprintEnrolled(currentUser) {
 		fmt.Println("Fingerprint daemon enabled successfully.")
 		fmt.Println("Note: PAM has NOT been modified because no fingerprint is enrolled yet.")
-		fmt.Println("Run 'asura fingerprint enroll' to record your fingerprint and activate PAM login.")
+		fmt.Println("Run 'toren fingerprint enroll' to record your fingerprint and activate PAM login.")
 		return exitOK
 	}
 
 	// Enrolled: apply PAM
 	for _, target := range targetPamFiles() {
 		if err := applyPamToTarget(target); err != nil {
-			fmt.Fprintf(os.Stderr, "asura enable fingerprint: configuring %s: %v\n", target, err)
+			fmt.Fprintf(os.Stderr, "toren enable fingerprint: configuring %s: %v\n", target, err)
 			return exitFail
 		}
 	}
@@ -413,7 +413,7 @@ func runFingerprintDisable() int {
 	// 1. Revert PAM targets
 	for _, target := range targetPamFiles() {
 		if err := revertPamFromTarget(target); err != nil {
-			fmt.Fprintf(os.Stderr, "asura disable fingerprint: reverting %s: %v\n", target, err)
+			fmt.Fprintf(os.Stderr, "toren disable fingerprint: reverting %s: %v\n", target, err)
 			return exitFail
 		}
 	}
@@ -431,7 +431,7 @@ func runFingerprintDisable() int {
 func runFingerprintEnroll(args []string) int {
 	hasReader, desc := hasSupportedFingerprintReader()
 	if !hasReader {
-		fmt.Fprintf(os.Stderr, "asura fingerprint enroll: refused — %s\n", desc)
+		fmt.Fprintf(os.Stderr, "toren fingerprint enroll: refused — %s\n", desc)
 		return exitFail
 	}
 
@@ -439,7 +439,7 @@ func runFingerprintEnroll(args []string) int {
 	if !fprintInstalled("fprintd") {
 		fmt.Println("installing fprintd and libfprint...")
 		if err := fprintPrivileged("xbps-install", "-Sy", "fprintd", "libfprint"); err != nil {
-			fmt.Fprintf(os.Stderr, "asura fingerprint enroll: %v\n", err)
+			fmt.Fprintf(os.Stderr, "toren fingerprint enroll: %v\n", err)
 			return exitFail
 		}
 	}
@@ -465,7 +465,7 @@ func runFingerprintEnroll(args []string) int {
 
 	fmt.Println("Place your finger on the fingerprint reader when prompted...")
 	if err := cmd.Run(); err != nil {
-		fmt.Fprintf(os.Stderr, "asura fingerprint enroll: enrolment failed: %v\n", err)
+		fmt.Fprintf(os.Stderr, "toren fingerprint enroll: enrolment failed: %v\n", err)
 		return exitFail
 	}
 
@@ -474,7 +474,7 @@ func runFingerprintEnroll(args []string) int {
 		fmt.Println("\nEnrolment successful! Activating PAM for sudo, lock screen, and polkit...")
 		for _, target := range targetPamFiles() {
 			if err := applyPamToTarget(target); err != nil {
-				fmt.Fprintf(os.Stderr, "asura fingerprint: warning: configuring %s: %v\n", target, err)
+				fmt.Fprintf(os.Stderr, "toren fingerprint: warning: configuring %s: %v\n", target, err)
 			}
 		}
 		fmt.Println("Fingerprint login is now active.")

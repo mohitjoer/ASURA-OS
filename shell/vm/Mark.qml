@@ -3,7 +3,7 @@ import qs.Ui.Singletons
 
 // The app's mark, in ink. The generated coiled-dragon plate (3.7) is a dev-time
 // art deliverable graded through DESIGN section 10; the mark that ships in the
-// instrument itself is the Asura mark, ink-only and zero-chroma, anchoring the
+// instrument itself is the Toren mark, ink-only and zero-chroma, anchoring the
 // empty library, the KVM gate, and the ISO lane's left column.
 Text {
     property real size: 96

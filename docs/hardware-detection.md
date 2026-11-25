@@ -11,22 +11,22 @@ implementation record for the part between the kernel and the profile.
 
 ## Why detection is load-bearing
 
-Detection is the only subsystem whose failure mode is *no machine at all*. Everything else in
+Detection is the only subsystem whose failure mode is _no machine at all_. Everything else in
 Toren degrades into a lesser desktop. Detection getting it wrong means a machine that will not
 boot, or will boot without a network and no way to recover, which is indistinguishable from
 Toren not supporting the machine at all.
 
 One detection result decides nearly everything the installer does:
 
-| Decision | Read from | Wrong answer looks like |
-|---|---|---|
-| Kernel flavour | profile, else tier-3 fallback | No boot, or no GPU, or no WiFi |
-| GPU driver stack | PCI probe + profile | Black screen at session start |
-| Hybrid mux mode | profile + vendor tool detection | External display dead, or suspend broken |
-| Firmware packages | probe + profile | Network device present, never comes up |
-| Microcode | DMI CPU family, PCI | Subtle corruption, or an early boot failure |
-| Support tier | profile database | A promise Toren cannot keep |
-| Offline rescue set | probe | The machine cannot install at all |
+| Decision           | Read from                       | Wrong answer looks like                     |
+| ------------------ | ------------------------------- | ------------------------------------------- |
+| Kernel flavour     | profile, else tier-3 fallback   | No boot, or no GPU, or no WiFi              |
+| GPU driver stack   | PCI probe + profile             | Black screen at session start               |
+| Hybrid mux mode    | profile + vendor tool detection | External display dead, or suspend broken    |
+| Firmware packages  | probe + profile                 | Network device present, never comes up      |
+| Microcode          | DMI CPU family, PCI             | Subtle corruption, or an early boot failure |
+| Support tier       | profile database                | A promise Toren cannot keep                 |
+| Offline rescue set | probe                           | The machine cannot install at all           |
 
 Five things therefore have to be true, and they are the acceptance criteria for any change to
 this subsystem.
@@ -49,7 +49,7 @@ this subsystem.
 The output side has its own criterion, and it is not a nice-to-have: **the report is published.**
 It lands in a pull request, an issue, a forum post and a bug tracker. A detection bug that
 leaks a serial is a privacy bug in the distribution's most-used command, which is why
-[PII stripping](#pii-stripping-for-asura-hardware-report) is specified as a policy rather than a
+[PII stripping](#pii-stripping-for-toren-hardware-report) is specified as a policy rather than a
 convention.
 
 ---
@@ -61,24 +61,24 @@ Five probes, in the order fixed by `matching.probe_order` in
 cheapest and most decisive first, so the common case — a machine that a profile claims by DMI
 string alone — never reaches the slow probes.
 
-| Probe | Yields | Cost on the common path | Decisive for |
-|---|---|---|---|
-| DMI | Machine identity strings | Under 1 ms, in-process | Which profile |
-| PCI | GPU, network, audio, storage, USB host, WWAN | Single-digit ms, in-process | Which drivers |
-| USB | Fingerprint, card reader, dock, WWAN modem | Low ms, in-process | Which quirks |
-| ACPI | Sleep states, power resources, platform profile | Free from sysfs; seconds if tables are dumped | Suspend behaviour, hotkeys |
-| EDID | Panel identity, modes, HDR, backlight presence | Under 1 ms, in-process | Display quirks |
+| Probe | Yields                                          | Cost on the common path                       | Decisive for               |
+| ----- | ----------------------------------------------- | --------------------------------------------- | -------------------------- |
+| DMI   | Machine identity strings                        | Under 1 ms, in-process                        | Which profile              |
+| PCI   | GPU, network, audio, storage, USB host, WWAN    | Single-digit ms, in-process                   | Which drivers              |
+| USB   | Fingerprint, card reader, dock, WWAN modem      | Low ms, in-process                            | Which quirks               |
+| ACPI  | Sleep states, power resources, platform profile | Free from sysfs; seconds if tables are dumped | Suspend behaviour, hotkeys |
+| EDID  | Panel identity, modes, HDR, backlight presence  | Under 1 ms, in-process                        | Display quirks             |
 
 Four rules apply to every probe, and they are what keeps the subsystem maintainable.
 
 - **Read sysfs directly.** Detection walks `/sys` itself rather than shelling out to `lspci`,
   `lsusb`, `acpidump` and `edid-decode`. A shell-out costs a process spawn and a `pci.ids` parse
   to obtain data that is two `read()` calls away — `lspci -Dnn` and `lspci -tv` measured 70–200 ms
-  on the reference machine against a sysfs walk that is not measurable beside them — and it
+  on the reference machine against a sysfs walk that is not metorenble beside them — and it
   makes detection depend on four packages being present. Detection must assume none of them is:
   the ISO's package set is a reviewed artefact that can change without warning, and a subprocess
   design has four ways to return nothing that a sysfs walk does not. `lspci` and `edid-decode`
-  are used for the *human* output in the report, where their formatting earns the cost, and
+  are used for the _human_ output in the report, where their formatting earns the cost, and
   never as the source of truth.
 - **One filesystem root per probe.** Every probe takes a root path as its first argument and
   reads nothing outside it. That single property is what makes the whole subsystem testable
@@ -101,7 +101,7 @@ The identity of the machine, and the match key for every profile in the database
 `board_version`, `chassis_type`, `bios_vendor`, `bios_version`, `bios_date`. The directory also
 contains `product_uuid`, `product_serial`, `board_serial`, `chassis_serial`,
 `chassis_asset_tag`, `board_asset_tag` and `modalias`, all of which are handled by
-[redaction](#pii-stripping-for-asura-hardware-report) rather than by the reader.
+[redaction](#pii-stripping-for-toren-hardware-report) rather than by the reader.
 
 ```go
 // probe/dmi.go
@@ -163,7 +163,7 @@ The `serial-number` property is read and **not carried**. A device-tree serial i
 identifier exactly as a SMBIOS one is, and the probe's whole purpose is to reach a board without
 collecting it. The struct has no field for it, so the omission cannot be undone by accident.
 
-**Vocabulary.** The device tree is projected onto the *existing* match-key fields — `model`
+**Vocabulary.** The device tree is projected onto the _existing_ match-key fields — `model`
 becomes `product_name`, and the head of `compatible` becomes `sys_vendor`. A parallel
 `devicetree_model:` key would mean every profile is written twice, neither copy is checked
 against the other, and the reach problem returns in a different shape. One vocabulary means a
@@ -184,7 +184,7 @@ Every device the profile needs to know about: GPU, network, audio, storage, USB 
 `class` (6 hex digits: class, subclass, interface), `subsystem_vendor`, `subsystem_device`,
 `driver` (a symlink into `/sys/bus/pci/drivers/`), `boot_vga`, `modalias` and `revision`. The
 `modalias` carries the candidate module list, which is how a report can name the modules that
-*would* bind even when only one has bound — on the reference machine it reads
+_would_ bind even when only one has bound — on the reference machine it reads
 `Kernel modules: i915, xe`, which is what lets a profile record `integrated: auto` with a real
 basis instead of a hope.
 
@@ -196,16 +196,16 @@ the other layout. `usb.ids` in the same directory serves the USB probe.
 
 The class codes that matter:
 
-| Class | Meaning | Why detection needs it |
-|---|---|---|
-| `0300` / `0302` | VGA / 3D controller | The GPU, and which driver stack it needs |
-| `0200` | Ethernet controller | Wired path during install and rescue |
-| `0280` | Other network controller | Wireless, and the offline-risk signal |
-| `0403` | Audio device | HDA, and the HDMI audio function on a dGPU |
-| `0106` / `0108` | SATA / NVMe | Storage; a VMD-managed disk enumerates as `0108` behind `00:1e.0` |
-| `0c03` | USB xHCI host | Port count and USB-C presence |
-| `0c04` | USB xHCI with paging | Newer host controllers |
-| `0300` + `boot_vga=1` | Boot display | Which GPU the firmware drives the panel from |
+| Class                 | Meaning                  | Why detection needs it                                            |
+| --------------------- | ------------------------ | ----------------------------------------------------------------- |
+| `0300` / `0302`       | VGA / 3D controller      | The GPU, and which driver stack it needs                          |
+| `0200`                | Ethernet controller      | Wired path during install and rescue                              |
+| `0280`                | Other network controller | Wireless, and the offline-risk signal                             |
+| `0403`                | Audio device             | HDA, and the HDMI audio function on a dGPU                        |
+| `0106` / `0108`       | SATA / NVMe              | Storage; a VMD-managed disk enumerates as `0108` behind `00:1e.0` |
+| `0c03`                | USB xHCI host            | Port count and USB-C presence                                     |
+| `0c04`                | USB xHCI with paging     | Newer host controllers                                            |
+| `0300` + `boot_vga=1` | Boot display             | Which GPU the firmware drives the panel from                      |
 
 `boot_vga` is the single most useful value on a hybrid machine: it is how detection knows that
 on the reference machine the panel hangs off the Intel device at `00:02.0` and not the dGPU at
@@ -250,7 +250,7 @@ hardware ID database, resolved by the same two-path probe the PCI reader uses.
 
 ### ACPI
 
-Platform capability, and the only probe that can explain *why* a lid switch or a sleep state
+Platform capability, and the only probe that can explain _why_ a lid switch or a sleep state
 behaves the way it does.
 
 **Reads** `/sys/firmware/acpi/` for the free facts: `tables/` (uppercase table names, plus
@@ -384,25 +384,25 @@ survives ranking is selected precisely because no narrower one claimed the machi
 Applied in this order. Each step is total, and resolution never depends on file ordering on
 disk or on map iteration order in the implementation.
 
-| Order | Rule | Reason |
-|---|---|---|
-| 1 | **Higher tier wins** | Fixed by `matching.ambiguous_resolution: highest_tier`. A confirmed-working recipe beats a more specific guess. |
-| 2 | **More identity fields** | `sys_vendor`, `product_name`, `product_version`, `product_family`, `board_name` count 1 each. |
-| 3 | **More narrowing fields** | `chassis_type`, `board_version`, `product_sku` count 1 each. |
-| 4 | **A comparator is present** | A profile asserting `bios_date: ">=2024-01-01"` is more specific than one without it. |
-| 5 | **Lexicographically smallest `id`** | Exists only to make resolution total and reproducible. It is never reached with different behaviour. |
+| Order | Rule                                | Reason                                                                                                          |
+| ----- | ----------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| 1     | **Higher tier wins**                | Fixed by `matching.ambiguous_resolution: highest_tier`. A confirmed-working recipe beats a more specific guess. |
+| 2     | **More identity fields**            | `sys_vendor`, `product_name`, `product_version`, `product_family`, `board_name` count 1 each.                   |
+| 3     | **More narrowing fields**           | `chassis_type`, `board_version`, `product_sku` count 1 each.                                                    |
+| 4     | **A comparator is present**         | A profile asserting `bios_date: ">=2024-01-01"` is more specific than one without it.                           |
+| 5     | **Lexicographically smallest `id`** | Exists only to make resolution total and reproducible. It is never reached with different behaviour.            |
 
 Rules 2 to 4 form a tuple compared lexicographically, not a weighted score: there are no magic
 constants to tune, and the comparison is easy to reimplement in any language.
 
 **Why the higher tier wins, given that it is the counterintuitive rule.** Two profiles can
 match the same machine because the machine's DMI string is shared by more than one
-configuration. A narrow tier-2 profile is a recipe someone ran on a *different* machine that
+configuration. A narrow tier-2 profile is a recipe someone ran on a _different_ machine that
 happens to share the string. A broad tier-1 profile is one a maintainer ran on a machine of
-*this* model and tier-1 checklist. The tier-1 recipe is the one with evidence behind it, so it
+_this_ model and tier-1 checklist. The tier-1 recipe is the one with evidence behind it, so it
 is the one that wins. Specificity is a proxy for evidence and loses to evidence.
 
-**Conflict.** Candidates that tie on tier *and* on the whole specificity tuple, and that
+**Conflict.** Candidates that tie on tier _and_ on the whole specificity tuple, and that
 disagree on any actionable key — `kernel`, `gpu.*`, `hybrid_mux.*`, `network.wifi[*].driver`,
 `network.wifi[*].firmware`, `firmware.*` — are not a tie-break case. Detection does not choose:
 it reports a **conflict**, names both profile IDs and the keys they disagree on, and falls back
@@ -416,9 +416,9 @@ often turns into a conflict once someone adds a third.
 
 ### Resolution output
 
-The resolution is written to `/etc/asura/hardware/resolution.yaml` at install time, which is
+The resolution is written to `/etc/toren/hardware/resolution.yaml` at install time, which is
 inside the only directory structure Toren owns outright, so nothing is written outside
-`/usr/share/asura/` and `/etc/asura/`. `toren hardware match` reads it and answers the two questions a
+`/usr/share/toren/` and `/etc/toren/`. `toren hardware match` reads it and answers the two questions a
 user actually has: which tier am I, and what would change it.
 
 ```yaml
@@ -479,28 +479,28 @@ carrying nothing that identifies the person or the asset. The residual risks it 
 Every field falls into exactly one of three classes. There is no default class; an
 unclassified field is a validation error in the reader.
 
-| Field | Class | Rule |
-|---|---|---|
-| `sys_vendor`, `product_name`, `product_version`, `product_family` | **Kept** | The match key. Required. |
-| `board_vendor`, `board_name`, `board_version` | **Kept** | The match key, and how two configurations of one model are told apart. |
-| `product_sku` | **Kept** | A model identifier, not a person. Frequently the field that distinguishes configurations `product_name` merges. |
-| `chassis_type` | **Kept, mapped** | Integer to ACPI chassis type string. |
-| `bios_vendor`, `bios_version`, `bios_date`, `bios_release`, `ec_firmware_release` | **Kept** | Firmware identity. Never sufficient alone to identify an asset. |
-| PCI vendor, device, class, subsystem vendor, subsystem device, revision, `boot_vga`, candidate module list | **Kept** | Published hardware IDs. The most useful narrowing evidence available. |
-| USB `idVendor`, `idProduct`, `bcdDevice`, `manufacturer`, `product`, topology | **Kept** | Device class, not asset. |
-| ACPI table names, sleep masks, platform profile and choices, wake sources | **Kept, derived only** | Facts. Never a table dump, never AML source, never a GUID. |
-| EDID manufacturer, product code, mode list, name string, backlight device name | **Kept** | Panel identity. |
-| `product_uuid` | **Hashed** | Token. |
-| `product_serial`, `board_serial`, `chassis_serial` | **Hashed** | Token. |
-| EDID serial descriptor (offset 54, tag `0xff`, 4-byte little-endian, and the ASCII variant) | **Hashed** | Token. Internal panels do carry one. |
-| `chassis_asset_tag`, `board_asset_tag` | **Dropped** | World-readable, stable, low-entropy, and maps to a purchasing record. No diagnostic value worth that risk. |
-| `product_serial` on the GPU, GPU UUID, board ID | **Dropped** | From `/proc/driver/nvidia/gpus/<pci>/information`. |
-| `/sys/class/net/*/address`, `perm_address`, `ifalias` | **Dropped** | MACs and user-set interface aliases. |
-| Storage `serial`, `wwn`, `wwid`, `vpd_page_80`, `/dev/disk/by-id/*`, `/sys/class/scsi_host/*/proc_name` | **Dropped** | Every one is an asset identifier. The drive model is kept; the drive's identity is not. |
-| WWAN IMEI | **Dropped** | Identifies the SIM and its subscriber, which is a third party who did not consent. Never hashed. |
-| `/etc/machine-id`, `/var/lib/dbus/machine-id`, `product_uuid` in unredacted form | **Dropped** | A machine identifier is exactly that. |
-| `$USER`, `$LOGNAME`, `$HOME`, `/etc/hostname`, `uname -n`, any path under a home directory | **Dropped** | |
-| Journal excerpts, `dmesg`, service logs | **Not collected** | They are full of usernames, hostnames and paths. The hardware support form asks for journal text in its own field, beside the report, and the report itself carries none. |
+| Field                                                                                                      | Class                  | Rule                                                                                                                                                                      |
+| ---------------------------------------------------------------------------------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sys_vendor`, `product_name`, `product_version`, `product_family`                                          | **Kept**               | The match key. Required.                                                                                                                                                  |
+| `board_vendor`, `board_name`, `board_version`                                                              | **Kept**               | The match key, and how two configurations of one model are told apart.                                                                                                    |
+| `product_sku`                                                                                              | **Kept**               | A model identifier, not a person. Frequently the field that distinguishes configurations `product_name` merges.                                                           |
+| `chassis_type`                                                                                             | **Kept, mapped**       | Integer to ACPI chassis type string.                                                                                                                                      |
+| `bios_vendor`, `bios_version`, `bios_date`, `bios_release`, `ec_firmware_release`                          | **Kept**               | Firmware identity. Never sufficient alone to identify an asset.                                                                                                           |
+| PCI vendor, device, class, subsystem vendor, subsystem device, revision, `boot_vga`, candidate module list | **Kept**               | Published hardware IDs. The most useful narrowing evidence available.                                                                                                     |
+| USB `idVendor`, `idProduct`, `bcdDevice`, `manufacturer`, `product`, topology                              | **Kept**               | Device class, not asset.                                                                                                                                                  |
+| ACPI table names, sleep masks, platform profile and choices, wake sources                                  | **Kept, derived only** | Facts. Never a table dump, never AML source, never a GUID.                                                                                                                |
+| EDID manufacturer, product code, mode list, name string, backlight device name                             | **Kept**               | Panel identity.                                                                                                                                                           |
+| `product_uuid`                                                                                             | **Hashed**             | Token.                                                                                                                                                                    |
+| `product_serial`, `board_serial`, `chassis_serial`                                                         | **Hashed**             | Token.                                                                                                                                                                    |
+| EDID serial descriptor (offset 54, tag `0xff`, 4-byte little-endian, and the ASCII variant)                | **Hashed**             | Token. Internal panels do carry one.                                                                                                                                      |
+| `chassis_asset_tag`, `board_asset_tag`                                                                     | **Dropped**            | World-readable, stable, low-entropy, and maps to a purchasing record. No diagnostic value worth that risk.                                                                |
+| `product_serial` on the GPU, GPU UUID, board ID                                                            | **Dropped**            | From `/proc/driver/nvidia/gpus/<pci>/information`.                                                                                                                        |
+| `/sys/class/net/*/address`, `perm_address`, `ifalias`                                                      | **Dropped**            | MACs and user-set interface aliases.                                                                                                                                      |
+| Storage `serial`, `wwn`, `wwid`, `vpd_page_80`, `/dev/disk/by-id/*`, `/sys/class/scsi_host/*/proc_name`    | **Dropped**            | Every one is an asset identifier. The drive model is kept; the drive's identity is not.                                                                                   |
+| WWAN IMEI                                                                                                  | **Dropped**            | Identifies the SIM and its subscriber, which is a third party who did not consent. Never hashed.                                                                          |
+| `/etc/machine-id`, `/var/lib/dbus/machine-id`, `product_uuid` in unredacted form                           | **Dropped**            | A machine identifier is exactly that.                                                                                                                                     |
+| `$USER`, `$LOGNAME`, `$HOME`, `/etc/hostname`, `uname -n`, any path under a home directory                 | **Dropped**            |                                                                                                                                                                           |
+| Journal excerpts, `dmesg`, service logs                                                                    | **Not collected**      | They are full of usernames, hostnames and paths. The hardware support form asks for journal text in its own field, beside the report, and the report itself carries none. |
 
 Asset tags are dropped rather than hashed while serials are hashed, and the difference is
 deliberate. A hashed serial exists so that support can confirm "this is the serial you sent me"
@@ -520,9 +520,9 @@ attempt over a plausible serial list.
 
 ```text
 key  = 32 bytes from getrandom(2), written 0600 to
-       $XDG_STATE_HOME/asura/hardware/report-salt   (default ~/.local/state/asura/hardware/)
-       or /etc/asura/hardware/report-salt when running as root from the installer
-input = "asura/hardware-report/v1\0" || field_name || "\0" || raw_value
+       $XDG_STATE_HOME/toren/hardware/report-salt   (default ~/.local/state/toren/hardware/)
+       or /etc/toren/hardware/report-salt when running as root from the installer
+input = "toren/hardware-report/v1\0" || field_name || "\0" || raw_value
 token = "sha256:" || lowercase hex of the first 8 bytes of HMAC-SHA256(key, input)
 ```
 
@@ -531,8 +531,8 @@ another — the DMI UUID token and the EDID serial token for the same machine di
 correct, because they are different fields that happen to be equal.
 
 Both salt locations are ones Toren already owns: a user-state path from the ownership model, and
-`/etc/asura/`. Nothing is written to `~` by a package and nothing is written outside
-`/usr/share/asura/` and `/etc/asura/` by anything shipped.
+`/etc/toren/`. Nothing is written to `~` by a package and nothing is written outside
+`/usr/share/toren/` and `/etc/toren/` by anything shipped.
 
 Two properties follow, and both belong in the report's own header so a reader knows them:
 
@@ -579,16 +579,16 @@ profile is written from:
 
 - **No kernel patch version in anything that becomes a profile.** The report prints the running
   kernel for a bug report, because it is needed to diagnose one. The profile section carries
-  the flavour only — `generic`, `hwe`, `oem` — resolved from `/etc/asura/kernel` or from the
+  the flavour only — `generic`, `hwe`, `oem` — resolved from `/etc/toren/kernel` or from the
   flavour component of `uname -r`. A candidate profile containing `6.8.0-31-generic` is a
   validation failure, not a warning.
-- **No firmware file, ever.** A profile names firmware *packages*: `linux-firmware`,
+- **No firmware file, ever.** A profile names firmware _packages_: `linux-firmware`,
   `linux-firmware-mediatek`, `linux-firmware-intel-wireless`. The report lists a device's
   required firmware as the package that ships it, resolved through the reviewed set below,
   and never as a blob, a path, or a `modinfo` filename.
 
 The set of packages a profile is allowed to name is data, at
-`/usr/share/asura/hardware/firmware-set.yaml`, mapping every firmware blob the resolver knows
+`/usr/share/toren/hardware/firmware-set.yaml`, mapping every firmware blob the resolver knows
 about to the package that contains it. A profile naming a package outside this set does not
 install it; it falls back to tier 3 and says so. This is the same boundary
 [`SECURITY.md`](../SECURITY.md) draws for packaging: a profile must not be able to introduce
@@ -596,13 +596,13 @@ a package, a firmware file or a kernel flavour outside the reviewed set.
 
 ### Output shapes
 
-| Invocation | Emits | Contains serials |
-|---|---|---|
-| `toren hardware report` | Diagnostic text, for pasting into the hardware support form | Tokens only |
-| `toren hardware report --format json` | The same content, machine-readable | Tokens only |
-| `toren hardware report --profile` | Candidate profile YAML, schema-validated | No tokens at all |
-| `toren hardware report --deep` | Diagnostic text plus ACPI-derived facts | Tokens only |
-| `toren hardware report --raw` | Unredacted local dump for debugging | **Yes** |
+| Invocation                            | Emits                                                       | Contains serials |
+| ------------------------------------- | ----------------------------------------------------------- | ---------------- |
+| `toren hardware report`               | Diagnostic text, for pasting into the hardware support form | Tokens only      |
+| `toren hardware report --format json` | The same content, machine-readable                          | Tokens only      |
+| `toren hardware report --profile`     | Candidate profile YAML, schema-validated                    | No tokens at all |
+| `toren hardware report --deep`        | Diagnostic text plus ACPI-derived facts                     | Tokens only      |
+| `toren hardware report --raw`         | Unredacted local dump for debugging                         | **Yes**          |
 
 `--raw` writes to a path matching the patterns already excluded in
 [`.gitignore`](../.gitignore) — `*.hardware.raw.yaml`, `*-report-raw.yaml` — prints the
@@ -724,14 +724,14 @@ Each rung is tried before the next. A machine needs the lowest rung that works, 
 records which one it needed, because the rung a machine needs is the most useful single fact
 in its profile.
 
-| Rung | Situation | What it takes |
-|---|---|---|
-| 1 | Driver is in the kernel and the module is in the ISO initramfs | Nothing. `modinfo <module>` against the running kernel is the check. |
-| 2 | Driver is in the ISO's rescue module pool | `modprobe` from `/usr/lib/modules/<flavour>/extra/asura-rescue/` |
-| 3 | Driver binds, firmware blob missing | A package from the rescue pool, installed offline |
-| 4 | Out-of-tree driver, buildable on the target | `linux-headers` for the running kernel plus a toolchain, both on the ISO, then a DKMS build from an offline `.xbps` package |
-| 5 | Secure Boot refuses the out-of-tree module | MOK enrolment at reboot, with `mokutil` on the ISO |
-| 6 | No route at all | `asura-firmware load` from USB, a local directory, or a LAN host |
+| Rung | Situation                                                      | What it takes                                                                                                               |
+| ---- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| 1    | Driver is in the kernel and the module is in the ISO initramfs | Nothing. `modinfo <module>` against the running kernel is the check.                                                        |
+| 2    | Driver is in the ISO's rescue module pool                      | `modprobe` from `/usr/lib/modules/<flavour>/extra/toren-rescue/`                                                            |
+| 3    | Driver binds, firmware blob missing                            | A package from the rescue pool, installed offline                                                                           |
+| 4    | Out-of-tree driver, buildable on the target                    | `linux-headers` for the running kernel plus a toolchain, both on the ISO, then a DKMS build from an offline `.xbps` package |
+| 5    | Secure Boot refuses the out-of-tree module                     | MOK enrolment at reboot, with `mokutil` on the ISO                                                                          |
+| 6    | No route at all                                                | `toren-firmware load` from USB, a local directory, or a LAN host                                                            |
 
 Rung 4 is where Secure Boot bites, and it is worth being blunt about the outcome: if the user
 will not enrol a MOK, the machine runs without acceleration for the discrete GPU, and the
@@ -744,7 +744,7 @@ Broad rather than matched. The ISO carries enough that detection has not yet run
 anything useful to say, which is the only condition under which the bundle matters.
 
 ```
-/asura-firmware/
+/toren-firmware/
   BUNDLE.IDX            # signed index: hardware ID -> pool items -> sha256
   BUNDLE.sig            # detached signature over BUNDLE.IDX
   pool/*.xbps           # firmware packages, DKMS sources, microcode
@@ -754,7 +754,7 @@ anything useful to say, which is the only condition under which the bundle matte
 
 Verification is not optional, because firmware loaded from removable media is an untrusted
 input path and [`SECURITY.md`](../SECURITY.md) scopes it accordingly. `BUNDLE.IDX` is verified
-against the public key at `/usr/share/asura/hardware/keys/firmware-bundle.pub` — inside the
+against the public key at `/usr/share/toren/hardware/keys/firmware-bundle.pub` — inside the
 directory Toren owns outright, so the key ships with the image and cannot be replaced by a
 mounted stick. Every `.xbps` is checked against the digest in the verified repository index (`xbps-rindex`) before it is
 installed. A failed signature aborts the whole load; there is no partial-apply path.
@@ -788,7 +788,7 @@ Each `provides` names a package from the reviewed set, so a rescue item can neve
 the installer is allowed to install. An ID that appears in no item is reported as an unknown
 machine rather than guessed at.
 
-### `asura-firmware load`
+### `toren-firmware load`
 
 The two halves are a pair, and both are needed: the machine that has a working driver has the
 firmware, the machine that needs the firmware cannot reach anything.
@@ -800,31 +800,31 @@ radio that will not come up. That is the LAN host row. A machine with no usable 
 is the USB stick and local directory rows, and that is the case the wall in the issue template
 was filed about.
 
-| Source form | Example | How it is read | Behaviour on failure |
-|---|---|---|---|
-| A block device or partition | `asura-firmware load /dev/sdb1` | Opened read-only, mounted `ro,noexec,nosuid,nodev` in a private mount namespace, unmounted before the call returns | Partition with no `/asura-firmware/BUNDLE.IDX` is skipped, not an error |
-| Any local directory | `asura-firmware load /media/asura-stick` | Same mount rules for removable media; plain read for an ordinary directory | Refuses if the index does not verify |
-| A LAN host | `asura-firmware load asura-desktop:/srv/asura-firmware` | `ssh`, host key pinned in `/etc/asura/hardware/known-hosts` | Refuses on an unknown or changed host key, without prompting |
+| Source form                 | Example                                                 | How it is read                                                                                                     | Behaviour on failure                                                    |
+| --------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------- |
+| A block device or partition | `toren-firmware load /dev/sdb1`                         | Opened read-only, mounted `ro,noexec,nosuid,nodev` in a private mount namespace, unmounted before the call returns | Partition with no `/toren-firmware/BUNDLE.IDX` is skipped, not an error |
+| Any local directory         | `toren-firmware load /media/toren-stick`                | Same mount rules for removable media; plain read for an ordinary directory                                         | Refuses if the index does not verify                                    |
+| A LAN host                  | `toren-firmware load toren-desktop:/srv/toren-firmware` | `ssh`, host key pinned in `/etc/toren/hardware/known-hosts`                                                        | Refuses on an unknown or changed host key, without prompting            |
 
-`asura-firmware push` is the other half and is what makes the LAN row worth having. Run on a
+`toren-firmware push` is the other half and is what makes the LAN row worth having. Run on a
 machine that already works, it indexes **its own installed packages** against the hardware IDs
 it can see, so the transfer carries what that particular machine needed and nothing else. It is
 a machine's working state moved as data, not a downloaded bundle.
 
 ```console
 # On a machine that already has the driver, for the machine that does not
-$ asura-firmware push toren-installer:/srv/asura-firmware
-indexed 3 hardware ids from 2 installed packages, wrote /srv/asura-firmware (412 KiB)
+$ toren-firmware push toren-installer:/srv/toren-firmware
+indexed 3 hardware ids from 2 installed packages, wrote /srv/toren-firmware (412 KiB)
 
 # On the machine that needs it
-$ asura-firmware load /dev/sdb1
-scanned /dev/sdb1: found /asura-firmware/BUNDLE.IDX, signature ok
+$ toren-firmware load /dev/sdb1
+scanned /dev/sdb1: found /toren-firmware/BUNDLE.IDX, signature ok
 matching 1 hardware id: net-realtek-8821ce
   rtl8821ce-dkms 1.912.0-1  amd64  sha256 ok
 installed 1 package; module built for 6.17.0-31-generic
 Secure Boot is active: a one-time enrolment is required for the out-of-tree module.
 Reboot and choose "Enroll MOK" at the prompt, or run:
-  mokutil --import /var/lib/asura/firmware/MOK.der
+  mokutil --import /var/lib/toren/firmware/MOK.der
 re-running detection
   network: 10ec:c832 now has driver rtl8821ce bound
   offline_risk: false
@@ -835,7 +835,7 @@ Four things in that output are deliberate and are each load-bearing:
 
 - **`signature ok` before anything is installed.** Verification precedes use, always.
 - **The hardware ID is matched, not the driver.** The index is consulted with the ID detection
-  produced *before* a driver existed, which is the entire reason the index is keyed by ID.
+  produced _before_ a driver existed, which is the entire reason the index is keyed by ID.
 - **The tier does not change.** Firmware rescue makes tier 3's defaults work; it is not
   evidence about the machine. A tier-3 machine that installs cleanly with rescue firmware is
   still tier 3, and saying otherwise is exactly the dishonesty the tier system exists to
@@ -846,10 +846,10 @@ Four things in that output are deliberate and are each load-bearing:
 
 ### Installing base-layer firmware does not violate the boundary
 
-Worth stating because it looks like a violation and is not. `asura-firmware load` runs `xbps-install`
+Worth stating because it looks like a violation and is not. `toren-firmware load` runs `xbps-install`
 on packages from the base layer and its firmware archive. Those packages write to `/lib/firmware`
-and `/usr/lib/modules`, which Toren does not own. The boundary rule constrains *Toren's* packages
-to `/usr/share/asura/` and `/etc/asura/`; installing a base-layer package is the base layer
+and `/usr/lib/modules`, which Toren does not own. The boundary rule constrains _Toren's_ packages
+to `/usr/share/toren/` and `/etc/toren/`; installing a base-layer package is the base layer
 writing its own files. Toren installs the package and never touches its contents.
 
 ---
@@ -861,13 +861,13 @@ it, never by what a machine asks for. The tiers themselves, and what each one pr
 [`tiers.yaml`](../system/hardware/tiers.yaml); this is who is allowed to move a machine
 between them.
 
-| Transition | Automatic | Performed by | Gate |
-|---|---|---|---|
-| No profile → 3 | Yes | The matcher | The `fallback:` block, plus `warn_tier: true` |
-| 3 → 2 | Yes, at submission | The contributor, and CI enforces the floor | The profile passes `toren hardware lint-profiles` and was generated by `toren hardware report` on the machine it describes |
-| 2 → 2, editing a profile | Yes | The contributor | Re-validation. A narrower `match:` cannot lower a tier, because the tier is a claim about the machine, not about how precisely the profile found it. |
-| 2 → 1 | **No** | A maintainer | The `tiers.yaml` `requires:` checklist satisfied, evidence attached, machine physically run |
-| 1 → 2, or any → 3 | Yes, downward only | The loader | The profile names a kernel flavour, firmware package or DKMS module outside the reviewed set, or matches nothing in the database |
+| Transition               | Automatic          | Performed by                               | Gate                                                                                                                                                 |
+| ------------------------ | ------------------ | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| No profile → 3           | Yes                | The matcher                                | The `fallback:` block, plus `warn_tier: true`                                                                                                        |
+| 3 → 2                    | Yes, at submission | The contributor, and CI enforces the floor | The profile passes `toren hardware lint-profiles` and was generated by `toren hardware report` on the machine it describes                           |
+| 2 → 2, editing a profile | Yes                | The contributor                            | Re-validation. A narrower `match:` cannot lower a tier, because the tier is a claim about the machine, not about how precisely the profile found it. |
+| 2 → 1                    | **No**             | A maintainer                               | The `tiers.yaml` `requires:` checklist satisfied, evidence attached, machine physically run                                                          |
+| 1 → 2, or any → 3        | Yes, downward only | The loader                                 | The profile names a kernel flavour, firmware package or DKMS module outside the reviewed set, or matches nothing in the database                     |
 
 The rule behind the table: **promotion upward from evidence already on the machine is
 automatic; promotion upward from an assertion is not, and demotion is always automatic.**
@@ -878,9 +878,9 @@ Three reasons, and the first is the practical one.
 
 **The checklist contains things no machine can check.** `tiers.yaml` requires `suspend_resume`,
 `external_display` and — for some machines — `bluetooth` and `fingerprint`. Whether suspend
-and resume are *clean* on a given laptop, whether an external display works through that
+and resume are _clean_ on a given laptop, whether an external display works through that
 machine's USB-C dock, is a judgement made by a person looking at the machine. No probe reads
-it and no script infers it. `toren hardware verify` collects what *can* be collected — boots,
+it and no script infers it. `toren hardware verify` collects what _can_ be collected — boots,
 login manager, session, network, audio output, GPU acceleration, panel backlight writable,
 bluetooth enumerated — and leaves exactly the judgement calls to the human.
 
@@ -908,7 +908,7 @@ The rule is enforced in three places, because a rule only one reviewer remembers
   silently drops from tier 2 to tier 3 — a BIOS update rewriting a DMI string is the usual
   cause — is the failure mode here, and it is only visible if something says so out loud.
 
-A tier-3 machine with a working community profile *should* be raised to tier 2 by submitting
+A tier-3 machine with a working community profile _should_ be raised to tier 2 by submitting
 one. That is the loop, and it costs one machine and no code.
 
 ---
@@ -967,24 +967,24 @@ applied to the code.
 
 ### The test matrix
 
-| Test | Input | Asserts |
-|---|---|---|
-| `probe/dmi` | Captured DMI directory | Exact field struct, including the empty `product_sku` and the `mm/dd/yyyy` `bios_date` parse |
-| `probe/pci` | Captured PCI tree, hybrid machine | GPU, network, audio, storage classification; `boot_vga`; the candidate module list from `modalias` |
-| `probe/usb` | Captured USB tree | VID/PID/name mapping, topology reconstruction from directory names |
-| `probe/acpi` | Captured `/sys/firmware` and `/sys/power` | Sleep mask parsed; absent tables yield `unknown`, never an error |
-| `probe/edid` | 128-byte blob | Manufacturer `NCP`, product code, native `1920x1080` at `144.000162 Hz`, name string `LM156LF-2F01` |
-| `probe/edid` | Zero-byte `edid` | `present: false`, no error, no panic |
-| `probe/edid` | 100-byte `edid` | Rejected as a faulty read, not partially parsed |
-| `match` | Inline profile tables, no hardware | Each of the five tie-break rules, individually and in combination |
-| `match` | Two profiles tying on tier and specificity, disagreeing on `gpu.discrete` | **Conflict**, both IDs named, tier 3 fallback |
-| `match` | A machine matching nothing | Tier 3 with the `fallback:` block applied |
-| `match` | An ARM laptop fixture with no DMI but a device tree | Reaches tier 2 on an ordinary DMI-vocabulary profile, no crash |
-| `match` | A board with neither DMI nor a device tree | Tier 3 with `reason: dmi unavailable`, no crash |
-| `redact` | Synthetic DMI tree seeded with canaries | Zero canaries in the rendered bytes |
-| `redact` | An injected serial, MAC and home path | The sweep refuses, names the key, exits non-zero |
-| `lint` | Every file in `profiles/` | No patch-version kernel pin, no firmware file, no unclassified field, `id` matches its filename stem, every `match:` field is in the detection vocabulary |
-| Golden | `toren hardware report --format json` per fixture | Byte-identical to the committed output; a diff is a review artefact |
+| Test         | Input                                                                     | Asserts                                                                                                                                                   |
+| ------------ | ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `probe/dmi`  | Captured DMI directory                                                    | Exact field struct, including the empty `product_sku` and the `mm/dd/yyyy` `bios_date` parse                                                              |
+| `probe/pci`  | Captured PCI tree, hybrid machine                                         | GPU, network, audio, storage classification; `boot_vga`; the candidate module list from `modalias`                                                        |
+| `probe/usb`  | Captured USB tree                                                         | VID/PID/name mapping, topology reconstruction from directory names                                                                                        |
+| `probe/acpi` | Captured `/sys/firmware` and `/sys/power`                                 | Sleep mask parsed; absent tables yield `unknown`, never an error                                                                                          |
+| `probe/edid` | 128-byte blob                                                             | Manufacturer `NCP`, product code, native `1920x1080` at `144.000162 Hz`, name string `LM156LF-2F01`                                                       |
+| `probe/edid` | Zero-byte `edid`                                                          | `present: false`, no error, no panic                                                                                                                      |
+| `probe/edid` | 100-byte `edid`                                                           | Rejected as a faulty read, not partially parsed                                                                                                           |
+| `match`      | Inline profile tables, no hardware                                        | Each of the five tie-break rules, individually and in combination                                                                                         |
+| `match`      | Two profiles tying on tier and specificity, disagreeing on `gpu.discrete` | **Conflict**, both IDs named, tier 3 fallback                                                                                                             |
+| `match`      | A machine matching nothing                                                | Tier 3 with the `fallback:` block applied                                                                                                                 |
+| `match`      | An ARM laptop fixture with no DMI but a device tree                       | Reaches tier 2 on an ordinary DMI-vocabulary profile, no crash                                                                                            |
+| `match`      | A board with neither DMI nor a device tree                                | Tier 3 with `reason: dmi unavailable`, no crash                                                                                                           |
+| `redact`     | Synthetic DMI tree seeded with canaries                                   | Zero canaries in the rendered bytes                                                                                                                       |
+| `redact`     | An injected serial, MAC and home path                                     | The sweep refuses, names the key, exits non-zero                                                                                                          |
+| `lint`       | Every file in `profiles/`                                                 | No patch-version kernel pin, no firmware file, no unclassified field, `id` matches its filename stem, every `match:` field is in the detection vocabulary |
+| Golden       | `toren hardware report --format json` per fixture                         | Byte-identical to the committed output; a diff is a review artefact                                                                                       |
 
 ### Negative fixtures and fuzzing
 
@@ -1000,7 +1000,7 @@ cases nobody captures from real hardware. They are written by hand:
 - A panel whose EDID has no serial descriptor.
 
 Each one asserts that detection degrades to `unknown` and still reaches a total resolution.
-*Never a crash and never a wrong profile* is the bar, and the "never a wrong profile" half is
+_Never a crash and never a wrong profile_ is the bar, and the "never a wrong profile" half is
 what the negative fixtures exist for.
 
 Three parsers take untrusted input and are fuzzed, because each of them is attacker-influenced
@@ -1032,11 +1032,11 @@ conflates them.
 
 ## Open questions
 
-| Question | Why it matters |
-|---|---|
-| `match:` beyond DMI | PCI subsystem IDs and USB IDs distinguish two machines that share a DMI string, and they are the only stable identity on a board with no DMI at all. Both are non-identifying published hardware IDs. Until the schema grows a `pci_subsystem:` key, they stay in the report as evidence and in the linter as collision warnings. |
-| Two profiles, one DMI string, different tiers | The rule resolves it deterministically and the linter warns about it. Whether the linter should be able to *refuse* the pair, on the grounds that a machine matching both cannot be placed with confidence, is not decided. |
-| Detection on every boot, or once at install | A BIOS update can rewrite a DMI string, and a machine silently drops from tier 2 to tier 3. Re-detecting at boot would catch it; it would also make the resolution non-deterministic across an update, which is a different cost. |
-| Whether the report carries any failure context | A journal excerpt would help enormously and is full of usernames, hostnames and paths. The hardware support form asks for journal text in its own field, beside the report, which keeps the report a pure inventory. Whether that separation survives contact with a real submission is worth watching. |
-| Rescue bundle signing granularity | Per ISO or per release. Per release means a machine with an old ISO cannot be helped by a current bundle; per ISO means more keys in the image. |
-| Tier 1 evidence collection | `toren hardware verify` can check most of the `tiers.yaml` checklist mechanically. Whether the machine-generated evidence block is ever attached to a tier 1 sign-off, or whether it is deliberately kept out to preserve the human judgement, is a call to make before the first tier 1 is granted. |
+| Question                                       | Why it matters                                                                                                                                                                                                                                                                                                                    |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `match:` beyond DMI                            | PCI subsystem IDs and USB IDs distinguish two machines that share a DMI string, and they are the only stable identity on a board with no DMI at all. Both are non-identifying published hardware IDs. Until the schema grows a `pci_subsystem:` key, they stay in the report as evidence and in the linter as collision warnings. |
+| Two profiles, one DMI string, different tiers  | The rule resolves it deterministically and the linter warns about it. Whether the linter should be able to _refuse_ the pair, on the grounds that a machine matching both cannot be placed with confidence, is not decided.                                                                                                       |
+| Detection on every boot, or once at install    | A BIOS update can rewrite a DMI string, and a machine silently drops from tier 2 to tier 3. Re-detecting at boot would catch it; it would also make the resolution non-deterministic across an update, which is a different cost.                                                                                                 |
+| Whether the report carries any failure context | A journal excerpt would help enormously and is full of usernames, hostnames and paths. The hardware support form asks for journal text in its own field, beside the report, which keeps the report a pure inventory. Whether that separation survives contact with a real submission is worth watching.                           |
+| Rescue bundle signing granularity              | Per ISO or per release. Per release means a machine with an old ISO cannot be helped by a current bundle; per ISO means more keys in the image.                                                                                                                                                                                   |
+| Tier 1 evidence collection                     | `toren hardware verify` can check most of the `tiers.yaml` checklist mechanically. Whether the machine-generated evidence block is ever attached to a tier 1 sign-off, or whether it is deliberately kept out to preserve the human judgement, is a call to make before the first tier 1 is granted.                              |

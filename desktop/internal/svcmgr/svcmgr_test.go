@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"asura/desktop/internal/runner/runnertest"
+	"toren/desktop/internal/runner/runnertest"
 )
 
 func fakeManager(t *testing.T) (*runnertest.Fake, *Manager, string) {
@@ -26,11 +26,11 @@ func TestRunitServiceName(t *testing.T) {
 		unit string
 		want string
 	}{
-		{"asura-shell.service", "quickshell"},
-		{"asurad.service", "asurad"},
-		{"asura-palette-bridge.service", "asura-palette-bridge"},
-		{"asura-session.target", "asura-session"},
-		{"asura-ai-usage.timer", "asura-ai-usage"},
+		{"toren-shell.service", "quickshell"},
+		{"torend.service", "torend"},
+		{"toren-palette-bridge.service", "toren-palette-bridge"},
+		{"toren-session.target", "toren-session"},
+		{"toren-ai-usage.timer", "toren-ai-usage"},
 		{"voxtype.service", "voxtype"},
 	}
 	for _, c := range cases {
@@ -42,31 +42,31 @@ func TestRunitServiceName(t *testing.T) {
 
 func TestRunitVerbs(t *testing.T) {
 	fake, m, svdir := fakeManager(t)
-	dir := filepath.Join(svdir, "asurad")
+	dir := filepath.Join(svdir, "torend")
 	if err := os.Mkdir(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}
 	run := "sv status " + dir
 
 	// ── the answer table, unchanged order = the call order below ───────────
-	up := runnertest.Answer{Stdout: "run: asurad: (pid 901) 33102s\n"}
-	down := runnertest.Answer{Stdout: "down: asurad: normally up, got TERM\n"}
+	up := runnertest.Answer{Stdout: "run: torend: (pid 901) 33102s\n"}
+	down := runnertest.Answer{Stdout: "down: torend: normally up, got TERM\n"}
 	fake.On(run, up)
 	fake.On(run, up)
 	fake.On(run, up)
 	fake.On(run, down)
 
 	// ── the up run: no down marker, sv says run ────────────────────────────
-	if !m.Active("asurad.service") {
+	if !m.Active("torend.service") {
 		t.Error("a run: status line is running")
 	}
-	if !m.Enabled("asurad.service") {
+	if !m.Enabled("torend.service") {
 		t.Error("no down marker is enabled")
 	}
-	if got := m.MainPID("asurad.service"); got != "901" {
+	if got := m.MainPID("torend.service"); got != "901" {
 		t.Errorf("MainPID = %q, want 901", got)
 	}
-	if got := m.Summary("asurad.service"); got != "active (running)" {
+	if got := m.Summary("torend.service"); got != "active (running)" {
 		t.Errorf("Summary = %q, want active (running)", got)
 	}
 
@@ -74,19 +74,19 @@ func TestRunitVerbs(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(dir, "down"), nil, 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if m.Active("asurad.service") {
+	if m.Active("torend.service") {
 		t.Error("a down: status line is not running")
 	}
-	if m.Enabled("asurad.service") {
+	if m.Enabled("torend.service") {
 		t.Error("a down marker is disabled")
 	}
-	if got := m.Summary("asurad.service"); got != "inactive" {
+	if got := m.Summary("torend.service"); got != "inactive" {
 		t.Errorf("Summary = %q, want inactive", got)
 	}
 
 	// EnableNow removes the marker and runs sv up.
 	fake.On("sv up "+dir, runnertest.Answer{})
-	if err := m.EnableNow("asurad.service"); err != nil {
+	if err := m.EnableNow("torend.service"); err != nil {
 		t.Errorf("EnableNow: %v", err)
 	}
 	if _, err := os.Stat(filepath.Join(dir, "down")); err == nil {
@@ -95,7 +95,7 @@ func TestRunitVerbs(t *testing.T) {
 
 	// DisableNow runs sv down and lays the marker back.
 	fake.On("sv down "+dir, runnertest.Answer{})
-	if err := m.DisableNow("asurad.service"); err != nil {
+	if err := m.DisableNow("torend.service"); err != nil {
 		t.Errorf("DisableNow: %v", err)
 	}
 	if _, err := os.Stat(filepath.Join(dir, "down")); err != nil {
@@ -111,9 +111,9 @@ func TestRunitVerbs(t *testing.T) {
 	fake.On("sv restart "+dir, runnertest.Answer{})
 	fake.On("sv restart "+dir, runnertest.Answer{})
 	for name, op := range map[string]func() error{
-		"Restart":            func() error { return m.Restart("asurad.service") },
-		"Reload":             func() error { return m.Reload("asurad.service") },
-		"TryReloadOrRestart": func() error { return m.TryReloadOrRestart("asurad.service") },
+		"Restart":            func() error { return m.Restart("torend.service") },
+		"Reload":             func() error { return m.Reload("torend.service") },
+		"TryReloadOrRestart": func() error { return m.TryReloadOrRestart("torend.service") },
 	} {
 		if err := op(); err != nil {
 			t.Errorf("%s: %v", name, err)

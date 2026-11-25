@@ -75,17 +75,17 @@ mkdir -p "$INCLUDE_DIR/etc/sudoers.d" \
 	"$INCLUDE_DIR/etc/plymouth" \
 	"$INCLUDE_DIR/etc/dracut.conf.d" \
 	"$INCLUDE_DIR/usr/bin" \
-	"$INCLUDE_DIR/usr/share/asura/branding" \
-	"$INCLUDE_DIR/usr/share/asura/session" \
-	"$INCLUDE_DIR/usr/share/asura/runit/services" \
-	"$INCLUDE_DIR/usr/share/asura/hyprland" \
-	"$INCLUDE_DIR/usr/share/asura/shell" \
+	"$INCLUDE_DIR/usr/share/toren/branding" \
+	"$INCLUDE_DIR/usr/share/toren/session" \
+	"$INCLUDE_DIR/usr/share/toren/runit/services" \
+	"$INCLUDE_DIR/usr/share/toren/hyprland" \
+	"$INCLUDE_DIR/usr/share/toren/shell" \
 	"$INCLUDE_DIR/usr/share/wayland-sessions"
 
 # Configure Plymouth boot splash with logo and loading progress bar animation
-mkdir -p "$INCLUDE_DIR/usr/share/plymouth/themes/asura"
-cp -r "$REPO_ROOT/system/plymouth/toren"/* "$INCLUDE_DIR/usr/share/plymouth/themes/asura/"
-ln -sf /usr/share/plymouth/themes/asura/toren.plymouth "$INCLUDE_DIR/usr/share/plymouth/themes/default.plymouth"
+mkdir -p "$INCLUDE_DIR/usr/share/plymouth/themes/toren"
+cp -r "$REPO_ROOT/system/plymouth/toren"/* "$INCLUDE_DIR/usr/share/plymouth/themes/toren/"
+ln -sf /usr/share/plymouth/themes/toren/toren.plymouth "$INCLUDE_DIR/usr/share/plymouth/themes/default.plymouth"
 
 # Pre-stage TrueType fonts and fontconfig configuration for Plymouth label rendering
 mkdir -p "$INCLUDE_DIR/usr/share/fonts/TTF" "$INCLUDE_DIR/etc/fonts"
@@ -141,7 +141,7 @@ EOF
 
 cat >"$INCLUDE_DIR/etc/plymouth/plymouthd.conf" <<'EOF'
 [Daemon]
-Theme=asura
+Theme=toren
 ShowDelay=0
 DeviceTimeout=8
 EOF
@@ -198,8 +198,8 @@ cat >"$INCLUDE_DIR/etc/issue.net" <<'EOF'
      %##                    ##%       https://github.com/mohitjoer/Toren-Linux
     ####   %%%%%%%%%%%%%%   ####
   ######% %%%%%%%%%%%%%%%% %######    Robust. Minimal. Kinetic.
-%###########% %%%%%%%%  ###########%  Live Session: user 'asura' (nopasswd sudo)
- %###########          ###########%   Run 'asura install' or 'asura-installer' to install
+%###########% %%%%%%%%  ###########%  Live Session: user 'toren' (nopasswd sudo)
+ %###########          ###########%   Run 'toren install' or 'toren-installer' to install
      ########  @@@@@@  ########
    %% ########%      %######## %%%
    %%  %%##################%%% %%%
@@ -218,11 +218,11 @@ EOF
 
 cat >"$INCLUDE_DIR/etc/motd" <<'EOF'
        #                    #         Toren Linux Beta 001
-     %##                    ##%       https://asuraos.dev
+     %##                    ##%       https://github.com/mohitjoer/Toren-Linux
     ####   %%%%%%%%%%%%%%   ####
   ######% %%%%%%%%%%%%%%%% %######    Robust. Minimal. Kinetic.
-%###########% %%%%%%%%  ###########%  Live Session: user 'asura' (nopasswd sudo)
- %###########          ###########%   Run 'asura install' or 'asura-installer' to install
+%###########% %%%%%%%%  ###########%  Live Session: user 'toren' (nopasswd sudo)
+ %###########          ###########%   Run 'toren install' or 'toren-installer' to install
      ########  @@@@@@  ########
    %% ########%      %######## %%%
    %%  %%##################%%% %%%
@@ -249,22 +249,22 @@ LC_ALL=en_US.UTF-8
 LOCALECFG
 
 # Copy branding assets
-mkdir -p "$INCLUDE_DIR/usr/share/asura/branding"
+mkdir -p "$INCLUDE_DIR/usr/share/toren/branding"
 cp "$REPO_ROOT/public/toren-logo.svg" \
-	"$INCLUDE_DIR/usr/share/asura/branding/asura-logo.svg"
+	"$INCLUDE_DIR/usr/share/toren/branding/toren-logo.svg"
 cp "$REPO_ROOT/public/toren-logo.svg" \
-	"$INCLUDE_DIR/usr/share/asura/branding/toren-logo.svg"
+	"$INCLUDE_DIR/usr/share/toren/branding/toren-logo.svg"
 cp "$REPO_ROOT/public/toren-logo-on-dark.svg" \
-	"$INCLUDE_DIR/usr/share/asura/branding/asura-logo-on-dark.svg"
+	"$INCLUDE_DIR/usr/share/toren/branding/toren-logo-on-dark.svg"
 cp "$REPO_ROOT/public/toren-logo-on-dark.svg" \
-	"$INCLUDE_DIR/usr/share/asura/branding/toren-logo-on-dark.svg"
+	"$INCLUDE_DIR/usr/share/toren/branding/toren-logo-on-dark.svg"
 if [ -f "$REPO_ROOT/public/branding/boot-splash.png" ]; then
 	cp "$REPO_ROOT/public/branding/boot-splash.png" \
-		"$INCLUDE_DIR/usr/share/asura/branding/boot-splash.png"
+		"$INCLUDE_DIR/usr/share/toren/branding/boot-splash.png"
 fi
 if [ -d "$REPO_ROOT/public/branding" ]; then
 	cp -r "$REPO_ROOT/public/branding"/* \
-		"$INCLUDE_DIR/usr/share/asura/branding/" 2>/dev/null || true
+		"$INCLUDE_DIR/usr/share/toren/branding/" 2>/dev/null || true
 fi
 
 # Ensure strict permissions on sudoers.d directory (0750) and wheel rule (0440)
@@ -273,53 +273,43 @@ echo '%wheel ALL=(ALL:ALL) NOPASSWD: ALL' > "$INCLUDE_DIR/etc/sudoers.d/wheel"
 chmod 0440 "$INCLUDE_DIR/etc/sudoers.d/wheel"
 
 # Copy session files, keybind catalogue, and desktop sessions
-cp "$REPO_ROOT/session/toren-session" "$INCLUDE_DIR/usr/share/asura/session/toren-session"
+cp "$REPO_ROOT/session/toren-session" "$INCLUDE_DIR/usr/share/toren/session/toren-session"
 cp "$REPO_ROOT/session/toren-session" "$INCLUDE_DIR/usr/bin/toren-session"
-ln -sf toren-session "$INCLUDE_DIR/usr/share/asura/session/asura-session"
-ln -sf toren-session "$INCLUDE_DIR/usr/bin/asura-session"
-cp "$REPO_ROOT/session/toren-session-safe" "$INCLUDE_DIR/usr/share/asura/session/toren-session-safe"
+cp "$REPO_ROOT/session/toren-session-safe" "$INCLUDE_DIR/usr/share/toren/session/toren-session-safe"
 cp "$REPO_ROOT/session/toren-session-safe" "$INCLUDE_DIR/usr/bin/toren-session-safe"
-ln -sf toren-session-safe "$INCLUDE_DIR/usr/share/asura/session/asura-session-safe"
-ln -sf toren-session-safe "$INCLUDE_DIR/usr/bin/asura-session-safe"
-cp "$REPO_ROOT/session/toren-activate" "$INCLUDE_DIR/usr/share/asura/session/toren-activate"
+cp "$REPO_ROOT/session/toren-activate" "$INCLUDE_DIR/usr/share/toren/session/toren-activate"
 cp "$REPO_ROOT/session/toren-activate" "$INCLUDE_DIR/usr/bin/toren-activate"
-ln -sf toren-activate "$INCLUDE_DIR/usr/share/asura/session/asura-activate"
-ln -sf toren-activate "$INCLUDE_DIR/usr/bin/asura-activate"
-cp "$REPO_ROOT/session/toren.desktop" "$INCLUDE_DIR/usr/share/asura/session/toren.desktop"
+cp "$REPO_ROOT/session/toren.desktop" "$INCLUDE_DIR/usr/share/toren/session/toren.desktop"
 cp "$REPO_ROOT/session/toren.desktop" "$INCLUDE_DIR/usr/share/wayland-sessions/toren.desktop"
-cp "$REPO_ROOT/session/toren-safe.desktop" "$INCLUDE_DIR/usr/share/asura/session/toren-safe.desktop"
+cp "$REPO_ROOT/session/toren-safe.desktop" "$INCLUDE_DIR/usr/share/toren/session/toren-safe.desktop"
 cp "$REPO_ROOT/session/toren-safe.desktop" "$INCLUDE_DIR/usr/share/wayland-sessions/toren-safe.desktop"
-cp "$REPO_ROOT/session/binds.json" "$INCLUDE_DIR/usr/share/asura/session/binds.json"
-cp "$REPO_ROOT/session/runit/toren-user-services" "$INCLUDE_DIR/usr/share/asura/session/toren-user-services"
+cp "$REPO_ROOT/session/binds.json" "$INCLUDE_DIR/usr/share/toren/session/binds.json"
+cp "$REPO_ROOT/session/runit/toren-user-services" "$INCLUDE_DIR/usr/share/toren/session/toren-user-services"
 cp "$REPO_ROOT/session/runit/toren-user-services" "$INCLUDE_DIR/usr/bin/toren-user-services"
-ln -sf toren-user-services "$INCLUDE_DIR/usr/share/asura/session/asura-user-services"
-ln -sf toren-user-services "$INCLUDE_DIR/usr/bin/asura-user-services"
 
 # Copy session store wrapper, portal configuration, and session CLI scripts
-cp "$REPO_ROOT/session/toren-store" "$INCLUDE_DIR/usr/share/asura/session/toren-store"
-ln -sf toren-store "$INCLUDE_DIR/usr/share/asura/session/asura-store"
-mkdir -p "$INCLUDE_DIR/usr/share/xdg-desktop-portal" "$INCLUDE_DIR/usr/share/asura/session"
-cp "$REPO_ROOT/session/toren-portals.conf" "$INCLUDE_DIR/usr/share/xdg-desktop-portal/asura-portals.conf"
-cp "$REPO_ROOT/session/toren-portals.conf" "$INCLUDE_DIR/usr/share/asura/session/toren-portals.conf"
-ln -sf toren-portals.conf "$INCLUDE_DIR/usr/share/asura/session/asura-portals.conf"
+cp "$REPO_ROOT/session/toren-store" "$INCLUDE_DIR/usr/share/toren/session/toren-store"
+mkdir -p "$INCLUDE_DIR/usr/share/xdg-desktop-portal" "$INCLUDE_DIR/usr/share/toren/session"
+cp "$REPO_ROOT/session/toren-portals.conf" "$INCLUDE_DIR/usr/share/xdg-desktop-portal/toren-portals.conf"
+cp "$REPO_ROOT/session/toren-portals.conf" "$INCLUDE_DIR/usr/share/toren/session/toren-portals.conf"
 
-# Stage session units into /usr/share/asura/units and systemd user directory
-mkdir -p "$INCLUDE_DIR/usr/share/asura/units" "$INCLUDE_DIR/usr/share/asura/session/units" "$INCLUDE_DIR/usr/lib/systemd/user"
+# Stage session units into /usr/share/toren/units and systemd user directory
+mkdir -p "$INCLUDE_DIR/usr/share/toren/units" "$INCLUDE_DIR/usr/share/toren/session/units" "$INCLUDE_DIR/usr/lib/systemd/user"
 if [ -d "$REPO_ROOT/session/units" ]; then
-	cp "$REPO_ROOT/session/units"/* "$INCLUDE_DIR/usr/share/asura/units/"
-	cp "$REPO_ROOT/session/units"/* "$INCLUDE_DIR/usr/share/asura/session/units/"
+	cp "$REPO_ROOT/session/units"/* "$INCLUDE_DIR/usr/share/toren/units/"
+	cp "$REPO_ROOT/session/units"/* "$INCLUDE_DIR/usr/share/toren/session/units/"
 	cp "$REPO_ROOT/session/units"/* "$INCLUDE_DIR/usr/lib/systemd/user/"
 fi
 
-# Copy default wallpapers to /usr/share/asura/backgrounds/ and /etc/skel/Pictures/Wallpapers/
-mkdir -p "$INCLUDE_DIR/usr/share/asura/backgrounds"
+# Copy default wallpapers to /usr/share/toren/backgrounds/ and /etc/skel/Pictures/Wallpapers/
+mkdir -p "$INCLUDE_DIR/usr/share/toren/backgrounds"
 mkdir -p "$INCLUDE_DIR/etc/skel/Pictures/Wallpapers"
 if [ -d "$REPO_ROOT/public/wallpapers" ]; then
-	cp "$REPO_ROOT/public/wallpapers"/* "$INCLUDE_DIR/usr/share/asura/backgrounds/"
+	cp "$REPO_ROOT/public/wallpapers"/* "$INCLUDE_DIR/usr/share/toren/backgrounds/"
 	cp "$REPO_ROOT/public/wallpapers"/* "$INCLUDE_DIR/etc/skel/Pictures/Wallpapers/"
 fi
 
-for s in asura-hub asura-idle asura-pin asura-reload-cover asura-shot asura-vm asura-wallpaper-ui asura-welcome asura-greeter; do
+for s in toren-hub toren-idle toren-pin toren-reload-cover toren-shot toren-vm toren-wallpaper-ui toren-welcome toren-greeter; do
 	if [ -f "$REPO_ROOT/session/$s" ]; then
 		cp "$REPO_ROOT/session/$s" "$INCLUDE_DIR/usr/bin/"
 	fi
@@ -329,16 +319,16 @@ if [ -d "$REPO_ROOT/session/scripts" ]; then
 fi
 
 if [ -d "$REPO_ROOT/session/grub" ]; then
-	mkdir -p "$INCLUDE_DIR/usr/share/asura/session/grub"
-	cp "$REPO_ROOT/session/grub"/* "$INCLUDE_DIR/usr/share/asura/session/grub/"
+	mkdir -p "$INCLUDE_DIR/usr/share/toren/session/grub"
+	cp "$REPO_ROOT/session/grub"/* "$INCLUDE_DIR/usr/share/toren/session/grub/"
 fi
 
-# Copy all shell scripts (asura-app, asura-cmd-*, asura-summon, etc.) to /usr/bin/
+# Copy all shell scripts (toren-app, toren-cmd-*, toren-summon, etc.) to /usr/bin/
 if [ -d "$REPO_ROOT/shell/scripts" ]; then
 	cp "$REPO_ROOT/shell/scripts"/* "$INCLUDE_DIR/usr/bin/"
 fi
 
-# Copy all system helpers (asura-volume, asura-restart-audio, asura-hw-backlight, etc.)
+# Copy all system helpers (toren-volume, toren-restart-audio, toren-hw-backlight, etc.)
 for hdir in audio display input perf pkg; do
 	if [ -d "$REPO_ROOT/system/helpers/$hdir" ]; then
 		for f in "$REPO_ROOT/system/helpers/$hdir"/*; do
@@ -352,20 +342,18 @@ cp "$REPO_ROOT/system/helpers/prime-run" "$INCLUDE_DIR/usr/bin/prime-run"
 cp "$REPO_ROOT/system/helpers/fan-profile" "$INCLUDE_DIR/usr/bin/fan-profile"
 cp "$REPO_ROOT/system/helpers/systemctl" "$INCLUDE_DIR/usr/bin/systemctl"
 cp "$REPO_ROOT/system/helpers/toren-gpu" "$INCLUDE_DIR/usr/bin/toren-gpu"
-ln -sf toren-gpu "$INCLUDE_DIR/usr/bin/asura-gpu"
 chmod 755 "$INCLUDE_DIR/usr/bin/systemctl"
 cp "$REPO_ROOT/system/helpers/journalctl" "$INCLUDE_DIR/usr/bin/journalctl"
 chmod 755 "$INCLUDE_DIR/usr/bin/journalctl"
 cp "$REPO_ROOT/installation/toren-installer.sh" "$INCLUDE_DIR/usr/bin/toren-installer"
-ln -sf toren-installer "$INCLUDE_DIR/usr/bin/asura-installer"
 chmod 755 "$INCLUDE_DIR/usr/bin/toren-installer"
-touch "$INCLUDE_DIR/etc/asura-live"
+touch "$INCLUDE_DIR/etc/toren-live"
 
 
 
 # Copy GLib GSettings schemas
 mkdir -p "$INCLUDE_DIR/usr/share/glib-2.0/schemas"
-cp "$REPO_ROOT/shell"/org.asura.*.gschema.xml "$INCLUDE_DIR/usr/share/glib-2.0/schemas/"
+cp "$REPO_ROOT/shell"/org.toren.*.gschema.xml "$INCLUDE_DIR/usr/share/glib-2.0/schemas/"
 
 # Copy applications .desktop entries
 mkdir -p "$INCLUDE_DIR/usr/share/applications"
@@ -386,12 +374,12 @@ if [ -f "$REPO_ROOT/session/applications/toren-store.desktop" ]; then
 	chmod 755 "$INCLUDE_DIR/etc/skel/Desktop/toren-store.desktop"
 fi
 if [ -f "$REPO_ROOT/shell/assets/toren-store.svg" ]; then
-	cp "$REPO_ROOT/shell/assets/toren-store.svg" "$INCLUDE_DIR/usr/share/icons/hicolor/scalable/apps/asura-store.svg"
-	cp "$REPO_ROOT/shell/assets/toren-store.svg" "$INCLUDE_DIR/usr/share/pixmaps/asura-store.svg"
+	cp "$REPO_ROOT/shell/assets/toren-store.svg" "$INCLUDE_DIR/usr/share/icons/hicolor/scalable/apps/toren-store.svg"
+	cp "$REPO_ROOT/shell/assets/toren-store.svg" "$INCLUDE_DIR/usr/share/pixmaps/toren-store.svg"
 fi
 if [ -f "$REPO_ROOT/shell/assets/toren-store.png" ]; then
-	cp "$REPO_ROOT/shell/assets/toren-store.png" "$INCLUDE_DIR/usr/share/icons/hicolor/512x512/apps/asura-store.png"
-	cp "$REPO_ROOT/shell/assets/toren-store.png" "$INCLUDE_DIR/usr/share/pixmaps/asura-store.png"
+	cp "$REPO_ROOT/shell/assets/toren-store.png" "$INCLUDE_DIR/usr/share/icons/hicolor/512x512/apps/toren-store.png"
+	cp "$REPO_ROOT/shell/assets/toren-store.png" "$INCLUDE_DIR/usr/share/pixmaps/toren-store.png"
 fi
 
 # Toren Installer desktop shortcut and icon
@@ -401,8 +389,8 @@ if [ -f "$REPO_ROOT/session/applications/toren-installer.desktop" ]; then
 	chmod 755 "$INCLUDE_DIR/etc/skel/Desktop/toren-installer.desktop"
 fi
 if [ -f "$REPO_ROOT/shell/assets/toren-installer.svg" ]; then
-	cp "$REPO_ROOT/shell/assets/toren-installer.svg" "$INCLUDE_DIR/usr/share/icons/hicolor/scalable/apps/asura-installer.svg"
-	cp "$REPO_ROOT/shell/assets/toren-installer.svg" "$INCLUDE_DIR/usr/share/pixmaps/asura-installer.svg"
+	cp "$REPO_ROOT/shell/assets/toren-installer.svg" "$INCLUDE_DIR/usr/share/icons/hicolor/scalable/apps/toren-installer.svg"
+	cp "$REPO_ROOT/shell/assets/toren-installer.svg" "$INCLUDE_DIR/usr/share/pixmaps/toren-installer.svg"
 fi
 
 # Core desktop application icons
@@ -455,24 +443,24 @@ fi
 
 # Copy Asura apps (ghostty, starship, zsh configurations)
 if [ -d "$REPO_ROOT/apps" ]; then
-	mkdir -p "$INCLUDE_DIR/usr/share/asura/apps"
-	cp -r "$REPO_ROOT/apps"/* "$INCLUDE_DIR/usr/share/asura/apps/"
+	mkdir -p "$INCLUDE_DIR/usr/share/toren/apps"
+	cp -r "$REPO_ROOT/apps"/* "$INCLUDE_DIR/usr/share/toren/apps/"
 fi
 
 # One-time migrations (asura migrate). A fresh install already starts in the
 # state they lead to, so every shipped one is recorded as done: the machine's
-# in /var/lib/asura/migrations, each user's through /etc/skel. Existing
+# in /var/lib/toren/migrations, each user's through /etc/skel. Existing
 # machines run them on their next asura update.
 if [ -d "$REPO_ROOT/migrations" ]; then
-	mkdir -p "$INCLUDE_DIR/usr/share/asura/migrations"
-	cp -r "$REPO_ROOT/migrations"/. "$INCLUDE_DIR/usr/share/asura/migrations/"
+	mkdir -p "$INCLUDE_DIR/usr/share/toren/migrations"
+	cp -r "$REPO_ROOT/migrations"/. "$INCLUDE_DIR/usr/share/toren/migrations/"
 	for kind in system user; do
 		case "$kind" in
-		system) state="$INCLUDE_DIR/var/lib/asura/migrations" ;;
-		user) state="$INCLUDE_DIR/etc/skel/.local/state/asura/migrations" ;;
+		system) state="$INCLUDE_DIR/var/lib/toren/migrations" ;;
+		user) state="$INCLUDE_DIR/etc/skel/.local/state/toren/migrations" ;;
 		esac
 		mkdir -p "$state"
-		for f in "$INCLUDE_DIR/usr/share/asura/migrations/$kind"/*.sh; do
+		for f in "$INCLUDE_DIR/usr/share/toren/migrations/$kind"/*.sh; do
 			[ -f "$f" ] || continue
 			chmod 0755 "$f"
 			echo "marked done by the installer image" >"$state/$(basename "$f")"
@@ -487,53 +475,53 @@ if [ -d "$REPO_ROOT/docs/manual" ]; then
 fi
 
 # Stage system-wide skills and pre-seed OpenCode / cross-agent skills
-mkdir -p "$INCLUDE_DIR/usr/share/asura/skills"
+mkdir -p "$INCLUDE_DIR/usr/share/toren/skills"
 if [ -d "$REPO_ROOT/shell/agent/skills" ]; then
-	cp -r "$REPO_ROOT/shell/agent/skills"/* "$INCLUDE_DIR/usr/share/asura/skills/" 2>/dev/null || true
+	cp -r "$REPO_ROOT/shell/agent/skills"/* "$INCLUDE_DIR/usr/share/toren/skills/" 2>/dev/null || true
 fi
 mkdir -p "$INCLUDE_DIR/etc/skel/.agents/skills"
-cp -r "$INCLUDE_DIR/usr/share/asura/skills"/* "$INCLUDE_DIR/etc/skel/.agents/skills/" 2>/dev/null || true
+cp -r "$INCLUDE_DIR/usr/share/toren/skills"/* "$INCLUDE_DIR/etc/skel/.agents/skills/" 2>/dev/null || true
 mkdir -p "$INCLUDE_DIR/etc/skel/.config/opencode/skills"
-cp -r "$INCLUDE_DIR/usr/share/asura/skills"/* "$INCLUDE_DIR/etc/skel/.config/opencode/skills/" 2>/dev/null || true
+cp -r "$INCLUDE_DIR/usr/share/toren/skills"/* "$INCLUDE_DIR/etc/skel/.config/opencode/skills/" 2>/dev/null || true
 
 # Hardware models and components for quirks engine
-mkdir -p "$INCLUDE_DIR/usr/share/asura/hardware/models" "$INCLUDE_DIR/usr/share/asura/hardware/components"
+mkdir -p "$INCLUDE_DIR/usr/share/toren/hardware/models" "$INCLUDE_DIR/usr/share/toren/hardware/components"
 if [ -d "$REPO_ROOT/system/hardware/models" ]; then
-	cp -r "$REPO_ROOT/system/hardware/models"/* "$INCLUDE_DIR/usr/share/asura/hardware/models/" 2>/dev/null || true
+	cp -r "$REPO_ROOT/system/hardware/models"/* "$INCLUDE_DIR/usr/share/toren/hardware/models/" 2>/dev/null || true
 fi
 if [ -d "$REPO_ROOT/system/hardware/components" ]; then
-	cp -r "$REPO_ROOT/system/hardware/components"/* "$INCLUDE_DIR/usr/share/asura/hardware/components/" 2>/dev/null || true
+	cp -r "$REPO_ROOT/system/hardware/components"/* "$INCLUDE_DIR/usr/share/toren/hardware/components/" 2>/dev/null || true
 fi
 cat >"$INCLUDE_DIR/etc/skel/.config/opencode/opencode.json" <<'EOF'
 {
   "$schema": "https://opencode.ai/config.json",
   "skills": [
-    "/usr/share/asura/skills",
+    "/usr/share/toren/skills",
     "~/.agents/skills"
   ]
 }
 EOF
 
 # Copy Hyprland configuration, runit services, and shell tree
-cp -r "$REPO_ROOT/session/hyprland"/* "$INCLUDE_DIR/usr/share/asura/hyprland/"
-mkdir -p "$INCLUDE_DIR/usr/share/asura/safe-mode"
-cp -r "$REPO_ROOT/session/safe-mode"/* "$INCLUDE_DIR/usr/share/asura/safe-mode/"
+cp -r "$REPO_ROOT/session/hyprland"/* "$INCLUDE_DIR/usr/share/toren/hyprland/"
+mkdir -p "$INCLUDE_DIR/usr/share/toren/safe-mode"
+cp -r "$REPO_ROOT/session/safe-mode"/* "$INCLUDE_DIR/usr/share/toren/safe-mode/"
 if [ -d "$REPO_ROOT/session/sddm" ]; then
-	cp -r "$REPO_ROOT/session/sddm" "$INCLUDE_DIR/usr/share/asura/session/" 2>/dev/null || true
+	cp -r "$REPO_ROOT/session/sddm" "$INCLUDE_DIR/usr/share/toren/session/" 2>/dev/null || true
 fi
-cp -r "$REPO_ROOT/shell"/* "$INCLUDE_DIR/usr/share/asura/shell/"
-# The desktop, the default shell (org.asura.shell desktop-shell = desktop).
+cp -r "$REPO_ROOT/shell"/* "$INCLUDE_DIR/usr/share/toren/shell/"
+# The desktop, the default shell (org.toren.shell desktop-shell = desktop).
 # Its own scripts (vendor.sh, manifest.txt) are build tooling and stay out of the image.
-mkdir -p "$INCLUDE_DIR/usr/share/asura/shell-desktop"
-cp -r "$REPO_ROOT/shell-desktop"/* "$INCLUDE_DIR/usr/share/asura/shell-desktop/"
-rm -f "$INCLUDE_DIR/usr/share/asura/shell-desktop/toren/vendor.sh" \
-	"$INCLUDE_DIR/usr/share/asura/shell-desktop/toren/manifest.txt"
-ln -sfn toren "$INCLUDE_DIR/usr/share/asura/shell-desktop/asura"
-cp -r "$REPO_ROOT/system/runit/user-services"/* "$INCLUDE_DIR/usr/share/asura/runit/services/"
+mkdir -p "$INCLUDE_DIR/usr/share/toren/shell-desktop"
+cp -r "$REPO_ROOT/shell-desktop"/* "$INCLUDE_DIR/usr/share/toren/shell-desktop/"
+rm -f "$INCLUDE_DIR/usr/share/toren/shell-desktop/toren/vendor.sh" \
+	"$INCLUDE_DIR/usr/share/toren/shell-desktop/toren/manifest.txt"
+ln -sfn toren "$INCLUDE_DIR/usr/share/toren/shell-desktop/asura"
+cp -r "$REPO_ROOT/system/runit/user-services"/* "$INCLUDE_DIR/usr/share/toren/runit/services/"
 # The commit this image is built from: asura update compares it with the
 # branch, so a fresh install knows whether there is anything newer.
-git -c safe.directory='*' -C "$REPO_ROOT" rev-parse HEAD >"$INCLUDE_DIR/usr/share/asura/applied-commit" 2>/dev/null ||
-	rm -f "$INCLUDE_DIR/usr/share/asura/applied-commit"
+git -c safe.directory='*' -C "$REPO_ROOT" rev-parse HEAD >"$INCLUDE_DIR/usr/share/toren/applied-commit" 2>/dev/null ||
+	rm -f "$INCLUDE_DIR/usr/share/toren/applied-commit"
 
 # Ensure XBPS tools are available (if running on a non-Void host, fetch xbps-static)
 if ! command -v xbps-rindex >/dev/null 2>&1 || ! command -v xbps-install >/dev/null 2>&1; then
@@ -569,7 +557,7 @@ done
 # Fallback: until ASURA's own repository is published, Hyprland 0.57 is not
 # downloadable, and Void has no Hyprland at all. Stage the prebuilt 0.49 stack
 # instead (the ISO's source before ASURA built its own), so the image always
-# has a compositor. asura-session picks the .conf config for Hyprland < 0.57.
+# has a compositor. toren-session picks the .conf config for Hyprland < 0.57.
 if [ ! -f "$HYPR_CACHE/hyprland-0.57.2_1.x86_64.xbps" ]; then
 	echo "build-iso-void: Hyprland 0.57.2 is not available from $ASURA_REPO_URL; staging the prebuilt 0.49 stack" >&2
 	rm -f "$HYPR_CACHE"/*.xbps
@@ -641,7 +629,7 @@ done
 # native quickshell package is installed via packages-void.yaml
 rm -f "$INCLUDE_DIR/usr/bin/quickshell"
 
-# Copy udev power rules (99-asura-power.rules, 80-nvidia-pm.rules, 99-battery-threshold.rules)
+# Copy udev power rules (99-toren-power.rules, 80-nvidia-pm.rules, 99-battery-threshold.rules)
 cp "$REPO_ROOT/system/udev"/*.rules "$INCLUDE_DIR/etc/udev/rules.d/"
 if [ -d "$REPO_ROOT/system/modprobe.d" ]; then
 	cp "$REPO_ROOT/system/modprobe.d"/*.conf "$INCLUDE_DIR/etc/modprobe.d/"
@@ -657,7 +645,7 @@ if [ -d "$REPO_ROOT/system/tlp.d" ]; then
 fi
 cp "$REPO_ROOT/system/sysctl.d/99-toren-performance.conf" "$INCLUDE_DIR/etc/sysctl.d/99-asura-performance.conf"
 cp "$REPO_ROOT/session/turnstile/turnstile.conf" "$INCLUDE_DIR/etc/turnstile/turnstile.conf"
-cp "$REPO_ROOT/system/xbps.d/toren.conf" "$INCLUDE_DIR/etc/xbps.d/asura.conf"
+cp "$REPO_ROOT/system/xbps.d/toren.conf" "$INCLUDE_DIR/etc/xbps.d/toren.conf"
 # Default host firewall (block inbound, allow outbound), loaded by the nftables runit service
 cp "$REPO_ROOT/system/nftables/nftables.conf" "$INCLUDE_DIR/etc/nftables.conf"
 cp "$REPO_ROOT/system/xbps.d/toren.conf" "$INCLUDE_DIR/etc/xbps.d/00-repository-main.conf"
@@ -686,26 +674,26 @@ echo "build-iso-void: building Toren Go binaries..."
 	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/toren-wallpaper" ./cmd/toren-wallpaper
 	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/apm" ./cmd/apm
 	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/toren-agent" ./cmd/toren-agent
-	# Build Asura Store (prioritizing standalone repository https://github.com/Toren-Linux/asura-store)
+	# Build Asura Store (prioritizing standalone repository https://github.com/Toren-Linux/toren-store)
 	STORE_SRC="${ASURA_STORE_SRC:-}"
 	if [ -z "$STORE_SRC" ]; then
-		if [ -d "$REPO_ROOT/../asura-store" ]; then
-			STORE_SRC="$REPO_ROOT/../asura-store"
+		if [ -d "$REPO_ROOT/../toren-store" ]; then
+			STORE_SRC="$REPO_ROOT/../toren-store"
 		fi
 	fi
 	if [ -n "$STORE_SRC" ] && [ -d "$STORE_SRC/cmd/toren-store" ]; then
 		echo "build-iso-void: building toren-store from standalone repo ($STORE_SRC)..."
 		( cd "$STORE_SRC/cmd/toren-store" && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o "$INCLUDE_DIR/usr/bin/toren-store" . )
 		if [ -d "$STORE_SRC/catalog" ]; then
-			mkdir -p "$INCLUDE_DIR/usr/share/asura/store/catalog"
-			cp -r "$STORE_SRC/catalog"/* "$INCLUDE_DIR/usr/share/asura/store/catalog/" 2>/dev/null || true
+			mkdir -p "$INCLUDE_DIR/usr/share/toren/store/catalog"
+			cp -r "$STORE_SRC/catalog"/* "$INCLUDE_DIR/usr/share/toren/store/catalog/" 2>/dev/null || true
 		fi
-	elif [ -n "$STORE_SRC" ] && [ -d "$STORE_SRC/cmd/asura-store" ]; then
+	elif [ -n "$STORE_SRC" ] && [ -d "$STORE_SRC/cmd/toren-store" ]; then
 		echo "build-iso-void: building toren-store from standalone repo ($STORE_SRC)..."
-		( cd "$STORE_SRC/cmd/asura-store" && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o "$INCLUDE_DIR/usr/bin/toren-store" . )
+		( cd "$STORE_SRC/cmd/toren-store" && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o "$INCLUDE_DIR/usr/bin/toren-store" . )
 		if [ -d "$STORE_SRC/catalog" ]; then
-			mkdir -p "$INCLUDE_DIR/usr/share/asura/store/catalog"
-			cp -r "$STORE_SRC/catalog"/* "$INCLUDE_DIR/usr/share/asura/store/catalog/" 2>/dev/null || true
+			mkdir -p "$INCLUDE_DIR/usr/share/toren/store/catalog"
+			cp -r "$STORE_SRC/catalog"/* "$INCLUDE_DIR/usr/share/toren/store/catalog/" 2>/dev/null || true
 		fi
 	else
 		echo "build-iso-void: building toren-store from desktop tree..."
@@ -719,30 +707,16 @@ echo "build-iso-void: building Toren Go binaries..."
 find "$INCLUDE_DIR/usr/bin" -type f -exec chmod 0755 {} +
 # Symlinks
 ln -sf toren "$INCLUDE_DIR/usr/bin/os-ctl"
-ln -sf toren "$INCLUDE_DIR/usr/bin/asura"
-for f in "$INCLUDE_DIR/usr/bin"/toren-*; do
+for f in "$INCLUDE_DIR/usr/share/toren/session"/toren-*; do
 	[ -e "$f" ] || continue
 	base=$(basename "$f")
-	asura_base=$(echo "$base" | sed 's/^toren/asura/')
-	[ -e "$INCLUDE_DIR/usr/bin/$asura_base" ] || ln -sf "$base" "$INCLUDE_DIR/usr/bin/$asura_base"
-done
-for f in "$INCLUDE_DIR/usr/share/asura/session"/toren-*; do
-	[ -e "$f" ] || continue
-	base=$(basename "$f")
-	asura_base=$(echo "$base" | sed 's/^toren/asura/')
-	ln -sf "$base" "$INCLUDE_DIR/usr/share/asura/session/$asura_base"
-	if [ -x "$f" ] && [ ! -e "$INCLUDE_DIR/usr/bin/$asura_base" ]; then
-		ln -sf "/usr/share/asura/session/$base" "$INCLUDE_DIR/usr/bin/$asura_base"
+	if [ -x "$f" ] && [ ! -e "$INCLUDE_DIR/usr/bin/$base" ]; then
+		ln -sf "/usr/share/toren/session/$base" "$INCLUDE_DIR/usr/bin/$base"
 	fi
 done
 
-# Transitional symlink for /usr/share/toren <-> /usr/share/asura
-if [ -d "$INCLUDE_DIR/usr/share/asura" ] && [ ! -e "$INCLUDE_DIR/usr/share/toren" ]; then
-	ln -sfn asura "$INCLUDE_DIR/usr/share/toren"
-fi
-
 # Pre-seed user skeleton configuration and XDG user directories
-mkdir -p "$INCLUDE_DIR/etc/skel/.config/asura" \
+mkdir -p "$INCLUDE_DIR/etc/skel/.config/toren" \
          "$INCLUDE_DIR/etc/skel/.config/ghostty" \
          "$INCLUDE_DIR/etc/skel/.config/fastfetch" \
          "$INCLUDE_DIR/etc/skel/Desktop" \
@@ -751,12 +725,11 @@ mkdir -p "$INCLUDE_DIR/etc/skel/.config/asura" \
          "$INCLUDE_DIR/etc/skel/Music" \
          "$INCLUDE_DIR/etc/skel/Pictures" \
          "$INCLUDE_DIR/etc/skel/Videos"
-cp -a "$INCLUDE_DIR/usr/share/asura"/* "$INCLUDE_DIR/etc/skel/.config/asura/"
-ln -sfn asura "$INCLUDE_DIR/etc/skel/.config/toren"
+cp -a "$INCLUDE_DIR/usr/share/toren"/* "$INCLUDE_DIR/etc/skel/.config/toren/"
 
 # Pre-seed Ghostty terminal configuration in skeleton
 cat >"$INCLUDE_DIR/etc/skel/.config/ghostty/config" <<'EOF'
-config-file = ?~/.config/asura/apps/ghostty/config
+config-file = ?~/.config/toren/apps/ghostty/config
 working-directory = home
 EOF
 
@@ -768,21 +741,21 @@ fi
 
 # Pre-seed zsh configuration in skeleton
 cat >"$INCLUDE_DIR/etc/skel/.zshrc" <<'EOF'
-# Asura OS Zsh configuration
-[ -r "$HOME/.config/asura/apps/zsh/toren.zsh" ] && . "$HOME/.config/asura/apps/zsh/toren.zsh"
+# Toren Linux Zsh configuration
+[ -r "$HOME/.config/toren/apps/zsh/toren.zsh" ] && . "$HOME/.config/toren/apps/zsh/toren.zsh"
 EOF
 
 # Pre-seed fastfetch ASCII logo and configuration
-mkdir -p "$INCLUDE_DIR/usr/share/asura/branding" "$INCLUDE_DIR/etc/skel/.config/fastfetch"
+mkdir -p "$INCLUDE_DIR/usr/share/toren/branding" "$INCLUDE_DIR/etc/skel/.config/fastfetch"
 if [ -f "$REPO_ROOT/public/branding/toren-logo.txt" ]; then
-	cp "$REPO_ROOT/public/branding/toren-logo.txt" "$INCLUDE_DIR/usr/share/asura/branding/asura-logo.txt"
-	cp "$REPO_ROOT/public/branding/toren-logo.txt" "$INCLUDE_DIR/usr/share/asura/branding/fastfetch-ascii.txt"
+	cp "$REPO_ROOT/public/branding/toren-logo.txt" "$INCLUDE_DIR/usr/share/toren/branding/toren-logo.txt"
+	cp "$REPO_ROOT/public/branding/toren-logo.txt" "$INCLUDE_DIR/usr/share/toren/branding/fastfetch-ascii.txt"
 fi
 if [ -f "$REPO_ROOT/public/branding/toren-logo-mono.txt" ]; then
-	cp "$REPO_ROOT/public/branding/toren-logo-mono.txt" "$INCLUDE_DIR/usr/share/asura/branding/asura-logo-mono.txt"
+	cp "$REPO_ROOT/public/branding/toren-logo-mono.txt" "$INCLUDE_DIR/usr/share/toren/branding/toren-logo-mono.txt"
 fi
 if [ -f "$REPO_ROOT/public/branding/fastfetch-emblem.png" ]; then
-	cp "$REPO_ROOT/public/branding/fastfetch-emblem.png" "$INCLUDE_DIR/usr/share/asura/branding/fastfetch-emblem.png"
+	cp "$REPO_ROOT/public/branding/fastfetch-emblem.png" "$INCLUDE_DIR/usr/share/toren/branding/fastfetch-emblem.png"
 fi
 
 cat >"$INCLUDE_DIR/etc/skel/.config/fastfetch/config.jsonc" <<'EOF'
@@ -790,7 +763,7 @@ cat >"$INCLUDE_DIR/etc/skel/.config/fastfetch/config.jsonc" <<'EOF'
   "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
   "logo": {
     "type": "file-raw",
-    "source": "/usr/share/asura/branding/asura-logo.txt",
+    "source": "/usr/share/toren/branding/toren-logo.txt",
     "padding": {
       "left": 2,
       "right": 4,
@@ -871,8 +844,8 @@ cat >"$INCLUDE_DIR/etc/skel/.config/fastfetch/config.jsonc" <<'EOF'
 }
 EOF
 
-# Stage system runit services (asura-sysd, scx-lavd, ananicy-cpp)
-mkdir -p "$INCLUDE_DIR/etc/sv/asura-sysd"
+# Stage system runit services (toren-sysd, scx-lavd, ananicy-cpp)
+mkdir -p "$INCLUDE_DIR/etc/sv/toren-sysd"
 for svc_dir in "$REPO_ROOT/system/runit/services"/*; do
 	if [ -d "$svc_dir" ]; then
 		svc_name=$(basename "$svc_dir")
@@ -968,14 +941,14 @@ if [ -f "$MKLIVE_DIR/lib.sh" ]; then
 	sed -i "s|https://repo-default.voidlinux.org/current|$MIRROR|g" "$MKLIVE_DIR/lib.sh"
 fi
 
-# Patch dracut vmklive module to use asura-os hostname, asura user, and include _seatd/input/asura-hw groups
+# Patch dracut vmklive module to use asura-os hostname, asura user, and include _seatd/input/toren-hw groups
 if [ -f "$MKLIVE_DIR/dracut/vmklive/adduser.sh" ]; then
 	sed -i 's/echo void-live >/echo toren-linux >/g' "$MKLIVE_DIR/dracut/vmklive/adduser.sh"
-	sed -i 's/-G audio,video,wheel/-G audio,video,wheel,_seatd,input,tty,storage,network,asura-hw/g' "$MKLIVE_DIR/dracut/vmklive/adduser.sh"
-	sed -i 's/USERNAME=anon/USERNAME=asura/g' "$MKLIVE_DIR/dracut/vmklive/adduser.sh"
-	sed -i 's/voidlinux/asura/g' "$MKLIVE_DIR/dracut/vmklive/adduser.sh"
-	sed -i 's/99-void-live/99-asura-live/g' "$MKLIVE_DIR/dracut/vmklive/adduser.sh"
-	sed -i 's/void-live.rules/asura-live.rules/g' "$MKLIVE_DIR/dracut/vmklive/adduser.sh"
+	sed -i 's/-G audio,video,wheel/-G audio,video,wheel,_seatd,input,tty,storage,network,toren-hw/g' "$MKLIVE_DIR/dracut/vmklive/adduser.sh"
+	sed -i 's/USERNAME=anon/USERNAME=toren/g' "$MKLIVE_DIR/dracut/vmklive/adduser.sh"
+	sed -i 's/voidlinux/toren/g' "$MKLIVE_DIR/dracut/vmklive/adduser.sh"
+	sed -i 's/99-void-live/99-toren-live/g' "$MKLIVE_DIR/dracut/vmklive/adduser.sh"
+	sed -i 's/void-live.rules/toren-live.rules/g' "$MKLIVE_DIR/dracut/vmklive/adduser.sh"
 	sed -i 's/-s \/bin\/bash/-s \/bin\/zsh/g' "$MKLIVE_DIR/dracut/vmklive/adduser.sh"
 	sed -i 's/chroot ${NEWROOT} useradd/chroot ${NEWROOT} id "$USERNAME" >\/dev\/null 2>\&1 || chroot ${NEWROOT} useradd/g' "$MKLIVE_DIR/dracut/vmklive/adduser.sh"
 fi
@@ -1098,33 +1071,25 @@ fi
 
 # The power key stays with acpid: elogind must not also handle it (one writer)
 mkdir -p "$ROOTFS/etc/elogind/logind.conf.d"
-printf '[Login]\nHandlePowerKey=ignore\nHandleSuspendKey=ignore\nHandleHibernateKey=ignore\nHandleLidSwitch=ignore\n' > "$ROOTFS/etc/elogind/logind.conf.d/90-asura-powerkey.conf"
+printf '[Login]\nHandlePowerKey=ignore\nHandleSuspendKey=ignore\nHandleHibernateKey=ignore\nHandleLidSwitch=ignore\n' > "$ROOTFS/etc/elogind/logind.conf.d/90-toren-powerkey.conf"
 
 # Configure seat permissions and groups for default user
 chroot "$ROOTFS" getent group toren-hw >/dev/null 2>&1 || chroot "$ROOTFS" groupadd -r toren-hw || true
-chroot "$ROOTFS" getent group asura-hw >/dev/null 2>&1 || chroot "$ROOTFS" groupadd -r asura-hw || true
+chroot "$ROOTFS" getent group toren-hw >/dev/null 2>&1 || chroot "$ROOTFS" groupadd -r toren-hw || true
 chroot "$ROOTFS" getent group docker >/dev/null 2>&1 || chroot "$ROOTFS" groupadd -r docker || true
-for user in anon asura toren; do
+for user in anon toren; do
 	if chroot "$ROOTFS" id "$user" >/dev/null 2>&1; then
-		chroot "$ROOTFS" usermod -aG _seatd,video,audio,input,wheel,storage,network,toren-hw,asura-hw,docker "$user" || true
+		chroot "$ROOTFS" usermod -aG _seatd,video,audio,input,wheel,storage,network,toren-hw,docker "$user" || true
 	fi
 done
 
 # Ensure user toren exists with zsh login shell and configure autologin
 if ! chroot "$ROOTFS" id toren >/dev/null 2>&1; then
-	chroot "$ROOTFS" useradd -m -s /bin/zsh -U -G _seatd,video,audio,input,wheel,storage,network,toren-hw,asura-hw,docker toren || true
+	chroot "$ROOTFS" useradd -m -s /bin/zsh -U -G _seatd,video,audio,input,wheel,storage,network,toren-hw,docker toren || true
 else
-	chroot "$ROOTFS" usermod -aG toren-hw,asura-hw,docker -s /bin/zsh toren || true
+	chroot "$ROOTFS" usermod -aG toren-hw,docker -s /bin/zsh toren || true
 fi
 echo "toren:toren" | chroot "$ROOTFS" chpasswd 2>/dev/null || true
-
-# Maintain user asura with password asura for backwards compatibility
-if ! chroot "$ROOTFS" id asura >/dev/null 2>&1; then
-	chroot "$ROOTFS" useradd -m -s /bin/zsh -U -G _seatd,video,audio,input,wheel,storage,network,toren-hw,asura-hw,docker asura || true
-else
-	chroot "$ROOTFS" usermod -aG toren-hw,asura-hw,docker -s /bin/zsh asura || true
-fi
-echo "asura:asura" | chroot "$ROOTFS" chpasswd 2>/dev/null || true
 
 # Reset root and anon passwords to eliminate upstream voidlinux defaults
 echo "root:toren" | chroot "$ROOTFS" chpasswd 2>/dev/null || true
@@ -1151,63 +1116,51 @@ chmod 0440 "$ROOTFS/etc/sudoers.d/wheel"
 chmod 0440 "$ROOTFS/etc/sudoers.d"/* 2>/dev/null || true
 grep -q '%wheel ALL=(ALL:ALL) NOPASSWD: ALL' "$ROOTFS/etc/sudoers" 2>/dev/null || echo '%wheel ALL=(ALL:ALL) NOPASSWD: ALL' >> "$ROOTFS/etc/sudoers"
 
-# Compile GSettings schemas for Asura Shell and Settings
+# Compile GSettings schemas for Toren Shell and Settings
 if command -v glib-compile-schemas >/dev/null 2>&1; then
 	glib-compile-schemas "$ROOTFS/usr/share/glib-2.0/schemas" 2>/dev/null || true
 fi
 
 # Enable automatic silent console login on tty1 for seamless graphical boot
-mkdir -p "$ROOTFS/etc/sv/agetty-tty1" "$ROOTFS/home/toren" "$ROOTFS/home/asura"
+mkdir -p "$ROOTFS/etc/sv/agetty-tty1" "$ROOTFS/home/toren"
 echo 'GETTY_ARGS="--autologin toren --skip-login --nonewline --noissue"' > "$ROOTFS/etc/sv/agetty-tty1/conf"
 touch "$ROOTFS/home/toren/.hushlogin"
-touch "$ROOTFS/home/asura/.hushlogin"
 touch "$INCLUDE_DIR/etc/skel/.hushlogin"
-# Pre-materialize user configuration for toren & asura user, skeleton, and XDG directories
-mkdir -p "$ROOTFS/home/toren/.config/asura" "$ROOTFS/home/toren/.config/toren" \
+# Pre-materialize user configuration for toren user, skeleton, and XDG directories
+mkdir -p "$ROOTFS/home/toren/.config/toren" \
          "$ROOTFS/home/toren/.config/ghostty" "$ROOTFS/home/toren/.config/fastfetch" \
          "$ROOTFS/home/toren/Desktop" "$ROOTFS/home/toren/Documents" \
          "$ROOTFS/home/toren/Downloads" "$ROOTFS/home/toren/Music" \
          "$ROOTFS/home/toren/Pictures" "$ROOTFS/home/toren/Videos" \
-         "$ROOTFS/home/asura/.config/asura" "$ROOTFS/etc/skel/.config/asura" \
-         "$ROOTFS/home/asura/.config/ghostty" "$ROOTFS/home/asura/.config/fastfetch" \
-         "$ROOTFS/home/asura/Desktop" "$ROOTFS/home/asura/Documents" \
-         "$ROOTFS/home/asura/Downloads" "$ROOTFS/home/asura/Music" \
-         "$ROOTFS/home/asura/Pictures" "$ROOTFS/home/asura/Videos" \
+         "$ROOTFS/etc/skel/.config/toren" \
          "$INCLUDE_DIR/etc/skel/Desktop"
 # Ensure live user desktop shortcuts are deployed and executable
-mkdir -p "$ROOTFS/home/toren/Desktop" "$ROOTFS/home/asura/Desktop"
+mkdir -p "$ROOTFS/home/toren/Desktop"
 if [ -d "$ROOTFS/etc/skel/Desktop" ]; then
 	cp -a "$ROOTFS/etc/skel/Desktop"/* "$ROOTFS/home/toren/Desktop/" 2>/dev/null || true
-	cp -a "$ROOTFS/etc/skel/Desktop"/* "$ROOTFS/home/asura/Desktop/" 2>/dev/null || true
 fi
-chmod 755 "$ROOTFS/home/toren/Desktop"/*.desktop "$ROOTFS/home/asura/Desktop"/*.desktop 2>/dev/null || true
+chmod 755 "$ROOTFS/home/toren/Desktop"/*.desktop 2>/dev/null || true
 chown -R toren:toren "$ROOTFS/home/toren/Desktop" 2>/dev/null || true
-chown -R asura:asura "$ROOTFS/home/asura/Desktop" 2>/dev/null || true
-if [ -d "$ROOTFS/usr/share/asura" ]; then
-	cp -a "$ROOTFS/usr/share/asura"/* "$ROOTFS/home/toren/.config/asura/"
-	cp -a "$ROOTFS/usr/share/asura"/* "$ROOTFS/home/toren/.config/toren/"
-	cp -a "$ROOTFS/usr/share/asura"/* "$ROOTFS/home/asura/.config/asura/"
-	cp -a "$ROOTFS/usr/share/asura"/* "$ROOTFS/etc/skel/.config/asura/"
+if [ -d "$ROOTFS/usr/share/toren" ]; then
+	cp -a "$ROOTFS/usr/share/toren"/* "$ROOTFS/home/toren/.config/toren/"
+	cp -a "$ROOTFS/usr/share/toren"/* "$ROOTFS/etc/skel/.config/toren/"
 fi
-for _u in toren asura; do
+for _u in toren; do
 	cp -a "$ROOTFS/etc/skel/.config/ghostty"/* "$ROOTFS/home/$_u/.config/ghostty/" 2>/dev/null || true
 	cp -a "$ROOTFS/etc/skel/.config/fastfetch"/* "$ROOTFS/home/$_u/.config/fastfetch/" 2>/dev/null || true
 	cp -a "$ROOTFS/etc/skel/.config/opencode" "$ROOTFS/home/$_u/.config/" 2>/dev/null || true
 	cp -a "$ROOTFS/etc/skel/.agents" "$ROOTFS/home/$_u/" 2>/dev/null || true
 	cp -a "$ROOTFS/etc/skel/.zshrc" "$ROOTFS/home/$_u/.zshrc" 2>/dev/null || true
 done
-chroot "$ROOTFS" su - toren -c "asura materialize" 2>/dev/null || true
+chroot "$ROOTFS" su - toren -c "toren materialize" 2>/dev/null || true
 chroot "$ROOTFS" su - toren -c "xdg-user-dirs-update" 2>/dev/null || true
 chroot "$ROOTFS" chown -R toren:toren /home/toren 2>/dev/null || true
-chroot "$ROOTFS" su - asura -c "asura materialize" 2>/dev/null || true
-chroot "$ROOTFS" su - asura -c "xdg-user-dirs-update" 2>/dev/null || true
-chroot "$ROOTFS" chown -R asura:asura /home/asura 2>/dev/null || true
 
 # Ensure Plymouth theme and configuration are active in ROOTFS
 mkdir -p "$ROOTFS/usr/share/plymouth/themes"
-ln -sf /usr/share/plymouth/themes/asura/toren.plymouth "$ROOTFS/usr/share/plymouth/themes/default.plymouth" 2>/dev/null || true
+ln -sf /usr/share/plymouth/themes/toren/toren.plymouth "$ROOTFS/usr/share/plymouth/themes/default.plymouth" 2>/dev/null || true
 if [ -f "$ROOTFS/etc/plymouth/plymouthd.conf" ]; then
-	sed -i 's/^Theme=.*/Theme=asura/' "$ROOTFS/etc/plymouth/plymouthd.conf"
+	sed -i 's/^Theme=.*/Theme=toren/' "$ROOTFS/etc/plymouth/plymouthd.conf"
 fi
 
 # Boot status goes to Plymouth while it runs; the stock functions file stays
@@ -1270,7 +1223,7 @@ if [ -f "$ROOTFS/etc/runit/core-services/08-sysctl.sh" ]; then
 fi
 
 mkdir -p "$ROOTFS/etc/xbps.d"
-cp "$REPO_ROOT/system/xbps.d/toren.conf" "$ROOTFS/etc/xbps.d/asura.conf" 2>/dev/null || true
+cp "$REPO_ROOT/system/xbps.d/toren.conf" "$ROOTFS/etc/xbps.d/toren.conf" 2>/dev/null || true
 cp "$REPO_ROOT/system/xbps.d/toren.conf" "$ROOTFS/etc/xbps.d/00-repository-main.conf" 2>/dev/null || true
 
 if [ -d "$REPO_ROOT/system/modules-load.d" ]; then
@@ -1432,10 +1385,10 @@ cat >"$ROOTFS/etc/issue" <<'ISSUE'
      %##                    ##%       Kernel \r on an \m (\l)
     ####   %%%%%%%%%%%%%%   ####
   ######% %%%%%%%%%%%%%%%% %######    Robust. Minimal. Kinetic.
-%###########% %%%%%%%%  ###########%  Live Session: user 'asura' (nopasswd sudo)
- %###########          ###########%   Run 'asura install' or 'asura-installer' to install
+%###########% %%%%%%%%  ###########%  Live Session: user 'toren' (nopasswd sudo)
+ %###########          ###########%   Run 'toren install' or 'toren-installer' to install
      ########  @@@@@@  ########
-   %% ########%      %######## %%%    https://asuraos.dev
+   %% ########%      %######## %%%    https://github.com/mohitjoer/Toren-Linux
    %%  %%##################%%% %%%
    %% ##     %########%     ## %%%
    %% ####%%%%%      %%%%%#### %%
@@ -1452,11 +1405,11 @@ ISSUE
 
 cat >"$ROOTFS/etc/issue.net" <<'ISSUENET'
        #                    #         Toren Linux Beta 001
-     %##                    ##%       https://asuraos.dev
+     %##                    ##%       https://github.com/mohitjoer/Toren-Linux
     ####   %%%%%%%%%%%%%%   ####
   ######% %%%%%%%%%%%%%%%% %######    Robust. Minimal. Kinetic.
-%###########% %%%%%%%%  ###########%  Live Session: user 'asura' (nopasswd sudo)
- %###########          ###########%   Run 'asura install' or 'asura-installer' to install
+%###########% %%%%%%%%  ###########%  Live Session: user 'toren' (nopasswd sudo)
+ %###########          ###########%   Run 'toren install' or 'toren-installer' to install
      ########  @@@@@@  ########
    %% ########%      %######## %%%
    %%  %%##################%%% %%%
@@ -1475,11 +1428,11 @@ ISSUENET
 
 cat >"$ROOTFS/etc/motd" <<'MOTD'
        #                    #         Toren Linux Beta 001
-     %##                    ##%       https://asuraos.dev
+     %##                    ##%       https://github.com/mohitjoer/Toren-Linux
     ####   %%%%%%%%%%%%%%   ####
   ######% %%%%%%%%%%%%%%%% %######    Robust. Minimal. Kinetic.
-%###########% %%%%%%%%  ###########%  Live Session: user 'asura' (nopasswd sudo)
- %###########          ###########%   Run 'asura install' or 'asura-installer' to install
+%###########% %%%%%%%%  ###########%  Live Session: user 'toren' (nopasswd sudo)
+ %###########          ###########%   Run 'toren install' or 'toren-installer' to install
      ########  @@@@@@  ########
    %% ########%      %######## %%%
    %%  %%##################%%% %%%
@@ -1499,24 +1452,24 @@ MOTD
 
 # Auto-start Asura Wayland desktop on tty1 login (with safe fallback if compositor exits)
 mkdir -p "$ROOTFS/etc/profile.d"
-cat >"$ROOTFS/etc/profile.d/asura-autologin.sh" <<'PROFILE'
+cat >"$ROOTFS/etc/profile.d/toren-autologin.sh" <<'PROFILE'
 if [ -z "$WAYLAND_DISPLAY" ] && [ -z "$DISPLAY" ] && [ "$(tty 2>/dev/null)" = "/dev/tty1" ]; then
 	# Suppress text console cursor and clear screen to eliminate terminal flicker before GUI
 	setterm -cursor off 2>/dev/null || true
 	clear 2>/dev/null || true
 	command -v xdg-user-dirs-update >/dev/null 2>&1 && xdg-user-dirs-update 2>/dev/null || true
-	if [ ! -d "$HOME/.config/asura/shell" ] && command -v asura >/dev/null 2>&1; then
-		asura materialize 2>/dev/null || true
+	if [ ! -d "$HOME/.config/toren/shell" ] && command -v asura >/dev/null 2>&1; then
+		toren materialize 2>/dev/null || true
 	fi
-	if ! /usr/share/asura/session/asura-session; then
+	if ! /usr/share/toren/session/toren-session; then
 		setterm -cursor on 2>/dev/null || true
 		if command -v plymouth >/dev/null 2>&1; then
 			sudo -n plymouth --quit 2>/dev/null || plymouth --quit 2>/dev/null || sudo -n killall -9 plymouthd 2>/dev/null || true
 		fi
 		echo
 		echo "================================================================"
-		if grep -q "No 3D enabled" "$HOME/.local/state/asura/session.log" 2>/dev/null || \
-		   grep -q "failed to create dri2 screen" "$HOME/.local/state/asura/session.log" 2>/dev/null; then
+		if grep -q "No 3D enabled" "$HOME/.local/state/toren/session.log" 2>/dev/null || \
+		   grep -q "failed to create dri2 screen" "$HOME/.local/state/toren/session.log" 2>/dev/null; then
 			echo "  [Virtual Machine Display Notice]"
 			echo "  VirtualBox / VMware 3D Acceleration is currently DISABLED."
 			echo "  Hyprland Wayland compositor requires hardware 3D acceleration."
@@ -1528,22 +1481,22 @@ if [ -z "$WAYLAND_DISPLAY" ] && [ -z "$DISPLAY" ] && [ "$(tty 2>/dev/null)" = "/
 			echo
 		else
 			echo "  Toren graphical desktop session exited."
-			echo "  Log available at: ~/.local/state/asura/session.log"
+			echo "  Log available at: ~/.local/state/toren/session.log"
 			echo
 		fi
-		echo "  To launch the installer directly, run: sudo asura install"
-		echo "  To retry launching the desktop, run: asura-session"
+		echo "  To launch the installer directly, run: sudo toren install"
+		echo "  To retry launching the desktop, run: toren-session"
 		echo "================================================================"
 		echo
 	fi
 fi
 PROFILE
-chmod 0755 "$ROOTFS/etc/profile.d/asura-autologin.sh"
+chmod 0755 "$ROOTFS/etc/profile.d/toren-autologin.sh"
 # zsh login shells do not read /etc/profile.d/*.sh unless /etc/zsh/zprofile sources it
 mkdir -p "$ROOTFS/etc/zsh"
-if [ ! -f "$ROOTFS/etc/zsh/zprofile" ] || ! grep -q 'asura-autologin.sh' "$ROOTFS/etc/zsh/zprofile"; then
+if [ ! -f "$ROOTFS/etc/zsh/zprofile" ] || ! grep -q 'toren-autologin.sh' "$ROOTFS/etc/zsh/zprofile"; then
 	cat >>"$ROOTFS/etc/zsh/zprofile" <<'ZPROFILE'
-[ -r /etc/profile.d/asura-autologin.sh ] && emulate sh -c '. /etc/profile.d/asura-autologin.sh'
+[ -r /etc/profile.d/toren-autologin.sh ] && emulate sh -c '. /etc/profile.d/toren-autologin.sh'
 ZPROFILE
 fi
 exit 0

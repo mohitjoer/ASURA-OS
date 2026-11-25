@@ -9,11 +9,11 @@ import (
 	"testing"
 	"time"
 
-	"asura/desktop/internal/wm"
+	"toren/desktop/internal/wm"
 )
 
 // TestNightlightWatcherEndToEnd drives the real watcher: a fake backend binary,
-// a fake provider that names it in caps, a PATH-shimmed asura-cmd-nightlight that
+// a fake provider that names it in caps, a PATH-shimmed toren-cmd-nightlight that
 // starts/stops it and writes the marker and temp files, and the inotify loop
 // publishing to a live topic subscription. It proves a toggle intent reaches QML
 // as a pushed frame with no polling anywhere. The injected backend name is one no
@@ -30,10 +30,10 @@ func TestNightlightWatcherEndToEnd(t *testing.T) {
 		t.Skip("no python3 to name the fake backend")
 	}
 
-	// The daemon's caps probe runs asura-wm-<name> caps; this fake reports the
+	// The daemon's caps probe runs toren-wm-<name> caps; this fake reports the
 	// backend name the watcher must grep for, injected through the same wmc the
 	// rest of the daemon reads.
-	provider := filepath.Join(bin, "asura-wm-testwm")
+	provider := filepath.Join(bin, "toren-wm-testwm")
 	providerScript := "#!/usr/bin/env bash\n" +
 		"[[ \"$1\" == caps ]] && printf '%s' " +
 		"'{\"name\":\"testwm\",\"supports\":[\"nightLight\"],\"workspaceModel\":\"dynamic\",\"nightLightProcess\":\"" + backend + "\"}'\n" +
@@ -43,9 +43,9 @@ func TestNightlightWatcherEndToEnd(t *testing.T) {
 	}
 
 	pidFile := filepath.Join(state, "fake.pid")
-	marker := filepath.Join(state, "asura-nightlight-enabled")
-	tempFile := filepath.Join(state, "asura-nightlight")
-	shim := filepath.Join(bin, "asura-cmd-nightlight")
+	marker := filepath.Join(state, "toren-nightlight-enabled")
+	tempFile := filepath.Join(state, "toren-nightlight")
+	shim := filepath.Join(bin, "toren-cmd-nightlight")
 	script := strings.NewReplacer(
 		"@PID@", pidFile, "@MARKER@", marker, "@TEMP@", tempFile, "@FAKE@", fake,
 	).Replace(`#!/usr/bin/env bash
@@ -161,7 +161,7 @@ func waitForFrame(t *testing.T, sub *topicSubscriber, want func(nlFrame) bool, d
 const fakeBackendPy = "import ctypes, sys, time; ctypes.CDLL(None).prctl(15, sys.argv[1].encode(), 0, 0, 0); time.sleep(600)"
 
 // nlFake is the fake night-light environment: a backend binary, a provider that
-// names it in caps, and a PATH-shimmed asura-cmd-nightlight, all laid ahead of
+// names it in caps, and a PATH-shimmed toren-cmd-nightlight, all laid ahead of
 // the packaged binaries on PATH.
 type nlFake struct {
 	state   string
@@ -194,7 +194,7 @@ func buildNlFake(t *testing.T, backend string, capsFailFirst bool) nlFake {
 	if capsFailFirst {
 		fail = "1"
 	}
-	provider := filepath.Join(bin, "asura-wm-testwm")
+	provider := filepath.Join(bin, "toren-wm-testwm")
 	provScript := strings.NewReplacer(
 		"@BACKEND@", backend, "@COUNT@", filepath.Join(state, "caps-count"), "@FAIL@", fail,
 	).Replace(`#!/usr/bin/env bash
@@ -212,9 +212,9 @@ printf '%s' '{"name":"testwm","supports":["nightLight"],"nightLightProcess":"@BA
 	}
 
 	pid := filepath.Join(state, "fake.pid")
-	marker := filepath.Join(state, "asura-nightlight-enabled")
-	temp := filepath.Join(state, "asura-nightlight")
-	shim := filepath.Join(bin, "asura-cmd-nightlight")
+	marker := filepath.Join(state, "toren-nightlight-enabled")
+	temp := filepath.Join(state, "toren-nightlight")
+	shim := filepath.Join(bin, "toren-cmd-nightlight")
 	shimScript := strings.NewReplacer(
 		"@PID@", pid, "@MARKER@", marker, "@TEMP@", temp, "@FAKE@", fake, "@NAME@", backend,
 	).Replace(`#!/usr/bin/env bash

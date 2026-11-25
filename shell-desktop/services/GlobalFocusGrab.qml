@@ -1,5 +1,5 @@
 pragma Singleton
-// ASURA overlay (shell-desktop/asura/vendor.sh OVERLAYS): the bar always stays in
+// ASURA overlay (shell-desktop/toren/vendor.sh OVERLAYS): the bar always stays in
 // the focus grab, so opening a sidebar from it does not close it again.
 pragma ComponentBehavior: Bound
 import QtQuick

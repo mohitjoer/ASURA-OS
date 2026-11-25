@@ -10,12 +10,12 @@ import (
 	"strings"
 )
 
-// `asura manual` shows the user manual (docs/manual in the repository,
-// installed at /usr/share/doc/asura/manual): the list of chapters, one
+// `toren manual` shows the user manual (docs/manual in the repository,
+// installed at /usr/share/doc/toren/manual): the list of chapters, one
 // chapter, or all of them, through a pager.
 
 var (
-	manualDir   = "/usr/share/doc/asura/manual"
+	manualDir   = "/usr/share/doc/toren/manual"
 	manualPager = func(text string) error {
 		if !isTerminal(os.Stdout) {
 			_, err := fmt.Print(text)
@@ -37,15 +37,15 @@ var (
 	}
 )
 
-const manualUsage = `Usage: asura manual [CHAPTER | --all]
+const manualUsage = `Usage: toren manual [CHAPTER | --all]
 
   (none)    the chapters
-  CHAPTER   one chapter, by name or number (asura manual updates, asura manual 4)
+  CHAPTER   one chapter, by name or number (toren manual updates, toren manual 4)
   --all     every chapter, one after the other
 `
 
 func init() {
-	register("manual", "read the ASURA user manual", asuraManual)
+	register("manual", "read the ASURA user manual", torenManual)
 }
 
 type manualChapter struct {
@@ -85,14 +85,14 @@ func firstHeading(path string) string {
 	return ""
 }
 
-func asuraManual(args []string) int {
+func torenManual(args []string) int {
 	chapters, err := manualChapters(manualDir)
 	if err != nil || len(chapters) == 0 {
-		fmt.Fprintf(os.Stderr, "asura manual: the manual is not installed (%s)\n", manualDir)
+		fmt.Fprintf(os.Stderr, "toren manual: the manual is not installed (%s)\n", manualDir)
 		return exitFail
 	}
 	if len(args) == 0 {
-		fmt.Println("Toren Linux manual. Read a chapter with asura manual NAME:")
+		fmt.Println("Toren Linux manual. Read a chapter with toren manual NAME:")
 		for _, c := range chapters {
 			fmt.Printf("  %s  %-10s %s\n", strings.TrimLeft(c.Num, "0"), c.Name, c.Title)
 		}
@@ -118,14 +118,14 @@ func asuraManual(args []string) int {
 		}
 	}
 	if len(pick) == 0 {
-		fmt.Fprintf(os.Stderr, "asura manual: no chapter %q (asura manual lists them)\n", args[0])
+		fmt.Fprintf(os.Stderr, "toren manual: no chapter %q (toren manual lists them)\n", args[0])
 		return exitUsage
 	}
 	var text strings.Builder
 	for i, c := range pick {
 		b, err := os.ReadFile(c.Path)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "asura manual:", err)
+			fmt.Fprintln(os.Stderr, "toren manual:", err)
 			return exitFail
 		}
 		if i > 0 {
@@ -134,7 +134,7 @@ func asuraManual(args []string) int {
 		text.Write(b)
 	}
 	if err := manualPager(text.String()); err != nil {
-		fmt.Fprintln(os.Stderr, "asura manual:", err)
+		fmt.Fprintln(os.Stderr, "toren manual:", err)
 		return exitFail
 	}
 	return exitOK

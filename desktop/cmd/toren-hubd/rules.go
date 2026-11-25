@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"asura/desktop/cmd/toren-hubd/internal/wm"
+	"toren/desktop/cmd/toren-hubd/internal/wm"
 )
 
 // rules is the backend for the Window Rules page in Settings Hub.

@@ -23,7 +23,7 @@ func TestIsVideo(t *testing.T) {
 func TestFrameOffset(t *testing.T) {
 	dir := t.TempDir()
 	t.Setenv("XDG_STATE_HOME", dir)
-	tune := filepath.Join(dir, "asura-walls.json")
+	tune := filepath.Join(dir, "toren-walls.json")
 	video := "/home/x/Pictures/livewalls/clip.mp4"
 
 	// no tune -> the auto default
@@ -70,8 +70,8 @@ func TestLiveFramePerClip(t *testing.T) {
 	}
 
 	first := liveFrame(one)
-	if first == "" || !strings.Contains(first, "asura-live-frames") {
-		t.Fatalf("still for one.mp4 = %q, want a file under asura-live-frames", first)
+	if first == "" || !strings.Contains(first, "toren-live-frames") {
+		t.Fatalf("still for one.mp4 = %q, want a file under toren-live-frames", first)
 	}
 	if again := liveFrame(one); again != first {
 		t.Errorf("second call = %q, want the cached %q", again, first)
@@ -85,7 +85,7 @@ func TestLiveFramePerClip(t *testing.T) {
 
 	// The wallpaper frame slider picks a different second: that is a different
 	// still, not an overwrite of the one already on screen.
-	tune := filepath.Join(state, "asura-walls.json")
+	tune := filepath.Join(state, "toren-walls.json")
 	if err := os.WriteFile(tune, []byte(`{"image":"`+one+`","frame":4}`), 0o644); err != nil {
 		t.Fatal(err)
 	}

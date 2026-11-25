@@ -161,7 +161,7 @@ Provider {
                 icon: "",
                 execute: function () {
                     var script = op === "remove" ? packages.removeScript : packages.installScript;
-                    Spawn.run(["asura-app", "terminal", "--", "sh", "-c", script, "sh", pkg.name]);
+                    Spawn.run(["toren-app", "terminal", "--", "sh", "-c", script, "sh", pkg.name]);
                     packages.invalidateSearch();
                 }
             }]

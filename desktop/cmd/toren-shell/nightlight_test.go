@@ -8,12 +8,12 @@ import (
 	"strings"
 	"testing"
 
-	"asura/desktop/internal/wm"
+	"toren/desktop/internal/wm"
 )
 
 func TestNightlightSavedTemp(t *testing.T) {
 	dir := t.TempDir()
-	n := &nightlightState{tempFile: filepath.Join(dir, "asura-nightlight")}
+	n := &nightlightState{tempFile: filepath.Join(dir, "toren-nightlight")}
 
 	if got := n.savedTemp(); got != nlDefaultTemp {
 		t.Fatalf("missing file: got %d want default %d", got, nlDefaultTemp)
@@ -45,7 +45,7 @@ func TestNightlightFrameShape(t *testing.T) {
 	sub := topic.subscribe()
 	defer topic.unsubscribe(sub)
 
-	n := &nightlightState{topic: topic, tempFile: filepath.Join(dir, "asura-nightlight")}
+	n := &nightlightState{topic: topic, tempFile: filepath.Join(dir, "toren-nightlight")}
 	if err := os.WriteFile(n.tempFile, []byte("4200\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}

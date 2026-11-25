@@ -242,7 +242,7 @@ func writeTestEmblem(t *testing.T, path string) {
 
 func TestDitherLogoBakesTwoColourThenIsIdempotent(t *testing.T) {
 	dir := t.TempDir()
-	src := filepath.Join(dir, "asura-logo.png")
+	src := filepath.Join(dir, "toren-logo.png")
 	writeTestEmblem(t, src)
 
 	baked, err := ditherFastfetchLogo("on", src)

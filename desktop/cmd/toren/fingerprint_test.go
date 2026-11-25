@@ -139,7 +139,7 @@ session    required   pam_limits.so
 	}
 
 	// Check backup file was created
-	bakFile := testPam + ".asura-fprint-bak"
+	bakFile := testPam + ".toren-fprint-bak"
 	bakData, err := os.ReadFile(bakFile)
 	if err != nil {
 		t.Fatalf("backup file not created: %v", err)

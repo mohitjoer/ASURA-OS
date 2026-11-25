@@ -6,13 +6,13 @@ import (
 	"path/filepath"
 )
 
-// performance.json is the file the Performance section of Asura Settings
+// performance.json is the file the Performance section of Toren Settings
 // writes; a few daemon behaviours (the battery power-saver, the power profile
 // restore) read their opt-ins from it.
 
-// asuraConfigDir is ~/.config/asura (honouring XDG_CONFIG_HOME), the dir the
-// Asura Settings sections write. Empty only when the home dir is unknowable.
-func asuraConfigDir() string {
+// torenConfigDir is ~/.config/toren (honouring XDG_CONFIG_HOME), the dir the
+// Toren Settings sections write. Empty only when the home dir is unknowable.
+func torenConfigDir() string {
 	dir := os.Getenv("XDG_CONFIG_HOME")
 	if dir == "" {
 		home, err := os.UserHomeDir()
@@ -21,13 +21,13 @@ func asuraConfigDir() string {
 		}
 		dir = filepath.Join(home, ".config")
 	}
-	return filepath.Join(dir, "asura")
+	return filepath.Join(dir, "toren")
 }
 
-// perfPath is ~/.config/asura/performance.json, the file the Performance section
-// in Asura Settings writes. Empty only when the home dir is unknowable.
+// perfPath is ~/.config/toren/performance.json, the file the Performance section
+// in Toren Settings writes. Empty only when the home dir is unknowable.
 func perfPath() string {
-	dir := asuraConfigDir()
+	dir := torenConfigDir()
 	if dir == "" {
 		return ""
 	}

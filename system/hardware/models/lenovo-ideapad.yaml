@@ -24,4 +24,4 @@ services: []
 notes:
   - "Knowledge source: Linux kernel drivers/platform/x86/lenovo/ideapad-laptop.c."
   - "Battery conservation mode: limits state of charge around 60-80% via ideapad_acpi conservation_mode."
-  - "Thermal profiles: quiet, balanced, and performance profiles via ideapad_laptop platform_profile ('asura power profile')."
+  - "Thermal profiles: quiet, balanced, and performance profiles via ideapad_laptop platform_profile ('toren power profile')."

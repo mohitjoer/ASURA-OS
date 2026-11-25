@@ -4,9 +4,9 @@ import Qt5Compat.GraphicalEffects
 import "Singletons"
 
 // The desktop brand seal, A by default. Users swap it globally (their own
-// glyph/text, or an image) from Asura Settings -> Shell -> Global; stored in
-// ~/.config/asura/brand.json. Asura's own apps (the Hub, related apps) never use
-// this and keep the Asura brand. Drop-in for the old
+// glyph/text, or an image) from Toren Settings -> Shell -> Global; stored in
+// ~/.config/toren/brand.json. Toren's own apps (the Hub, related apps) never use
+// this and keep the Toren brand. Drop-in for the old
 // `Text { text: "A"; font.family: Theme.fontJp; color: Theme.brand }` seal:
 // pass the old pixelSize as `size` and the old colour as `color`.
 Item {
@@ -15,7 +15,7 @@ Item {
     property real size: 13
     property color color: Theme.brand
     property int weight: Font.Medium
-    // recolour a single-colour image mark to `color` (matches the tinted Asura mark
+    // recolour a single-colour image mark to `color` (matches the tinted Toren mark
     // idiom); off shows a full-colour logo as-is. no effect in text mode.
     property bool tint: Theme.markTint
 
@@ -25,7 +25,7 @@ Item {
 
     readonly property string imageSource: hasCustomImage
         ? (/^(file|qrc|image|https?):/.test(Theme.markSource) ? Theme.markSource : "file://" + Theme.markSource)
-        : Qt.resolvedUrl("../../../assets/asura-logo-on-dark.svg")
+        : Qt.resolvedUrl("../../../assets/toren-logo-on-dark.svg")
 
     implicitWidth:  !mark.hasCustomText ? mark.size : glyph.implicitWidth
     implicitHeight: !mark.hasCustomText ? mark.size : glyph.implicitHeight
@@ -41,7 +41,7 @@ Item {
         font.pixelSize: mark.size
     }
 
-    // custom image mark or default Asura logo.
+    // custom image mark or default Toren logo.
     Image {
         id: img
         anchors.centerIn: parent

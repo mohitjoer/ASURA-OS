@@ -101,7 +101,7 @@ Item {
                 spacing: Tokens.s2
                 anchors.verticalCenter: parent.verticalCenter
                 Rectangle { width: 16; height: 1; color: Tokens.ink; anchors.verticalCenter: parent.verticalCenter }
-                AsuraLogo {
+                TorenLogo {
                     size: 11
                     variant: "white"
                     anchors.verticalCenter: parent.verticalCenter
@@ -201,7 +201,7 @@ Item {
             if (page.reloadCoverImportBusy || !page.pendingReloadCoverRow) return;
             page.reloadCoverImportGeneration++;
             reloadCoverImport.requestGeneration = page.reloadCoverImportGeneration;
-            reloadCoverImport.command = ["asura-hubd", "reload-cover", "import", "" + p];
+            reloadCoverImport.command = ["toren-hubd", "reload-cover", "import", "" + p];
             page.reloadCoverImportBusy = true;
             reloadCoverImport.running = true;
         }

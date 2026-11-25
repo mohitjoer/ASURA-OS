@@ -43,7 +43,7 @@ func resolveShellQML() string {
 			return abs
 		}
 	}
-	return "/usr/share/asura/shell/wallpaper-ui.qml"
+	return "/usr/share/toren/shell/wallpaper-ui.qml"
 }
 
 func (m *managedProcess) running() bool {
@@ -87,7 +87,7 @@ func (m *managedProcess) launch(extraEnv ...string) {
 		}
 	}
 	if err := cmd.Start(); err != nil {
-		fmt.Fprintf(os.Stderr, "asura-wallpaper: launch wall-ui: %v\n", err)
+		fmt.Fprintf(os.Stderr, "toren-wallpaper: launch wall-ui: %v\n", err)
 		return
 	}
 	m.cmd = cmd
@@ -118,7 +118,7 @@ func managedLogPath(label string) string {
 	if base == "" {
 		base = filepath.Join(home(), ".cache")
 	}
-	dir := filepath.Join(base, "asura", "wallpaper")
+	dir := filepath.Join(base, "toren", "wallpaper")
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return ""
 	}

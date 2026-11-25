@@ -92,11 +92,11 @@ func TestShouldApplyProfile(t *testing.T) {
 
 // TestApplyActiveProfileNoConfig proves the load-bearing safety rule: with a
 // power.json that has no "profiles" block, the applier is never invoked, so an
-// unconfigured user triggers no asura-power exec (and thus no pkexec prompt).
+// unconfigured user triggers no toren-power exec (and thus no pkexec prompt).
 func TestApplyActiveProfileNoConfig(t *testing.T) {
 	dir := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", dir)
-	cfgDir := filepath.Join(dir, "asura")
+	cfgDir := filepath.Join(dir, "toren")
 	if err := os.MkdirAll(cfgDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -129,7 +129,7 @@ func TestApplyActiveProfileNoConfig(t *testing.T) {
 func TestApplyDelay(t *testing.T) {
 	dir := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", dir)
-	cfgDir := filepath.Join(dir, "asura")
+	cfgDir := filepath.Join(dir, "toren")
 	if err := os.MkdirAll(cfgDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -158,7 +158,7 @@ func TestDecideProfileChange(t *testing.T) {
 		sinceFlip, sinceRestore                    time.Duration
 		want                                       profileAction
 	}{
-		// boot noise and Asura-caused changes are never a pick.
+		// boot noise and Toren-caused changes are never a pick.
 		{"empty profile", "", "balanced", true, false, false, false, long, long, profileNone},
 		{"before restore is boot noise", "performance", "balanced", false, false, false, false, long, long, profileNone},
 		{"game mode owns the profile", "performance", "balanced", true, false, false, true, long, long, profileNone},

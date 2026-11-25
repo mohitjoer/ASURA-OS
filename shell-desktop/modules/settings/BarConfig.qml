@@ -1,4 +1,4 @@
-// ASURA overlay (shell-desktop/asura/vendor.sh OVERLAYS): the desktop's bar settings
+// ASURA overlay (shell-desktop/toren/vendor.sh OVERLAYS): the desktop's bar settings
 // without the utility buttons and the workspace options ASURA's bar ignores.
 import QtQuick
 import QtQuick.Layouts

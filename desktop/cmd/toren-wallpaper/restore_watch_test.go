@@ -126,7 +126,7 @@ func TestMigrateLegacyOutputs(t *testing.T) {
 	if err := os.MkdirAll(state, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(state, "asura-wallpaper.json"),
+	if err := os.WriteFile(filepath.Join(state, "toren-wallpaper.json"),
 		[]byte(`{"default":"`+pic+`","outputs":{}}`), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -194,7 +194,7 @@ func TestDefaultWallpaperPicksFirstStatic(t *testing.T) {
 // awww) must land on the shipped default instead of the empty grey frame:
 // applyDefaultWallpaper paints the frame AND persists the choice to
 // outputs.json, so the next login's restore reproduces it. This is the #149
-// regression: the desktop went black because asura-wallpaper painted nothing when no
+// regression: the desktop went black because toren-wallpaper painted nothing when no
 // choice was stored.
 func TestApplyDefaultWallpaperPaintsAndPersists(t *testing.T) {
 	root := t.TempDir()

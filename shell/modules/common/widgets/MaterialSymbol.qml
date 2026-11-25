@@ -5,7 +5,7 @@ StyledText {
     id: root
 
     // The vendored components pass the icon's Material Symbol name as `text`.
-    // Asura does not carry the Material Symbols font, so that name would
+    // Toren does not carry the Material Symbols font, so that name would
     // render as literal text (or nothing). Keep the original name in
     // `_rawName` (updated only when `text` is itself a Material Symbol name,
     // so a rewritten codepoint never clobbers it) and map it onto a Font

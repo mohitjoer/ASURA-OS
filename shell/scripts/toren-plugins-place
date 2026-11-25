@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
-# merge a plugin placement change into ~/.config/asura/plugins.json. used by:
-# the desktop layer (drag commits a free position), Asura Settings (any
+# merge a plugin placement change into ~/.config/toren/plugins.json. used by:
+# the desktop layer (drag commits a free position), Toren Settings (any
 # placement edit), and the installer (seed/forget a plugin's settings block).
 # Registry's file watch sees it and retunes every surface, no reload.
 #
-#   asura-plugins-place <id> desktopWidget <x> <y> [scale] [locked] [opacity]
-#   asura-plugins-place <id> framePopout <edge> <align> <hoverW> <hoverH>
-#   asura-plugins-place <id> host <hostName>
-#   asura-plugins-place <id> enabled <true|false>
-#   asura-plugins-place <id> settings <json>   merge a settings object
-#   asura-plugins-place <id> seed              inject the manifest preset block
-#   asura-plugins-place <id> forget            drop the whole entry (uninstall)
+#   toren-plugins-place <id> desktopWidget <x> <y> [scale] [locked] [opacity]
+#   toren-plugins-place <id> framePopout <edge> <align> <hoverW> <hoverH>
+#   toren-plugins-place <id> host <hostName>
+#   toren-plugins-place <id> enabled <true|false>
+#   toren-plugins-place <id> settings <json>   merge a settings object
+#   toren-plugins-place <id> seed              inject the manifest preset block
+#   toren-plugins-place <id> forget            drop the whole entry (uninstall)
 set -euo pipefail
 
 cfg_home="${XDG_CONFIG_HOME:-$HOME/.config}"
 data_home="${XDG_DATA_HOME:-$HOME/.local/share}"
-f="$cfg_home/asura/plugins.json"
+f="$cfg_home/toren/plugins.json"
 mkdir -p "$(dirname "$f")"
 lock="$f.lock"
 exec 9>"$lock"
@@ -43,7 +43,7 @@ manifest_for() {
 	local -a dirs=()
 	local pdir="${ASURA_PLUGINS_DIR:-}"
 	[ -n "$pdir" ] && IFS=':' read -r -a dirs <<<"$pdir"
-	dirs+=("$data_home/asura/plugins")
+	dirs+=("$data_home/toren/plugins")
 	for d in "${dirs[@]}"; do
 		[ -n "$d" ] && [ -f "$d/$pid/manifest.json" ] && { printf '%s\n' "$d/$pid/manifest.json"; return 0; }
 	done
@@ -132,7 +132,7 @@ forget)
 	jq --arg id "$id" 'del(.[$id])' "$f" >"$tmp" && mv "$tmp" "$f"
 	;;
 *)
-	echo "usage: asura-plugins-place <id> desktopWidget <x> <y> | framePopout <edge> <align> <hoverW> <hoverH> | host <name> | enabled <bool> | settings <json> | seed | restore <json|null> <file-existed> | forget" >&2
+	echo "usage: toren-plugins-place <id> desktopWidget <x> <y> | framePopout <edge> <align> <hoverW> <hoverH> | host <name> | enabled <bool> | settings <json> | seed | restore <json|null> <file-existed> | forget" >&2
 	exit 2
 	;;
 esac

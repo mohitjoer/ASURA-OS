@@ -7,11 +7,11 @@ import qs.Services
 
 // QS Bar Settings' left rail: the masthead, the four bar routes as one flat
 // group, then, parted by a rule and a COMMUNITY eyebrow, the route for every bar
-// widget installed from outside Asura, and a search row at the foot. The panel
+// widget installed from outside Toren, and a search row at the foot. The panel
 // is about one thing, the bar, so the first group has no headers: four routes,
 // always one click away. Latin names the route, kanji seals it. The active route
 // takes a bone plate with a `//` lead, the desktop's only emphasis; nothing here
-// is coloured except the Asura seal.
+// is coloured except the Toren seal.
 Item {
     id: rail
 
@@ -22,7 +22,7 @@ Item {
     signal searchRequested()
     signal hubRequested()
 
-    // Installed bar plugins that are not Asura's own: the Community route's count.
+    // Installed bar plugins that are not Toren's own: the Community route's count.
     readonly property int communityCount: {
         var c = (rail.root && rail.root.barCatalog) ? rail.root.barCatalog : []
         var n = 0

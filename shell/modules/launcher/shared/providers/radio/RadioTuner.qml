@@ -97,10 +97,10 @@ Provider {
     }
 
     // The provider, and the radio's status polling, exist only once the
-    // asura-cmd-radio helper is found.
+    // toren-cmd-radio helper is found.
     Process {
         id: availProc
-        command: ["sh", "-c", "command -v asura-cmd-radio >/dev/null 2>&1"]
+        command: ["sh", "-c", "command -v toren-cmd-radio >/dev/null 2>&1"]
         onExited: (code) => {
             if (code !== 0)
                 return;
@@ -114,7 +114,7 @@ Provider {
     // the station catalog never changes at runtime; one read once found.
     Process {
         id: stationsProc
-        command: ["asura-cmd-radio", "stations"]
+        command: ["toren-cmd-radio", "stations"]
         stdout: StdioCollector {
             onStreamFinished: {
                 var rows = [];

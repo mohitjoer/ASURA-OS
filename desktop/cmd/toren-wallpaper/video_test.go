@@ -72,7 +72,7 @@ func TestLiveFit(t *testing.T) {
 	}
 }
 
-// fakeLiveTools installs stub asura-wallpaper-live / ffprobe binaries on PATH and seeds
+// fakeLiveTools installs stub toren-wallpaper-live / ffprobe binaries on PATH and seeds
 // the output cache with two monitors. The player records its argv to marker;
 // ffprobe reports a small direct-playable h264 clip so Play never transcodes.
 func fakeLiveTools(t *testing.T, marker string, exitFast bool) {
@@ -89,7 +89,7 @@ func fakeLiveTools(t *testing.T, marker string, exitFast bool) {
 			t.Fatal(err)
 		}
 	}
-	write("asura-wallpaper-live", player)
+	write("toren-wallpaper-live", player)
 	write("ffprobe", "#!/bin/sh\nprintf 'codec_name=h264\\npix_fmt=yuv420p\\nwidth=1280\\nr_frame_rate=30/1\\n'\n")
 	t.Setenv("PATH", dir+":"+os.Getenv("PATH"))
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
@@ -273,7 +273,7 @@ func TestVideoReadyHandshake(t *testing.T) {
 	dir := t.TempDir()
 	// A player that paints (READY), lives briefly, then dies.
 	body := "#!/bin/sh\nprintf '%s\\n' \"$*\" >> " + marker + "\necho READY\nsleep 0.3\nexit 1\n"
-	if err := os.WriteFile(filepath.Join(dir, "asura-wallpaper-live"), []byte(body), 0o755); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "toren-wallpaper-live"), []byte(body), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	t.Setenv("PATH", dir+":"+os.Getenv("PATH"))

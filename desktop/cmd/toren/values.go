@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	"asura/desktop/internal/gschema"
-	"asura/desktop/internal/settings"
+	"toren/desktop/internal/gschema"
+	"toren/desktop/internal/settings"
 )
 
 // The shell reads its settings through this command.
@@ -45,7 +45,7 @@ func configValues(catalogue *settings.Catalogue) int {
 
 	encoded, err := json.MarshalIndent(values, "", "  ")
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "asura config values:", err)
+		fmt.Fprintln(os.Stderr, "toren config values:", err)
 		return exitFail
 	}
 	fmt.Println(string(encoded))

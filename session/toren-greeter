@@ -2,7 +2,7 @@
 # The login screen's compositor.
 #
 # SDDM runs this as CompositorCommand when the greeter is in Wayland mode. It
-# brings up a kiosk Weston and hosts Asura's own login surface on it.
+# brings up a kiosk Weston and hosts Toren's own login surface on it.
 #
 # A shell script, for the same reason the session entry point is one: this runs
 # before anything else exists, on a machine that may be in a bad way, and it has
@@ -16,8 +16,8 @@ set -eu
 
 # The layout is fixed and is the one in docs/session.md, not wherever this script
 # happens to be installed from. The session script and this one sit in the same
-# directory and both name /usr/share/asura/session explicitly for that reason.
-PREFIX=/usr/share/asura
+# directory and both name /usr/share/toren/session explicitly for that reason.
+PREFIX=/usr/share/toren
 SHELL_DIR="$PREFIX/greeter"
 WESTON_BIN=${ASURA_WESTON:-weston}
 MODETEST=${ASURA_MODETEST:-modetest}
@@ -96,16 +96,16 @@ mode_pair() {
 
 if PAIR=$(mode_pair 2>/dev/null) && [ -n "${PAIR:-}" ]; then
     printf '[output]\nname=preferred\nmode=%s\n' "$PAIR" >> "$INI"
-    echo "asura-greeter: using mode $PAIR"
+    echo "toren-greeter: using mode $PAIR"
 else
-    echo "asura-greeter: letting weston choose a mode"
+    echo "toren-greeter: letting weston choose a mode"
 fi
 
 # The login surface itself.
 #
 # The surface directory is named unconditionally and the shell binary is named
 # only if it exists, because the two failures are different. A missing directory
-# is Asura's, and a missing quickshell is the package's; Weston is started
+# is Toren's, and a missing quickshell is the package's; Weston is started
 # either way, so the greeter comes up as a kiosk with nothing in it — visible,
 # and not a machine that will not boot.
 QUICKSHELL_BIN=${ASURA_QUICKSHELL:-/usr/bin/quickshell}

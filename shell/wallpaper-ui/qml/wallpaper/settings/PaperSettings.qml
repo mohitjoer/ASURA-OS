@@ -17,7 +17,7 @@ Column {
     // (skwd-wall v2's taxonomy; the nine gl-transition ports v2 dropped are
     // classed by what their math visibly does, and v2's Sand family is absent
     // because it is an instanced particle system the shell's ShaderEffect cannot
-    // run). The Reveal row is Asura's original 22-preset mask engine, carried
+    // run). The Reveal row is Toren's original 22-preset mask engine, carried
     // over from the wallpaper daemon and the upstream ii set. Random stays first
     // and ungrouped, and rotates across the whole pool.
     readonly property var _shaderOptions: [
@@ -140,17 +140,17 @@ Column {
     SettingsCard {
         colors: root.colors
         title: I18n.tr("Live wallpapers")
-        subtitle: I18n.tr("How video wallpapers play: the default engine decodes a cached transcode through asura-wallpaper-live; the in-shell engine decodes the clip through the shell.")
+        subtitle: I18n.tr("How video wallpapers play: the default engine decodes a cached transcode through toren-wallpaper-live; the in-shell engine decodes the clip through the shell.")
 
         SettingsRow {
             colors: root.colors
             title: I18n.tr("Video engine")
-            description: I18n.tr("asura-wallpaper = the C player (cached transcode, low resources); in-shell = the shell's QtMultimedia player.")
+            description: I18n.tr("toren-wallpaper = the C player (cached transcode, low resources); in-shell = the shell's QtMultimedia player.")
             Row {
                 spacing: 4
                 Repeater {
                     model: [
-                        { key: "asura-wallpaper",  label: "asura-wallpaper" },
+                        { key: "toren-wallpaper",  label: "toren-wallpaper" },
                         { key: "in_shell", label: "in-shell" }
                     ]
                     FilterButton {

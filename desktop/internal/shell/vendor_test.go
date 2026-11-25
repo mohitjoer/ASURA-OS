@@ -68,7 +68,7 @@ func manifestText(t *testing.T, files map[string]string) string {
 
 // vendorTree writes a shell tree with a vendored component in it.
 //
-// The overlay files are written too, because they are Asura's own files at
+// The overlay files are written too, because they are Toren's own files at
 // upstream's paths and the tree is not whole without them.
 func vendorTree(t *testing.T, vendored map[string]string) Env {
 	t.Helper()
@@ -119,7 +119,7 @@ func TestTheVendoredTreeHasNotDrifted(t *testing.T) {
 	}
 
 	// The count has to be the number of files that were compared, and not
-	// the number of lines in the manifest: a declared override is Asura's
+	// the number of lines in the manifest: a declared override is Toren's
 	// file and has no upstream blob to match.
 	manifest, err := os.ReadFile(filepath.Join("..", "..", "..", "shell", "vendor", "manifest.yaml"))
 	if err != nil {
@@ -282,9 +282,9 @@ func TestAFileNobodyDeclaredIsFound(t *testing.T) {
 	}
 }
 
-// TestTheOverlayFilesAreRequired covers the files Asura supplies.
+// TestTheOverlayFilesAreRequired covers the files Toren supplies.
 //
-// They are Asura's, not upstream's, so they are not in the manifest and
+// They are Toren's, not upstream's, so they are not in the manifest and
 // they are not drift. They are still required: a vendored component that
 // imports one cannot resolve it without it, and the failure is at run time
 // on the machine.
@@ -312,7 +312,7 @@ func TestTheOverlayFilesAreRequired(t *testing.T) {
 // TestTheOverlayFilesAreNotDrift covers the other half: an overlay that is
 // present and is not upstream's is not a finding.
 //
-// An overlay is Asura's file. It differs from upstream by definition — it
+// An overlay is Toren's file. It differs from upstream by definition — it
 // is the whole point of it — so a check that reported it as drift would
 // report every overlay, every time.
 func TestTheOverlayFilesAreNotDrift(t *testing.T) {
@@ -426,7 +426,7 @@ func TestTheBlobIdIsGits(t *testing.T) {
 // TestTheVendoredImportsAreReportedNotFailed covers the import rule over
 // the vendored tree.
 //
-// The rule is closed for Asura's own code and it stays closed. But the
+// The rule is closed for Toren's own code and it stays closed. But the
 // vendored tree is upstream's, and upstream's components import modules
 // this image does not carry yet. That is a fact about the image's package
 // list rather than a fault in a file nobody may edit, so it is reported.
@@ -494,19 +494,19 @@ func contains(list []string, value string) bool {
 	return false
 }
 
-// TestTheVendoredTreeIsNotHeldToAsurasRules covers the scope of the
+// TestTheVendoredTreeIsNotHeldToTorensRules covers the scope of the
 // rules.
 //
-// A vendored file is upstream's, and the shell's rules are about Asura's
+// A vendored file is upstream's, and the shell's rules are about Toren's
 // own code. Upstream's Material palette, upstream's glyphs and upstream's
 // absolute paths are all correct in upstream's tree, and a rule that
 // reported them would be reporting somebody else's code as this project's
 // problem — and would be reporting it in a way that cannot be fixed, since
 // the fix is an edit to a file that is not ours to edit.
-func TestTheVendoredTreeIsNotHeldToAsurasRules(t *testing.T) {
+func TestTheVendoredTreeIsNotHeldToTorensRules(t *testing.T) {
 	env := vendorTree(t, map[string]string{
 		"modules/common/Widget.qml": "import QtQuick\nimport SomeUserModule\n" +
-			"Item { color: \"#4c8bf5\"; source: \"/etc/sddm.conf.d/10-asura.conf\" }\n",
+			"Item { color: \"#4c8bf5\"; source: \"/etc/sddm.conf.d/10-toren.conf\" }\n",
 	})
 	env.EntryPoint = "shell.qml"
 	if err := os.WriteFile(filepath.Join(env.Root, "shell", "shell.qml"),
@@ -519,7 +519,7 @@ func TestTheVendoredTreeIsNotHeldToAsurasRules(t *testing.T) {
 	}
 }
 
-// houseRules are the rules that are about Asura's own code.
+// houseRules are the rules that are about Toren's own code.
 //
 // They are listed here so that the scope test below can say which rules
 // must never name a file in the vendored tree. A rule added to the package
@@ -546,7 +546,7 @@ var houseRules = map[string]bool{
 // tree and checks that none of them names a file in the vendored tree.
 //
 // The tree is large and upstream's, and the rules are many. The one
-// property that matters is the scope: a rule about Asura's own code must
+// property that matters is the scope: a rule about Toren's own code must
 // never name a file that is upstream's.
 func TestNoRuleNamesAVendoredFile(t *testing.T) {
 	env := Env{Root: "../../..", Dir: "shell", EntryPoint: "shell.qml", OwnsSettings: true}
@@ -561,7 +561,7 @@ func TestNoRuleNamesAVendoredFile(t *testing.T) {
 			continue
 		}
 		if isVendored(relative) {
-			t.Errorf("a rule about Asura's own code named a vendored file: "+
+			t.Errorf("a rule about Toren's own code named a vendored file: "+
 				"%s %s: %s", finding.Rule, finding.Path, finding.Detail)
 		}
 	}
@@ -573,7 +573,7 @@ func TestNoRuleNamesAVendoredFile(t *testing.T) {
 // The vendor script's EXCLUDE_FILES is the list of paths the script does
 // not take from upstream, and the validator's overlay list is the same
 // list. Two copies of one list drift, and the drift is invisible until a
-// sync overwrites a file Asura wrote — which is how a hand edit gets into
+// sync overwrites a file Toren wrote — which is how a hand edit gets into
 // a tree that is supposed to be byte-identical to upstream.
 func TestTheOverlayListMatchesTheVendorScript(t *testing.T) {
 	script, err := os.ReadFile(filepath.Join("..", "..", "..", "shell", "vendor", "vendor.sh"))
@@ -604,7 +604,7 @@ func TestTheOverlayListMatchesTheVendorScript(t *testing.T) {
 // script.
 //
 // The script is the only thing that writes into the vendored paths, so its
-// list of the paths it does not write is the list of the paths Asura
+// list of the paths it does not write is the list of the paths Toren
 // supplies.
 func vendorScriptExcludes(script string) []string {
 	const marker = "EXCLUDE_FILES=\""
@@ -639,7 +639,7 @@ func vendorScriptExcludes(script string) []string {
 func TestTheOverlayListStaysSmall(t *testing.T) {
 	if len(overlayFiles) > 14 {
 		t.Errorf("there are %d declared overrides; the list is a short one "+
-			"of the paths Asura supplies rather than takes", len(overlayFiles))
+			"of the paths Toren supplies rather than takes", len(overlayFiles))
 	}
 	for path, reason := range overlayFiles {
 		if reason == "" {

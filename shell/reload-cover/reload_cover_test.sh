@@ -17,8 +17,8 @@
 set -u
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-SCRIPT="$REPO_ROOT/shell/scripts/asura-reload-cover"
-WRAPPER="$REPO_ROOT/session/asura-reload-cover"
+SCRIPT="$REPO_ROOT/shell/scripts/toren-reload-cover"
+WRAPPER="$REPO_ROOT/session/toren-reload-cover"
 
 TMP="$(mktemp -d)"
 FAILED=0
@@ -103,7 +103,7 @@ fresh() {
     export FAKE_MODE=${1:-normal}
     mkdir -p "$XDG_RUNTIME_DIR"
 }
-statefile() { echo "$XDG_RUNTIME_DIR/asura-reload-cover.json"; }
+statefile() { echo "$XDG_RUNTIME_DIR/toren-reload-cover.json"; }
 # Read one field of the state file the way the QML does: as JSON.
 field() { python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[sys.argv[2]])' "$(statefile)" "$1"; }
 gone() {
@@ -160,7 +160,7 @@ check "the cover process ends" gone "$pid"
 for _ in $(seq 1 60); do [ -e "$(statefile)" ] || break; sleep 0.05; done
 check "the state file is removed once the cover is gone" test ! -e "$(statefile)"
 check "no lock outlives begin (the next begin is not refused)" \
-    flock -n "$XDG_RUNTIME_DIR/asura-reload-cover.lock" true
+    flock -n "$XDG_RUNTIME_DIR/toren-reload-cover.lock" true
 
 # ------------------------------------------------- two begins at the same time
 fresh

@@ -1,6 +1,6 @@
 # Hardware support framework
 
-Toren targets every laptop, which is not a promise anyone can keep. What anyone *can* do is
+Toren targets every laptop, which is not a promise anyone can keep. What anyone _can_ do is
 make the set of working machines grow, without needing a hardware lab, and be honest about
 which machines are confirmed.
 
@@ -9,18 +9,18 @@ This directory is that mechanism.
 ## The three tiers
 
 [`tiers.yaml`](tiers.yaml) is the definition of a tier in Toren, and there is exactly one of
-them. The installer, the matcher and `asura hardware report` all read that file. Everything in
+them. The installer, the matcher and `toren hardware report` all read that file. Everything in
 this section is a rendering of it for a human reader: where the two disagree, `tiers.yaml`
 is right and this file is stale.
 
 Every machine is exactly one tier, and the tier is decided by whether a profile exists —
 not by marketing.
 
-| Tier | Name | Granted by | Meaning |
-|---|---|---|---|
-| 1 | Verified | maintainer | Installs, boots, suspend/resume, GPU acceleration, audio and peripherals all confirmed on this machine by a maintainer. |
-| 2 | Community confirmed | contributor | Working on a contributor's machine, with a profile submitted from real detection output. Not independently verified. |
-| 3 | Best effort | fallback | No matching profile. Installs conservative defaults — the `generic` kernel, full firmware bundle — and may need manual intervention. |
+| Tier | Name                | Granted by  | Meaning                                                                                                                              |
+| ---- | ------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| 1    | Verified            | maintainer  | Installs, boots, suspend/resume, GPU acceleration, audio and peripherals all confirmed on this machine by a maintainer.              |
+| 2    | Community confirmed | contributor | Working on a contributor's machine, with a profile submitted from real detection output. Not independently verified.                 |
+| 3    | Best effort         | fallback    | No matching profile. Installs conservative defaults — the `generic` kernel, full firmware bundle — and may need manual intervention. |
 
 A machine is never silently upgraded between tiers. Tier 1 requires a maintainer's
 sign-off, because it is a claim about hardware Toren has not been run on by the people who
@@ -37,19 +37,19 @@ because a fallback has to boot before anything can rescue it.
 Eleven checks, and each tier's `requires:` block is the checklist for that tier. This is
 tier 1's.
 
-| Check | Value | What must have happened on the physical machine |
-|---|---|---|
-| `boots` | `true` | The machine boots and reaches a login prompt. |
-| `login_manager` | `true` | The login manager runs, lists accounts and starts a session. |
-| `desktop_session` | `true` | The compositor draws and Toren's shell starts. |
-| `network` | `true` | The machine reaches the network on its own, with no manual step. |
-| `audio_output` | `true` | Sound plays from the built-in codec. |
-| `suspend_resume` | `true` | It sleeps and comes back. The most-reported laptop failure, and the reason this check is on the list. |
-| `gpu_acceleration` | `true` | The GPU renders accelerated rather than falling back to software. |
-| `display_brightness` | `true` | The panel dims. |
-| `external_display` | `any` | Exercised, where the machine can drive an external display at all. |
-| `bluetooth` | `any` | Exercised, where the machine has a radio. |
-| `fingerprint` | `any` | Exercised, where the machine has a reader. |
+| Check                | Value  | What must have happened on the physical machine                                                       |
+| -------------------- | ------ | ----------------------------------------------------------------------------------------------------- |
+| `boots`              | `true` | The machine boots and reaches a login prompt.                                                         |
+| `login_manager`      | `true` | The login manager runs, lists accounts and starts a session.                                          |
+| `desktop_session`    | `true` | The compositor draws and Toren's shell starts.                                                        |
+| `network`            | `true` | The machine reaches the network on its own, with no manual step.                                      |
+| `audio_output`       | `true` | Sound plays from the built-in codec.                                                                  |
+| `suspend_resume`     | `true` | It sleeps and comes back. The most-reported laptop failure, and the reason this check is on the list. |
+| `gpu_acceleration`   | `true` | The GPU renders accelerated rather than falling back to software.                                     |
+| `display_brightness` | `true` | The panel dims.                                                                                       |
+| `external_display`   | `any`  | Exercised, where the machine can drive an external display at all.                                    |
+| `bluetooth`          | `any`  | Exercised, where the machine has a radio.                                                             |
+| `fingerprint`        | `any`  | Exercised, where the machine has a reader.                                                            |
 
 `true` means the check must have been exercised on the machine and pass. Where the hardware
 a check needs is something a machine may simply not have, the value is one of `any`,
@@ -112,11 +112,11 @@ machine that boots on nothing else, the fleet carries no upstream for it, and ne
 
 Firmware is named as packages, and only with names the base archive carries:
 
-| Package shape | Names that exist |
-|---|---|
-| Metapackage pulling all of them | `linux-firmware` |
-| Per-vendor, pulled in by it | `linux-firmware-mediatek`, `linux-firmware-intel-wireless`, `linux-firmware-broadcom-wireless`, `linux-firmware-realtek`, `linux-firmware-amd-graphics` |
-| Signed audio firmware | `firmware-sof-signed` |
+| Package shape                   | Names that exist                                                                                                                                        |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Metapackage pulling all of them | `linux-firmware`                                                                                                                                        |
+| Per-vendor, pulled in by it     | `linux-firmware-mediatek`, `linux-firmware-intel-wireless`, `linux-firmware-broadcom-wireless`, `linux-firmware-realtek`, `linux-firmware-amd-graphics` |
+| Signed audio firmware           | `firmware-sof-signed`                                                                                                                                   |
 
 There is no `linux-firmware-nonfree` and no `firmware-nonfree`: the base layer has no
 `non-free-firmware` component, and every firmware blob it carries is in the packages
@@ -130,7 +130,7 @@ reviewed set does not install it, and the machine falls back to tier 3 and says 
 This is the loop that makes the matrix grow without anyone owning hardware:
 
 1. A machine installs Toren and boots.
-2. `asura hardware report` emits a candidate profile from live detection, with anything
+2. `toren hardware report` emits a candidate profile from live detection, with anything
    identifying stripped.
 3. The user reviews it, fills in what only a human knows (does suspend work? does the GPU
    switch?), and opens a pull request.
@@ -142,7 +142,7 @@ cheapest. It needs one machine and no code.
 
 ## Detection order
 
-The probes are not in this directory. They belong to `asura hardware`, and
+The probes are not in this directory. They belong to `toren hardware`, and
 [`docs/hardware-detection.md`](../../docs/hardware-detection.md) is their implementation
 record; what this directory holds is the data they read and the tier they resolve against.
 Their order is fixed by `matching.probe_order` in [`tiers.yaml`](tiers.yaml), cheapest and
@@ -162,13 +162,13 @@ the **higher tier**, because a confirmed-working recipe beats a more specific gu
 ## What a profile must not contain
 
 - **Anything identifying.** No usernames, no hostnames, no serial numbers, no MAC addresses,
-  no home directory paths. `asura hardware report` strips these before emitting, and a profile
+  no home directory paths. `toren hardware report` strips these before emitting, and a profile
   containing them will be rejected.
 - **A kernel version pinned to a patch number.** Pin the flavour — `generic`, `hwe` or
   `oem`, the closed set in [`fleet.yaml`](../../system/kernel/fleet.yaml) — never
   `6.8.0-31-generic`. Profiles that pin patch versions stop matching on the next security
   update, and a flavour name that is not a fleet key installs no kernel at all.
-- **Firmware blobs, or a firmware file path.** A profile names firmware *packages*, by the
+- **Firmware blobs, or a firmware file path.** A profile names firmware _packages_, by the
   names above. Never a blob, never a `modinfo` filename, and never a package the archive
   does not carry.
 
@@ -179,7 +179,7 @@ download it. This is the failure mode that makes a Linux distribution unusable o
 machine, and it is why:
 
 - The ISO carries a broad firmware rescue bundle rather than only what detection matched.
-- `asura-firmware load <source>` accepts a USB stick, a local directory, or another machine on
+- `toren-firmware load <source>` accepts a USB stick, a local directory, or another machine on
   the LAN.
 - Tier 3 is a real tier with real behaviour, not a shrug.
 

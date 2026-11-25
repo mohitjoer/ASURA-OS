@@ -8,10 +8,10 @@ import (
 )
 
 // TestProfileCandidatesAreNotOneDirectoryTooHigh is the regression for a bug
-// that made an installed asura unable to find the profile database it shipped.
+// that made an installed toren unable to find the profile database it shipped.
 //
-// filepath.Dir(filepath.Dir("/usr/bin/asura")) is "/" and not "/usr", so the
-// installed candidate used to be "/share/asura/hardware/profiles". The search
+// filepath.Dir(filepath.Dir("/usr/bin/toren")) is "/" and not "/usr", so the
+// installed candidate used to be "/share/toren/hardware/profiles". The search
 // then fell through to a path relative to the working directory, which resolved
 // to something that did not exist or, worse, to the checkout — and the failure
 // presented as "an empty database", indistinguishable from a machine with no
@@ -24,21 +24,21 @@ func TestProfileCandidatesAreNotOneDirectoryTooHigh(t *testing.T) {
 	}
 
 	installed := candidates[0]
-	want := filepath.Join("share", "asura", "hardware", "profiles")
+	want := filepath.Join("share", "toren", "hardware", "profiles")
 	if !strings.HasSuffix(installed, want) {
 		t.Errorf("installed candidate = %q, want it to end in %q", installed, want)
 	}
 
 	// The whole bug in one line: exactly one hop up from the executable's own
 	// directory. Two hops — Dir(Dir(exe)) — lands one level too high, which for
-	// /usr/bin/asura is /share rather than /usr/share.
+	// /usr/bin/toren is /share rather than /usr/share.
 	executable, err := os.Executable()
 	if err != nil {
 		t.Fatal(err)
 	}
 	wantOneHop := filepath.Join(filepath.Dir(executable), "..", want)
 	if installed != wantOneHop {
-		t.Errorf("installed candidate = %q, want %q; an installed asura looks "+
+		t.Errorf("installed candidate = %q, want %q; an installed toren looks "+
 			"in the wrong place", installed, wantOneHop)
 	}
 

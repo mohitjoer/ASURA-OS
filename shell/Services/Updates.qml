@@ -3,13 +3,13 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// Live view of the daemon "updates" topic (asura status --json). The background
+// Live view of the daemon "updates" topic (toren status --json). The background
 // check lives in the daemon; this just parses the streamed frame so the bar glyph
 // reflects it without polling.
 Singleton {
     id: root
 
-    readonly property string sockPath: (Quickshell.env("XDG_RUNTIME_DIR") || "/tmp") + "/asura-shell.sock"
+    readonly property string sockPath: (Quickshell.env("XDG_RUNTIME_DIR") || "/tmp") + "/toren-shell.sock"
 
     property var frame: ({})
     readonly property bool available: root.frame.available === true

@@ -26,10 +26,10 @@ type extraCommand struct {
 // by a user and not by a test.
 func register(name, summary string, run func(args []string) int) {
 	if _, taken := commands[name]; taken {
-		panic("asura: command " + name + " is already built in")
+		panic("toren: command " + name + " is already built in")
 	}
 	if _, taken := extraCommands[name]; taken {
-		panic("asura: command " + name + " is registered twice")
+		panic("toren: command " + name + " is registered twice")
 	}
 	extraCommands[name] = extraCommand{summary: summary, run: run}
 }
