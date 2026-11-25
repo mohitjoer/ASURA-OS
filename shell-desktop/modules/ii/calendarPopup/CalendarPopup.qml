@@ -60,16 +60,17 @@ Scope {
         // The popup card itself
         Item {
             id: popupCardWrapper
+            readonly property real barGap: 4
             anchors {
                 horizontalCenter: !Config.options.bar.vertical ? parent.horizontalCenter : undefined
                 left: Config.options.bar.vertical && !Config.options.bar.bottom ? parent.left : undefined
                 right: Config.options.bar.vertical && Config.options.bar.bottom ? parent.right : undefined
                 top: !Config.options.bar.bottom ? parent.top : undefined
                 bottom: Config.options.bar.bottom && !Config.options.bar.vertical ? parent.bottom : undefined
-                topMargin: !Config.options.bar.bottom ? (Appearance.sizes.barHeight + Appearance.sizes.hyprlandGapsOut) : 0
-                bottomMargin: (Config.options.bar.bottom && !Config.options.bar.vertical) ? (Appearance.sizes.barHeight + Appearance.sizes.hyprlandGapsOut) : 0
-                leftMargin: (Config.options.bar.vertical && !Config.options.bar.bottom) ? (Appearance.sizes.verticalBarWidth + Appearance.sizes.hyprlandGapsOut) : 0
-                rightMargin: (Config.options.bar.vertical && Config.options.bar.bottom) ? (Appearance.sizes.verticalBarWidth + Appearance.sizes.hyprlandGapsOut) : 0
+                topMargin: !Config.options.bar.bottom ? (Appearance.sizes.barHeight + barGap - Appearance.sizes.elevationMargin) : 0
+                bottomMargin: (Config.options.bar.bottom && !Config.options.bar.vertical) ? (Appearance.sizes.barHeight + barGap - Appearance.sizes.elevationMargin) : 0
+                leftMargin: (Config.options.bar.vertical && !Config.options.bar.bottom) ? (Appearance.sizes.verticalBarWidth + barGap - Appearance.sizes.elevationMargin) : 0
+                rightMargin: (Config.options.bar.vertical && Config.options.bar.bottom) ? (Appearance.sizes.verticalBarWidth + barGap - Appearance.sizes.elevationMargin) : 0
             }
             implicitWidth: popupCard.implicitWidth + Appearance.sizes.elevationMargin * 2
             implicitHeight: popupCard.implicitHeight + Appearance.sizes.elevationMargin * 2
