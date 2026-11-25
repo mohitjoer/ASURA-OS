@@ -109,20 +109,3 @@ red = "#E5484D"
 teal = "#A1A1A1"
 yellow = "#F5A524"
 error = "#E5484D"
-
-# Monochrome Toren terminal palette for backwards compatibility
-[palettes.toren]
-ink = "#F2F2F2"
-ink_dim = "#CCCCCC"
-ink_faint = "#A1A1A1"
-surface = "#242424"
-blue = "#CCCCCC"
-sapphire = "#A1A1A1"
-mauve = "#F2F2F2"
-green = "#CCCCCC"
-peach = "#F5A524"
-red = "#E5484D"
-teal = "#A1A1A1"
-yellow = "#F5A524"
-error = "#E5484D"
-

@@ -541,7 +541,7 @@ mkdir -p "$HYPR_CACHE"
 
 ASURA_REPO_URL="${ASURA_REPO_URL:-https://mohitjoer.github.io/Toren-Linux/current}"
 
-HYPR_PKGS="hyprutils-0.14.4_1.x86_64.xbps aquamarine-0.16.0_1.x86_64.xbps hyprlang-0.6.8_1.x86_64.xbps hyprcursor-0.1.14_1.x86_64.xbps hyprgraphics-0.6.0_1.x86_64.xbps hyprland-protocols-0.8.0_1.x86_64.xbps hyprwire-0.3.1_1.x86_64.xbps hyprtoolkit-0.6.0_1.x86_64.xbps hyprland-0.57.2_1.x86_64.xbps xdg-desktop-portal-hyprland-1.5.0_1.x86_64.xbps hypridle-0.1.8_1.x86_64.xbps hyprlock-0.9.7_1.x86_64.xbps"
+HYPR_PKGS="hyprutils-0.14.4_1.x86_64.xbps aquamarine-0.16.0_1.x86_64.xbps hyprlang-0.6.8_1.x86_64.xbps hyprcursor-0.1.14_1.x86_64.xbps hyprgraphics-0.6.0_1.x86_64.xbps hyprland-protocols-0.8.0_1.x86_64.xbps hyprwire-0.3.1_1.x86_64.xbps hyprtoolkit-0.6.0_1.x86_64.xbps hyprland-0.57.2_1.x86_64.xbps xdg-desktop-portal-hyprland-1.5.0_1.x86_64.xbps hypridle-0.1.8_1.x86_64.xbps hyprlock-0.9.7_1.x86_64.xbps hyprland-guiutils-0.2.2_1.x86_64.xbps"
 for hpkg in $HYPR_PKGS; do
 	if [ ! -f "$HYPR_CACHE/$hpkg" ]; then
 		echo "build-iso-void: downloading $hpkg from ASURA repository..."
@@ -913,7 +913,8 @@ for group, body in manifest.items():
 
 filtered = [p for p in packages if p != "base-system"]
 all_requested = sorted(dict.fromkeys(str(p) for p in filtered))
-custom_pkgs = {"hyprland", "xdg-desktop-portal-hyprland", "hypridle", "hyprlock"}
+# staged above from Toren's repository (HYPR_PKGS), not in Void's
+custom_pkgs = {"hyprland", "xdg-desktop-portal-hyprland", "hypridle", "hyprlock", "hyprland-guiutils"}
 out = [p for p in all_requested if p not in custom_pkgs]
 print(" ".join(out))
 PY
@@ -1063,11 +1064,12 @@ if [ -x "$ROOTFS/usr/bin/ananicy-cpp" ] && [ -d "$ROOTFS/etc/sv/ananicy-cpp" ]; 
 	ln -sf /etc/sv/ananicy-cpp "$ROOTFS/etc/runit/runsvdir/default/ananicy-cpp"
 fi
 
-# thermald only on Intel CPUs
-if grep -qi "GenuineIntel" "$ROOTFS/proc/cpuinfo" 2>/dev/null || grep -qi "Intel" "$ROOTFS/proc/cpuinfo" 2>/dev/null; then
-	if [ -d "$ROOTFS/etc/sv/thermald" ]; then
-		ln -sf /etc/sv/thermald "$ROOTFS/etc/runit/runsvdir/default/thermald"
-	fi
+# thermald: decided on the machine, at boot, by its conf (it stays down
+# without Intel coretemp sensors), not by the CPU of the machine building this
+# image.
+if [ -d "$ROOTFS/etc/sv/thermald" ]; then
+	cp "$REPO_ROOT/system/runit/sv-conf/thermald/conf" "$ROOTFS/etc/sv/thermald/conf"
+	ln -sf /etc/sv/thermald "$ROOTFS/etc/runit/runsvdir/default/thermald"
 fi
 
 # Ensure runtime library compatibility symlinks exist inside rootfs

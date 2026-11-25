@@ -233,6 +233,68 @@ Scope {
                     }
                 }
 
+                // Toren: this workspace's layout (toren layout). Each workspace
+                // keeps its own; Default follows Settings -> Window Manager.
+                ColumnLayout {
+                    id: layoutPicker
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.topMargin: 10
+                    spacing: 8
+                    readonly property int workspaceId: Hyprland.focusedMonitor?.activeWorkspace?.id ?? 0
+                    property var layouts: ({})
+                    readonly property string current: layoutPicker.layouts[String(layoutPicker.workspaceId)] ?? "default"
+
+                    FileView {
+                        path: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/toren/layouts.json"
+                        watchChanges: true
+                        printErrors: false
+                        onFileChanged: reload()
+                        onLoaded: {
+                            try {
+                                layoutPicker.layouts = JSON.parse(text()).workspaces ?? {};
+                            } catch (e) {
+                                layoutPicker.layouts = {};
+                            }
+                        }
+                        onLoadFailed: layoutPicker.layouts = {}
+                    }
+
+                    StyledText {
+                        Layout.alignment: Qt.AlignHCenter
+                        color: Appearance.colors.colOnLayer0
+                        font.pixelSize: Appearance.font.pixelSize.normal
+                        text: Translation.tr("Layout of workspace %1").arg(layoutPicker.workspaceId)
+                    }
+
+                    RowLayout {
+                        Layout.alignment: Qt.AlignHCenter
+                        spacing: 4
+                        Repeater {
+                            model: [
+                                { id: "default", icon: "restart_alt", label: Translation.tr("Default") },
+                                { id: "tile", icon: "dashboard", label: Translation.tr("Tiling") },
+                                { id: "scroll", icon: "view_week", label: Translation.tr("Scrolling") },
+                                { id: "master", icon: "view_quilt", label: Translation.tr("Master") },
+                                { id: "monocle", icon: "crop_square", label: Translation.tr("Monocle") },
+                                { id: "float", icon: "filter_none", label: Translation.tr("Floating") }
+                            ]
+                            delegate: SelectionGroupButton {
+                                required property var modelData
+                                required property int index
+                                buttonIcon: modelData.icon
+                                buttonText: modelData.label
+                                leftmost: index === 0
+                                rightmost: index === 5
+                                toggled: layoutPicker.current === modelData.id
+                                onClicked: {
+                                    Quickshell.execDetached(["toren", "layout", "set", modelData.id]);
+                                    sessionRoot.hide();
+                                }
+                            }
+                        }
+                    }
+                }
+
                 DescriptionLabel {
                     Layout.alignment: Qt.AlignHCenter
                     text: sessionRoot.subtitle

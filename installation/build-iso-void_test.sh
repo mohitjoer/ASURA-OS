@@ -262,6 +262,24 @@ grep -Fq 'qemu64' "$REPO_ROOT/installation/ci/qemu-boot-test.sh"
 grep -Fq 'installation/ci/qemu-boot-test.sh' "$REPO_ROOT/.github/actions/build-iso/action.yml"
 grep -Fq './.github/actions/build-iso' "$REPO_ROOT/.github/workflows/ci.yml"
 
+# A package the ISO stages from Toren's repository (HYPR_PKGS) must not also be
+# requested from Void's mirrors, which do not have it: it belongs in custom_pkgs.
+python3 - "$SCRIPT" "$MANIFEST" <<'PY' || exit 1
+import re, sys
+script = open(sys.argv[1]).read()
+manifest = open(sys.argv[2]).read()
+staged = set()
+m = re.search(r'^HYPR_PKGS="([^"]*)"', script, re.M)
+for f in m.group(1).split():
+    staged.add(re.sub(r"-[0-9][^-]*_[0-9]+\.x86_64\.xbps$", "", f))
+custom = set(re.findall(r'"([^"]+)"', re.search(r"custom_pkgs = \{([^}]*)\}", script).group(1)))
+listed = set(re.findall(r"^\s*-\s*([A-Za-z0-9][A-Za-z0-9._+-]*)", manifest, re.M))
+missing = sorted((staged & listed) - custom)
+if missing:
+    print("build-iso-void_test: staged from Toren's repository but requested from Void: " + ", ".join(missing), file=sys.stderr)
+    sys.exit(1)
+PY
+
 echo "build-iso-void_test: ok"
 
 

@@ -141,7 +141,7 @@ Item {
         anchors {
             left: parent.left; leftMargin: row.padH
             top: parent.top; topMargin: row.padV
-            right: row.banded ? parent.right : vcluster.left
+            right: row.banded ? parent.right : (vcluster.visible ? vcluster.left : slot.left)
             rightMargin: row.banded ? row.padH : Tokens.s3
         }
         spacing: 1

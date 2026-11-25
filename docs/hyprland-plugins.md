@@ -1,5 +1,9 @@
 # Hyprland Compositor Plugins
 
+> **Status:** not available on Toren Linux yet. Void has no packaged Hyprland
+> plugins, and Toren does not build them, so Settings has no Plugins page. This
+> page describes the design for when they are added.
+
 Hyprland compositor plugins are native shared libraries (`.so`) loaded directly into the
 compositor process space. They provide deep compositor-level capabilities that shell
 widgets cannot provide on their own: window title bars (`hyprbars`), acrylic / glass effects

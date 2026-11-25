@@ -1,3 +1,4 @@
+@import url("toren-corners.css"); /* Toren: square or rounded app corners (Settings -> Desktop -> Look) */
 /* Toren palette -> classic GTK 3. Rendered by toren theme; do not hand-edit.
    GTK 3 has no CSS custom properties, so @define-color is the whole story here:
    the :root { --* } form the GTK 4 template leads with would not parse. The

@@ -111,6 +111,9 @@ modules/common/functions/Session.qml
 modules/common/widgets/AppIcon.qml
 modules/ii/sessionScreen/SessionScreen.qml
 modules/waffle/looks/WAppIcon.qml
+matugen/templates/gtk-3.0/gtk.css
+matugen/templates/gtk-4.0/gtk.css
+modules/settings/QuickConfig.qml
 "
 
 log() { printf '%s\n' "$*" >&2; }

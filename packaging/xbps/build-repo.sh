@@ -69,7 +69,7 @@ echo "build-repo: creating $PKGVER"
 		-m "mohitjoer <mohitjoe.r@gmail.com>" \
 		-l "GPL-3.0-only" \
 		-H "https://github.com/mohitjoer/Toren-Linux" \
-		-D "hyprland>=0.57 quickshell>=0 seatd>=0 turnstile>=0" \
+		-D "hyprland>=0.57 hyprland-guiutils>=0 quickshell>=0 seatd>=0 turnstile>=0" \
 		-F "$conf_files" \
 		"$STAGE"
 )

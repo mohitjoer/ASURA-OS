@@ -26,15 +26,24 @@ Item {
         }
     }
 
+    function glyphFor(name) {
+        if (!name) return "";
+        switch (("" + name).toLowerCase()) {
+        case "hug": return "\u25dc ";
+        case "float": return "\u25ad ";
+        case "rect": case "plain": return "\u25a2 ";
+        default: return "";
+        }
+    }
+
     // a segment never drops below minSeg (a one-glyph mode still reads as a
     // button) and pads its label by padSeg either side.
     readonly property int minSeg: 52
-    readonly property int padSeg: 18
+    readonly property int padSeg: 16
     readonly property int segH: 24
 
     implicitWidth: measure.implicitWidth
     implicitHeight: flow.implicitHeight
-    width: parent ? Math.min(measure.implicitWidth, parent.width) : measure.implicitWidth
     height: flow.implicitHeight
 
     // an off-screen single row, so the natural width is known before the visible
@@ -51,8 +60,8 @@ Item {
                 height: seg.segH
                 Text {
                     id: mlab
-                    text: I18n.tr(parent.modelData)
-                    font.family: Tokens.ui; font.pixelSize: 9
+                    text: seg.glyphFor(parent.modelData) + I18n.tr(parent.modelData)
+                    font.family: Tokens.ui; font.pixelSize: 10
                     font.weight: Font.Medium; font.letterSpacing: 0.6
                 }
             }
@@ -61,7 +70,7 @@ Item {
 
     Flow {
         id: flow
-        width: seg.width
+        anchors.fill: parent
         spacing: Tokens.s1
         Repeater {
             model: seg.options
@@ -79,10 +88,10 @@ Item {
                 Text {
                     id: lab
                     anchors.centerIn: parent
-                    text: I18n.tr(parent.modelData)
+                    text: seg.glyphFor(parent.modelData) + I18n.tr(parent.modelData)
                     color: parent.on ? Tokens.inkOnBone : Tokens.inkDim
                     font.family: Tokens.ui
-                    font.pixelSize: 9
+                    font.pixelSize: 10
                     font.weight: Font.Medium
                     font.letterSpacing: 0.6
                 }

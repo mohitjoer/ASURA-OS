@@ -36,10 +36,14 @@ Toren Hub is built on dynamic, data-driven schema pages:
 
 ## Hub Page Directory
 
+Pages marked *Toren shell* configure Toren's own shell and only appear while it
+runs (`gsettings get org.toren.shell desktop-shell` is `'toren'`). With the
+default desktop they are hidden: that desktop keeps its own settings.
+
 | Page Key        | Title            | File (`shell/hub/pages/`) | Controlled Subsystem                                       |
 | --------------- | ---------------- | ------------------------- | ---------------------------------------------------------- |
-| `profile`       | Profile          | `ProfilePage.qml`         | User avatar, name, and profile hero styling                |
-| `global`        | General          | `GlobalPage.qml`          | Hub preferences, font scaling, UI zoom                     |
+| `profile`       | Profile          | `ProfilePage.qml`         | *Toren shell.* User avatar, name, and profile hero styling                |
+| `global`        | General          | `GlobalPage.qml`          | *Toren shell.* Hub preferences, font scaling, UI zoom                     |
 | `updates`       | Updates          | `UpdatesPage.qml`         | System updates, release channel, package manager           |
 | `displays`      | Displays         | `DisplaysPage.qml`        | Monitor resolutions, refresh rates, scaling                |
 | `connections`   | Connections      | `ConnectionsPage.qml`     | Wi-Fi networks, Bluetooth pairing                          |
@@ -48,22 +52,19 @@ Toren Hub is built on dynamic, data-driven schema pages:
 | `animations`    | Animations       | `AnimationsPage.qml`      | Compositor animation curves and bezier profiles            |
 | `lockscreen`    | Lockscreen       | `LockscreenPage.qml`      | Hyprlock appearance, clock format, lock timeouts           |
 | `windowmanager` | Window Manager   | `WindowManagerPage.qml`   | Window gaps, border radius, active border colors           |
-| `plugins`       | Plugins          | `PluginsPage.qml`         | Compositor plugins and extensions                          |
-| `layerrules`    | Layer Rules      | `LayerRulesPage.qml`      | Advanced layer-shell window rules                          |
-| `bar-studio`    | Bar Studio       | `BarStudioPage.qml`       | QS Bar styling, border radiuses, height                    |
-| `desktop`       | Desktop          | `DesktopPage.qml`         | Desktop stage, widgets, and background effects             |
-| `widgets`       | Widgets          | `WidgetsPage.qml`         | Desktop clock, system monitor, and media widgets           |
-| `launcher`      | App Launcher     | `LauncherPage.qml`        | Super+Space launcher behavior and search engines           |
+| `bar-studio`    | Bar Studio       | `BarStudioPage.qml`       | *Toren shell.* QS Bar styling, border radiuses, height                    |
+| `desktop`       | Desktop          | `DesktopPage.qml`         | *Toren shell.* Desktop stage, widgets, and background effects             |
+| `widgets`       | Widgets          | `WidgetsPage.qml`         | *Toren shell.* Desktop clock, system monitor, and media widgets           |
+| `launcher`      | App Launcher     | `LauncherPage.qml`        | *Toren shell.* Super+Space launcher behavior and search engines           |
 | `keybinds`      | Keybinds         | `KeybindsPage.qml`        | Global shortcut chords and compositor keybindings          |
 | `appoverrides`  | App Overrides    | `AppOverridesPage.qml`    | Per-application window rules and float settings            |
 | `windowrules`   | Window Rules     | `WindowRulesPage.qml`     | Tiling rules, workspace assignments                        |
 | `performance`   | Performance      | `PerformancePage.qml`     | Gaming mode toggles, CPU governor tuning                   |
 | `session`       | Session          | `SessionPage.qml`         | Autostart services, session timeout, power actions         |
-| `recording`     | Recording        | `RecordingPage.qml`       | Screen recording bitrate, audio sources                    |
-| `dictation`     | Dictation        | `DictationPage.qml`       | Voice dictation and input triggers                         |
+| `recording`     | Recording        | `RecordingPage.qml`       | *Toren shell.* Screen recording bitrate, audio sources                    |
 | `fastfetch`     | Fastfetch        | `FastfetchPage.qml`       | Terminal system splash logo and info                       |
 | `import`        | Import Config    | `ImportPage.qml`          | Migrate external dotfiles and configs                      |
-| `addons`        | Add-ons          | `AddonsPage.qml`          | Shell plugins catalogue and community extensions           |
+| `addons`        | Add-ons          | `AddonsPage.qml`          | *Toren shell.* Shell plugins catalogue and community extensions           |
 | `credits`       | Credits          | `CreditsPage.qml`         | Distribution credits and licenses                          |
 
 ---

@@ -1,0 +1,19 @@
+# Toren: Void's thermald service reads this before it starts thermald.
+#
+# thermald drives Intel CPUs through the coretemp sensors. Without them (an
+# AMD CPU, a virtual machine) it exits at once and runit restarts it forever
+# ("THD engine init failed"). So it starts only on such a machine; anywhere
+# else the service takes itself down and stays down.
+_toren_thermald_ok() {
+	grep -q GenuineIntel /proc/cpuinfo 2>/dev/null || return 1
+	grep -qw hypervisor /proc/cpuinfo 2>/dev/null && return 1
+	for _d in /sys/devices/platform/coretemp.*; do
+		[ -e "$_d" ] && return 0
+	done
+	return 1
+}
+if ! _toren_thermald_ok; then
+	echo "thermald: no Intel coretemp sensors here; the service stays down"
+	sv down . >/dev/null 2>&1
+	exit 0
+fi

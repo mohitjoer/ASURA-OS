@@ -166,6 +166,8 @@ put system/modules-load.d /etc/modules-load.d
 put system/tlp.d /etc/tlp.d
 put system/sysctl.d /etc/sysctl.d
 put_as system/xbps.d/toren.conf /etc/xbps.d/toren.conf
+# thermald starts only where it can work (system/runit/sv-conf/thermald/conf)
+put_as system/runit/sv-conf/thermald/conf /etc/sv/thermald/conf
 put_as system/xbps.d/toren.conf /etc/xbps.d/00-repository-main.conf
 # Toren Linux repository signing key (installed only where missing is handled
 # by the migration; here we always refresh from the checkout).
@@ -231,10 +233,9 @@ if [ "$ROOT" = "" ]; then
 			ln -sf "/etc/sv/$svc" "/etc/runit/runsvdir/default/$svc"
 		fi
 	done
-	if grep -qi "GenuineIntel\|Intel" /proc/cpuinfo 2>/dev/null; then
-		if [ -d /etc/sv/thermald ] && [ ! -e /etc/runit/runsvdir/default/thermald ]; then
-			ln -sf /etc/sv/thermald /etc/runit/runsvdir/default/thermald
-		fi
+	# its conf keeps it down on machines without Intel coretemp sensors
+	if [ -d /etc/sv/thermald ] && [ ! -e /etc/runit/runsvdir/default/thermald ]; then
+		ln -sf /etc/sv/thermald /etc/runit/runsvdir/default/thermald
 	fi
 fi
 

@@ -105,7 +105,7 @@ Item {
     // left edge with one column empty beside them
     readonly property int columns: Math.max(1, Math.min(capacity, groups.length))
     readonly property int cardW: Math.min(Tokens.cardWide,
-        Math.max(360, Math.floor((width - 28 - (gridColumns - 1) * Tokens.s5) / gridColumns)))
+        Math.max(360, Math.floor(((flick.width - 14) - (columns - 1) * Tokens.s5) / columns)))
     // The column's own geometry, so a page's head can sit on the same grid.
     readonly property real sheetWidth: col.width
     readonly property real sheetX: flick.x + col.x
@@ -372,7 +372,7 @@ Item {
 
             Row {
                 id: cardColumns
-                width: col.width
+                anchors.horizontalCenter: parent.horizontalCenter
                 spacing: Tokens.s5
                 readonly property var buckets: sheet.bucketGroups(sheet.groups, sheet.columns)
 

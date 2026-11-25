@@ -1,5 +1,12 @@
 #!/bin/sh
 exec 2>&1
+# The session bus (the dbus user service): wait for it, so this service does
+# not start on no bus; runit starts it again until the bus is there.
+_bus="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/bus"
+_i=0
+while [ ! -S "$_bus" ] && [ "$_i" -lt 50 ]; do sleep 0.2; _i=$((_i + 1)); done
+[ -S "$_bus" ] || { echo "waiting for the session bus at $_bus"; exit 1; }
+export DBUS_SESSION_BUS_ADDRESS="unix:path=$_bus"
 
 # The dispatcher derives the per-desktop portal configuration file name by
 # lowercasing XDG_CURRENT_DESKTOP. Services under turnstile's runsvdir start
@@ -15,9 +22,6 @@ export XDG_CURRENT_DESKTOP="${XDG_CURRENT_DESKTOP:-Toren}"
 # and the dispatcher starts on no bus.
 RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
 export XDG_RUNTIME_DIR="$RUNTIME_DIR"
-if [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ] && [ -S "$RUNTIME_DIR/bus" ]; then
-	export DBUS_SESSION_BUS_ADDRESS="unix:path=$RUNTIME_DIR/bus"
-fi
 
 # The dispatcher builds its interface map from the backends that own their bus
 # names when it starts, and a backend that appears later is never added: the

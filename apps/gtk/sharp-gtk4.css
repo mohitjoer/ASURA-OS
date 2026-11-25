@@ -1,0 +1,20 @@
+/* Toren: square corners for GTK 4 and libadwaita windows.
+ *
+ * Loaded from ~/.config/gtk-4.0/toren-corners.css while Settings -> Desktop ->
+ * Look -> "Rounded app corners" is off (the default). Only window-level
+ * shapes are squared: buttons, entries and popovers keep the app's style.
+ */
+window,
+window.csd,
+window.solid-csd,
+window.dialog,
+dialog,
+floating-sheet,
+sheet,
+window > .titlebar,
+window > headerbar,
+window headerbar,
+window toolbarview > .top-bar,
+window toolbarview > .bottom-bar {
+  border-radius: 0;
+}

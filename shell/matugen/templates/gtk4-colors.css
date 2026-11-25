@@ -1,3 +1,4 @@
+@import url("toren-corners.css"); /* Toren: square or rounded app corners (Settings -> Desktop -> Look) */
 /* Toren palette -> GTK 4 / libadwaita. Rendered by toren theme; do not hand-edit.
    Two blocks ship because libadwaita 1.6+ recolours its own widgets from CSS
    custom properties and no longer reads @define-color for them, so the :root

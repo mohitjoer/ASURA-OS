@@ -247,8 +247,9 @@ type Hyprfocus struct {
 	Slide   float64 `json:"slide"`
 }
 
-// Hyprscrolling is a plugin on Hyprland 0.53 (core from 0.54): it applies
-// whenever the tiling layout is "scrolling" and the plugin is installed.
+// Hyprscrolling holds the scrolling layout's options (built into Hyprland
+// since 0.54; written as scrolling:*). The JSON name stays for stores that
+// already have it.
 type Hyprscrolling struct {
 	ColumnWidth float64 `json:"columnWidth"`
 	FollowFocus bool    `json:"followFocus"`

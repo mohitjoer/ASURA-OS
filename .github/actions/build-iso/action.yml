@@ -52,7 +52,11 @@ runs:
       shell: bash
       env:
         ASURA_VERSION: ${{ inputs.version }}
-      run: sudo env "PATH=$PATH" ASURA_VERSION="$ASURA_VERSION" installation/build-iso-void.sh "$RUNNER_TEMP/toren-iso"
+      # shell: bash here is bash -eo pipefail, so the build's own exit status
+      # counts, not tee's. The log is what ci.yml shows on a failure.
+      run: |
+        sudo env "PATH=$PATH" ASURA_VERSION="$ASURA_VERSION" installation/build-iso-void.sh "$RUNNER_TEMP/toren-iso" 2>&1 |
+          tee "$RUNNER_TEMP/iso-build.log"
 
     - name: Locate ISO
       id: locate

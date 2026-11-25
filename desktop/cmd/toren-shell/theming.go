@@ -235,7 +235,8 @@ func themeAppsEnabled() bool {
 // blankGtk drops the Toren palette from the generated GTK stylesheets, so GTK /
 // libadwaita apps fall back to their own stock colours when app theming is off.
 func blankGtk(cfgBase string) {
-	const off = "/* Toren: app theming is off; apps use their own colours. */\n"
+	// the corner choice (toren-corners.css) holds with theming off too
+	const off = "@import url(\"toren-corners.css\");\n/* Toren: app theming is off; apps use their own colours. */\n"
 	for _, rel := range []string{"gtk-3.0/gtk.css", "gtk-4.0/gtk.css"} {
 		p := filepath.Join(cfgBase, rel)
 		_ = os.MkdirAll(filepath.Dir(p), 0o755)

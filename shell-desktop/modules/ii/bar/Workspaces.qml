@@ -7,6 +7,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Io
 import Quickshell.Widgets
 
 // ASURA overlay (shell-desktop/toren/vendor.sh OVERLAYS): the bar's workspaces,
@@ -28,6 +29,34 @@ ButtonMouseArea {
     property real widgetPadding: 4
     property real workspaceButtonWidth: 26
     property real iconSize: workspaceButtonWidth * 0.69
+
+    // Per-workspace layouts (toren layout): workspace ID -> tile, scroll,
+    // master, monocle or float. The mark below shows the active workspace's
+    // own layout; a workspace without one follows the default and shows none.
+    property var layouts: ({})
+    readonly property string activeLayout: root.layouts[String(root.activeId)] ?? ""
+    readonly property var layoutIcon: ({
+        "tile": "dashboard", "scroll": "view_week", "master": "view_quilt",
+        "monocle": "crop_square", "float": "filter_none"
+    })
+    readonly property var layoutName: ({
+        "tile": "Tiling", "scroll": "Scrolling", "master": "Master",
+        "monocle": "Monocle", "float": "Floating"
+    })
+    FileView {
+        path: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/toren/layouts.json"
+        watchChanges: true
+        printErrors: false
+        onFileChanged: reload()
+        onLoaded: {
+            try {
+                root.layouts = JSON.parse(text()).workspaces ?? {};
+            } catch (e) {
+                root.layouts = {};
+            }
+        }
+        onLoadFailed: root.layouts = {}
+    }
 
     // The workspaces on this monitor: every regular one Hyprland has with windows,
     // plus the active one (at most one empty workspace is shown).
@@ -218,6 +247,37 @@ ButtonMouseArea {
             StyledToolTip {
                 extraVisibleCondition: addTabMouse.containsMouse
                 text: Translation.tr("New workspace")
+            }
+        }
+
+        // The active workspace's own layout (toren layout); click for the next.
+        Rectangle {
+            id: layoutMark
+            visible: root.activeLayout !== ""
+            implicitWidth: root.workspaceButtonWidth
+            implicitHeight: root.workspaceButtonWidth
+            radius: 4
+            color: layoutMouse.containsMouse ? Appearance.colors.colLayer1Hover : "transparent"
+
+            MaterialSymbol {
+                anchors.centerIn: parent
+                text: root.layoutIcon[root.activeLayout] ?? "dashboard"
+                iconSize: 15
+                color: layoutMouse.containsMouse ? Appearance.colors.colOnLayer1 : Appearance.colors.colSubtext
+            }
+
+            MouseArea {
+                id: layoutMouse
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                acceptedButtons: Qt.LeftButton
+                onClicked: Quickshell.execDetached(["toren", "layout", "next"])
+            }
+
+            StyledToolTip {
+                extraVisibleCondition: layoutMouse.containsMouse
+                text: Translation.tr("%1 layout. Click for the next one").arg(root.layoutName[root.activeLayout] ?? "")
             }
         }
     }

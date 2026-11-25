@@ -791,7 +791,17 @@ func reportHardwareQuirks(root string) int {
 		return exitOK
 	}
 
-	fs, _ := probe.New(root)
+	// The doctor's root is a filesystem root ("" for the running machine);
+	// the hardware probe reads sysfs, under it.
+	probeRoot := probe.RootDefault
+	if root != "" {
+		probeRoot = filepath.Join(root, "sys")
+	}
+	fs, err := probe.New(probeRoot)
+	if err != nil {
+		fmt.Printf("  probe             %v\n", err)
+		return exitOK
+	}
 	matchedLayers, _ := quirks.MatchMachine(allDefs, fs)
 	appliedState, _ := getAppliedState()
 

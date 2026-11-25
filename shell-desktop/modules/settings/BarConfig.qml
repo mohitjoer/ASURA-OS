@@ -119,7 +119,7 @@ ContentPage {
 
             ContentSubsection {
                 title: Translation.tr("Group style")
-                Layout.fillWidth: false
+                Layout.fillWidth: true
 
                 ConfigSelectionArray {
                     currentValue: Config.options.bar.borderless

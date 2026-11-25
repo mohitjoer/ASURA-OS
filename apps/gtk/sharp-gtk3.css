@@ -1,0 +1,17 @@
+/* Toren: square corners for GTK 3 windows.
+ *
+ * Loaded from ~/.config/gtk-3.0/toren-corners.css while Settings -> Desktop ->
+ * Look -> "Rounded app corners" is off (the default). Only window-level
+ * shapes are squared: buttons, entries and menus keep the app's style.
+ */
+decoration,
+window.csd decoration,
+window.solid-csd decoration,
+.window-frame,
+.titlebar,
+headerbar,
+window.csd > .titlebar,
+window.csd > headerbar,
+messagedialog .titlebar {
+  border-radius: 0;
+}

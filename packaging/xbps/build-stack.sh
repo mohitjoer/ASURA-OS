@@ -28,6 +28,7 @@ xdg-desktop-portal-hyprland
 hypridle
 hyprlock
 hyprpicker
+hyprland-guiutils
 "
 
 # If a local void-packages directory wasn't provided, clone Toren-Linux/void-packages

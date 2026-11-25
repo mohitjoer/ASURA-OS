@@ -1,0 +1,16 @@
+#!/bin/sh
+# The user's D-Bus session bus, at $XDG_RUNTIME_DIR/bus.
+#
+# turnstile points every session program at that address
+# (export_dbus_address in turnstile.conf) but does not start a bus itself:
+# on Void that is a user service. Without it there is no session bus, so
+# gsettings/dconf, the portals (screenshots, file chooser), the polkit
+# prompt and notifications fail. The other user services wait for this
+# socket before they start.
+exec 2>&1
+[ -r ./conf ] && . ./conf
+RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+# a socket left by a bus that died would make the new one fail to bind
+[ -S "$RUNTIME_DIR/bus" ] && ! pgrep -u "$(id -u)" -f 'dbus-daemon --session' >/dev/null 2>&1 &&
+	rm -f "$RUNTIME_DIR/bus"
+exec dbus-daemon --session --nofork --nopidfile --address="unix:path=$RUNTIME_DIR/bus" ${OPTS:-}

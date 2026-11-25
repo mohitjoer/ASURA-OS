@@ -133,7 +133,7 @@ func runQuirksList() int {
 		return exitFail
 	}
 
-	fs, _ := probe.New("")
+	fs, _ := probe.New(probe.RootDefault)
 	matchedLayers, _ := quirks.MatchMachine(allDefs, fs)
 	matchedMap := make(map[string]bool)
 	for _, m := range matchedLayers {
@@ -274,7 +274,7 @@ func runQuirksShow(args []string) int {
 	}
 
 	// Show matched layers for current machine
-	fs, _ := probe.New("")
+	fs, _ := probe.New(probe.RootDefault)
 	matchedLayers, _ := quirks.MatchMachine(allDefs, fs)
 	if len(matchedLayers) == 0 {
 		fmt.Println("No hardware quirks match this machine.")
@@ -356,7 +356,7 @@ func runQuirksApply(args []string) int {
 			return exitFail
 		}
 	} else {
-		fs, _ := probe.New("")
+		fs, _ := probe.New(probe.RootDefault)
 		layersToApply, err = quirks.MatchMachine(allDefs, fs)
 		if err != nil || len(layersToApply) == 0 {
 			fmt.Println("No hardware quirks match this machine.")

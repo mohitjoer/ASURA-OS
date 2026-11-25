@@ -45,3 +45,29 @@
 | Ctrl + Shift + Escape | system monitor (btop) |
 | Super + Shift + A | restart audio |
 | Super + comma | Toren settings (the Hub) |
+
+## Layouts per workspace
+
+Each workspace can arrange its windows its own way, and changing one does not
+change the others:
+
+| Layout | What it does |
+|---|---|
+| Tiling | each new window splits the space (the default) |
+| Scrolling | windows sit side by side in a row wider than the screen; scroll through them |
+| Master | one large window, the others stacked beside it |
+| Monocle | one window fills the screen at a time |
+| Floating | windows float freely and overlap |
+
+Pick one in the power menu (Ctrl+Alt+Delete, "Layout of workspace N"), or click
+the layout mark in the bar to step to the next one. From a terminal:
+
+```sh
+toren layout                 # the current workspace's layout
+toren layout set scroll      # tile, scroll, master, monocle, float, default
+toren layout next            # step to the next one
+```
+
+A workspace set to Default follows the tiling layout chosen in Settings ->
+Window Manager -> Layout. Choices are kept across logins
+(`~/.config/toren/layouts.json`).

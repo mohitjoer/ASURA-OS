@@ -1152,20 +1152,23 @@ func keywordLines(src string) []string {
 
 // --- scrolling layout -------------------------------------------------------
 
-// scrollingOptions are the scrolling layout's knobs, emitted only when the layout
-// is selected. The scrolling layout is a plugin on Hyprland 0.53, so its options
-// live under plugin:hyprscrolling and exist only while the plugin is loaded.
+// scrollingOptions are the scrolling layout's knobs. Since Hyprland 0.54 the
+// scrolling layout is built in, its options live under scrolling: and exist
+// whatever the default layout is, so they are written whenever they differ
+// from the defaults: a workspace can scroll (toren layout) while the default
+// layout tiles. follow_focus is a number there (0 or 1), not a bool.
 func scrollingOptions(o Overrides) hlOpts {
-	if o.Appearance.Layout != "scrolling" {
-		return nil
-	}
 	var out hlOpts
 	hs, dhs := o.Plugins.Hyprscrolling, defaultOverrides().Plugins.Hyprscrolling
 	if hs.ColumnWidth != dhs.ColumnWidth {
-		out.set("plugin:hyprscrolling:column_width", hs.ColumnWidth)
+		out.set("scrolling:column_width", hs.ColumnWidth)
 	}
 	if hs.FollowFocus != dhs.FollowFocus {
-		out.set("plugin:hyprscrolling:follow_focus", hs.FollowFocus)
+		follow := 0
+		if hs.FollowFocus {
+			follow = 1
+		}
+		out.set("scrolling:follow_focus", follow)
 	}
 	return out
 }

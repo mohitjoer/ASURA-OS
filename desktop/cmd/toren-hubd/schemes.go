@@ -71,7 +71,7 @@ func gnomeAccentOn(s themeState) bool { return s.GnomeAccent == nil || *s.GnomeA
 
 // gtkOff is written to the generated GTK stylesheets when app theming is off, so
 // GTK / libadwaita apps drop the Toren palette and use their own stock colours.
-const gtkOff = "/* Toren: app theming is off; apps use their own colours. */\n"
+const gtkOff = "@import url(\"toren-corners.css\");\n/* Toren: app theming is off; apps use their own colours. */\n"
 
 func blankGtk() {
 	for _, rel := range []string{"gtk-3.0/gtk.css", "gtk-4.0/gtk.css"} {

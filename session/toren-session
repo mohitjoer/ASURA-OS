@@ -125,6 +125,24 @@ export QT_QPA_PLATFORM=wayland
 export QT_QPA_PLATFORMTHEME=gtk3
 export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
 
+# GTK app corners: square unless the user turned rounded corners on (Settings ->
+# Desktop -> Look). ~/.config/gtk-N.0/toren-corners.css holds the choice and the
+# GTK stylesheets import it; a missing choice file means the default, square.
+# A stylesheet written before the import existed gets it added in front (in
+# place, so a symlinked gtk.css stays a symlink).
+for _v in 3 4; do
+    _gtk="${XDG_CONFIG_HOME:-$HOME/.config}/gtk-$_v.0"
+    mkdir -p "$_gtk" 2>/dev/null || continue
+    [ -e "$_gtk/toren-corners.css" ] ||
+        printf '@import url("file:///usr/share/toren/apps/gtk/sharp-gtk%s.css");\n' "$_v" >"$_gtk/toren-corners.css"
+    if [ ! -e "$_gtk/gtk.css" ]; then
+        printf '@import url("toren-corners.css");\n' >"$_gtk/gtk.css"
+    elif ! grep -q 'toren-corners.css' "$_gtk/gtk.css" 2>/dev/null; then
+        { printf '@import url("toren-corners.css");\n'; cat "$_gtk/gtk.css"; } >"$_gtk/gtk.css.toren" &&
+            cat "$_gtk/gtk.css.toren" >"$_gtk/gtk.css" && rm -f "$_gtk/gtk.css.toren"
+    fi
+done
+
 # Cursor sizing and theming for the XWayland apps that do not read GTK.
 export XCURSOR_SIZE=24
 export XCURSOR_THEME=Adwaita

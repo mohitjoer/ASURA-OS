@@ -7,9 +7,9 @@ import qs.Ui
 import qs.Ui.Singletons
 import "Singletons"
 import "schema/DesktopPage.js" as DesktopSchema
+import "schema/DesktopShellPage.js" as DesktopShellSchema
 import "schema/BarStudioPage.js" as BarStudioSchema
 import "schema/WindowSettings.js" as WindowSettingsSchema
-import "schema/PluginsPage.js" as PluginsSchema
 import "schema/InputPage.js" as InputSchema
 import "schema/KeybindsPage.js" as KeybindsSchema
 import "schema/DisplaysPage.js" as DisplaysSchema
@@ -23,7 +23,6 @@ import "schema/AnimationsPage.js" as AnimationsSchema
 import "schema/AddonsPage.js" as AddonsSchema
 import "schema/WindowRulesPage.js" as WindowRulesSchema
 import "schema/AppOverridesPage.js" as AppOverridesSchema
-import "schema/LayerRulesPage.js" as LayerRulesSchema
 import "schema/SessionPage.js" as SessionSchema
 import "schema/PerformancePage.js" as PerformanceSchema
 import "schema/UpdatesPage.js" as UpdatesSchema
@@ -78,8 +77,31 @@ Rectangle {
         hub.section = target;
     }
     property bool navigated: false
+    // the last section, read back from hub config, was reopened
+    property bool restored: false
+    // The page the Hub opens on when none was asked for: the running
+    // desktop's own settings.
+    function homeSection() {
+        return hub.desktopShell === "toren" ? "bar-studio" : "desktop-shell";
+    }
     property string query: ""
-    readonly property bool hasVoiceEngine: false
+    // Which desktop runs: "desktop" (the default) or "toren" (Toren's own
+    // shell). TOREN_DESKTOP_SHELL overrides it, for tests.
+    property string desktopShell: Quickshell.env("TOREN_DESKTOP_SHELL") || "desktop"
+    Process {
+        command: ["gsettings", "get", "org.toren.shell", "desktop-shell"]
+        running: !Quickshell.env("TOREN_DESKTOP_SHELL")
+        stdout: StdioCollector {
+            onStreamFinished: {
+                var v = this.text.trim().replace(/'/g, "");
+                if (v === "toren" || v === "desktop") hub.desktopShell = v;
+                // a section opened before this answer that the shell cannot
+                // back moves to one it can
+                if ((!hub.navigated && !hub.restored) || !hub.sectionAvailable(hub.section))
+                    hub.section = hub.homeSection();
+            }
+        }
+    }
 
     // Advanced mode is permanently enabled across the Hub: every schema page,
     // power-user section, and deep tuning knob is always accessible by default.
@@ -99,26 +121,27 @@ Rectangle {
     // stays calm until asked. Compositor-owned pages sit together under one group
     // so a compositor's settings live in one place, not sprinkled through the list.
     readonly property var groups: [
-        { name: "OVERVIEW", items: [ { key: "profile", name: "Profile" }, { key: "global", name: "General" }, { key: "updates", name: "Updates" } ] },
+        { name: "DESKTOP", items: [
+            { key: "desktop-shell", name: "Desktop", needs: { shell: "desktop" } },
+            { key: "bar-studio", name: "Bar Studio", wired: true, needs: { shell: "toren" } }, { key: "desktop", name: "Desktop", wired: true, needs: { shell: "toren" } },
+            { key: "widgets", name: "Widgets", needs: { shell: "toren" } }, { key: "launcher", name: "App Launcher", needs: { shell: "toren" } } ] },
+        { name: "OVERVIEW", items: [ { key: "profile", name: "Profile", needs: { shell: "toren" } }, { key: "global", name: "General", needs: { shell: "toren" } }, { key: "updates", name: "Updates", rail: false } ] },
         { name: "DEVICES", items: [
             { key: "displays", name: "Displays", needs: { cap: "monitorConfig" } }, { key: "connections", name: "Connections" },
             { key: "input", name: "Input" }, { key: "gpu", name: "Graphics & Power" } ] },
         { name: "LOOK", items: [
             { key: "animations", name: "Animations" }, { key: "lockscreen", name: "Lockscreen" } ] },
         { name: "COMPOSITOR", items: [
-            { key: "windowmanager", name: "Window Manager", needs: { provider: true } }, { key: "plugins", name: "Plugins", needs: { cap: "plugins" } } ] },
-        { name: "DESKTOP", items: [
-            { key: "bar-studio", name: "Bar Studio", wired: true }, { key: "desktop", name: "Desktop", wired: true },
-            { key: "widgets", name: "Widgets" }, { key: "launcher", name: "App Launcher" } ] },
+            { key: "windowmanager", name: "Window Manager", needs: { provider: true } } ] },
         { name: "KEYS & APPS", items: [
             { key: "keybinds", name: "Keybinds" }, { key: "appoverrides", name: "App Overrides", adv: true },
             { key: "windowrules", name: "Window Rules", adv: true } ] },
         { name: "SYSTEM", items: [
             { key: "performance", name: "Performance" }, { key: "session", name: "Session" },
-            { key: "recording", name: "Recording" }, { key: "fastfetch", name: "Fastfetch", adv: true },
+            { key: "recording", name: "Recording", needs: { shell: "toren" } }, { key: "fastfetch", name: "Fastfetch", adv: true },
             { key: "import", name: "Import config", adv: true, wired: true } ] },
         { name: "EXTEND", items: [
-            { key: "addons", name: "Add-ons" } ] },
+            { key: "addons", name: "Add-ons", needs: { shell: "toren" } } ] },
         { name: "", items: [ { key: "credits", name: "Credits" } ] }
     ]
 
@@ -127,13 +150,13 @@ Rectangle {
     // is the texture, and every gloss is the real word, never decoration:
     // Section rail navigation items
     readonly property var jpName: ({
-        "profile": "", "displays": "", "audio": "", "input": "", "keybinds": "",
+        "profile": "", "displays": "", "input": "", "keybinds": "",
         "connections": "", "gpu": "", "recording": "",
-        "plugins": "", "bar-studio": "", "desktop": "", "launcher": "", "fastfetch": "",
+        "bar-studio": "", "desktop": "", "launcher": "", "fastfetch": "",
         "widgets": "", "lockscreen": "", "animations": "",
-        "addons": "", "windowrules": "", "appoverrides": "", "layerrules": "",
+        "addons": "", "windowrules": "", "appoverrides": "",
         "session": "", "performance": "",
-        "updates": "", "credits": "", "global": "", "import": "", "windowmanager": ""
+        "updates": "", "credits": "", "global": "", "import": "", "windowmanager": "", "desktop-shell": ""
     })
 
     // Extra search vocabulary per section: the words a user actually types that
@@ -150,9 +173,9 @@ Rectangle {
         "gpu": "graphics nvidia amd vram passthrough vfio rendering hybrid performance cpu governor epp frequency thermal battery charge ceiling aspm profile",
         "recording": "screen record capture video screencast screenshot fps codec framerate",
         "windowmanager": "compositor window manager wm wayland switch change swap session provider window windows rounding corners softness gaps border borders thickness colour tiling layout opacity transparency transparent dim blur shadow float snap resize animation spread offset",
-        "plugins": "plugin plugins hyprland compositor hyprpm title bar titlebar hyprbars glass hyprglass image border imgborders cursor motion dynamic cursors focus flash hyprfocus key sound sounds keyboard keysounds typing click clicky thock creamy cherry mx topre mechvibes switch version abi mismatch rebuild build update add git repository install",
         "bar-studio": "bar frame rails zones widgets menus surfaces style catalogue layout framebars sidebar dock dockapps pinned pin magnify autohide auto-hide media chip peek labels edge taskbar",
         "desktop": "desktop brand logo mark name widget board wallpaper",
+        "desktop-shell": "desktop bar dock panel taskbar weather colours colors scheme palette transparency clock time 12-hour 24-hour seconds notifications popup osd lock screen battery warning suspend night light warmth blue sound volume overview workspaces rounded corners",
         "launcher": "launcher spotlight command palette greeting weather home",
         "fastfetch": "fetch neofetch terminal system info logo ascii emblem readout",
         "widgets": "desktop widget clock calendar weather face overlay wallpaper",
@@ -161,7 +184,6 @@ Rectangle {
         "addons": "installed plugin addon extension manage enable remove update widget bundle extras store marketplace browse",
         "windowrules": "window rule float pin size place opacity class title override",
         "appoverrides": "app override per-app opacity blur corner class inherit opaque transparent",
-        "layerrules": "layer rule namespace blur dim bar notification surface",
         "session": "session login startup autostart launch run command boot environment variable env var export",
         "performance": "performance battery power saving save lowpower potato lag cpu gpu ram memory idle freeze reduce motion fps",
         "updates": "update upgrade version channel commit behind check origin",
@@ -176,7 +198,7 @@ Rectangle {
     // section -> its schema rows, the one source for both global search and the
     // compositor-driving classification, so the two cannot drift apart.
     readonly property var sectionRows: ({
-        "bar-studio": BarStudioSchema.rows, "desktop": DesktopSchema.rows, "windowmanager": WindowSettingsSchema.rows, "plugins": PluginsSchema.rows,
+        "bar-studio": BarStudioSchema.rows, "desktop": DesktopSchema.rows, "desktop-shell": DesktopShellSchema.rows, "windowmanager": WindowSettingsSchema.rows,
         "input": InputSchema.rows, "keybinds": KeybindsSchema.rows,
         "displays": DisplaysSchema.rows, "gpu": GpuSchema.rows,
         "recording": RecordingSchema.rows,
@@ -184,7 +206,7 @@ Rectangle {
         "widgets": WidgetsSchema.rows, "lockscreen": LockscreenSchema.rows,
         "animations": AnimationsSchema.rows, "addons": AddonsSchema.rows,
         "windowrules": WindowRulesSchema.rows, "appoverrides": AppOverridesSchema.rows,
-        "layerrules": LayerRulesSchema.rows, "session": SessionSchema.rows,
+        "session": SessionSchema.rows,
         "performance": PerformanceSchema.rows,
         "updates": UpdatesSchema.rows
     })
@@ -269,14 +291,14 @@ Rectangle {
         "hotkey": "keybind shortcut", "hotkeys": "keybinds shortcuts", "shortcut": "keybind", "shortcuts": "keybinds",
         "wifi": "connections wireless network", "internet": "connections network", "ethernet": "connections network", "bluetooth": "connections", "hotspot": "connections",
         "brightness": "backlight", "backlight": "brightness", "nightlight": "night comfort backlight", "warmth": "night comfort", "bluelight": "night comfort",
-        "volume": "audio sound", "sound": "audio", "font": "typeface appearance", "typeface": "font appearance",
+        "font": "typeface appearance", "typeface": "font appearance",
         "screenshot": "recording capture", "screencast": "recording capture", "screensaver": "lockscreen lock", "lock": "lockscreen",
         "startup": "session", "boot": "session", "battery": "performance power", "powersaving": "performance power", "potato": "performance", "lag": "performance",
         "gap": "gaps spacing", "spacing": "gaps", "glass": "blur liquid", "liquid": "glass blur",
-        "titlebar": "title bar", "titlebars": "title bar", "plugin": "plugins addon", "plugins": "plugin addon",
+        "titlebar": "title bar", "titlebars": "title bar", "plugin": "addons", "plugins": "addons",
         "monitor": "displays screen", "monitors": "displays screen", "resolution": "displays screen", "hidpi": "displays scale", "refresh": "displays",
         "mouse": "input pointer", "pointer": "input", "keyboard": "input", "touchpad": "input trackpad", "trackpad": "input touchpad",
-        "clock": "widgets desktop", "notifications": "layerrules",
+        "clock": "widgets desktop",
         "update": "updates upgrade", "upgrade": "updates", "blur": "windows glass", "rounding": "windows corners", "corners": "windows rounding",
         "animation": "animations motion", "motion": "animations", "gpu": "graphics", "graphics": "gpu"
     })
@@ -396,8 +418,8 @@ Rectangle {
     // `framed` pages keep the rail + bottom action bar; `ledger` pages also get
     // the right write-ledger column. Everything else is full-bleed.
     readonly property var framedSet: ({
-        "bar-studio": true, "desktop": true, "plugins": true, "input": true, "animations": true, "global": true, "windowmanager": true,
-        "windowrules": true, "appoverrides": true, "layerrules": true,
+        "bar-studio": true, "desktop": true, "input": true, "animations": true, "global": true, "windowmanager": true,
+        "windowrules": true, "appoverrides": true,
         "session": true
     })
     // A section drives the compositor when any of its rows targets the neutral
@@ -447,7 +469,9 @@ Rectangle {
     function needsMet(item) {
         var n = item ? item.needs : undefined;
         if (!n) return true;
-        if (n.voiceEngine === true && !hub.hasVoiceEngine) return false;
+        // Pages that configure Toren's own shell mean nothing while the
+        // desktop shell runs (org.toren.shell desktop-shell).
+        if (n.shell !== undefined && hub.desktopShell !== n.shell) return false;
         if (n.cap !== undefined && !Settings.supports(n.cap)) return false;
         if (n.provider === true && Settings.provider === "") return false;
         if (n.rows === true && !hub.hasModeledRow(item.key)) return false;
@@ -484,7 +508,7 @@ Rectangle {
         return (prov && prov.length) ? base.concat(prov) : base;
     }
     function pageFile(s) {
-        var map = { "plugins": "PluginsPage", "profile": "ProfilePage", "bar-studio": "BarStudioPage", "desktop": "DesktopPage", "session": "SessionPage", "layerrules": "LayerRulesPage", "windowrules": "WindowRulesPage", "appoverrides": "AppOverridesPage", "animations": "AnimationsPage", "input": "InputPage", "keybinds": "KeybindsPage", "displays": "DisplaysPage", "connections": "ConnectionsPage", "gpu": "GpuPage", "audio": "AudioPage", "updates": "UpdatesPage", "recording": "RecordingPage", "performance": "PerformancePage", "launcher": "LauncherPage", "lockscreen": "LockscreenPage", "fastfetch": "FastfetchPage", "addons": "AddonsPage", "widgets": "WidgetsPage", "credits": "CreditsPage" };
+        var map = { "desktop-shell": "DesktopShellPage", "profile": "ProfilePage", "bar-studio": "BarStudioPage", "desktop": "DesktopPage", "session": "SessionPage", "windowrules": "WindowRulesPage", "appoverrides": "AppOverridesPage", "animations": "AnimationsPage", "input": "InputPage", "keybinds": "KeybindsPage", "displays": "DisplaysPage", "connections": "ConnectionsPage", "gpu": "GpuPage", "updates": "UpdatesPage", "recording": "RecordingPage", "performance": "PerformancePage", "launcher": "LauncherPage", "lockscreen": "LockscreenPage", "fastfetch": "FastfetchPage", "addons": "AddonsPage", "widgets": "WidgetsPage", "credits": "CreditsPage" };
         map.global = "GlobalPage";
         map["import"] = "ImportPage";
         map.windowmanager = "WindowManagerPage";
@@ -831,7 +855,7 @@ Rectangle {
                 if (hub.navigated)
                     return;
                 var s = hub.canonicalSection(this.text.trim());
-                if (s && hub.pageFile(s) !== "" && hub.sectionAvailable(s)) hub.section = s;
+                if (s && hub.pageFile(s) !== "" && hub.sectionAvailable(s)) { hub.section = s; hub.restored = true; }
             }
         }
     }
@@ -1182,38 +1206,55 @@ Rectangle {
                             // away instead of leaving a bare label. The open section
                             // always counts, so you never lose your place.
                             readonly property bool anyShown: grp.modelData.items.some(function (i) {
-                                return hub.needsMet(i) && (!i.adv || hub.advanced || hub.section === i.key);
+                                return hub.needsMet(i) && i.rail !== false && (!i.adv || hub.advanced || hub.section === i.key);
                             })
                             width: parent.width
                             height: !anyShown ? 0 : (grp.modelData.name === "" ? Tokens.s4 : 34)
                             visible: anyShown
-                            Row {
+                            Item {
+                                anchors.fill: parent
                                 visible: grp.modelData.name !== ""
-                                anchors.verticalCenter: parent.verticalCenter
-                                anchors.bottomMargin: 2
-                                spacing: Tokens.s2
-                                // the poster's plate numerals: each group carries
-                                // its index, 01..05, in tabular mono.
-                                Text {
-                                    text: (grp.index + 1 < 10 ? "0" : "") + (grp.index + 1)
-                                    color: grp.activeGroup ? Tokens.inkDim : Tokens.inkFaint
-                                    font.family: Tokens.mono; font.pixelSize: 9
-                                    anchors.verticalCenter: parent.verticalCenter
-                                }
-                                Text {
-                                    text: I18n.tr(grp.modelData.name); color: grp.activeGroup ? Tokens.inkDim : Tokens.inkFaint
-                                    font.family: Tokens.ui; font.pixelSize: 9
-                                    font.weight: Font.Medium; font.letterSpacing: 2
-                                    anchors.verticalCenter: parent.verticalCenter
+                                Row {
+                                    id: grpLabelRow
+                                    anchors { left: parent.left; verticalCenter: parent.verticalCenter }
+                                    anchors.leftMargin: Tokens.s1
+                                    spacing: Tokens.s2
+                                    // the poster's plate numerals: each group carries
+                                    // its index, 01..05, in tabular mono.
+                                    Text {
+                                        text: (grp.index + 1 < 10 ? "0" : "") + (grp.index + 1)
+                                        color: grp.activeGroup ? Tokens.inkDim : Tokens.inkFaint
+                                        font.family: Tokens.mono; font.pixelSize: 9
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                    Text {
+                                        text: I18n.tr(grp.modelData.name); color: grp.activeGroup ? Tokens.inkDim : Tokens.inkFaint
+                                        font.family: Tokens.ui; font.pixelSize: 9
+                                        font.weight: Font.Medium; font.letterSpacing: 2
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
                                 }
                                 Rectangle {
-                                    width: Math.max(0, nav.width - 130); height: 1; color: Tokens.lineSoft
-                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors {
+                                        left: grpLabelRow.right
+                                        right: grpTick.left
+                                        leftMargin: Tokens.s2
+                                        rightMargin: Tokens.s2
+                                        verticalCenter: parent.verticalCenter
+                                    }
+                                    height: 1
+                                    color: Tokens.lineSoft
                                 }
                                 Rectangle {
-                                    width: 1; height: 5; color: grp.activeGroup ? Tokens.lineStrong : Tokens.line
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    anchors.verticalCenterOffset: -2
+                                    id: grpTick
+                                    anchors {
+                                        right: parent.right
+                                        rightMargin: Tokens.s3
+                                        verticalCenter: parent.verticalCenter
+                                        verticalCenterOffset: -2
+                                    }
+                                    width: 1; height: 5
+                                    color: grp.activeGroup ? Tokens.lineStrong : Tokens.line
                                 }
                             }
                         }
@@ -1229,7 +1270,7 @@ Rectangle {
                                 // outright and unreachable. The open section stays put
                                 // so turning Advanced off never strands you on a page
                                 // the rail no longer lists.
-                                readonly property bool shown: hub.needsMet(modelData)
+                                readonly property bool shown: hub.needsMet(modelData) && modelData.rail !== false
                                     && (!modelData.adv || hub.advanced || hub.section === modelData.key)
                                 width: nav.width
                                 height: shown ? 36 : 0
@@ -1250,16 +1291,20 @@ Rectangle {
                                 // the right, every item carries its kanji seal,
                                 // Latin and Japanese sitting side by side.
                                 Row {
-                                    x: Tokens.s3
-                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors {
+                                        left: parent.left
+                                        leftMargin: Tokens.s3
+                                        verticalCenter: parent.verticalCenter
+                                    }
                                     spacing: Tokens.s2
                                     Text {
                                         id: navLead
-                                        visible: navItem.sel
                                         text: "//"
+                                        opacity: navItem.sel ? 1 : 0
                                         color: Tokens.inkOnBoneDim
                                         font.family: Tokens.mono; font.pixelSize: 11
                                         anchors.verticalCenter: parent.verticalCenter
+                                        Behavior on opacity { NumberAnimation { duration: Tokens.snap } }
                                     }
                                     Text {
                                         id: navLatin
@@ -1268,8 +1313,6 @@ Rectangle {
                                         font.family: Tokens.ui; font.pixelSize: 14
                                         anchors.verticalCenter: parent.verticalCenter
                                         elide: Text.ElideRight
-                                        width: Math.max(0, navKana.x - Tokens.s2 - Tokens.s3
-                                            - (navItem.sel ? navLead.width + Tokens.s2 : 0))
                                         Behavior on color { ColorAnimation { duration: Tokens.snap } }
                                     }
                                 }
@@ -1406,10 +1449,10 @@ Rectangle {
     Item {
         id: updatesBtn
         anchors { top: parent.top; right: parent.right }
-        anchors.topMargin: Tokens.s4; anchors.rightMargin: Tokens.s6
+        anchors.topMargin: Tokens.s5 - Math.round((height - 18) / 2); anchors.rightMargin: Tokens.s6
         z: 60
         width: ubLabel.implicitWidth + Tokens.s4 * 2
-        height: 30
+        height: 26
         readonly property bool here: hub.section === "updates"
         Rectangle {
             anchors.fill: parent
@@ -1449,11 +1492,11 @@ Rectangle {
     Item {
         id: filesBtn
         anchors { top: parent.top; right: updatesBtn.left }
-        anchors.topMargin: Tokens.s4; anchors.rightMargin: Tokens.s3
+        anchors.topMargin: Tokens.s5 - Math.round((height - 18) / 2); anchors.rightMargin: Tokens.s3
         z: 60
         visible: hub.settingsFiles().length > 0
         width: fbLabel.implicitWidth + Tokens.s4 * 2
-        height: 30
+        height: 26
         Rectangle {
             anchors.fill: parent
             radius: Tokens.radius

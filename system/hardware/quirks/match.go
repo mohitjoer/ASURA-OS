@@ -42,7 +42,10 @@ func MatchFieldPattern(pattern, value string) bool {
 	normP := match.Normalize(pattern)
 	normV := match.Normalize(value)
 	if normP != "" && normV != "" {
-		if normP == normV || strings.HasPrefix(normV, normP) || strings.HasPrefix(normP, normV) {
+		// The value may be longer than the pattern ("ThinkPad" matches
+		// "ThinkPad T14 Gen 3"), never the other way round: a short value
+		// ("X") would otherwise match every pattern that starts with it.
+		if normP == normV || strings.HasPrefix(normV, normP) {
 			return true
 		}
 	}
@@ -183,7 +186,9 @@ func MatchQuirk(
 			patLower := strings.ToLower(strings.TrimSpace(pat))
 			for _, mod := range modules {
 				modLower := strings.ToLower(strings.TrimSpace(mod))
-				if patLower == modLower || MatchFieldPattern(patLower, modLower) {
+				// a module name is exact (or an explicit glob): "hid" is not
+				// "hid_sensor_hub"
+				if globbed, _ := filepath.Match(patLower, modLower); patLower == modLower || globbed {
 					matchedMod = mod
 					break
 				}

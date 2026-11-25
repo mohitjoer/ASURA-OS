@@ -66,6 +66,7 @@ desktop:
   packages:
     # Wayland Compositor & helpers
     - hyprland
+    - hyprland-guiutils # hyprland-dialog: Hyprland's permission and not-responding dialogs
     - muparser # libmuparser.so.2 required by Hyprland 0.57
     - lua55 # liblua5.5.so.5.5 required by Hyprland 0.57
     - glslang

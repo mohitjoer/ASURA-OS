@@ -233,6 +233,7 @@ ContentPage {
         ConfigRow {
             ContentSubsection {
                 title: Translation.tr("Bar position")
+                Layout.fillWidth: true
                 ConfigSelectionArray {
                     currentValue: (Config.options.bar.bottom ? 1 : 0) | (Config.options.bar.vertical ? 2 : 0)
                     onSelected: newValue => {
@@ -265,6 +266,7 @@ ContentPage {
             }
             ContentSubsection {
                 title: Translation.tr("Bar silhouette & corners")
+                Layout.fillWidth: true
 
                 ConfigSelectionArray {
                     currentValue: Config.options.bar.cornerStyle
