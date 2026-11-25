@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	"toren/desktop/internal/hypr"
 )
 
 // Hyprland's capability manifest and the actions the Hub backend performs on the
@@ -100,7 +102,7 @@ func runAct(a Action, rest []string) (string, error) {
 		if state == "on" {
 			disable = "false"
 		}
-		_, err = ctl("keyword", "misc:disable_autoreload", disable)
+		_, err = ctl("eval", hypr.KeywordToLua("misc:disable_autoreload", disable))
 		return "", err
 
 	case ActionCursorSet:
@@ -125,11 +127,11 @@ func runAct(a Action, rest []string) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		_, err = ctl("dispatch", "submap", name)
+		_, err = ctl("dispatch", hypr.DispatchToLua("submap", name))
 		return "", err
 
 	case ActionSubmapReset:
-		_, err := ctl("dispatch", "submap", "reset")
+		_, err := ctl("dispatch", hypr.DispatchToLua("submap", "reset"))
 		return "", err
 
 	case ActionKeyboardCycleLayout:
@@ -146,7 +148,7 @@ func runAct(a Action, rest []string) (string, error) {
 		if state != "on" && state != "off" {
 			return "", fmt.Errorf("act %s: expected on or off, got %q", a, state)
 		}
-		_, err = ctl("dispatch", "dpms", state)
+		_, err = ctl("dispatch", hypr.DispatchToLua("dpms", state))
 		return "", err
 	}
 	return "", fmt.Errorf("%w: %s", ErrUnsupported, a)

@@ -48,4 +48,4 @@ hl.config({
 })
 
 hl.exec_cmd("toren-perf-apply")
-hl.exec_cmd([[n=$(grep -oE '"screenShader" *: *"[a-z]+"' "$HOME/.config/toren/shell.json" 2>/dev/null | grep -oE '[a-z]+"$' | tr -d '"'); [ -n "$n" ] && hyprctl keyword decoration:screen_shader "/usr/share/toren/hyprland/shaders/$n.glsl" >/dev/null]])
+hl.exec_cmd([[n=$(grep -oE '"screenShader" *: *"[a-z]+"' "$HOME/.config/toren/shell.json" 2>/dev/null | grep -oE '[a-z]+"$' | tr -d '"'); [ -n "$n" ] && hyprctl eval 'hl.config({ decoration = { screen_shader = "/usr/share/toren/hyprland/shaders/'"$n"'.glsl" } })' >/dev/null]])

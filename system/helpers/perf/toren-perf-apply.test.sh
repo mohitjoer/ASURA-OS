@@ -12,12 +12,12 @@ check() { [ "$(run)" = "$2" ] || { echo "FAIL $1: got '$(run)'" >&2; exit 1; }; 
 
 check "nothing set changes nothing" ""
 printf '{"disableBlur": true}' >"$tmp/cfg/toren/performance.json"
-check "disableBlur" "hyprctl keyword decoration:blur:enabled false"
+check "disableBlur" "hyprctl eval 'hl.config({ decoration = { blur = { enabled = false } } })'"
 printf '{"lowPowerMode": true}' >"$tmp/cfg/toren/performance.json"
-check "lowPowerMode" "hyprctl keyword decoration:blur:enabled false
-hyprctl keyword decoration:shadow:enabled false"
+check "lowPowerMode" "hyprctl eval 'hl.config({ decoration = { blur = { enabled = false } } })'
+hyprctl eval 'hl.config({ decoration = { shadow = { enabled = false } } })'"
 printf '{}' >"$tmp/cfg/toren/performance.json"
 printf '{"saver": true}' >"$tmp/cache/toren/hypr-perf.json"
-check "power saver" "hyprctl keyword decoration:blur:enabled false
-hyprctl keyword decoration:shadow:enabled false"
+check "power saver" "hyprctl eval 'hl.config({ decoration = { blur = { enabled = false } } })'
+hyprctl eval 'hl.config({ decoration = { shadow = { enabled = false } } })'"
 echo "ok"

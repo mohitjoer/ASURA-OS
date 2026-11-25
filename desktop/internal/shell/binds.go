@@ -375,6 +375,22 @@ func extractTableFieldNum(expr, field string) string {
 
 func parseLuaDispatcher(expr string) (string, string) {
 	expr = strings.TrimSpace(expr)
+	if strings.Contains(expr, "function()") {
+		if strings.Contains(expr, "window.float()") && strings.Contains(expr, "window.resize") && strings.Contains(expr, "window.center()") {
+			return "exec", "hyprctl --batch \"dispatch togglefloating ; dispatch resizeactive exact 1000 660 ; dispatch centerwindow\""
+		}
+		if strings.Contains(expr, "submap(") && strings.Contains(expr, "resize") && strings.Contains(expr, "notify") {
+			return "exec", "hyprctl dispatch submap resize && hyprctl notify -1 2200 0 \"Resize mode: arrows or hjkl resize. Esc exits\""
+		}
+	}
+	if strings.HasPrefix(expr, "hl.dsp.window.float(") {
+		return "togglefloating", ""
+	}
+	if strings.HasPrefix(expr, "hl.dsp.submap(") {
+		inner := strings.TrimSuffix(strings.TrimPrefix(expr, "hl.dsp.submap("), ")")
+		inner = strings.Trim(strings.TrimSpace(inner), `"`)
+		return "submap", inner
+	}
 	if strings.HasPrefix(expr, "hl.dsp.exec_cmd(") && strings.HasSuffix(expr, ")") {
 		inner := strings.TrimSuffix(strings.TrimPrefix(expr, "hl.dsp.exec_cmd("), ")")
 		inner = strings.TrimSpace(inner)
@@ -489,8 +505,24 @@ func parseLuaDispatcher(expr string) (string, string) {
 func parseBinds(body string) []compositorBind {
 	var binds []compositorBind
 	submap := ""
-	for number, line := range strings.Split(body, "\n") {
+	lines := strings.Split(body, "\n")
+	for i := 0; i < len(lines); i++ {
+		number := i
+		line := lines[i]
 		trimmed := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmed, "hl.bind(") && strings.Contains(trimmed, "function(") && !strings.HasSuffix(trimmed, "end)") {
+			var joined []string
+			joined = append(joined, line)
+			for i+1 < len(lines) {
+				i++
+				joined = append(joined, lines[i])
+				if strings.HasSuffix(strings.TrimSpace(lines[i]), "end)") {
+					break
+				}
+			}
+			line = strings.Join(joined, " ")
+			trimmed = strings.TrimSpace(line)
+		}
 		if match := submapDirective.FindStringSubmatch(line); match != nil {
 			submap = match[1]
 			if submap == "reset" {

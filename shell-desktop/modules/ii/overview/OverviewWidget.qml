@@ -4,6 +4,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.common.functions
+import qs.toren
 import Qt5Compat.GraphicalEffects
 import QtQuick
 import QtQuick.Layouts
@@ -142,7 +143,7 @@ Item {
                                 onPressed: {
                                     if (root.draggingTargetWorkspace === -1) {
                                         GlobalStates.overviewOpen = false
-                                        Hyprland.dispatch(`workspace ${workspace.workspaceValue}`)
+                                        HyprDispatch.run(`workspace ${workspace.workspaceValue}`)
                                     }
                                 }
                             }
@@ -266,7 +267,7 @@ Item {
                             window.Drag.active = false
                             root.draggingFromWorkspace = -1
                             if (targetWorkspace !== -1 && targetWorkspace !== windowData?.workspace.id) {
-                                Hyprland.dispatch(`movetoworkspacesilent ${targetWorkspace},address:${window.windowData?.address}`)
+                                HyprDispatch.run(`movetoworkspacesilent ${targetWorkspace},address:${window.windowData?.address}`)
                                 updateWindowPosition.restart()
                             }
                             else {
@@ -276,7 +277,7 @@ Item {
                                 }
                                 const percentageX = (window.x - xOffset) / root.workspaceImplicitWidth
                                 const percentageY = (window.y - yOffset) / root.workspaceImplicitHeight
-                                Hyprland.dispatch(`movewindowpixel exact ${percentageX * root.screen.width} ${percentageY * root.screen.height},address:${window.windowData?.address}`)
+                                HyprDispatch.run(`movewindowpixel exact ${percentageX * root.screen.width} ${percentageY * root.screen.height},address:${window.windowData?.address}`)
                             }
                         }
                         onClicked: (event) => {
@@ -284,10 +285,10 @@ Item {
 
                             if (event.button === Qt.LeftButton) {
                                 GlobalStates.overviewOpen = false
-                                Hyprland.dispatch(`focuswindow address:${windowData.address}`)
+                                HyprDispatch.run(`focuswindow address:${windowData.address}`)
                                 event.accepted = true
                             } else if (event.button === Qt.MiddleButton) {
-                                Hyprland.dispatch(`closewindow address:${windowData.address}`)
+                                HyprDispatch.run(`closewindow address:${windowData.address}`)
                                 event.accepted = true
                             }
                         }

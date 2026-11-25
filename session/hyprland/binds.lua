@@ -72,13 +72,20 @@ hl.bind("SUPER + C", hl.dsp.window.center())
 hl.bind("SUPER + SHIFT + P", hl.dsp.window.pin())
 hl.bind("SUPER + G", hl.dsp.group.toggle())
 -- Float at 1000x660, centred; press again to tile back.
-hl.bind("SUPER + A", hl.dsp.exec_cmd("hyprctl --batch \"dispatch togglefloating ; dispatch resizeactive exact 1000 660 ; dispatch centerwindow\""))
+hl.bind("SUPER + A", function()
+    hl.dispatch(hl.dsp.window.float())
+    hl.dispatch(hl.dsp.window.resize({ x = 1000, y = 660 }))
+    hl.dispatch(hl.dsp.window.center())
+end)
 -- Split the current window's tile the other way (dwindle), and pseudo-tile a
 -- floating window so it keeps its aspect ratio inside the tiled grid.
 hl.bind("SUPER + J", hl.dsp.layout("togglesplit"))
 hl.bind("SUPER + CTRL + P", hl.dsp.window.pseudo())
 -- Resize mode (resize.conf). Entering a submap is silent, hence the toast.
-hl.bind("SUPER + R", hl.dsp.exec_cmd("hyprctl dispatch submap resize && hyprctl notify -1 2200 0 \"Resize mode: arrows or hjkl resize. Esc exits\""))
+hl.bind("SUPER + R", function()
+    hl.dispatch(hl.dsp.submap("resize"))
+    hl.dispatch(hl.dsp.exec_cmd('hyprctl notify -1 2200 0 "Resize mode: arrows or hjkl resize. Esc exits"'))
+end)
 
 hl.bind("SUPER + Left", hl.dsp.focus({ direction = "left" }))
 hl.bind("SUPER + Right", hl.dsp.focus({ direction = "right" }))

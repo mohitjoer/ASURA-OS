@@ -71,10 +71,16 @@ if [ "$dry" = 0 ]; then
 fi
 
 set_key() {
+	local expr
+	case "$1" in
+		decoration:blur:enabled) expr="hl.config({ decoration = { blur = { enabled = $2 } } })" ;;
+		decoration:shadow:enabled) expr="hl.config({ decoration = { shadow = { enabled = $2 } } })" ;;
+		*) expr="hl.config({ $1 = $2 })" ;;
+	esac
 	if [ "$dry" = 1 ]; then
-		echo "hyprctl keyword $1 $2"
+		echo "hyprctl eval '$expr'"
 	else
-		hyprctl keyword "$1" "$2" >/dev/null
+		hyprctl eval "$expr" >/dev/null
 	fi
 }
 

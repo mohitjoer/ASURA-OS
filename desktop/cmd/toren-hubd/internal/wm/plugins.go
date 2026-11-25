@@ -282,8 +282,8 @@ func pluginBlocks(o Overrides) []pluginBlock {
 		b.opts.set("plugin:hyprbars:bar_blur", hb.Blur)
 		if hb.Buttons {
 			b.adds = append(b.adds,
-				hlOpt{"plugin:hyprbars:hyprbars-button", "rgb(ff5f57), 12, \u00d7, hyprctl dispatch killactive"},
-				hlOpt{"plugin:hyprbars:hyprbars-button", "rgb(28c840), 12, +, hyprctl dispatch fullscreen 1"})
+				hlOpt{"plugin:hyprbars:hyprbars-button", "rgb(ff5f57), 12, \u00d7, hyprctl dispatch 'hl.dsp.window.close()'"},
+				hlOpt{"plugin:hyprbars:hyprbars-button", "rgb(28c840), 12, +, hyprctl dispatch 'hl.dsp.window.fullscreen({ mode = \"1\" })'"})
 		}
 		out = append(out, b)
 	}

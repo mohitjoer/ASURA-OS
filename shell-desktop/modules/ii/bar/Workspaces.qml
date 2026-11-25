@@ -3,6 +3,7 @@ import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.toren
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
@@ -84,9 +85,9 @@ ButtonMouseArea {
     hoverEnabled: true
     onWheel: event => {
         if (event.angleDelta.y < 0)
-            Hyprland.dispatch("workspace r+1");
+            HyprDispatch.run("workspace r+1");
         else if (event.angleDelta.y > 0)
-            Hyprland.dispatch("workspace r-1");
+            HyprDispatch.run("workspace r-1");
     }
 
     GridLayout {
@@ -200,7 +201,7 @@ ButtonMouseArea {
                     hoverEnabled: true
                     acceptedButtons: Qt.LeftButton
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: Hyprland.dispatch(`workspace ${ws.modelData}`)
+                    onClicked: HyprDispatch.run(`workspace ${ws.modelData}`)
                 }
 
                 StyledToolTip {
@@ -240,7 +241,7 @@ ButtonMouseArea {
                     for (let id of root.shownIds) {
                         if (id > maxId) maxId = id;
                     }
-                    Hyprland.dispatch(`workspace ${maxId + 1}`);
+                    HyprDispatch.run(`workspace ${maxId + 1}`);
                 }
             }
 

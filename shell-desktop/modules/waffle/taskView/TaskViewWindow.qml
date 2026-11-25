@@ -11,6 +11,7 @@ import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.modules.waffle.looks
+import qs.toren
 import "window-layout.js" as WindowLayout
 
 WMouseAreaButton {
@@ -62,14 +63,14 @@ WMouseAreaButton {
     }
 
     function closeWindow() {
-        Hyprland.dispatch(`closewindow address:${root.hyprlandClient?.address}`)
+        HyprDispatch.run(`closewindow address:${root.hyprlandClient?.address}`)
     }
 
     acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
     onClicked: event => {
         if (event.button === Qt.LeftButton) {
             GlobalStates.overviewOpen = false;
-            Hyprland.dispatch(`focuswindow address:${root.hyprlandClient?.address}`)
+            HyprDispatch.run(`focuswindow address:${root.hyprlandClient?.address}`)
             GlobalStates.overviewOpen = false;
         } else if (event.button === Qt.MiddleButton) {
             root.closeWindow();
@@ -143,7 +144,7 @@ WMouseAreaButton {
             icon.name: isPinned ? "checkmark" : "empty"
             text: Translation.tr("Show this window on all desktops")
             onTriggered: {
-                Hyprland.dispatch(`pin address:${root.hyprlandClient?.address}`);
+                HyprDispatch.run(`pin address:${root.hyprlandClient?.address}`);
             }
         }
         Action {

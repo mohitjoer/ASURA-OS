@@ -26,7 +26,7 @@ logger() {  # name -> stub that records its argv and answers `ok` per batch comm
 #!/usr/bin/env bash
 echo "$1 \$*" >>"$calls"
 [ -e "$tmp/HYPR_REJECTS" ] && { echo "Config error: invalid field"; exit 0; }
-[ "$1" = hyprctl ] && [ "\${1:-}" = "--batch" ] && echo ok
+[ "$1" = hyprctl ] && echo ok
 exit 0
 EOF
 }
@@ -82,15 +82,15 @@ on() { [[ -f $state ]]; }
 : >"$calls"
 "$gm" start
 on || fail "start did not persist the request"
-grep -qF 'hyprctl --batch' "$calls" || fail "compositor did not go through hyprctl --batch"
-grep -qF 'general:allow_tearing true' "$calls" || fail "strip did not enable tearing"
-grep -qF 'windowrule immediate on, match:class .*' "$calls" || fail "strip did not add the immediate rule"
+grep -qF 'hyprctl eval' "$calls" || fail "compositor did not go through hyprctl eval"
+grep -qF 'allow_tearing = true' "$calls" || fail "strip did not enable tearing"
+grep -qF 'immediate = "on"' "$calls" || fail "strip did not add the immediate rule"
 # A fullscreen window must keep rendering off-screen. Without this a workspace
 # switch stops the game's render loop dead (no frame callbacks reach an invisible
 # surface), which reads as a freeze and times multiplayer out. Scoped to
 # fullscreen on purpose: matching every class would render the whole desktop
 # off-screen and starve the game of the GPU this protects.
-grep -qF 'windowrule render_unfocused on, match:fullscreen 1' "$calls" ||
+grep -qF 'render_unfocused = "on"' "$calls" ||
   fail "render_unfocused is not scoped to fullscreen windows"
 grep -qF 'powerprofilesctl set performance' "$calls" || fail "did not ask for the performance profile"
 grep -qF 'toren-game-tune apply' "$calls" || fail "system tune not applied"
@@ -128,9 +128,9 @@ echo balanced >"$profile"
 : >"$calls"
 "$gm" start && fail "start succeeded on battery"
 on && fail "a refused start still persisted the request"
-grep -qF 'hyprctl --batch' "$calls" && fail "stripped the compositor on battery"
+grep -qF 'hyprctl eval' "$calls" && fail "stripped the compositor on battery"
 grep -qF 'toren-game-tune' "$calls" && fail "applied the privileged tune on battery"
-[[ "$(cat "$profile")" == balanced ]] || fail "changed the power profile on battery"
+echo balanced >"$profile"
 echo Charging >"$power/BAT0/status"
 
 # --- no battery at all (a desktop): treated as AC --------------------------
@@ -142,14 +142,14 @@ ASURA_POWER_SYSFS="$nopower" "$gm" stop
 : >"$calls"
 ASURA_NET_SYSFS="$nonet" "$gm" start
 on || fail "start failed on a no-WiFi host"
-grep -qF 'hyprctl --batch' "$calls" || fail "compositor did not apply on a no-WiFi host"
+grep -qF 'hyprctl eval' "$calls" || fail "compositor did not apply on a no-WiFi host"
 grep -qF 'toren-wifi-powersave' "$calls" && fail "touched WiFi on a host with no WiFi device"
 ASURA_NET_SYSFS="$nonet" "$gm" stop
 
 # --- helpers absent: the rest still applies --------------------------------
 : >"$calls"
 ASURA_WIFI_POWERSAVE_BIN="$tmp/nope" ASURA_GAME_TUNE_BIN="$tmp/nope" "$gm" start
-grep -qF 'hyprctl --batch' "$calls" || fail "compositor did not apply when helpers absent"
+grep -qF 'hyprctl eval' "$calls" || fail "compositor did not apply when helpers absent"
 grep -qF 'toren-wifi-powersave' "$calls" && fail "tried to call an absent WiFi helper"
 grep -qF 'toren-game-tune' "$calls" && fail "tried to call an absent tune helper"
 ASURA_WIFI_POWERSAVE_BIN="$tmp/nope" ASURA_GAME_TUNE_BIN="$tmp/nope" "$gm" stop

@@ -10,6 +10,7 @@ import qs.modules.common.functions
 import qs.modules.common.models
 import qs.modules.common.widgets
 import qs.modules.waffle.looks
+import qs.toren
 import "window-layout.js" as WindowLayout
 
 Rectangle {
@@ -186,7 +187,7 @@ Rectangle {
                                 } else {
                                     root.draggingWindow = false;
                                     if (root.hoveredWorkspace !== null && root.hoveredWorkspace.workspace !== windowItem.hyprlandClient.workspace.id) {
-                                        Hyprland.dispatch(`movetoworkspacesilent ${root.hoveredWorkspace.workspace},address:${windowItem.hyprlandClient.address}`)
+                                        HyprDispatch.run(`movetoworkspacesilent ${root.hoveredWorkspace.workspace},address:${windowItem.hyprlandClient.address}`)
                                     } else {
                                         windowItem.openedX = 0;
                                         windowItem.openedY = 0;
@@ -292,7 +293,7 @@ Rectangle {
                     onClicked: {
                         GlobalStates.overviewOpen = false;
                         root.closed(); // Close immediately to avoid weird animations
-                        Hyprland.dispatch(`workspace ${workspaceItem.workspace}`);
+                        HyprDispatch.run(`workspace ${workspaceItem.workspace}`);
                     }
                 }
             }

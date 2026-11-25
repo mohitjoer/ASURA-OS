@@ -21,6 +21,8 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
+	"toren/desktop/internal/hypr"
 )
 
 const (
@@ -180,9 +182,9 @@ func (d *UserDaemon) applyAllSettings() {
 	// 3. Hyprland dynamic rules
 	if os.Getenv("WAYLAND_DISPLAY") != "" {
 		if _, err := exec.LookPath("hyprctl"); err == nil {
-			_ = exec.Command("hyprctl", "keyword", "general:gaps_in", fmt.Sprintf("%d", cfg.GapsIn)).Run()
-			_ = exec.Command("hyprctl", "keyword", "general:gaps_out", fmt.Sprintf("%d", cfg.GapsOut)).Run()
-			_ = exec.Command("hyprctl", "keyword", "decoration:rounding", fmt.Sprintf("%d", cfg.BorderRadius)).Run()
+			_ = exec.Command("hyprctl", "eval", hypr.KeywordToLua("general:gaps_in", fmt.Sprintf("%d", cfg.GapsIn))).Run()
+			_ = exec.Command("hyprctl", "eval", hypr.KeywordToLua("general:gaps_out", fmt.Sprintf("%d", cfg.GapsOut))).Run()
+			_ = exec.Command("hyprctl", "eval", hypr.KeywordToLua("decoration:rounding", fmt.Sprintf("%d", cfg.BorderRadius))).Run()
 		}
 	}
 

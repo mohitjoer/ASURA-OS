@@ -101,7 +101,7 @@ PanelWindow {
         command: {
             var target = switcher.windows[switcher.selected]
             return target
-                ? ["hyprctl", "dispatch", "focuswindow", "address:" + target.address]
+                ? ["hyprctl", "dispatch", "hl.dsp.focus({ window = \"address:" + target.address + "\" })"]
                 : []
         }
         running: switcher.focusToken !== ""

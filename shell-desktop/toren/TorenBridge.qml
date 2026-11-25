@@ -115,17 +115,17 @@ Item {
         // ASURA's desktops are blocks of workspaces: a
         // desktop step is a workspace step, the way the bar scrolls.
         function overviewDesktop(delta: int): void {
-            Hyprland.dispatch(delta >= 0 ? "workspace r+1" : "workspace r-1");
+            HyprDispatch.run(delta >= 0 ? "workspace r+1" : "workspace r-1");
         }
 
         // Alt+Tab. The compositor cycles.
         function advanceSwitcher(): void {
-            Hyprland.dispatch("cyclenext");
-            Hyprland.dispatch("bringactivetotop");
+            HyprDispatch.run("cyclenext");
+            HyprDispatch.run("bringactivetotop");
         }
         function reverseSwitcher(): void {
-            Hyprland.dispatch("cyclenext prev");
-            Hyprland.dispatch("bringactivetotop");
+            HyprDispatch.run("cyclenext prev");
+            HyprDispatch.run("bringactivetotop");
         }
         function closeSwitcher(): void {
         }

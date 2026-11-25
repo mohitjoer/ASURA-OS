@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"toren/desktop/internal/hypr"
 )
 
 // The Hyprland provider. It is the only code allowed to run hyprctl, read
@@ -143,12 +145,10 @@ func hyprctlError(args []string, out []byte) error {
 	return fmt.Errorf("hyprctl %s: %s", strings.Join(args, " "), reply)
 }
 
-// dispatch runs one classic dispatcher: `hyprctl dispatch <name> <arg>`.
+// dispatch runs one classic dispatcher converted to Lua: `hyprctl dispatch <lua-expr>`.
 func dispatch(ctx context.Context, name string, args ...string) error {
-	argv := []string{"dispatch", name}
-	if joined := strings.Join(args, " "); joined != "" {
-		argv = append(argv, joined)
-	}
+	expr := hypr.DispatchToLua(name, args...)
+	argv := []string{"dispatch", expr}
 	out, err := hyprctl(ctx, argv...)
 	if err != nil {
 		return err
@@ -156,10 +156,11 @@ func dispatch(ctx context.Context, name string, args ...string) error {
 	return hyprctlError(argv, out)
 }
 
-// keyword applies one live config change: `hyprctl keyword <key> <value>`. The
+// keyword applies one live config change via Lua eval: `hyprctl eval '<lua-expr>'`. The
 // change lasts until the compositor rereads its config.
 func keyword(ctx context.Context, key, value string) error {
-	argv := []string{"keyword", key, value}
+	expr := hypr.KeywordToLua(key, value)
+	argv := []string{"eval", expr}
 	out, err := hyprctl(ctx, argv...)
 	if err != nil {
 		return err

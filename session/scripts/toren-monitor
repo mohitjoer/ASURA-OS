@@ -242,7 +242,7 @@ sync_gdk_scale() {
   gdk="$(monitors_json | gdk_scale_value 2>/dev/null)"
   [[ $gdk =~ ^[0-9]+$ ]] || gdk=1
   if [[ -z ${ASURA_MONITOR_JSON:-} ]]; then
-    hyprctl keyword env "GDK_SCALE,$gdk" >/dev/null 2>&1 || true
+    hyprctl eval "hl.env(\"GDK_SCALE\", \"$gdk\")" >/dev/null 2>&1 || true
   fi
   printf '%s\n' "$gdk"
 }
@@ -288,7 +288,14 @@ write_monitors_conf() {
 # a rule replaces the output's old one, so every caller passes all four fields.
 apply_monitor() {
   [[ -n ${ASURA_MONITOR_JSON:-} ]] && return 0
-  hyprctl keyword monitor "$1" >/dev/null 2>&1
+  local spec="$1"
+  local o_name o_mode o_pos o_scale
+  IFS=',' read -r o_name o_mode o_pos o_scale _ <<<"$spec"
+  if [[ "$o_mode" == "disable" ]]; then
+    hyprctl eval "hl.monitor({ output = \"$o_name\", disabled = true })" >/dev/null 2>&1 || true
+  elif [[ -n "$o_name" && -n "$o_mode" && -n "$o_pos" && -n "$o_scale" ]]; then
+    hyprctl eval "hl.monitor({ output = \"$o_name\", mode = \"$o_mode\", position = \"$o_pos\", scale = \"$o_scale\" })" >/dev/null 2>&1 || true
+  fi
 }
 
 # per-output intended mode from the generated monitors-auto.conf as a JSON object
@@ -631,7 +638,7 @@ write_monitors_explicit() {
     then ($s[0] | floor) else 1 end')"
   [[ $gdk =~ ^[0-9]+$ ]] || gdk=1
   if [[ -z ${ASURA_MONITOR_JSON:-} ]]; then
-    hyprctl keyword env "GDK_SCALE,$gdk" >/dev/null 2>&1 || true
+    hyprctl eval "hl.env(\"GDK_SCALE\", \"$gdk\")" >/dev/null 2>&1 || true
   fi
   mkdir -p "$(dirname "$monitors_conf")"
   {

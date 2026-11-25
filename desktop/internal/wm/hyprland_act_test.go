@@ -57,7 +57,7 @@ func (l *callLog) reset() {
 // hyprctl exits 0 on an invalid dispatcher. This is Hyprland 0.53, hyprlang:
 // the classic "<dispatcher> <args>" form and `keyword` for live config. The Lua
 // forms (hl.dsp.*, eval) of 0.55+ must never appear.
-func TestActEmitsHyprlangDialect(t *testing.T) {
+func TestActEmitsLuaDialect(t *testing.T) {
 	const addr = "0xdeadbeef"
 	cases := []struct {
 		name string
@@ -65,60 +65,60 @@ func TestActEmitsHyprlangDialect(t *testing.T) {
 		want []string
 	}{
 		{"window focus", []string{"window.focus", addr},
-			[]string{"dispatch focuswindow address:0xdeadbeef"}},
+			[]string{`dispatch hl.dsp.focus({ window = "address:0xdeadbeef" })`}},
 		{"window close", []string{"window.close", addr},
-			[]string{"dispatch closewindow address:0xdeadbeef"}},
+			[]string{`dispatch hl.dsp.window.close({ window = "address:0xdeadbeef" })`}},
 		{"window fullscreen focuses first", []string{"window.fullscreen", addr},
-			[]string{"dispatch focuswindow address:0xdeadbeef", "dispatch fullscreen 0"}},
+			[]string{`dispatch hl.dsp.focus({ window = "address:0xdeadbeef" })`, `dispatch hl.dsp.window.fullscreen()`}},
 		{"window float", []string{"window.float", addr},
-			[]string{"dispatch togglefloating address:0xdeadbeef"}},
+			[]string{`dispatch hl.dsp.window.float({ window = "address:0xdeadbeef" })`}},
 		{"window to workspace", []string{"window.moveToWorkspace", addr, "3"},
-			[]string{"dispatch movetoworkspace 3,address:0xdeadbeef"}},
+			[]string{`dispatch hl.dsp.window.move({ workspace = "3", window = "address:0xdeadbeef" })`}},
 		{"window to named workspace", []string{"window.moveToWorkspace", addr, "code"},
-			[]string{"dispatch movetoworkspace name:code,address:0xdeadbeef"}},
+			[]string{`dispatch hl.dsp.window.move({ workspace = "name:code", window = "address:0xdeadbeef" })`}},
 		{"app focus", []string{"app.focus", "org.quickshell"},
-			[]string{"dispatch focuswindow class:org.quickshell"}},
+			[]string{`dispatch hl.dsp.focus({ window = "class:org.quickshell" })`}},
 		{"workspace focus", []string{"workspace.focus", "9"},
-			[]string{"dispatch workspace 9"}},
+			[]string{`dispatch hl.dsp.focus({ workspace = "9" })`}},
 		{"workspace focus by name", []string{"workspace.focus", "web"},
-			[]string{"dispatch workspace name:web"}},
+			[]string{`dispatch hl.dsp.focus({ workspace = "name:web" })`}},
 		{"workspace focus special", []string{"workspace.focus", "special:magic"},
-			[]string{"dispatch workspace special:magic"}},
+			[]string{`dispatch hl.dsp.focus({ workspace = "special:magic" })`}},
 		{"workspace cycle forward", []string{"workspace.cycle", "1"},
-			[]string{"dispatch workspace r+1"}},
+			[]string{`dispatch hl.dsp.focus({ workspace = "r+1" })`}},
 		{"workspace cycle back", []string{"workspace.cycle", "-2"},
-			[]string{"dispatch workspace r-2"}},
+			[]string{`dispatch hl.dsp.focus({ workspace = "r-2" })`}},
 		{"workspace to output", []string{"workspace.moveToOutput", "9", "eDP-2"},
-			[]string{"dispatch moveworkspacetomonitor 9 eDP-2"}},
+			[]string{`dispatch hl.dsp.workspace.move({ workspace = "9", monitor = "eDP-2" })`}},
 		{"special workspace", []string{"workspace.toggleSpecial", "sharebar"},
-			[]string{"dispatch togglespecialworkspace sharebar"}},
+			[]string{`dispatch hl.dsp.workspace.toggle_special("sharebar")`}},
 		{"default special workspace", []string{"workspace.toggleSpecial"},
-			[]string{"dispatch togglespecialworkspace"}},
+			[]string{`dispatch hl.dsp.workspace.toggle_special()`}},
 		{"session exit", []string{"session.exit"},
-			[]string{"dispatch exit"}},
+			[]string{`dispatch hl.dsp.exit()`}},
 		{"output power on", []string{"output.power", "on"},
-			[]string{"dispatch dpms on"}},
+			[]string{`dispatch hl.dsp.dpms({ action = "on" })`}},
 		{"output power off", []string{"output.power", "off", "eDP-2"},
-			[]string{"dispatch dpms off eDP-2"}},
+			[]string{`dispatch hl.dsp.dpms({ action = "off", monitor = "eDP-2" })`}},
 		{"submap enter", []string{"submap.enter", "resize"},
-			[]string{"dispatch submap resize"}},
+			[]string{`dispatch hl.dsp.submap("resize")`}},
 		{"submap reset", []string{"submap.reset"},
-			[]string{"dispatch submap reset"}},
+			[]string{`dispatch hl.dsp.submap("reset")`}},
 		{"autoreload off", []string{"config.autoreload", "off"},
-			[]string{"keyword misc:disable_autoreload true"}},
+			[]string{`eval hl.config({ misc = { disable_autoreload = true } })`}},
 		{"autoreload on", []string{"config.autoreload", "on"},
-			[]string{"keyword misc:disable_autoreload false"}},
+			[]string{`eval hl.config({ misc = { disable_autoreload = false } })`}},
 		{"workspace layout", []string{"workspace.layout", "9", "master"},
-			[]string{"keyword workspace 9,layout:master"}},
+			[]string{`eval hl.workspace_rule({ workspace = "9", layout = "master" })`}},
 		{"border colours", []string{"decoration.borderColors", "#f3701e", "#0e0d0b"},
 			[]string{
-				"keyword general:col.active_border rgb(f3701e)",
-				"keyword general:col.inactive_border rgb(0e0d0b)",
+				`eval hl.config({ general = { ["col.active_border"] = "rgb(f3701e)" } })`,
+				`eval hl.config({ general = { ["col.inactive_border"] = "rgb(0e0d0b)" } })`,
 			}},
 		{"border colour, one role", []string{"decoration.borderColors", "#f3701e", "not-a-colour"},
-			[]string{"keyword general:col.active_border rgb(f3701e)"}},
+			[]string{`eval hl.config({ general = { ["col.active_border"] = "rgb(f3701e)" } })`}},
 		{"follow mouse", []string{"input.focusFollowsMouse", "2"},
-			[]string{"getoption input:follow_mouse -j", "keyword input:follow_mouse 2"}},
+			[]string{"getoption input:follow_mouse -j", `eval hl.config({ input = { follow_mouse = 2 } })`}},
 		{"cursor", []string{"cursor.set", "Bibata-Modern-Ice", "24"},
 			[]string{"setcursor Bibata-Modern-Ice 24"}},
 		{"keyboard layout", []string{"keyboard.cycleLayout"},
@@ -130,7 +130,7 @@ func TestActEmitsHyprlangDialect(t *testing.T) {
 		{"game mode off reloads", []string{"decoration.gameMode", "off"},
 			[]string{"reload"}},
 		{"output disable", []string{"output.enable", "DP-1", "off"},
-			[]string{"keyword monitor DP-1,disable"}},
+			[]string{`eval hl.monitor({ output = "DP-1", disabled = true })`}},
 	}
 
 	for _, tc := range cases {
@@ -154,22 +154,24 @@ func TestActEmitsHyprlangDialect(t *testing.T) {
 	}
 }
 
-// No emitted command may be the Lua dialect; this is the regression upstream's
-// provider would reintroduce if a case were copied across unconverted.
-func TestActNeverEmitsLua(t *testing.T) {
+// Every emitted command for dispatch or eval must be the Lua dialect.
+func TestActEmitsLua(t *testing.T) {
 	log := stubHyprctl(t, nil)
 	c := OpenNamed(ProviderHyprland)
 	c.capsOK, c.caps = true, Caps{Supports: All()}
 	for _, args := range [][]string{
 		{"window.focus", "0x1"}, {"workspace.focus", "2"}, {"output.power", "on"},
-		{"submap.reset"}, {"decoration.gameMode", "on"}, {"workspace.layout", "1", "dwindle"},
+		{"submap.reset"}, {"workspace.layout", "1", "dwindle"},
 		{"config.autoreload", "off"}, {"session.exit"},
 	} {
 		_, _ = c.ActOutput(Action(args[0]), args[1:]...)
 	}
 	for _, line := range log.all() {
-		if strings.Contains(line, "hl.") || strings.HasPrefix(line, "eval ") {
-			t.Errorf("Lua dialect reached hyprctl: %q", line)
+		if strings.HasPrefix(line, "dispatch ") && !strings.Contains(line, "hl.dsp.") {
+			t.Errorf("expected Lua dispatcher in hyprctl call: %q", line)
+		}
+		if strings.HasPrefix(line, "eval ") && !strings.Contains(line, "hl.") {
+			t.Errorf("expected Lua expression in eval call: %q", line)
 		}
 	}
 }
@@ -195,9 +197,9 @@ func TestActOutputPowerIsIdempotent(t *testing.T) {
 		args []string
 		want string
 	}{
-		{"on", []string{"on"}, "dispatch dpms on"},
-		{"off", []string{"off"}, "dispatch dpms off"},
-		{"on with monitor", []string{"on", "eDP-2"}, "dispatch dpms on eDP-2"},
+		{"on", []string{"on"}, `dispatch hl.dsp.dpms({ action = "on" })`},
+		{"off", []string{"off"}, `dispatch hl.dsp.dpms({ action = "off" })`},
+		{"on with monitor", []string{"on", "eDP-2"}, `dispatch hl.dsp.dpms({ action = "on", monitor = "eDP-2" })`},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			log := stubHyprctl(t, nil)
@@ -233,7 +235,7 @@ func TestOutputEnableKeepsLayout(t *testing.T) {
 		t.Fatal(err)
 	}
 	got := log.all()
-	want := "keyword monitor DP-1,2560x1440@143.91,1920x0,1.25"
+	want := `eval hl.monitor({ output = "DP-1", mode = "2560x1440@143.91", position = "1920x0", scale = "1.25" })`
 	if got[len(got)-1] != want {
 		t.Errorf("enable rule = %q, want %q", got[len(got)-1], want)
 	}
@@ -244,7 +246,7 @@ func TestOutputEnableKeepsLayout(t *testing.T) {
 		t.Fatal(err)
 	}
 	got = log.all()
-	if got[len(got)-1] != "keyword monitor HDMI-A-1,preferred,auto,1" {
+	if got[len(got)-1] != `eval hl.monitor({ output = "HDMI-A-1", mode = "preferred", position = "auto", scale = "1" })` {
 		t.Errorf("unknown output rule = %q", got[len(got)-1])
 	}
 }
@@ -350,8 +352,8 @@ func TestActSummonRaisesByTitle(t *testing.T) {
 		}
 	}
 	want := []string{
-		"dispatch movetoworkspacesilent 5,address:0xbbb",
-		"dispatch focuswindow address:0xbbb",
+		`dispatch hl.dsp.window.move({ workspace = "5", follow = false, window = "address:0xbbb" })`,
+		`dispatch hl.dsp.focus({ window = "address:0xbbb" })`,
 	}
 	if strings.Join(dispatched, "\n") != strings.Join(want, "\n") {
 		t.Errorf("dispatches\n got: %q\nwant: %q", dispatched, want)
@@ -404,7 +406,7 @@ func TestScreenShaderResolvesNamesToFiles(t *testing.T) {
 	if err := c.Act(ActionScreenShader, "warm"); err != nil {
 		t.Fatal(err)
 	}
-	if got := log.all(); len(got) != 1 || got[0] != "keyword decoration:screen_shader "+filepath.Join(dir, "warm.glsl") {
+	if got := log.all(); len(got) != 1 || got[0] != `eval hl.config({ decoration = { screen_shader = "`+filepath.Join(dir, "warm.glsl")+`" } })` {
 		t.Errorf("shader keyword = %q", got)
 	}
 
@@ -412,7 +414,7 @@ func TestScreenShaderResolvesNamesToFiles(t *testing.T) {
 	if err := c.Act(ActionScreenShader); err != nil {
 		t.Fatal(err)
 	}
-	if got := log.all(); len(got) != 1 || got[0] != "keyword decoration:screen_shader [[EMPTY]]" {
+	if got := log.all(); len(got) != 1 || got[0] != `eval hl.config({ decoration = { screen_shader = "[[EMPTY]]" } })` {
 		t.Errorf("clearing the shader must send hyprlang's empty sentinel, got %q", got)
 	}
 

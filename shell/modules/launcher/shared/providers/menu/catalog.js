@@ -256,7 +256,7 @@ var CATALOG = [
     category: "System",
     icon: "system-log-out",
     desc: "End current Wayland session",
-    exec: ["hyprctl", "dispatch", "exit"],
+    exec: ["hyprctl", "dispatch", "hl.dsp.exit()"],
   },
   {
     id: "system-reboot",

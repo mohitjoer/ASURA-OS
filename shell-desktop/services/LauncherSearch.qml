@@ -3,6 +3,7 @@ pragma Singleton
 import qs.modules.common
 import qs.modules.common.models
 import qs.modules.common.functions
+import qs.toren
 import QtQuick
 import Qt.labs.folderlistmodel
 import Quickshell
@@ -109,7 +110,7 @@ Singleton {
         {
             action: "wallpaper",
             execute: () => {
-                Hyprland.dispatch(`global quickshell:wallpaperSelectorToggle`)
+                HyprDispatch.run(`global quickshell:wallpaperSelectorToggle`)
             }
         },
         {

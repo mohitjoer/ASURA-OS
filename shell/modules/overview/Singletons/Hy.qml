@@ -309,25 +309,25 @@ Singleton {
         const id = Number(ws);
         if (!(id > 0))
             return;
-        root.runAct(["hyprctl", "dispatch", "workspace", String(id)]);
+        root.runAct(["hyprctl", "dispatch", 'hl.dsp.focus({ workspace = "' + String(id) + '" })']);
     }
     function focusWindow(id) {
         const a = root._addrOf(id);
         if (!a)
             return;
-        root.runAct(["hyprctl", "dispatch", "focuswindow", a]);
+        root.runAct(["hyprctl", "dispatch", 'hl.dsp.focus({ window = "' + a + '" })']);
     }
     function closeWindow(id) {
         const a = root._addrOf(id);
         if (!a)
             return;
-        root.runAct(["hyprctl", "dispatch", "closewindow", a]);
+        root.runAct(["hyprctl", "dispatch", 'hl.dsp.window.close({ window = "' + a + '" })']);
     }
     function moveWindowToWorkspace(id, ws) {
         const a = root._addrOf(id);
         const wid = Number(ws);
         if (!a || !(wid > 0))
             return;
-        root.runAct(["hyprctl", "dispatch", "movetoworkspacesilent", wid + "," + a]);
+        root.runAct(["hyprctl", "dispatch", 'hl.dsp.window.move({ workspace = "' + wid + '", follow = false, window = "' + a + '" })']);
     }
 }

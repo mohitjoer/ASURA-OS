@@ -114,6 +114,10 @@ modules/waffle/looks/WAppIcon.qml
 matugen/templates/gtk-3.0/gtk.css
 matugen/templates/gtk-4.0/gtk.css
 modules/settings/QuickConfig.qml
+modules/ii/overview/OverviewWidget.qml
+modules/ii/sidebarLeft/anime/BooruImage.qml
+modules/waffle/taskView/TaskViewContent.qml
+modules/waffle/taskView/TaskViewWindow.qml
 "
 
 log() { printf '%s\n' "$*" >&2; }

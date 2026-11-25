@@ -154,7 +154,7 @@ func run(name string, args ...string) ([]byte, error) {
 // argument entirely. Toren ships 0.53.3, where this is correct — see
 // system/packages.yaml.
 func Focus(address string) error {
-	_, err := run("hyprctl", "dispatch", "focuswindow", "address:"+address)
+	_, err := run("hyprctl", "dispatch", DispatchToLua("focuswindow", "address:"+address))
 	return err
 }
 

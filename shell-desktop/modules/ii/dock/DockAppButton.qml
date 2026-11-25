@@ -3,6 +3,7 @@
 import qs.services
 import qs.modules.common
 import qs.modules.common.functions
+import qs.toren
 import Qt5Compat.GraphicalEffects
 import QtQuick
 import QtQuick.Layouts
@@ -75,7 +76,7 @@ DockButton {
     function hyprExec(argv) {
         const line = argv.map(root.shellQuote).join(" ");
         console.log("[dock] launching:", line);
-        Hyprland.dispatch("exec " + line);
+        HyprDispatch.run("exec " + line);
     }
 
     function launchApp() {

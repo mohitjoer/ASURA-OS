@@ -3,6 +3,7 @@ import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.common.utils
 import qs.modules.common.widgets
+import qs.toren
 import QtQml
 import QtQuick
 import QtQuick.Controls
@@ -147,9 +148,9 @@ Button {
                             buttonText: Translation.tr("Open file link")
                             onClicked: {
                                 root.showActions = false
-                                Hyprland.dispatch("exec hyprctl keyword cursor:no_warps true")
+                                HyprDispatch.run("exec hyprctl keyword cursor:no_warps true")
                                 Qt.openUrlExternally(root.imageData.file_url)
-                                Hyprland.dispatch("exec hyprctl keyword cursor:no_warps false")
+                                HyprDispatch.run("exec hyprctl keyword cursor:no_warps false")
                             }
                         }
                         MenuButton {
@@ -160,9 +161,9 @@ Button {
                             enabled: root.imageData.source && root.imageData.source.length > 0
                             onClicked: {
                                 root.showActions = false
-                                Hyprland.dispatch("exec hyprctl keyword cursor:no_warps true")
+                                HyprDispatch.run("exec hyprctl keyword cursor:no_warps true")
                                 Qt.openUrlExternally(root.imageData.source)
-                                Hyprland.dispatch("exec hyprctl keyword cursor:no_warps false")
+                                HyprDispatch.run("exec hyprctl keyword cursor:no_warps false")
                             }
                         }
                         MenuButton {
