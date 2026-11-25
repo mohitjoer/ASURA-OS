@@ -19,7 +19,7 @@ Singleton {
     // where the Quick / Studio / Edit actions live.
     property bool chooserOpen: false
     // studio capture records with gpu-screen-recorder (below) and hands the clip
-    // to the ryomotion editor; our island is the toolbar and drives start/stop.
+    // to the motion editor; our island is the toolbar and drives start/stop.
     property bool studioActive: false
     readonly property bool anyActive: root.active || root.studioActive
     // owning backend: "gsr" | "wf" | "" when idle.
@@ -33,7 +33,7 @@ Singleton {
     readonly property string script: "asura-cmd-screenrecord"
 
     // studio uses gpu-screen-recorder + a cursor track (this wrapper), then opens
-    // the clip in the ryomotion editor.
+    // the clip in the motion editor.
     readonly property string studioScript: "asura-cmd-studiorecord"
 
     // region capture: the box the user drew as gsr's "WxH+X+Y" (logical coords),
@@ -124,8 +124,8 @@ Singleton {
 
     // Remembered capture options the record island's chooser and the capture card
     // both read, persisted to record.json: the desktop-audio / mic toggles and
-    // "edit after" -- when a Quick recording ends it opens the clip in ryomotion.
-    // Studio always routes through ryomotion, so it ignores editMode. Shape
+    // "edit after" -- when a Quick recording ends it opens the clip in the motion editor.
+    // Studio always routes through asura-motion, so it ignores editMode. Shape
     // mirrors Flags: watch for outside edits, write back on change, seed once.
     property alias optDesktopAudio: recPrefs.desktopAudio
     property alias optMic: recPrefs.mic
@@ -184,7 +184,7 @@ Singleton {
         return a;
     }
 
-    // edit-after: when a Quick recording ends, hand the clip to ryomotion. Latched
+    // edit-after: when a Quick recording ends, hand the clip to asura-motion. Latched
     // at start so a mid-capture toggle can't retarget it; Studio never uses it.
     readonly property string editScript: "asura-cmd-edit-recording"
     property bool pendingEdit: false
@@ -265,7 +265,7 @@ Singleton {
             Quickshell.execDetached([root.discordScript]);
             root.pendingDiscord = false;
         }
-        // edit-after: open the just-finished Quick clip in ryomotion; the script
+        // edit-after: open the just-finished Quick clip in asura-motion; the script
         // waits for the mp4 to finalise before launching the editor.
         if (root.pendingEdit) {
             Quickshell.execDetached([root.editScript]);
@@ -280,7 +280,7 @@ Singleton {
         root.paused = !root.paused;
     }
     // studio: record with gpu-screen-recorder + a cursor track, then open the clip
-    // in the ryomotion editor (its auto-zoom reads the cursor track we synthesise).
+    // in the motion editor (its auto-zoom reads the cursor track we synthesise).
     // Tracked so our stop can signal the wrapper; anyActive keeps the island up
     // until the gsr poll confirms the capture.
     function startStudio(desktopAudio, mic, regionGeom) {

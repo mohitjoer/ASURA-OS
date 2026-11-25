@@ -1,5 +1,5 @@
 #!/bin/sh
-# Asura OS journalctl compatibility bridge for runit/svlogd
+# Toren Linux journalctl compatibility bridge for runit/svlogd
 
 UNIT=""
 FOLLOW=0
@@ -27,7 +27,7 @@ while [ $# -gt 0 ]; do
             shift
             ;;
         --help|-h)
-            echo "journalctl [OPTIONS...] (Asura OS runit/svlogd compatibility shim)"
+            echo "journalctl [OPTIONS...] (Toren Linux runit/svlogd compatibility shim)"
             echo "  -u, --unit <name>    Show logs for specified service"
             echo "  -f, --follow         Follow log output in real time"
             echo "  -n, --lines <num>    Number of journal entries to show (default: 100)"
@@ -53,14 +53,15 @@ if [ -n "$UNIT" ]; then
         exit 0
     fi
 else
-    # Global messages fallback
-    if [ -f "/var/log/messages" ]; then
-        if [ "$FOLLOW" -eq 1 ]; then
-            exec tail -f -n "$LINES" "/var/log/messages"
-        else
-            exec tail -n "$LINES" "/var/log/messages"
+    # Global messages fallback: prefer socklog (kernel + daemon messages)
+    for logf in /var/log/socklog/kernel/current /var/log/socklog/unix/current /var/log/socklog/current /var/log/messages; do
+        if [ -f "$logf" ]; then
+            if [ "$FOLLOW" -eq 1 ]; then
+                exec tail -f -n "$LINES" "$logf"
+            else
+                exec tail -n "$LINES" "$logf"
+            fi
         fi
-    else
-        dmesg | tail -n "$LINES"
-    fi
+    done
+    dmesg | tail -n "$LINES"
 fi

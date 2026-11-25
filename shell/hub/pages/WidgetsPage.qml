@@ -35,7 +35,8 @@ Item {
         "aioEnabled", "aioStyle", "aioScale", "aioOpacity", "aioAnchor", "aioX", "aioY", "aioLocked",
         "statsEnabled", "statsScale", "statsOpacity", "statsAnchor", "statsX", "statsY", "statsLocked",
         "weatherEnabled", "weatherDesign", "weatherScale", "weatherOpacity", "weatherAnchor", "weatherX", "weatherY", "weatherLocked",
-        "notesEnabled", "notesScale", "notesOpacity", "notesWidth", "notesHeight", "notesAnchor", "notesX", "notesY", "notesLocked"
+        "notesEnabled", "notesScale", "notesOpacity", "notesWidth", "notesHeight", "notesAnchor", "notesX", "notesY", "notesLocked",
+        "batteryEnabled", "batteryDesign", "batteryScale", "batteryAnchor", "batteryX", "batteryY", "batteryLocked", "batteryOpacity", "batteryBg", "batteryRadius", "batteryColor", "batteryColor2", "batteryGradient"
     ]
 
     // Factory values mirror the wallpaper clock's canonical Config defaults.
@@ -58,7 +59,11 @@ Item {
         "weatherEnabled": false, "weatherDesign": "compact", "weatherScale": 1.0, "weatherOpacity": 1.0,
         "weatherAnchor": "top-right", "weatherX": 80, "weatherY": 80, "weatherLocked": false,
         "notesEnabled": false, "notesScale": 1.0, "notesOpacity": 1.0, "notesWidth": 260, "notesHeight": 180,
-        "notesAnchor": "right", "notesX": 80, "notesY": 80, "notesLocked": false
+        "notesAnchor": "right", "notesX": 80, "notesY": 80, "notesLocked": false,
+        "batteryEnabled": true, "batteryDesign": "default", "batteryScale": 1.0,
+        "batteryAnchor": "top-right", "batteryX": 80, "batteryY": 80, "batteryLocked": false,
+        "batteryOpacity": 1.0, "batteryBg": "none", "batteryRadius": 8,
+        "batteryColor": "", "batteryColor2": "", "batteryGradient": false
     })
 
     // Scale and opacity persist as ratios; the sheet edits integer percents.

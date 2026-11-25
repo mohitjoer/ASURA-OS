@@ -301,7 +301,7 @@ func TestSweepStillRefusesARealMACAmongIdentifiers(t *testing.T) {
 // policy says must pass.
 func TestSweepAllowsACleanReport(t *testing.T) {
 	rendered := []byte(strings.Join([]string{
-		"# Asura hardware report",
+		"# Toren hardware report",
 		"dmi:",
 		"  sys_vendor: ASUSTeK COMPUTER INC.",
 		"  product_name: ASUS TUF Gaming F15 FX507ZC4_FX507ZC4",
@@ -511,5 +511,26 @@ func TestReaderPolicyCoversTheClassifiedFields(t *testing.T) {
 		if class != probe.DMIClassDuplicate {
 			t.Errorf("%q is %q, want %q", name, class, probe.DMIClassDuplicate)
 		}
+	}
+}
+
+// TestSweepShortHostnameWholeWord covers a short hostname: it must not trip on
+// those letters inside other words, but must still refuse a real occurrence.
+func TestSweepShortHostnameWholeWord(t *testing.T) {
+	context := Context{Hostname: "vm"}
+
+	if findings := Verify([]byte("summary: overview of the system\n"), context); len(findings) != 0 {
+		t.Errorf("short hostname matched inside another word: %v", findings)
+	}
+
+	findings := Verify([]byte("hostname: vm\n"), context)
+	found := false
+	for _, f := range findings {
+		if f.Rule == "hostname" {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("real short hostname was allowed through: %v", findings)
 	}
 }

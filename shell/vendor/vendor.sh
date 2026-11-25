@@ -158,6 +158,11 @@ modules/common/utils/ScreenshotAction.qml
 modules/ii/regionSelector/RegionSelector.qml
 modules/ii/sessionScreen/SessionScreen.qml
 modules/ii/screenCorners/ScreenCorners.qml
+modules/common/functions/Session.qml
+modules/ii/overview/SearchItem.qml
+modules/ii/overview/SearchWidget.qml
+modules/ii/sidebarRight/quickToggles/androidStyle/AndroidQuickToggleButton.qml
+services/AppSearch.qml
 GlobalStates.qml
 "
 

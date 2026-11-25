@@ -21,7 +21,7 @@ Singleton {
     readonly property string mark: brandAdapter.markText.length > 0 ? brandAdapter.markText : "A"
     readonly property string markSource: brandAdapter.markImage
     readonly property bool markTint: brandAdapter.markTint
-    readonly property string brandName: brandAdapter.name.length > 0 ? brandAdapter.name : "Asura"
+    readonly property string brandName: brandAdapter.name.length > 0 ? brandAdapter.name : "Toren"
 
 
     // brand identity master (mark + name), the same ~/.config/asura/brand.json the
@@ -40,7 +40,7 @@ Singleton {
             property string markText: "A"
             property string markImage: ""
             property bool markTint: true
-            property string name: "Asura"
+            property string name: "Toren"
         }
     }
 }

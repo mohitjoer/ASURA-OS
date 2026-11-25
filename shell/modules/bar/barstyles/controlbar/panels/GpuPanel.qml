@@ -251,7 +251,7 @@ PanelWindow {
                 Behavior on color { ColorAnimation { duration: 120 } }
                 UiText {
                     anchors.centerIn: parent
-                    text: I18n.tr("Open Resource Monitor")
+                    text: I18n.tr("Open btop")
                     color: root.paper
                     font.family: root.mono
                     font.pixelSize: 11
@@ -273,6 +273,6 @@ PanelWindow {
 
     Process {
         id: sysmonRunner
-        command: ["asura-sysmon"]
+        command: ["asura-app", "terminal", "--", "btop"]
     }
 }

@@ -1,0 +1,26 @@
+#!/bin/sh
+# Tells the desktop when an ASURA update is available or a reboot would
+# finish one (asura notify-updates), once per new update or kernel. Checks 10
+# minutes after login, then every 6 hours. It only reads: nothing is installed
+# until the user runs asura update.
+exec 2>&1
+
+LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/asura"
+mkdir -p "$LOG_DIR"
+exec >>"$LOG_DIR/asura-updates.log" 2>&1
+
+# The live ISO has nothing to update.
+if [ -f /etc/asura-live ] || grep -qw "boot=live" /proc/cmdline 2>/dev/null; then
+	exec sleep infinity
+fi
+
+RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+if [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ] && [ -S "$RUNTIME_DIR/bus" ]; then
+	export DBUS_SESSION_BUS_ADDRESS="unix:path=$RUNTIME_DIR/bus"
+fi
+
+sleep 600
+while :; do
+	asura notify-updates || true
+	sleep 21600
+done

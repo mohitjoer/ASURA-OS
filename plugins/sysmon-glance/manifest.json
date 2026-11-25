@@ -1,0 +1,55 @@
+{
+  "id": "sysmon-glance",
+  "name": "Sysmon Glance",
+  "version": "1.0.0",
+  "author": "mohitjoer <mohitjoe.r@gmail.com>",
+  "description": "Real-time CPU, RAM, GPU, and thermal telemetry HUD for the bar and desktop.",
+  "license": "GPL-3.0",
+  "official": false,
+  "hosts": [
+    "topbarGlyph",
+    "desktopWidget"
+  ],
+  "entryPoints": {
+    "main": "service/Main.qml",
+    "content": "content/Widget.qml",
+    "panel": "content/Panel.qml"
+  },
+  "panel": {
+    "width": 320
+  },
+  "files": [],
+  "capabilities": {
+    "densities": [
+      "glyph",
+      "compact"
+    ]
+  },
+  "defaults": {
+    "host": "topbarGlyph",
+    "label": "Sysmon Glance"
+  },
+  "dependencies": {
+    "commands": []
+  },
+  "metadata": {
+    "settings": [
+      {
+        "key": "showTemp",
+        "type": "toggle",
+        "label": "Display CPU Temperature",
+        "group": "Metrics",
+        "default": true
+      },
+      {
+        "key": "pollIntervalSec",
+        "type": "int",
+        "label": "Poll Interval (seconds)",
+        "group": "Metrics",
+        "min": 1,
+        "max": 10,
+        "default": 2
+      }
+    ]
+  }
+}

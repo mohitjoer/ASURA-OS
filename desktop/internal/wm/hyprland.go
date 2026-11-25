@@ -17,7 +17,7 @@ import (
 //
 // Hyprland here is 0.53, whose configuration is hyprlang: `hyprctl dispatch`
 // takes the classic "<dispatcher> <args>" form and `hyprctl keyword` changes a
-// value live. Ryoku's provider spoke the Lua API of 0.55+ (hl.dsp.*, eval);
+// value live. upstream's provider spoke the Lua API of 0.55+ (hl.dsp.*, eval);
 // none of that exists on this compositor, which is why every action below is a
 // translation and not a copy.
 
@@ -225,7 +225,7 @@ var hyprlandWindowRuleActions = []string{
 }
 
 // hyprlandNightLightProcess is the gamma client the night light runs. hyprsunset,
-// which Ryoku used here, is not in Ubuntu's archive; gammastep speaks the same
+// which upstream used here, is not in Ubuntu's archive; gammastep speaks the same
 // wlr-gamma-control protocol Hyprland implements. Its comm name fits /proc's 15
 // characters, so an exact compare is right.
 const hyprlandNightLightProcess = "gammastep"

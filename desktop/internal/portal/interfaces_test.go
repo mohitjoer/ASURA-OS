@@ -50,7 +50,7 @@ func TestCameraIsNotABackendInterface(t *testing.T) {
 	// dispatcher's Camera portal asks for.
 	found := false
 	for _, want := range required {
-		if want.section == "org.gnome.impl.portal.Access" {
+		if want.section == "org.freedesktop.impl.portal.Access" {
 			found = true
 			if want.backend != "gtk" {
 				t.Errorf("Access names %q; only gtk is required to supply it",

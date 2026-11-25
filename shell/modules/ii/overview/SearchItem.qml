@@ -34,17 +34,45 @@ RippleButton {
     property string materialSymbol: entry.iconType === LauncherSearchResult.IconType.Material ? entry?.iconName ?? "" : ""
     property string cliphistRawString: entry?.rawValue ?? ""
     property bool blurImage: entry?.blurImage ?? false
+
+    property string itemSubtitle: {
+        if (entry?.genericName && entry.genericName.length > 0 && entry.genericName.toLowerCase() !== root.itemName.toLowerCase()) {
+            return entry.genericName;
+        }
+        if (entry?.comment && entry.comment.length > 0 && entry.comment.length < 60) {
+            return entry.comment;
+        }
+        const name = (root.itemName || "").toLowerCase();
+        if (name.includes("print")) return Translation.tr("Print & CUPS Management");
+        if (name.includes("nvim") || name.includes("neovim")) return Translation.tr("Vim-Fork Terminal Code Editor");
+        if (name.includes("opencode")) return Translation.tr("Terminal Development Environment");
+        if (name.includes("resource monitor") || name.includes("btop")) return Translation.tr("System Resource Monitor & Task Manager");
+        if (name.includes("thunar preferences")) return Translation.tr("File Manager Configuration");
+        if (name.includes("thunar")) return Translation.tr("Fast File Manager");
+        if (name.includes("removable drives")) return Translation.tr("Media & Storage Device Manager");
+        if (name.includes("volume") || name.includes("pavucontrol")) return Translation.tr("Audio & Mixer Settings");
+        if (name.includes("mpv")) return Translation.tr("High Performance Media Player");
+        if (name.includes("asura vm") || name.includes("toren vm")) return Translation.tr("Virtual Machine Manager");
+        if (name.includes("asura store") || name.includes("toren store")) return Translation.tr("App & Package Store");
+        if (name.includes("asura settings") || name.includes("toren settings")) return Translation.tr("System Settings & Rice Hub");
+        if (name.includes("install asura") || name.includes("install toren")) return Translation.tr("Live OS Installer");
+        if (name.includes("network")) return Translation.tr("Network Configuration & VPN");
+        if (root.itemType && root.itemType !== Translation.tr("App") && root.itemType !== "App") {
+            return root.itemType;
+        }
+        return Translation.tr("Application");
+    }
     
     visible: root.entryShown
-    property int horizontalMargin: 10
+    property int horizontalMargin: 4
     property int buttonHorizontalPadding: 10
     property int buttonVerticalPadding: 6
     property bool keyboardDown: false
     readonly property bool selected: (root.hovered || root.focus)
 
-    implicitHeight: rowLayout.implicitHeight + root.buttonVerticalPadding * 2
+    implicitHeight: Math.max(50, rowLayout.implicitHeight + root.buttonVerticalPadding * 2)
     implicitWidth: rowLayout.implicitWidth + root.buttonHorizontalPadding * 2
-    buttonRadius: Appearance.rounding.normal
+    buttonRadius: 10
     colBackground: (root.down || root.keyboardDown) ? Appearance.colors.colPrimaryContainerActive : 
         (selected ? Appearance.colors.colPrimaryContainer : 
         ColorUtils.transparentize(Appearance.colors.colPrimaryContainer, 1))
@@ -129,35 +157,133 @@ RippleButton {
 
     RowLayout {
         id: rowLayout
-        spacing: iconLoader.sourceComponent === null ? 0 : 10
+        spacing: 12
         anchors.fill: parent
         anchors.leftMargin: root.horizontalMargin + root.buttonHorizontalPadding
         anchors.rightMargin: root.horizontalMargin + root.buttonHorizontalPadding
 
-        // Icon
-        Loader {
-            id: iconLoader
-            active: true
-            sourceComponent: switch(root.iconType) {
-                case LauncherSearchResult.IconType.Material:
-                    return materialSymbolComponent
-                case LauncherSearchResult.IconType.Text:
-                    return bigTextComponent
-                case LauncherSearchResult.IconType.System:
-                    return iconImageComponent
-                case LauncherSearchResult.IconType.None:
-                    return null
-                default:
-                    return null
+        // Sleek Squircle Icon Frame for uniform alignment
+        Rectangle {
+            id: iconFrame
+            Layout.alignment: Qt.AlignVCenter
+            implicitWidth: 38
+            implicitHeight: 38
+            radius: 8
+            color: root.selected
+                ? ColorUtils.transparentize(Appearance.colors.colOnPrimaryContainer, 0.9)
+                : Appearance.colors.colLayer1
+            border.width: 1
+            border.color: root.selected
+                ? ColorUtils.transparentize(Appearance.colors.colOnPrimaryContainer, 0.8)
+                : Appearance.colors.colLayer0Border
+
+            Loader {
+                id: iconLoader
+                anchors.centerIn: parent
+                active: true
+                sourceComponent: switch(root.iconType) {
+                    case LauncherSearchResult.IconType.Material:
+                        return materialSymbolComponent
+                    case LauncherSearchResult.IconType.Text:
+                        return bigTextComponent
+                    case LauncherSearchResult.IconType.System:
+                        return iconImageComponent
+                    case LauncherSearchResult.IconType.None:
+                        return null
+                    default:
+                        return null
+                }
             }
         }
 
         Component {
             id: iconImageComponent
-            IconImage {
-                source: Quickshell.iconPath(root.iconName, "image-missing")
-                width: 35
-                height: 35
+            Item {
+                implicitWidth: 26
+                implicitHeight: 26
+
+                readonly property string resolvedIconPath: {
+                    if (!root.iconName || root.iconName.length === 0) return "";
+                    if (root.iconName.startsWith("/") || root.iconName.startsWith("file://")) {
+                        return root.iconName;
+                    }
+
+                    // Check local shell assets first
+                    let localAsset = Quickshell.shellPath("assets/icons/" + root.iconName + ".svg");
+                    if (localAsset && localAsset.length > 0) {
+                        return "file://" + localAsset;
+                    }
+
+                    let guess = AppSearch.guessIcon(root.iconName);
+                    if (guess && guess.length > 0 && guess !== root.iconName && guess !== "image-missing") {
+                        let localGuess = Quickshell.shellPath("assets/icons/" + guess + ".svg");
+                        if (localGuess && localGuess.length > 0) {
+                            return "file://" + localGuess;
+                        }
+                    }
+
+                    if (AppSearch.iconExists(root.iconName)) {
+                        return Quickshell.iconPath(root.iconName);
+                    }
+                    if (guess && guess.length > 0 && guess !== root.iconName && guess !== "image-missing" && AppSearch.iconExists(guess)) {
+                        return Quickshell.iconPath(guess);
+                    }
+
+                    const fallbacks = {
+                        "computer": ["asura-vm", "virtualbox", "system-run", "utilities-terminal", "application-x-executable"],
+                        "preferences-system": ["asura-settings", "asura-hub", "org.gnome.Settings", "system-run", "application-x-executable"],
+                        "preferences-system-network": ["network-wired", "network-workgroup", "network-wireless", "preferences-system", "application-x-executable"],
+                        "nm-connection-editor": ["preferences-system-network", "network-wired"],
+                        "utilities-terminal": ["ghostty", "terminal", "x-terminal-emulator", "system-run"],
+                        "utilities-system-monitor": ["btop", "system-run", "utilities-terminal"]
+                    };
+                    const list = fallbacks[root.iconName] || [];
+                    for (let fb of list) {
+                        let localFb = Quickshell.shellPath("assets/icons/" + fb + ".svg");
+                        if (localFb && localFb.length > 0) {
+                            return "file://" + localFb;
+                        }
+                        if (AppSearch.iconExists(fb)) {
+                            return Quickshell.iconPath(fb);
+                        }
+                    }
+                    if (AppSearch.iconExists("application-x-executable")) {
+                        return Quickshell.iconPath("application-x-executable");
+                    }
+                    return "";
+                }
+
+                Image {
+                    id: iconImg
+                    anchors.fill: parent
+                    source: parent.resolvedIconPath
+                    sourceSize.width: 32
+                    sourceSize.height: 32
+                    visible: parent.resolvedIconPath.length > 0 && status === Image.Ready
+                }
+
+                MaterialSymbol {
+                    anchors.centerIn: parent
+                    visible: !iconImg.visible
+                    iconSize: 22
+                    color: root.colForeground
+                    text: {
+                        const name = (root.iconName || "").toLowerCase();
+                        if (name.includes("vm") || name.includes("computer") || name.includes("virtual")) return "computer";
+                        if (name.includes("setting") || name.includes("preferences") || name.includes("hub")) return "settings";
+                        if (name.includes("network") || name.includes("wifi") || name.includes("connection")) return "lan";
+                        if (name.includes("terminal") || name.includes("console") || name.includes("opencode")) return "terminal";
+                        if (name.includes("monitor") || name.includes("btop") || name.includes("sysmon") || name.includes("resource")) return "speed";
+                        if (name.includes("edit") || name.includes("text") || name.includes("nvim") || name.includes("zed") || name.includes("code")) return "edit_note";
+                        if (name.includes("store") || name.includes("shop") || name.includes("market")) return "shopping_bag";
+                        if (name.includes("audio") || name.includes("sound") || name.includes("music") || name.includes("volume")) return "volume_up";
+                        if (name.includes("video") || name.includes("movie") || name.includes("mpv")) return "movie";
+                        if (name.includes("image") || name.includes("photo") || name.includes("draw")) return "image";
+                        if (name.includes("print")) return "print";
+                        if (name.includes("usb") || name.includes("media") || name.includes("drive")) return "usb";
+                        return "apps";
+                    }
+                }
             }
         }
 
@@ -165,7 +291,7 @@ RippleButton {
             id: materialSymbolComponent
             MaterialSymbol {
                 text: root.materialSymbol
-                iconSize: 30
+                iconSize: 22
                 color: root.colForeground
             }
         }
@@ -179,32 +305,29 @@ RippleButton {
             }
         }
 
-        // Main text
+        // Main text with professional two-line hierarchy
         ColumnLayout {
             id: contentColumn
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignVCenter
-            spacing: 0
-            StyledText {
-                font.pixelSize: Appearance.font.pixelSize.smaller
-                color: root.selected ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colSubtext
-                visible: root.itemType && root.itemType != Translation.tr("App")
-                text: root.itemType
-            }
+            spacing: 2
+
             RowLayout {
+                spacing: 6
+                Layout.fillWidth: true
+
                 Loader { // Checkmark for copied clipboard entry
                     visible: itemName == Quickshell.clipboardText && root.cliphistRawString
                     active: itemName == Quickshell.clipboardText && root.cliphistRawString
                     sourceComponent: Rectangle {
-                        implicitWidth: activeText.implicitHeight
-                        implicitHeight: activeText.implicitHeight
-                        radius: Appearance.rounding.full
+                        implicitWidth: 16
+                        implicitHeight: 16
+                        radius: 8
                         color: Appearance.colors.colPrimary
                         MaterialSymbol {
-                            id: activeText
                             anchors.centerIn: parent
                             text: "check"
-                            font.pixelSize: Appearance.font.pixelSize.normal
+                            iconSize: 11
                             color: Appearance.m3colors.m3onPrimary
                         }
                     }
@@ -213,15 +336,16 @@ RippleButton {
                     model: root.query == root.itemName ? [] : root.urls
                     Favicon {
                         required property var modelData
-                        size: parent.height
+                        size: 16
                         url: modelData
                     }
                 }
                 StyledText { // Item name/content
                     Layout.fillWidth: true
                     id: nameText
-                    textFormat: Text.StyledText // RichText also works, but StyledText ensures elide work
-                    font.pixelSize: Appearance.font.pixelSize.small
+                    textFormat: Text.StyledText
+                    font.pixelSize: Appearance.font.pixelSize.normal
+                    font.weight: root.selected ? Font.DemiBold : Font.Normal
                     font.family: Appearance.font.family[root.fontType]
                     color: root.colForeground
                     horizontalAlignment: Text.AlignLeft
@@ -229,6 +353,18 @@ RippleButton {
                     text: root.selected ? StringUtils.escapeHtml(root.itemName) : root.displayContent
                 }
             }
+
+            StyledText {
+                font.pixelSize: Appearance.font.pixelSize.smallest
+                color: root.selected
+                    ? ColorUtils.transparentize(root.colForeground, 0.3)
+                    : Appearance.colors.colSubtext
+                visible: root.itemSubtitle.length > 0
+                elide: Text.ElideRight
+                Layout.fillWidth: true
+                text: root.itemSubtitle
+            }
+
             Loader { // Clipboard image preview
                 active: root.cliphistRawString && Cliphist.entryIsImage(root.cliphistRawString)
                 sourceComponent: CliphistImage {
@@ -241,53 +377,90 @@ RippleButton {
             }
         }
 
-        // Action text
-        StyledText {
-            Layout.fillWidth: false
-            visible: root.selected
-            id: clickAction
-            font.pixelSize: Appearance.font.pixelSize.normal
-            color: Appearance.colors.colOnPrimaryContainer
-            horizontalAlignment: Text.AlignRight
-            text: root.itemClickActionName
+        // Action badge (visible on active item when no custom desktop actions)
+        Rectangle {
+            id: returnActionBadge
+            visible: root.selected && ((root.entry?.actions?.length ?? 0) === 0)
+            Layout.alignment: Qt.AlignVCenter
+            implicitWidth: actionPillRow.implicitWidth + 14
+            implicitHeight: 24
+            radius: 6
+            color: ColorUtils.transparentize(Appearance.colors.colPrimary, 0.85)
+            border.width: 1
+            border.color: ColorUtils.transparentize(Appearance.colors.colPrimary, 0.6)
+
+            RowLayout {
+                id: actionPillRow
+                anchors.centerIn: parent
+                spacing: 4
+
+                MaterialSymbol {
+                    iconSize: 13
+                    color: Appearance.colors.colPrimary
+                    text: "keyboard_return"
+                }
+
+                StyledText {
+                    text: root.itemClickActionName || "Open"
+                    font.pixelSize: Appearance.font.pixelSize.smallest
+                    font.weight: Font.Medium
+                    color: Appearance.colors.colPrimary
+                }
+            }
         }
 
+        // Secondary actions (ONLY visible when item is selected/focused)
         RowLayout {
-            Layout.alignment: Qt.AlignTop
-            Layout.topMargin: root.buttonVerticalPadding
-            Layout.bottomMargin: -root.buttonVerticalPadding // Why is this necessary? Good question.
+            visible: root.selected && ((root.entry?.actions?.length ?? 0) > 0)
+            Layout.alignment: Qt.AlignVCenter
             spacing: 4
             Repeater {
-                model: (root.entry.actions ?? []).slice(0, 4)
+                model: (root.entry?.actions ?? []).slice(0, 3)
                 delegate: RippleButton {
                     id: actionButton
                     required property var modelData
                     property var iconType: modelData.iconType
                     property string iconName: modelData.iconName ?? ""
-                    implicitHeight: 34
-                    implicitWidth: 34
+                    implicitHeight: 28
+                    implicitWidth: 28
+                    buttonRadius: 6
 
+                    colBackground: Appearance.colors.colLayer1
                     colBackgroundHover: Appearance.colors.colSecondaryContainerHover
                     colRipple: Appearance.colors.colSecondaryContainerActive
 
                     contentItem: Item {
-                        id: actionContentItem
                         anchors.centerIn: parent
                         Loader {
                             anchors.centerIn: parent
                             active: actionButton.iconType === LauncherSearchResult.IconType.Material || actionButton.iconName === ""
                             sourceComponent: MaterialSymbol {
-                                text: actionButton.iconName || "video_settings"
-                                font.pixelSize: Appearance.font.pixelSize.hugeass
+                                text: actionButton.iconName || "arrow_forward"
+                                iconSize: 16
                                 color: root.colForeground
                             }
                         }
                         Loader {
                             anchors.centerIn: parent
                             active: actionButton.iconType === LauncherSearchResult.IconType.System && actionButton.iconName !== ""
-                            sourceComponent: IconImage {
-                                source: Quickshell.iconPath(actionButton.iconName)
-                                implicitSize: 20
+                            sourceComponent: Item {
+                                implicitWidth: 16
+                                implicitHeight: 16
+                                Image {
+                                    id: actImg
+                                    anchors.fill: parent
+                                    source: Quickshell.iconPath(actionButton.iconName)
+                                    sourceSize.width: 16
+                                    sourceSize.height: 16
+                                    visible: source != "" && status === Image.Ready
+                                }
+                                MaterialSymbol {
+                                    anchors.centerIn: parent
+                                    visible: !actImg.visible
+                                    text: "open_in_new"
+                                    iconSize: 14
+                                    color: root.colForeground
+                                }
                             }
                         }
                     }
@@ -300,6 +473,5 @@ RippleButton {
                 }
             }
         }
-
     }
 }

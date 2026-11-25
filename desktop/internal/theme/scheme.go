@@ -311,7 +311,7 @@ func (s *Scheme) Tones() map[string]map[string]string {
 }
 
 // shellRoleKeys maps the snake_case Material roles to the camelCase keys the
-// shell's Theme, Scheme and Tokens singletons read. Ported from Ryoku's
+// shell's Theme, Scheme and Tokens singletons read. Ported from upstream's
 // matugenRoleKeys.
 var shellRoleKeys = [][2]string{
 	{"surface", "surface"},
@@ -349,7 +349,7 @@ var shellRoleKeys = [][2]string{
 }
 
 // baseSixteen maps the Material palette onto the sixteen terminal-style keys the
-// border and terminal templates read. Ported from Ryoku's matugenBase16: the
+// border and terminal templates read. Ported from upstream's matugenBase16: the
 // accent slots take the main accent roles, never a container, which inverts
 // between modes and washes out on a light surface.
 func baseSixteen(pal map[string]string) map[string]string {

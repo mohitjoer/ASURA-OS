@@ -1,0 +1,20 @@
+id: acer-predator
+name: "Acer Predator Gaming Laptops"
+description: "Acer Predator high-end gaming laptop hardware profile: turbo cooling profiles"
+layer: family
+
+match:
+  sys_vendor: "Acer*"
+  product_family: "*Predator*"
+
+packages: []
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel drivers/platform/x86/acer-wmi.c."
+  - "PredatorSense turbo mode and thermal management via acer-wmi."

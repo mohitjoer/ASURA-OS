@@ -8,8 +8,8 @@ effects.
 Run it from a live Hyprland session after starting the checkout shell:
 
 ```sh
-ryoku/shell/dev-run.sh
-ryoku/shell/quickshell/launcher/qa/run.sh
+sh shell/scripts/dev-run.sh
+sh shell/modules/launcher/qa/run.sh
 ```
 
 Evidence lands under `/tmp/launcher-qa/run-<timestamp>/` unless `QA_OUT` is set.

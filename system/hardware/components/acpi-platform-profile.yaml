@@ -1,0 +1,21 @@
+id: acpi-platform-profile
+name: "ACPI Platform Profile (Thermal & Performance Modes)"
+description: "Hardware platform profile selection (quiet, balanced, performance) via /sys/firmware/acpi/platform_profile"
+layer: component
+
+match:
+  acpi:
+    - "platform_profile"
+
+packages: []
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel Documentation/userspace-api/sysfs-platform_profile.rst."
+  - "Unified thermal interface across ASUS, Dell, HP, Lenovo, Framework, and Acer modern laptops."
+  - "Controllable via 'asura power profile [quiet | balanced | performance]'."

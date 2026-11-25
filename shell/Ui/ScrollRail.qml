@@ -3,7 +3,7 @@ import QtQuick.Controls
 import "Singletons"
 
 // A square thumb. Qt's pill is the only rounded thing left on a radius-2
-// surface, so ryovm drew its own; this is that, shared. Every Flickable,
+// surface; this is that, shared. Every Flickable,
 // ListView and GridView in the apps uses it.
 ScrollBar {
     id: rail

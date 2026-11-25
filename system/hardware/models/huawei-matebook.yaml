@@ -1,0 +1,22 @@
+id: huawei-matebook
+name: "Huawei & Honor MateBook Laptops"
+description: "Huawei MateBook hardware profile: huawei-wmi battery protection threshold and hotkey controls"
+layer: vendor
+
+match:
+  sys_vendor: "HUAWEI"
+  chassis: "laptop"
+
+packages: []
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel drivers/platform/x86/huawei-wmi.c."
+  - "Battery protection thresholds (40% start, 80% stop) managed via huawei-wmi."
+  - "Fn-lock and mic mute hotkeys mapped natively."
+  - "The battery limit comes from the power-huawei component."

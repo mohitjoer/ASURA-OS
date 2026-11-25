@@ -1,0 +1,32 @@
+id: dell-xps
+name: "Dell XPS Laptops (XPS 13 / 14 / 15 / 16 / 17)"
+description: "Dell XPS hardware profile: deep sleep optimization, thermal profile, and keyboard backlight"
+
+match:
+  sys_vendor: "Dell Inc."
+  product_family: "*XPS*"
+
+packages: []
+
+kernel_parameters:
+  - "mem_sleep_default=deep"
+
+files:
+  udev:
+    - target: "/etc/udev/rules.d/99-dell-battery.rules"
+      content: |
+        # Dell battery charge threshold
+        SUBSYSTEM=="power_supply", KERNEL=="BAT[0-9]", ATTR{charge_control_end_threshold}="80"
+      reason: "Persist 80% charge threshold on Dell charge_control_end_threshold"
+    - target: "/etc/udev/rules.d/90-dell-backlight.rules"
+      content: |
+        # Permissions for Dell keyboard backlight
+        SUBSYSTEM=="leds", KERNEL=="dell::kbd_backlight", ACTION=="add", RUN+="/bin/chmod a+w /sys/class/leds/dell::kbd_backlight/brightness"
+      reason: "Grant write permissions to dell::kbd_backlight"
+
+services: []
+
+notes:
+  - "Sleep fix: sets mem_sleep_default=deep to avoid modern standby battery drain in bags."
+  - "Thermal management: quiet, cool, balanced, and performance profiles via dell-wmi platform_profile ('asura power profile')."
+  - "Keyboard backlight permissions for ambient sensor and manual keys."

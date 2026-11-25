@@ -1,0 +1,20 @@
+id: acer-aspire
+name: "Acer Aspire Laptops"
+description: "Acer Aspire everyday laptop hardware profile: balanced thermal profiles"
+layer: family
+
+match:
+  sys_vendor: "Acer*"
+  product_family: "*Aspire*"
+
+packages: []
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel drivers/platform/x86/acer-wmi.c."
+  - "Acer Aspire balanced thermal profiles and keyboard backlight."

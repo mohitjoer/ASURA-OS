@@ -1,0 +1,26 @@
+id: power-samsung-galaxybook
+name: "Samsung Galaxy Book Battery Limit"
+description: "Persists an 85% charge limit via the samsung-galaxybook driver"
+layer: component
+
+match:
+  module:
+    - "samsung_galaxybook"
+
+packages: []
+
+kernel_parameters: []
+
+files:
+  udev:
+    - target: "/etc/udev/rules.d/99-samsung-galaxybook-battery.rules"
+      content: |
+        # Samsung Galaxy Book battery limit (85%), the driver's
+        # charge_control_end_threshold on the battery.
+        SUBSYSTEM=="power_supply", KERNEL=="BAT[0-9]*", ATTR{charge_control_end_threshold}="85"
+      reason: "Persist an 85% charge limit on Samsung Galaxy Book laptops (Linux drivers/platform/x86/samsung-galaxybook.c)"
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel Documentation/admin-guide/laptops/samsung-galaxybook.rst."

@@ -59,7 +59,7 @@ Column {
         visible: root.activePage === "matugen"
         colors: root.colors
         title: I18n.tr("External Matugen")
-        subtitle: I18n.tr("Run Matugen alongside Ryogami-wall's internal configuration.")
+        subtitle: I18n.tr("Run Matugen alongside wallpaper internal configuration.")
 
         RowTextInput {
             colors: root.colors

@@ -11,10 +11,10 @@ Item {
     id: theme
     // The single qsbar bar system; the bar form lives in `barShellStyle`.
 
-    property string omarchyCurrentRoot: Quickshell.env("HOME") + "/.config/asura/current"
-    property string omarchyInstallRoot: Quickshell.env("HOME") + "/.local/share/asura"
-    property bool omarchyCurrentRootResolved: false
-    readonly property string themeNamePath: omarchyCurrentRoot + "/theme.name"
+    property string asuraCurrentRoot: Quickshell.env("HOME") + "/.config/asura/current"
+    property string asuraInstallRoot: Quickshell.env("HOME") + "/.local/share/asura"
+    property bool asuraCurrentRootResolved: false
+    readonly property string themeNamePath: asuraCurrentRoot + "/theme.name"
     readonly property string colorsPath: (Quickshell.env("XDG_CACHE_HOME") || (Quickshell.env("HOME") + "/.cache")) + "/asura/colors.json"
     readonly property string shellConfigPath: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/asura/shell.json"
     readonly property string themeJsonPath: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/asura/theme.json"
@@ -26,7 +26,7 @@ Item {
     property var _namedPalette: null
     property bool _followWallpaper: true
     property var _basePalette: null
-    readonly property string currentBackgroundPath: omarchyCurrentRoot + "/background"
+    readonly property string currentBackgroundPath: asuraCurrentRoot + "/background"
     property string currentThemeName: ""
     readonly property var wallpaperSourcePaths: [
         Quickshell.env("HOME") + "/Pictures/Wallpapers",
@@ -41,7 +41,7 @@ Item {
     }
 
     function reloadCurrentThemeFiles() {
-        if (!omarchyCurrentRootResolved) return
+        if (!asuraCurrentRootResolved) return
         themeReloadDebounce.restart()
     }
 
@@ -1288,7 +1288,7 @@ Item {
         return rel && clock ? rel + " • " + clock : (rel || clock)
     }
 
-    // ── prorated pace on the 7-day window (ported from omarchy-agent-usage) ──
+    // ── prorated pace on the 7-day window ──
     //   weighs the allowance still left against the fraction of the seven-day
     //   window still ahead in time. burning faster than the clock ⇒ behind pace
     //   (the provider turns red). pct7d is 0..100; resetTs is the weekly reset
@@ -1320,7 +1320,7 @@ Item {
         return aiBehindPace(pct7d, resetTs) ? I18n.tr("%1% behind pace").arg(pts) : I18n.tr("%1% ahead of pace").arg(pts)
     }
 
-    // ── LAST 7 DAYS token chart helpers (ported from omarchy-agent-usage) ──
+    // ── LAST 7 DAYS token chart helpers ──
     //   _recent_days is [{date:"YYYY-MM-DD", tokens:int}] oldest→newest.
     function aiDayTokens(day) { return Math.max(0, (day && day.tokens) || 0) }
     function aiRecentTotal(days) {
@@ -2147,20 +2147,18 @@ Item {
     property bool _idleBackendChecked: false
     property bool _idleAsuraShellBackend: false
     property bool _idleAsuraShellSystem: false
-    property bool _omarchyBackendReprobePending: false
-    property int _omarchyBackendRetryIndex: 0
-    readonly property var _omarchyBackendRetryDelays: [2000, 5000, 15000]
-    readonly property string omarchyShellConfigPath: Quickshell.env("HOME") + "/.config/asura/shell.json"
+    property bool _asuraBackendReprobePending: false
+    property int _asuraBackendRetryIndex: 0
+    readonly property var _asuraBackendRetryDelays: [2000, 5000, 15000]
+    readonly property string asuraShellConfigPath: Quickshell.env("HOME") + "/.config/asura/shell.json"
     readonly property string idleStatePath: Quickshell.env("HOME") + "/.local/state/asura/indicators/stay-awake"
     property bool notifSilenced: false        // notification do-not-disturb mode
     property bool _notifBackendChecked: false
     property bool _notifAsuraShellBackend: false
     property bool _notifAsuraShellSystem: false
-    // Whether `makoctl` (the external mako DND source used in Omarchy-compat mode)
-    // is on PATH. Asura runs its own notification server and never ships mako, so
-    // this stays false there and the makoctl DND probe is skipped instead of
-    // failing to spawn on every status refresh (endless "binary not found" log
-    // spam). Detected once by makoDetectProc below.
+    // Whether `makoctl` is on PATH. Asura runs its own notification server and
+    // never ships mako, so this stays false there and the makoctl DND probe is skipped
+    // instead of failing to spawn on every status refresh. Detected once by makoDetectProc below.
     property bool _makoAvailable: false
     readonly property string notificationsStatePath: Quickshell.env("HOME") + "/.local/state/asura/notifications.json"
     property bool screenRecording: false
@@ -2191,42 +2189,42 @@ Item {
     }
     function reprobeAsuraShellBackends() {
         if (idleBackendProc.running || notifBackendProc.running) {
-            _omarchyBackendReprobePending = true
+            _asuraBackendReprobePending = true
             return
         }
-        _omarchyBackendReprobePending = false
+        _asuraBackendReprobePending = false
         idleBackendProc.running = true
         notifBackendProc.running = true
     }
     function finishAsuraBackendReprobe() {
         if (idleBackendProc.running || notifBackendProc.running) return
-        if (_omarchyBackendReprobePending) {
-            omarchyBackendProbeDebounce.restart()
+        if (_asuraBackendReprobePending) {
+            asuraBackendProbeDebounce.restart()
             return
         }
         scheduleAsuraBackendRetry()
     }
-    function omarchyBackendRetryNeeded() {
+    function asuraBackendRetryNeeded() {
         return (_idleAsuraShellSystem && !_idleAsuraShellBackend)
             || (_notifAsuraShellSystem && !_notifAsuraShellBackend)
     }
     function scheduleAsuraBackendRetry() {
-        if (!omarchyBackendRetryNeeded()) {
-            omarchyBackendRetryTimer.stop()
-            _omarchyBackendRetryIndex = 0
+        if (!asuraBackendRetryNeeded()) {
+            asuraBackendRetryTimer.stop()
+            _asuraBackendRetryIndex = 0
             return
         }
-        if (omarchyBackendConfirmTimer.running || omarchyBackendRetryTimer.running
-                || _omarchyBackendRetryIndex >= _omarchyBackendRetryDelays.length) return
-        omarchyBackendRetryTimer.interval = _omarchyBackendRetryDelays[_omarchyBackendRetryIndex]
-        _omarchyBackendRetryIndex++
-        omarchyBackendRetryTimer.restart()
+        if (asuraBackendConfirmTimer.running || asuraBackendRetryTimer.running
+                || _asuraBackendRetryIndex >= _asuraBackendRetryDelays.length) return
+        asuraBackendRetryTimer.interval = _asuraBackendRetryDelays[_asuraBackendRetryIndex]
+        _asuraBackendRetryIndex++
+        asuraBackendRetryTimer.restart()
     }
     function resetAsuraBackendProbes() {
-        omarchyBackendRetryTimer.stop()
-        _omarchyBackendRetryIndex = 0
-        omarchyBackendProbeDebounce.restart()
-        omarchyBackendConfirmTimer.restart()
+        asuraBackendRetryTimer.stop()
+        _asuraBackendRetryIndex = 0
+        asuraBackendProbeDebounce.restart()
+        asuraBackendConfirmTimer.restart()
         if (!makoDetectProc.running) makoDetectProc.running = true
     }
     function parseNotificationsState(text) {
@@ -2346,35 +2344,35 @@ Item {
     }
 
     Timer {
-        id: omarchyBackendProbeDebounce
+        id: asuraBackendProbeDebounce
         interval: 250
         repeat: false
         onTriggered: theme.reprobeAsuraShellBackends()
     }
 
     Timer {
-        id: omarchyBackendRetryTimer
+        id: asuraBackendRetryTimer
         repeat: false
         onTriggered: theme.reprobeAsuraShellBackends()
     }
 
     Timer {
-        id: omarchyBackendConfirmTimer
+        id: asuraBackendConfirmTimer
         interval: 2000
         repeat: false
         onTriggered: {
-            theme._omarchyBackendRetryIndex = Math.max(1, theme._omarchyBackendRetryIndex)
+            theme._asuraBackendRetryIndex = Math.max(1, theme._asuraBackendRetryIndex)
             theme.reprobeAsuraShellBackends()
         }
     }
 
     FileView {
-        id: omarchyShellConfigFile
-        path: theme.omarchyShellConfigPath
+        id: asuraShellConfigFile
+        path: theme.asuraShellConfigPath
         watchChanges: true
         printErrors: false
         onFileChanged: {
-            omarchyShellConfigFile.reload()
+            asuraShellConfigFile.reload()
             theme.resetAsuraBackendProbes()
         }
     }
@@ -2627,10 +2625,10 @@ Item {
     // ── picker visual style (theme/wallpaper/screenshot/video pickers) ──
     property string pickerStyle: "tanzaku"   // "tanzaku", "hearthstone", "carousel"
     property string launcherLogoMode: "icon"     // "text" or "icon" (default "icon")
-    property string launcherLogoText: "asura"    // "asura", "omarchy", "hyprland", "arch", or "omacom"
+    property string launcherLogoText: "asura"    // "asura", "hyprland", "arch", or "omacom"
     property string launcherLogoIcon: "asura"    // see launcherLogoIconGlyph()
     // Legacy launcher-logo text values migrated to the current text mode.
-    readonly property var legacyLogoTextValues: ["omarchy", "hyprland"]
+    readonly property var legacyLogoTextValues: ["hyprland"]
     property bool   weatherImperial: false   // false = °C / km·h, true = °F / mph
     property bool   clock12h:        false   // false = 24h, true = 12h (AM/PM)
 
@@ -3000,11 +2998,6 @@ Item {
     }
 
     // Asura's own marks, plus the neighbours whose wordmarks we actually ship.
-    // "omarchy" is deliberately absent from both lists: its mark is a Private Use
-    // Area glyph in a font we do not ship, and it was also the dead default these
-    // ids carried while the launcher drew a hardcoded mark. Leaving it out makes
-    // every one of those stale records fail validation and land on "asura", so an
-    // existing desktop keeps its own brand instead of being silently rebranded.
     readonly property var launcherLogoTextOptions: ["asura", "hyprland", "ubuntu", "omacom", "linux", "nixos", "debian", "fedora", "gentoo", "void", "wayland", "sway", "gnome", "dwm"]
     readonly property var launcherLogoIconOptions: ["asura", "hyprland", "arch", "grid", "spark", "power", "dragon", "mark", "nix", "branch", "rebel", "ubuntu", "debian", "fedora", "gentoo", "void", "artix", "manjaro", "suse", "alpine", "endeavour", "garuda", "cachyos", "freebsd", "apple", "raspi", "elementary", "gnome", "alma", "centos", "devuan", "arco", "ferris", "codeberg", "gitea", "tux", "android", "mint", "kali", "popos", "zorin", "plasma", "wayland", "docker", "github", "git", "gitlab", "python", "rust", "go", "node", "react", "vue", "kube", "vim", "neovim", "firefox", "chrome", "java", "js", "ts", "cpp", "ruby", "php", "swift", "kotlin", "lua", "haskell", "blender", "figma", "redis", "postgres", "steam", "spotify", "discord", "telegram", "slack", "empire", "jedi", "sith", "mandalorian", "firstorder", "deathstar", "spaceinvaders", "ghost", "pokeball", "pokemon", "gamepad", "retropad", "d20", "playstation", "xbox", "switch", "minecraft", "wizard", "dungeon", "sword", "shield", "crown", "skull", "crossbones", "ninja", "robot", "alien", "knight", "paw", "masks", "theater", "film", "spade", "superpowers", "reddit", "twitch"]
     // id -> glyph codepoint for every option. The brand/OS/dev marks are real
@@ -3031,8 +3024,6 @@ Item {
     function launcherLogoTextLabel(id) {
         return String(id).toUpperCase()
     }
-    // omarchy's U+E900 needs a font Asura doesn't ship, so it's absent here and
-    // any stale "omarchy" icon id falls back to asura via the validators below.
     function launcherLogoIconGlyph(id) {
         var c = launcherLogoIconCodes[id]
         return String.fromCodePoint(c !== undefined ? c : launcherLogoIconCodes["asura"])
@@ -3583,7 +3574,7 @@ Item {
     }
 
     Process {
-        id: omarchyCurrentRootProbe
+        id: asuraCurrentRootProbe
         command: ["bash", "-c",
             "state=\"$HOME/.local/state/asura/current\"; legacy=\"$HOME/.config/asura/current\"; " +
             "if command -v true >/dev/null 2>&1 && [ -d \"$state\" ] && [ -d /usr/share/asura ]; then printf '%s\\t%s\\n' \"$state\" /usr/share/asura; " +
@@ -3595,9 +3586,9 @@ Item {
                 var parts = this.text.trim().split("\t")
                 var resolved = parts.length > 0 ? parts[0] : ""
                 var installRoot = parts.length > 1 ? parts[1] : ""
-                if (resolved) theme.omarchyCurrentRoot = resolved
-                if (installRoot) theme.omarchyInstallRoot = installRoot
-                theme.omarchyCurrentRootResolved = true
+                if (resolved) theme.asuraCurrentRoot = resolved
+                if (installRoot) theme.asuraInstallRoot = installRoot
+                theme.asuraCurrentRootResolved = true
                 currentThemeNameWatcher.reload()
                 theme.reloadCurrentThemeFiles()
             }
@@ -3619,7 +3610,7 @@ Item {
     FileView {
         id: currentThemeNameWatcher
         path: theme.themeNamePath
-        watchChanges: theme.omarchyCurrentRootResolved
+        watchChanges: theme.asuraCurrentRootResolved
         printErrors: false
         onLoaded: {
             theme.setCurrentThemeName(currentThemeNameWatcher.text())

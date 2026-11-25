@@ -536,7 +536,7 @@ Item {
                             }
                             UiText {
                                 anchors.verticalCenter: parent.verticalCenter
-                                text: I18n.tr("GET MORE IN ASURA STORE")
+                                text: I18n.tr("GET MORE IN TOREN STORE")
                                 color: storeMa.containsMouse ? Tokens.ink : Tokens.inkDim
                                 font.family: Tokens.mono
                                 font.pixelSize: Tokens.fTiny

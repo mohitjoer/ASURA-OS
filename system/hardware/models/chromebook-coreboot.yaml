@@ -1,0 +1,21 @@
+id: chromebook-coreboot
+name: "Chromebooks with Standard coreboot Firmware"
+description: "x86 Chromebooks running MrChromebox coreboot/UEFI full ROM firmware"
+layer: vendor
+
+match:
+  sys_vendor: "*Google*"
+  chassis: "laptop"
+
+packages: []
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: coreboot and MrChromebox UEFI firmware documentation."
+  - "Supports standard x86 Chromebooks converted to UEFI firmware."
+  - "Search key acts as Super key in standard keyboard mapping."

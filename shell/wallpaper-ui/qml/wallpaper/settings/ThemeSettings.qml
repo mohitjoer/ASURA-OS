@@ -223,8 +223,8 @@ Column {
 
         RowAction {
             colors: root.colors
-            title: I18n.tr("Asura signature")
-            description: I18n.tr("Apply the Asura theme: frame bars, zero roundness, mono scheme.")
+            title: I18n.tr("Toren signature")
+            description: I18n.tr("Apply the Toren theme: frame bars, zero roundness, mono scheme.")
             valueLabel: I18n.tr("APPLY")
             onClicked: root._runHub(["desktop", "asura-theme"])
         }

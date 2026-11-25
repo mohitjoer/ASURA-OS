@@ -1,0 +1,26 @@
+id: audio-realtek-hda
+name: "Realtek HD Audio ALC Codec & Mic Mute LED"
+description: "Kernel audio powersave and LED mute quirk support for Realtek ALC2xx/ALC8xx audio codecs"
+layer: component
+
+match:
+  module:
+    - "snd_hda_codec_realtek"
+
+packages: []
+
+kernel_parameters: []
+
+files:
+  udev:
+    - target: "/etc/udev/rules.d/90-audio-realtek-powersave.rules"
+      content: |
+        # Realtek HD Audio powersave timeout (1s) and power_save_controller
+        ACTION=="add", SUBSYSTEM=="module", KERNEL=="snd_hda_intel", ATTR{parameters/power_save}="1", ATTR{parameters/power_save_controller}="Y"
+      reason: "Enable ALC codec low-power states when idle (Linux Documentation/sound/designs/powersave.rst)"
+
+services: []
+
+notes:
+  - "Knowledge source: Linux Documentation/sound/designs/powersave.rst and sound/pci/hda/patch_realtek.c."
+  - "Handles speaker amp mute LEDs and power-saving on Realtek ALC codecs."

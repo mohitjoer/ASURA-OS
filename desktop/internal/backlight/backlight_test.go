@@ -115,8 +115,8 @@ func TestNoDevicesIsNotAnError(t *testing.T) {
 	}
 }
 
-// The panel selection cases are the regression suite Ryoku wrote for its
-// ryoku-hw-backlight, ported: each is a laptop shape that made a name-ordered
+// The panel selection cases are the regression suite upstream wrote for its
+// asura-hw-backlight, ported: each is a laptop shape that made a name-ordered
 // pick land on a backlight that changes nothing.
 func TestPanelIsTheBacklightOnTheConnectedConnector(t *testing.T) {
 	t.Run("two native backlights, only one panel connected", func(t *testing.T) {

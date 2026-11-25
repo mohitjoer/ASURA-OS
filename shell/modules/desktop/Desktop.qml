@@ -4,6 +4,7 @@ import Quickshell.Wayland
 import Quickshell.Io
 import Quickshell.Widgets
 import "Singletons"
+import "battery"
 import "clock"
 import "calendar"
 import "music"
@@ -89,6 +90,7 @@ Scope {
             { id: "stats", label: "System stats", icon: "monitor_heart", enabled: Config.statsEnabled, group: "" },
             { id: "weather", label: "Weather", icon: "partly_cloudy_day", enabled: Config.weatherEnabled, group: "" },
             { id: "notes", label: "Notes", icon: "sticky_note_2", enabled: Config.notesEnabled, group: "" },
+            { id: "battery", label: "Battery", icon: "battery", enabled: Config.batteryEnabled, group: "" },
         ];
         // Fallback group name for a plugin whose manifest names no set. Plain
         // like the built-in labels above; the Hub translates its own copy.
@@ -195,7 +197,8 @@ Scope {
         "aioEnabled", "aioStyle", "aioScale", "aioAnchor", "aioX", "aioY", "aioLocked", "aioOpacity", "aioColor", "aioColor2", "aioGradient",
         "statsEnabled", "statsScale", "statsAnchor", "statsX", "statsY", "statsLocked", "statsOpacity", "statsColor", "statsColor2", "statsGradient",
         "weatherEnabled", "weatherDesign", "weatherScale", "weatherAnchor", "weatherX", "weatherY", "weatherLocked", "weatherOpacity", "weatherColor", "weatherColor2", "weatherGradient",
-        "notesEnabled", "notesScale", "notesAnchor", "notesX", "notesY", "notesLocked", "notesOpacity", "notesWidth", "notesHeight", "notesColor", "notesColor2", "notesGradient"
+        "notesEnabled", "notesScale", "notesAnchor", "notesX", "notesY", "notesLocked", "notesOpacity", "notesWidth", "notesHeight", "notesColor", "notesColor2", "notesGradient",
+        "batteryEnabled", "batteryDesign", "batteryScale", "batteryAnchor", "batteryX", "batteryY", "batteryLocked", "batteryOpacity", "batteryBg", "batteryRadius", "batteryColor", "batteryColor2", "batteryGradient"
     ]
     property var _snapConfig: null
     property var _snapPlugins: null
@@ -520,7 +523,7 @@ Scope {
             id: clockLoader
             anchors.fill: parent
             z: root.widgetZ("clock")
-            active: root.widgetsEnabled && root.reloadReady && Config.clockEnabled
+            active: root.widgetsEnabled && root.reloadReady && Config.fileVersion >= 0 && Config.clockEnabled
             sourceComponent: Component {
             Item {
                 anchors.fill: parent
@@ -551,7 +554,7 @@ Scope {
             id: calendarLoader
             anchors.fill: parent
             z: root.widgetZ("calendar")
-            active: root.widgetsEnabled && root.reloadReady && Config.calendarEnabled
+            active: root.widgetsEnabled && root.reloadReady && Config.fileVersion >= 0 && Config.calendarEnabled
             sourceComponent: Component {
             Item {
                 anchors.fill: parent
@@ -590,7 +593,7 @@ Scope {
             id: musicLoader
             anchors.fill: parent
             z: root.widgetZ("music")
-            active: root.widgetsEnabled && root.reloadReady && Config.musicEnabled
+            active: root.widgetsEnabled && root.reloadReady && Config.fileVersion >= 0 && Config.musicEnabled
             sourceComponent: Component {
             Item {
                 anchors.fill: parent
@@ -632,7 +635,7 @@ Scope {
             id: aioLoader
             anchors.fill: parent
             z: root.widgetZ("aio")
-            active: root.widgetsEnabled && root.reloadReady && Config.aioEnabled
+            active: root.widgetsEnabled && root.reloadReady && Config.fileVersion >= 0 && Config.aioEnabled
             sourceComponent: Component {
             Item {
                 anchors.fill: parent
@@ -665,7 +668,7 @@ Scope {
             id: statsLoader
             anchors.fill: parent
             z: root.widgetZ("stats")
-            active: root.widgetsEnabled && root.reloadReady && Config.statsEnabled
+            active: root.widgetsEnabled && root.reloadReady && Config.fileVersion >= 0 && Config.statsEnabled
             sourceComponent: Component {
             Item {
                 anchors.fill: parent
@@ -697,7 +700,7 @@ Scope {
             id: weatherLoader
             anchors.fill: parent
             z: root.widgetZ("weather")
-            active: root.widgetsEnabled && root.reloadReady && Config.weatherEnabled
+            active: root.widgetsEnabled && root.reloadReady && Config.fileVersion >= 0 && Config.weatherEnabled
             sourceComponent: Component {
             Item {
                 anchors.fill: parent
@@ -730,7 +733,7 @@ Scope {
             id: notesLoader
             anchors.fill: parent
             z: root.widgetZ("notes")
-            active: root.widgetsEnabled && root.reloadReady && Config.notesEnabled
+            active: root.widgetsEnabled && root.reloadReady && Config.fileVersion >= 0 && Config.notesEnabled
             sourceComponent: Component {
             Item {
                 anchors.fill: parent
@@ -759,6 +762,41 @@ Scope {
                     active: notesSlot.visible
                     wLogical: Config.notesWidth
                     hLogical: Config.notesHeight
+                }
+            }
+            }
+            }
+        }
+
+        Loader {
+            id: batteryLoader
+            anchors.fill: parent
+            z: root.widgetZ("battery")
+            active: root.widgetsEnabled && root.reloadReady && Config.fileVersion >= 0 && Config.batteryEnabled
+            sourceComponent: Component {
+            Item {
+                anchors.fill: parent
+            WidgetSlot {
+                id: batterySlot
+                widget: "battery"
+                z: root.widgetZ("battery")
+                visible: true
+                anchor: Config.batteryAnchor
+                freeX: Config.batteryX
+                freeY: Config.batteryY
+                locked: root.stageComposing ? false : Config.batteryLocked
+                composing: root.stageComposing
+                bg: Config.batteryBg
+                radius: Config.batteryRadius
+                scaleCfg: Config.batteryScale
+                pad: Config.batteryBg === "none" ? 0 : Math.round(24 * Config.batteryScale)
+                onMenuRequested: (x, y, w) => root.openWidgetMenu(w, x, y)
+                onDropped: (box) => win.flashDrop(box)
+                onResized: if (root.stageComposing) StageCfg.StageSession.markDirty()
+                BatteryWidget {
+                    style: Config.batteryDesign
+                    s: Config.batteryScale
+                    active: batterySlot.visible
                 }
             }
             }

@@ -1,9 +1,9 @@
 # Screenshots
 
-`asura-shot` captures, annotates, and copies or saves a shot. It is a port of the
+`toren-shot` captures, annotates, and copies or saves a shot. It is a port of the
 reference desktop's screenshot tool: a Quickshell layer surface on the Overlay layer
-(namespace `asura-shot`) that freezes each output with the compositor's screencopy and
-draws the editor over the frozen frame. `session/asura-shot` is a wrapper that runs
+(namespace `toren-shot`) that freezes each output with the compositor's screencopy and
+draws the editor over the frozen frame. `session/toren-shot` is a wrapper that runs
 `quickshell -p /usr/share/asura/shell/shot.qml` under a lock, so a second key press
 while the overlay is open does nothing.
 
@@ -19,7 +19,7 @@ while the overlay is open does nothing.
 
 Shots are written to `$XDG_PICTURES_DIR/Screenshots` (else `~/Pictures/Screenshots`) as
 `YYYY_MM_DD_HH_MM_SS_screenshot.png`, in UTC. The tool's own settings (tool styles, blur
-radius, copy on save, save folder) live in `~/.config/asura/asura-shot.json`, which only
+radius, copy on save, save folder) live in `~/.config/asura/toren-shot.json`, which only
 the tool writes. Upload sends the shot to litterbox.catbox.moe, a public host, and copies
 the 72-hour link; nothing is sent until the button or Ctrl+U is used.
 
@@ -32,10 +32,10 @@ same way.
 | Tool | For | If it is missing |
 |---|---|---|
 | `grim` | the frozen frame when screencopy gives none; every shot from the Capture tab | a toast and an on-screen note say to install it |
-| `wl-clipboard` | copying when the `asura-shell` daemon is not running | a toast says the shot was not copied |
+| `wl-clipboard` | copying when the `toren-shell` daemon is not running | a toast says the shot was not copied |
 | `imagemagick` | the eyedropper, the redaction palette, shots that span monitors | those three do nothing |
 | `asura-cmd-ocr` (tesseract) | the Copy text tool | the script says what is missing |
-| `asura-pin` | Ctrl+P | a toast says pinning is not available |
+| `toren-pin` | Ctrl+P | a toast says pinning is not available |
 | `zenity` | choosing the save folder | the button does nothing |
 
 Window snapping reads window boxes from the shell daemon's `wm` feed; without the daemon
@@ -43,7 +43,7 @@ the tool still works on regions and monitors.
 
 ## Not ported
 
-The beautify editor is not here. It needed changes to run on ASURA (its HD upscaler,
+The beautify editor is not here. It needed changes to run on Toren (its HD upscaler,
 `waifu2x-ncnn-vulkan`, is not in the archive, and its watermark and presets carry the
 reference desktop's branding), so it was left out rather than shipped half working. The
 Capture tab's "Beautify after" switch is stored but opens nothing.

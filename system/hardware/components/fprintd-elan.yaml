@@ -1,0 +1,21 @@
+id: fprintd-elan
+name: "Elan Microelectronics Fingerprint Sensor"
+description: "USB fingerprint authentication support for Elan biometric sensors via libfprint"
+layer: component
+
+match:
+  usb:
+    - "04f3:*"
+
+packages:
+  - fprintd
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: libfprint supported devices list (vendor 04f3 Elan Microelectronics)."
+  - "Enables biometric authentication via 'asura enable fingerprint' or fprintd."

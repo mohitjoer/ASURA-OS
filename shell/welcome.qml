@@ -14,7 +14,7 @@ ShellRoot {
         id: win
         // Not translated: the window rule matches this exact string, and a
         // translated title would leave the tour tiled in every other language.
-        title: "Welcome to Asura"
+        title: "Welcome to Toren"
 
         // Same fit-clamp as the hub window: the rule floats this at 1180x760,
         // which a 720p-class screen cannot hold. Hyprland clamps the rule's

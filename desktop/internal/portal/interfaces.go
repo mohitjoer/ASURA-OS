@@ -57,10 +57,20 @@ func CheckInterfaces(env Env, config *Config) []InterfaceFinding {
 
 	var findings []InterfaceFinding
 
-	for section := range config.Sections {
-		if section == "default" {
-			continue
+	// The interfaces named: the keys of portals.conf(5)'s [preferred] group,
+	// and the sections of the older per-section form.
+	var named []string
+	for key := range config.Sections["preferred"] {
+		if strings.Contains(key, ".impl.portal.") {
+			named = append(named, key)
 		}
+	}
+	for section := range config.Sections {
+		if section != "default" && section != "preferred" {
+			named = append(named, section)
+		}
+	}
+	for _, section := range named {
 		// Backend, not entries["use"]. The raw value still carries its trailing
 		// semicolon — "use=hyprland;" — so reading the map directly looks for
 		// "hyprland;.portal" and reports every backend as missing, which is

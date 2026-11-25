@@ -125,7 +125,7 @@ Item {
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 10
             anchors.horizontalCenter: parent.horizontalCenter
-            text: I18n.tr("ASURA VM · PASS")
+            text: I18n.tr("TOREN VM · PASS")
             color: Tokens.inkFaint
             font.family: Tokens.mono
             font.pixelSize: 9

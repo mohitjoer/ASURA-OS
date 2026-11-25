@@ -1,6 +1,6 @@
-# ASURA OS — Agent Guidelines
+# Toren Linux — Agent Guidelines
 
-ASURA's master agent contract. `AGENTS.md`, `CLAUDE.md` and `GEMINI.md` are pointers to this
+Toren's master agent contract. `AGENTS.md`, `CLAUDE.md` and `GEMINI.md` are pointers to this
 file. Everything below is binding unless it says otherwise.
 
 Those three are symlinks, created once per clone and deliberately untracked — which agent you run
@@ -14,25 +14,24 @@ ln -s agents/agents.md CLAUDE.md
 ln -s agents/agents.md GEMINI.md
 ```
 
-## What ASURA is
+## What Toren Linux is
 
-ASURA's wordmark is *asura* — healthy, robust, strong. Use it as the logo and as the
-project's name in prose: "ASURA", never "ASURA's" as a possessive of an acronym, never anything
-else.
+The operating system's name is **Toren Linux** (or **Toren**). Use it as the
+project's name in prose: "Toren Linux" or "Toren", never anything else.
 
-ASURA is a Linux distribution. Its **base layer** is Void Linux x86_64 (glibc); everything above that
-line is ASURA's own. Hyprland is the compositor and a Quickshell-drawn shell is the desktop;
+Toren Linux is a Linux distribution. Its **base layer** is Void Linux x86_64 (glibc); everything above that
+line is Toren's own. Hyprland is the compositor and a Quickshell-drawn shell is the desktop;
 Go binaries (`asura`, `asurad`, `asura-hub`) own the settings; GSettings schemas and dconf are
-the store. **There is no GNOME in ASURA** — no GNOME Shell, no GNOME daemons, no
+the store. **There is no GNOME in Toren** — no GNOME Shell, no GNOME daemons, no
 `xdg-desktop-portal-gnome`.
 
 Before designing or changing anything, read [`docs/architecture.md`](../docs/architecture.md).
-It maps every layer to its owner and explains why ASURA is built this way and not another way.
+It maps every layer to its owner and explains why Toren is built this way and not another way.
 Do not re-derive decisions that are already recorded there.
 
-The shell's **surfaces** are not all ASURA's. A vendored tree of open-source Quickshell
+The shell's **surfaces** are not all Toren's. A vendored tree of open-source Quickshell
 components lives under `shell/modules/` and `shell/services/`, kept byte-identical to a
-pinned upstream commit. ASURA owns the engine, the design system, the settings binding and
+pinned upstream commit. Toren owns the engine, the design system, the settings binding and
 the three overlay files that carry both into the vendored components. The rules for that
 tree are in [the one rule](#the-one-rule), and the record is in
 [the architecture](../docs/architecture.md#vendored-upstream-components).
@@ -102,8 +101,8 @@ ASURA's own names are ASURA's own: `asura`, `asurad`, `asura-hub`, `asura-shell`
 
 ## Design system
 
-ASURA's visual language is monochrome by construction. These rules are the reason ASURA looks
-like ASURA; they are not suggestions.
+Toren's visual language is monochrome by construction. These rules are the reason Toren looks
+like Toren; they are not suggestions.
 
 - **Strict monochrome.** Black, grey and white only, no coloured accents. Traffic lights and
   destructive/warning/error states are the sole exceptions, because they carry meaning a
@@ -169,7 +168,7 @@ sh shell/shell_test.sh
 sh session/session_test.sh
 sh session/greeter_test.sh
 sh installation/build-iso-void_test.sh
-sh installation/asura-installer_test.sh
+sh installation/toren-installer_test.sh
 
 # gofmt / vet — the control tools are Go. There is no go.mod at the
 # repository root: `desktop/` is one module and `system/hardware/` is
@@ -202,11 +201,11 @@ rules.
 
 ## Rules
 
-- [2026-11-17] end-4's desktop (`shell-end4/`) is the default shell. It is vendored byte for byte; change it only through an overlay listed in `shell-end4/asura/vendor.sh`, and keep `sh shell-end4/asura/vendor.sh verify` passing. Keyboard shortcuts do not change: a new or changed `asura ipc call asura ...` binding must be answered by `shell-end4/asura/AsuraBridge.qml` as well as by ASURA's shell.
-- [2026-11-17] Zed is the default **graphical** editor (mimeapps, the launcher); Neovim is the **terminal** editor (`$EDITOR`/`$VISUAL`, and the editor with no graphical session). Ship both; do not remove Neovim to "keep Zed the default". (Replaces the 2026-11-01 rule "Zed is the default code editor".)
-- [2026-11-01] The user-facing name of the operating system is ASURA OS (or ASURA). All user-visible branding across bootloader, Plymouth, os-release, motd, issue, Welcome tour, Fastfetch, settings headers, and installer must use ASURA OS.
+- [2026-11-17] The desktop (`shell-desktop/`) is the default shell. It is vendored byte for byte; change it only through an overlay listed in `shell-desktop/asura/vendor.sh`, and keep `sh shell-desktop/asura/vendor.sh verify` passing. Keyboard shortcuts do not change: a new or changed `asura ipc call asura ...` binding must be answered by `shell-desktop/asura/AsuraBridge.qml` as well as by Toren's shell.
+- [2026-11-24] The user-facing name of the operating system is Toren Linux (or Toren). All user-visible branding across bootloader, Plymouth, os-release, motd, issue, Welcome tour, Fastfetch, settings headers, and installer must use Toren Linux (or Toren).
+- [2026-11-22] Neovim is the sole text/code editor in Toren Linux ($EDITOR, $VISUAL, mimeapps, launcher via ghostty -e nvim). Zed has been removed from the ISO. (Replaces the 2026-11-17 rule "Zed is the default graphical editor".)
 - [2026-10-29] The OS must not mention anything about Void Linux/Void OS; completely hide all upstream base branding across boot sequences, motd, issue, os-release, hostnames, and greetings.
-- [2026-10-29] ASURA OS uses Void Linux x86_64 (glibc) as its base operating system.
+- [2026-10-29] Toren Linux uses Void Linux x86_64 (glibc) as its base operating system.
 - [2026-10-27] Never use or ship kitty in this OS; Ghostty is the sole supported terminal emulator.
 - [2026-11-17] In a QML file that also imports a module carrying a singleton of the same name (`qs.Services` has its own `Config`, the shell.json one), the unqualified name resolves to the imported singleton, and writing a property it does not have is accepted by the engine and silently dropped — no error, no value. Reach the shell's GSettings wrapper by its module name, as `Root.Config`, the way the overlay files do.
 

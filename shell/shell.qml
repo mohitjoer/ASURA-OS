@@ -104,17 +104,17 @@ ShellRoot {
         }
     }
 
-    // The configured desktop is end-4's, yet this shell is running: the
-    // quickshell service fell back to it because the end-4 desktop kept
+    // The configured desktop is the desktop shell, yet this shell is running: the
+    // quickshell service fell back to it because the desktop shell kept
     // exiting at start (system/runit/user-services/quickshell/run). Say so
     // once, so a different-looking desktop has an explanation and a way back.
     property bool desktopFallbackNoted: false
     function noteDesktopFallback() {
-        if (root.desktopFallbackNoted || RootCfg.Config.desktopShell !== "end4")
+        if (root.desktopFallbackNoted || RootCfg.Config.desktopShell !== "desktop")
             return;
         root.desktopFallbackNoted = true;
         Quickshell.execDetached(["notify-send", "-a", "ASURA",
-            "The end-4 desktop did not start",
+            "The desktop did not start",
             "ASURA's own desktop is running instead. Details: ~/.local/state/asura/quickshell.log. "
             + "To stay on this desktop: Hub > Desktop & Dock > Which desktop shell runs."]);
     }
@@ -575,7 +575,7 @@ ShellRoot {
     // spawn drive the identical transition. Names match the compositor binds.
     CustomShortcut {
         name: "barToggle"
-        description: I18n.tr("Toggle the Asura frame bar on the active monitor")
+        description: I18n.tr("Toggle the Toren frame bar on the active monitor")
         onPressed: root.toggleSurface("barToggle")
     }
     CustomShortcut {

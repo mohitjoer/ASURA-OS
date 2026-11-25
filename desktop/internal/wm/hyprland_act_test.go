@@ -154,7 +154,7 @@ func TestActEmitsHyprlangDialect(t *testing.T) {
 	}
 }
 
-// No emitted command may be the Lua dialect; this is the regression Ryoku's
+// No emitted command may be the Lua dialect; this is the regression upstream's
 // provider would reintroduce if a case were copied across unconverted.
 func TestActNeverEmitsLua(t *testing.T) {
 	log := stubHyprctl(t, nil)
@@ -325,8 +325,8 @@ func TestActWithoutSessionFailsFast(t *testing.T) {
 func TestActSummonRaisesByTitle(t *testing.T) {
 	const clients = `[
 		{"address":"0xaaa","title":"Other","initialTitle":"Other"},
-		{"address":"0xbbb","title":"Asura Settings","initialTitle":"org.quickshell"},
-		{"address":"0xccc","title":"stale","initialTitle":"Asura Settings"}
+		{"address":"0xbbb","title":"Toren Settings","initialTitle":"org.quickshell"},
+		{"address":"0xccc","title":"stale","initialTitle":"Toren Settings"}
 	]`
 	log := stubHyprctl(t, func(args ...string) ([]byte, error) {
 		switch args[0] {
@@ -340,7 +340,7 @@ func TestActSummonRaisesByTitle(t *testing.T) {
 	c := OpenNamed(ProviderHyprland)
 	c.capsOK, c.caps = true, Caps{Supports: All()}
 
-	if err := c.Act(ActionWindowSummon, "Asura Settings"); err != nil {
+	if err := c.Act(ActionWindowSummon, "Toren Settings"); err != nil {
 		t.Fatalf("summon: %v", err)
 	}
 	var dispatched []string

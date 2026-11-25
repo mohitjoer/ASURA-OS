@@ -1,4 +1,4 @@
-# Publish an ASURA OS release.
+# Publish a Toren Linux release.
 #
 # Pushing a tag `v*` builds the ISO with the same steps as CI
 # (.github/actions/build-iso), boot-tests it in QEMU with the test made
@@ -71,7 +71,7 @@ jobs:
           } >>"$GITHUB_OUTPUT"
           echo "Releasing $tag (version $version, prerelease=$prerelease)"
 
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v5
         with:
           ref: refs/tags/${{ steps.version.outputs.tag }}
 
@@ -97,7 +97,7 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           set -eu
-          expected="asura-os-${VERSION}-x86_64.iso"
+          expected="toren-linux-${VERSION}-x86_64.iso"
           if [ "$(basename "$ISO")" != "$expected" ]; then
             echo "::error::built $(basename "$ISO"), expected $expected"
             exit 1
@@ -129,12 +129,12 @@ jobs:
           (umask 077 && printf '%s\n' "$MINISIGN_SECRET_KEY" >"$keyfile")
           trap 'rm -f "$keyfile"' EXIT
           printf '%s\n' "${MINISIGN_PASSWORD:-}" | \
-            minisign -S -s "$keyfile" -m dist/SHA256SUMS -x dist/SHA256SUMS.sig -t "ASURA OS $VERSION"
+            minisign -S -s "$keyfile" -m dist/SHA256SUMS -x dist/SHA256SUMS.sig -t "Toren Linux $VERSION"
           echo "Signed SHA256SUMS"
 
       - name: Upload boot test logs
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v6
         with:
           name: release-boot-test
           path: |
@@ -144,7 +144,7 @@ jobs:
           retention-days: 14
 
       - name: Upload release files
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v6
         with:
           name: release-files
           path: dist/
@@ -160,7 +160,12 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v8
+      - uses: actions/checkout@v5
+        with:
+          ref: refs/tags/${{ needs.build.outputs.tag }}
+          path: src
+
+      - uses: actions/download-artifact@v7
         with:
           name: release-files
           path: dist
@@ -182,9 +187,16 @@ jobs:
           flags=""
           [ "$PRERELEASE" = true ] && flags="--prerelease"
           # shellcheck disable=SC2086
+          # docs/releases/<tag>.md is the release's notes when it exists;
+          # otherwise GitHub lists the merged pull requests.
+          notes="src/docs/releases/$TAG.md"
+          if [ -f "$notes" ]; then
+            flags="$flags --notes-file $notes"
+          else
+            flags="$flags --generate-notes"
+          fi
           gh release create "$TAG" dist/* \
             --verify-tag \
-            --title "ASURA OS $VERSION" \
-            --generate-notes \
+            --title "Toren Linux $VERSION" \
             $flags
           gh release view "$TAG" --json url --jq .url

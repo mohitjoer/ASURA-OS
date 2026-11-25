@@ -8,7 +8,7 @@
     "        underscore (pt_BR), matching Qt.locale().name.",
     "native  what the picker shows: the language's own name, so someone who",
     "        cannot read the current UI language can still find theirs.",
-    "google  the target code Ryoku's keyless Google engine used to make the catalogs.",
+    "google  the target code the translation engine used to make the catalogs.",
     "dir     ltr, or rtl for a right-to-left script (mirrors the layout).",
     "locale  the glibc locale offered with this language."
   ],

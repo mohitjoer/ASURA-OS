@@ -1,0 +1,20 @@
+id: dell-alienware
+name: "Alienware Gaming Laptops"
+description: "Alienware gaming hardware profile: thermal profile boost and fan controls"
+layer: family
+
+match:
+  sys_vendor: "*Alienware*"
+  product_family: "*Alienware*"
+
+packages: []
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel drivers/platform/x86/dell/alienware-wmi.c."
+  - "Alienware WMI thermal profile and high-performance fan profiles."

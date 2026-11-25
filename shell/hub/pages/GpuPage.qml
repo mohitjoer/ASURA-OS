@@ -692,7 +692,7 @@ done
                 // ── ASURA RENDERS ON ──
                 SettingCard {
                     width: gfxCol.colWidth
-                    title: I18n.tr("ASURA RENDERS ON")
+                    title: I18n.tr("TOREN RENDERS ON")
                     // Hybrid/Performance/Passthrough only mean something with a
                     // second GPU to switch between; a single-GPU box always renders
                     // on its one GPU, so hide the switcher rather than lock it.

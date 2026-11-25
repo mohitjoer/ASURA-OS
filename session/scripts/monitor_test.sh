@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Fixture test for asura-monitor's display persistence across a reboot and a
+# Fixture test for toren-monitor's display persistence across a reboot and a
 # power-cycled TV (issue #152). A layout saved from the Displays page must come
 # back at the next login even when the external display is absent, reports a
 # different serial, or returns on a different connector -- the reported case is
@@ -11,7 +11,7 @@
 set -euo pipefail
 
 here="$(cd "$(dirname "$0")" && pwd)"
-mon="$here/asura-monitor"
+mon="$here/toren-monitor"
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 

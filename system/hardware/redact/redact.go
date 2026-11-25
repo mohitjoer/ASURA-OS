@@ -275,6 +275,16 @@ func Verify(rendered []byte, context Context) []Findings {
 		if literal.value == "" {
 			continue
 		}
+		// Hostnames are matched as whole words (or whole field values) so a
+		// short hostname such as "vm" or "pc" does not trip on every
+		// occurrence of those letters inside other words.
+		if literal.rule == "hostname" {
+			re := regexp.MustCompile(`(?i)\b` + regexp.QuoteMeta(literal.value) + `\b`)
+			if re.MatchString(text) {
+				findings = append(findings, Findings{Rule: literal.rule, Detail: literal.value})
+			}
+			continue
+		}
 		if strings.Contains(text, literal.value) {
 			findings = append(findings, Findings{Rule: literal.rule, Detail: literal.value})
 		}

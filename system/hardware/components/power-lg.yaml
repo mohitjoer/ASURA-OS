@@ -1,0 +1,26 @@
+id: power-lg
+name: "LG Gram Battery Care Limit"
+description: "Persists 80% battery care limit via lg-laptop platform driver"
+layer: component
+
+match:
+  module:
+    - "lg_laptop"
+
+packages: []
+
+kernel_parameters: []
+
+files:
+  udev:
+    - target: "/etc/udev/rules.d/99-lg-battery.rules"
+      content: |
+        # LG Gram battery care limit (80%)
+        SUBSYSTEM=="platform", DRIVERS=="lg-laptop", ATTR{battery_care_limit}="80"
+      reason: "Persist 80% battery care limit on LG Gram laptops (Linux kernel Documentation/ABI/testing/sysfs-platform-lg-laptop)"
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel Documentation/ABI/testing/sysfs-platform-lg-laptop."
+  - "Prevents battery degradation on LG Gram laptops by stopping charging at 80%."

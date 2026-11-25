@@ -352,6 +352,133 @@ var bindDirective = regexp.MustCompile(
 // the one that closes it.
 var submapDirective = regexp.MustCompile(`^\s*submap\s*=\s*([^,\s]+)`)
 
+var luaBindDirective = regexp.MustCompile(`^\s*hl\.bind\(\s*"([^"]+)"\s*,\s*(.+?)(?:,\s*\{([^}]*)\})?\s*\)\s*$`)
+var luaSubmapDirective = regexp.MustCompile(`^\s*hl\.define_submap\(\s*"([^"]+)"`)
+
+func extractTableField(expr, field string) string {
+	re := regexp.MustCompile(field + `\s*=\s*"([^"]+)"`)
+	m := re.FindStringSubmatch(expr)
+	if len(m) > 1 {
+		return m[1]
+	}
+	return ""
+}
+
+func extractTableFieldNum(expr, field string) string {
+	re := regexp.MustCompile(field + `\s*=\s*(-?\d+)`)
+	m := re.FindStringSubmatch(expr)
+	if len(m) > 1 {
+		return m[1]
+	}
+	return ""
+}
+
+func parseLuaDispatcher(expr string) (string, string) {
+	expr = strings.TrimSpace(expr)
+	if strings.HasPrefix(expr, "hl.dsp.exec_cmd(") && strings.HasSuffix(expr, ")") {
+		inner := strings.TrimSuffix(strings.TrimPrefix(expr, "hl.dsp.exec_cmd("), ")")
+		inner = strings.TrimSpace(inner)
+		if strings.HasPrefix(inner, "\"") && strings.HasSuffix(inner, "\"") && len(inner) >= 2 {
+			inner = inner[1 : len(inner)-1]
+			inner = strings.ReplaceAll(inner, `\"`, `"`)
+		}
+		return "exec", inner
+	}
+	if strings.HasPrefix(expr, "hl.dsp.window.kill(") {
+		return "killactive", ""
+	}
+	if strings.HasPrefix(expr, "hl.dsp.window.fullscreen(") {
+		inner := strings.TrimSuffix(strings.TrimPrefix(expr, "hl.dsp.window.fullscreen("), ")")
+		return "fullscreen", strings.TrimSpace(inner)
+	}
+	if strings.HasPrefix(expr, "hl.dsp.window.center(") {
+		return "centerwindow", ""
+	}
+	if strings.HasPrefix(expr, "hl.dsp.window.pin(") {
+		return "pin", ""
+	}
+	if strings.HasPrefix(expr, "hl.dsp.group.toggle(") {
+		return "togglegroup", ""
+	}
+	if strings.HasPrefix(expr, "hl.dsp.layout(") {
+		inner := strings.TrimSuffix(strings.TrimPrefix(expr, "hl.dsp.layout("), ")")
+		inner = strings.Trim(strings.TrimSpace(inner), `"`)
+		return inner, ""
+	}
+	if strings.HasPrefix(expr, "hl.dsp.window.pseudo(") {
+		return "pseudo", ""
+	}
+	if strings.HasPrefix(expr, "hl.dsp.focus(") {
+		if strings.Contains(expr, "direction") {
+			dir := extractTableField(expr, "direction")
+			dirmap := map[string]string{"left": "l", "right": "r", "up": "u", "down": "d"}
+			if d, ok := dirmap[dir]; ok {
+				dir = d
+			}
+			return "movefocus", dir
+		}
+		if strings.Contains(expr, "workspace") {
+			ws := extractTableField(expr, "workspace")
+			return "workspace", ws
+		}
+		if strings.Contains(expr, "monitor") {
+			mon := extractTableField(expr, "monitor")
+			return "focusmonitor", mon
+		}
+	}
+	if strings.HasPrefix(expr, "hl.dsp.window.swap(") {
+		dir := extractTableField(expr, "direction")
+		dirmap := map[string]string{"left": "l", "right": "r", "up": "u", "down": "d"}
+		if d, ok := dirmap[dir]; ok {
+			dir = d
+		}
+		return "swapwindow", dir
+	}
+	if strings.HasPrefix(expr, "hl.dsp.window.resize(") {
+		if strings.Contains(expr, "x") && strings.Contains(expr, "y") {
+			x := extractTableFieldNum(expr, "x")
+			y := extractTableFieldNum(expr, "y")
+			return "resizeactive", fmt.Sprintf("%s %s", x, y)
+		}
+		return "resizewindow", ""
+	}
+	if strings.HasPrefix(expr, "hl.dsp.window.drag(") {
+		return "movewindow", ""
+	}
+	if strings.HasPrefix(expr, "hl.dsp.window.move(") {
+		if strings.Contains(expr, "monitor") {
+			mon := extractTableField(expr, "monitor")
+			return "movewindow", "mon:" + mon
+		}
+		if strings.Contains(expr, "workspace") {
+			ws := extractTableField(expr, "workspace")
+			return "movetoworkspace", ws
+		}
+		if strings.Contains(expr, "direction") {
+			dir := extractTableField(expr, "direction")
+			dirmap := map[string]string{"left": "l", "right": "r", "up": "u", "down": "d"}
+			if d, ok := dirmap[dir]; ok {
+				dir = d
+			}
+			return "movewindoworgroup", dir
+		}
+	}
+	if strings.HasPrefix(expr, "hl.dsp.workspace.move(") {
+		mon := extractTableField(expr, "monitor")
+		return "movecurrentworkspacetomonitor", mon
+	}
+	if strings.HasPrefix(expr, "hl.dispatch(") {
+		parts := strings.SplitN(strings.TrimSuffix(strings.TrimPrefix(expr, "hl.dispatch("), ")"), ",", 2)
+		d := strings.Trim(strings.TrimSpace(parts[0]), `"`)
+		a := ""
+		if len(parts) > 1 {
+			a = strings.Trim(strings.TrimSpace(parts[1]), `"`)
+		}
+		return d, a
+	}
+	return expr, ""
+}
+
 // parseBinds reads the binds out of the compositor's configuration.
 //
 // Only the bind lines are read. The rest of the file is the compositor's own
@@ -363,6 +490,7 @@ func parseBinds(body string) []compositorBind {
 	var binds []compositorBind
 	submap := ""
 	for number, line := range strings.Split(body, "\n") {
+		trimmed := strings.TrimSpace(line)
 		if match := submapDirective.FindStringSubmatch(line); match != nil {
 			submap = match[1]
 			if submap == "reset" {
@@ -370,6 +498,60 @@ func parseBinds(body string) []compositorBind {
 			}
 			continue
 		}
+		if match := luaSubmapDirective.FindStringSubmatch(line); match != nil {
+			submap = match[1]
+			continue
+		}
+		if submap != "" && (trimmed == "end)" || strings.HasPrefix(trimmed, "end)")) {
+			submap = ""
+			continue
+		}
+
+		if luaMatch := luaBindDirective.FindStringSubmatch(line); luaMatch != nil {
+			if submap != "" {
+				continue
+			}
+			chordStr := luaMatch[1]
+			if strings.HasPrefix(chordStr, "switch:") {
+				continue
+			}
+			chordParts := strings.Split(chordStr, "+")
+			for i := range chordParts {
+				chordParts[i] = strings.TrimSpace(chordParts[i])
+			}
+			key := chordParts[len(chordParts)-1]
+			modifiers := chordParts[:len(chordParts)-1]
+
+			disp, args := parseLuaDispatcher(luaMatch[2])
+
+			optsStr := ""
+			if len(luaMatch) > 3 {
+				optsStr = luaMatch[3]
+			}
+			directive := "bind"
+			switch {
+			case strings.Contains(optsStr, "release = true"):
+				directive = "bindr"
+			case strings.Contains(optsStr, "mouse = true"):
+				directive = "bindm"
+			case strings.Contains(optsStr, "locked = true") && strings.Contains(optsStr, "repeating = true"):
+				directive = "bindel"
+			case strings.Contains(optsStr, "locked = true"):
+				directive = "bindl"
+			case strings.Contains(optsStr, "repeating = true"):
+				directive = "binde"
+			}
+
+			binds = append(binds, compositorBind{
+				Directive:  directive,
+				Chord:      canonicalChord(modifiers, key),
+				Dispatcher: disp,
+				Arguments:  args,
+				Line:       number + 1,
+			})
+			continue
+		}
+
 		match := bindDirective.FindStringSubmatch(line)
 		if match == nil {
 			continue
@@ -490,15 +672,18 @@ func checkBinds(env Env) []Finding {
 }
 
 // readCompositorConfig returns the compositor's configuration as one text: the
-// file Hyprland is started with, and every other .conf beside it. The binds are
-// in files the first one sources, and a source line is not worth parsing for
-// the one directory they all live in.
+// file Hyprland is started with, and every sibling configuration file with the same
+// extension beside it.
 func readCompositorConfig(path string) ([]byte, error) {
 	body, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
-	siblings, _ := filepath.Glob(filepath.Join(filepath.Dir(path), "*.conf"))
+	ext := filepath.Ext(path)
+	if ext == "" {
+		ext = ".conf"
+	}
+	siblings, _ := filepath.Glob(filepath.Join(filepath.Dir(path), "*"+ext))
 	sort.Strings(siblings)
 	for _, sibling := range siblings {
 		if sibling == path {

@@ -1,0 +1,27 @@
+id: touchpad-i2c-hid
+name: "I2C HID Precision Touchpad"
+description: "Palm rejection and clickpad tuning for modern I2C HID laptop touchpads"
+layer: component
+
+match:
+  module:
+    - "i2c_hid"
+    - "i2c_hid_acpi"
+
+packages: []
+
+kernel_parameters: []
+
+files:
+  udev:
+    - target: "/etc/udev/rules.d/70-touchpad-tuning.rules"
+      content: |
+        # Mark I2C HID touchpads with libinput clickpad and palm detection properties
+        SUBSYSTEM=="input", KERNEL=="event*", ATTRS{name}=="*Touchpad*", ENV{LIBINPUT_ATTR_PALM_PRESSURE_THRESHOLD}="130"
+      reason: "Optimize palm rejection sensitivity for laptop I2C touchpads (libinput documentation)"
+
+services: []
+
+notes:
+  - "Knowledge source: libinput hardware quirks and palm rejection documentation."
+  - "Tunes palm rejection thresholds on high-sensitivity precision touchpads."

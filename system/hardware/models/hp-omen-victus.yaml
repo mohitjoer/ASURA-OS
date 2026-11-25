@@ -1,0 +1,25 @@
+id: hp-omen-victus
+name: "HP Omen & Victus Gaming Laptops"
+description: "HP gaming laptop hardware profile: Omen performance profiles, fan control, and backlight"
+
+match:
+  sys_vendor: "*HP*"
+  product_family: "*Omen*"
+
+packages: []
+
+kernel_parameters: []
+
+files:
+  udev:
+    - target: "/etc/udev/rules.d/90-hp-backlight.rules"
+      content: |
+        # Permissions for HP keyboard backlight
+        SUBSYSTEM=="leds", KERNEL=="hp::kbd_backlight", ACTION=="add", RUN+="/bin/chmod a+w /sys/class/leds/hp::kbd_backlight/brightness"
+      reason: "Grant write permissions to hp::kbd_backlight"
+
+services: []
+
+notes:
+  - "HP Omen Command Center thermal profiles exposed via hp-wmi platform_profile ('asura power profile')."
+  - "Fan curve and thermal balance optimized for gaming and heavy workloads."

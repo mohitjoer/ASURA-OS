@@ -1,0 +1,22 @@
+id: lg-gram
+name: "LG Gram Laptops"
+description: "LG Gram ultralight hardware profile: lg-laptop battery care limit and silent fan mode"
+layer: vendor
+
+match:
+  sys_vendor: "LG Electronics"
+  chassis: "laptop"
+
+packages: []
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel drivers/platform/x86/lg-laptop.c."
+  - "LG Battery Care Limit caps battery charge at 80%."
+  - "Reader mode and silent fan control supported through lg-laptop driver."
+  - "The battery limit comes from the power-lg component."

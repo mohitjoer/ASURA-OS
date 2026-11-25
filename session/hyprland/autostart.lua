@@ -1,0 +1,8 @@
+hl.on("hyprland.start", function()
+    hl.exec_cmd("command -v asura-monitor >/dev/null 2>&1 && asura-monitor autoscale --at-login")
+    hl.exec_cmd("command -v asura-cmd-folders >/dev/null 2>&1 && asura-cmd-folders")
+    hl.exec_cmd("command -v asura-cmd-nightlight >/dev/null 2>&1 && asura-cmd-nightlight restore")
+    hl.exec_cmd("command -v plymouth >/dev/null 2>&1 && (plymouth --quit 2>/dev/null || sudo -n plymouth --quit 2>/dev/null || sudo -n pkill -9 -x plymouthd 2>/dev/null || true)")
+    hl.exec_cmd([[sh -c 'if [ -f /etc/asura-live ] || grep -qE "boot=live|live" /proc/cmdline 2>/dev/null; then command -v notify-send >/dev/null 2>&1 && sleep 2 && notify-send -u normal -a "Toren Linux" "Welcome to Toren Linux" "Explore and test the live environment freely. Launch Install Toren Linux from the desktop or launcher when ready."; else /usr/bin/asura-welcome --if-first-run; fi']])
+    hl.exec_cmd("command -v swaybg >/dev/null 2>&1 && swaybg -i ~/.config/asura/current/background -m stretch")
+end)

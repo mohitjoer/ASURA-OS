@@ -101,7 +101,7 @@ Column {
             RowToggle {
                 colors: root.colors
                 title: I18n.tr("Managed")
-                description: I18n.tr("Let Asura drive this device's colour.")
+                description: I18n.tr("Let Toren drive this device's colour.")
                 checked: !!modelData.managed
                 onToggle: function(v) { root._set(modelData.key, { managed: v }) }
             }

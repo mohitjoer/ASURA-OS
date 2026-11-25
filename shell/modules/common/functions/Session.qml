@@ -1,10 +1,18 @@
 pragma Singleton
 import Quickshell
+import Quickshell.Io
 import qs.services
 import qs.modules.common
 
 Singleton {
     id: root
+
+    FileView {
+        id: hibernateReadyFile
+        path: "/run/asura/hibernate.ready"
+    }
+    readonly property bool canHibernate: hibernateReadyFile.loaded && hibernateReadyFile.text().trim() === "1"
+
 
     function closeAllWindows() {
         HyprlandData.windowList.map(w => w.pid).forEach(pid => {

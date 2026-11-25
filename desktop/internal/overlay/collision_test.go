@@ -16,6 +16,10 @@ import (
 func TestTwoUpdatesInTheSameSecondGetDistinctRevisions(t *testing.T) {
 	m := newMachine(t)
 	m.baseFile("a.conf", "base\n")
+	// This counts every revision, so keep them all for its duration.
+	keep := KeepRevisions
+	KeepRevisions = 100
+	t.Cleanup(func() { KeepRevisions = keep })
 
 	for i := 0; i < 5; i++ {
 		if err := Update(m.paths, nil, func() error { return nil }); err != nil {

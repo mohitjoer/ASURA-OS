@@ -1,0 +1,20 @@
+id: hp-victus
+name: "HP Victus Gaming Laptops"
+description: "HP Victus gaming laptop hardware profile: thermal profile and fan control"
+layer: family
+
+match:
+  sys_vendor: "*HP*"
+  product_family: "*Victus*"
+
+packages: []
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel drivers/platform/x86/hp/hp-wmi.c."
+  - "HP Victus thermal management via hp-wmi platform_profile."

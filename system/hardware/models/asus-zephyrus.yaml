@@ -1,0 +1,20 @@
+id: asus-zephyrus
+name: "ASUS ROG Zephyrus Laptops"
+description: "ASUS Zephyrus thin-and-light gaming laptop hardware profile: hybrid graphics and thermal profiles"
+layer: family
+
+match:
+  sys_vendor: "ASUSTeK COMPUTER INC."
+  product_family: "*Zephyrus*"
+
+packages: []
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel drivers/platform/x86/asus-wmi.c."
+  - "Optimized thermal and power management for slim gaming chassis."

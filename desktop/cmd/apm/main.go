@@ -39,6 +39,10 @@ func forward(asuraPath string, argv []string) int {
 }
 
 func main() {
+	if len(os.Args) == 2 && (os.Args[1] == "-h" || os.Args[1] == "--help") {
+		fmt.Print("Usage: apm [-flatpak] [-repo URL] install|remove|search|update|upgrade [package...]\n\napm is `asura pkg`: the same verbs and flags, shorter to type.\n")
+		return
+	}
 	asuraPath, err := exec.LookPath("asura")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "apm: the asura control tool is not installed: %v\n", err)

@@ -356,7 +356,7 @@ func slug(value string) string {
 func renderText(input Input, inferred Inference, opts Options) ([]byte, error) {
 	var b bytes.Buffer
 
-	b.WriteString("Asura hardware report\n")
+	b.WriteString("Toren hardware report\n")
 	b.WriteString("=======================\n\n")
 
 	fmt.Fprintf(&b, "Kernel flavour: %s\n\n", orDefault(inferred.KernelFlavour, "unknown"))

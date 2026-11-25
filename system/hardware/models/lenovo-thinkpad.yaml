@@ -1,0 +1,34 @@
+id: lenovo-thinkpad
+name: "Lenovo ThinkPad (T / X / P / E / L / Z Series & X1 Carbon)"
+description: "ThinkPad hardware profile: thinkpad_acpi thermal profile, dual battery charge thresholds, and TrackPoint"
+
+match:
+  sys_vendor: "LENOVO"
+  product_family: "*ThinkPad*"
+
+packages: []
+
+kernel_parameters: []
+
+files:
+  udev:
+    - target: "/etc/udev/rules.d/99-thinkpad-battery.rules"
+      content: |
+        # ThinkPad battery charging thresholds (BAT0 and BAT1 for dual-battery models)
+        SUBSYSTEM=="power_supply", KERNEL=="BAT[0-9]", ATTR{charge_stop_threshold}="80"
+        SUBSYSTEM=="power_supply", KERNEL=="BAT[0-9]", ATTR{charge_start_threshold}="75"
+      reason: "Persist 80% charge threshold on ThinkPad BAT0 and BAT1 charge_stop_threshold"
+    - target: "/etc/udev/rules.d/90-thinkpad-leds.rules"
+      content: |
+        # Permissions for ThinkPad keyboard backlight and notification LEDs
+        SUBSYSTEM=="leds", KERNEL=="tpacpi::kbd_backlight", ACTION=="add", RUN+="/bin/chmod a+w /sys/class/leds/tpacpi::kbd_backlight/brightness"
+        SUBSYSTEM=="leds", KERNEL=="tpacpi::thinklight", ACTION=="add", RUN+="/bin/chmod a+w /sys/class/leds/tpacpi::thinklight/brightness"
+        SUBSYSTEM=="leds", KERNEL=="tpacpi::power_led", ACTION=="add", RUN+="/bin/chmod a+w /sys/class/leds/tpacpi::power_led/brightness"
+      reason: "Grant user permissions to ThinkPad LEDs and keyboard backlight"
+
+services: []
+
+notes:
+  - "ACPI platform_profile: quiet, balanced, and performance thermal modes exposed by thinkpad_acpi ('asura power profile')."
+  - "Battery conservation: charge thresholds set on /sys/class/power_supply/BAT*/charge_stop_threshold."
+  - "TrackPoint & Keyboard backlight: configured natively through sysfs platform thinkpad_acpi."

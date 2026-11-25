@@ -1,0 +1,32 @@
+id: amd-gpu
+name: "AMD Radeon Discrete Graphics (DPM & Runtime Power)"
+description: "Dynamic power management (DPM) and PCIe runtime power off for AMD Radeon discrete graphics"
+layer: component
+
+match:
+  pci:
+    - "1002:*"
+  module:
+    - "amdgpu"
+
+packages:
+  - mesa-dri
+  - vulkan-loader
+
+kernel_parameters:
+  - "amdgpu.dpm=1"
+
+files:
+  udev:
+    - target: "/etc/udev/rules.d/80-amdgpu-pm.rules"
+      content: |
+        # Enable runtime power management for AMD discrete GPUs
+        ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1002", ATTR{class}=="0x03[0-9]*", ATTR{power/control}="auto"
+      reason: "Enable PCIe runtime power management for AMD discrete GPUs (Linux kernel Documentation/gpu/amdgpu/thermal.rst)"
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel Documentation/gpu/amdgpu/thermal.rst and power management guide."
+  - "Enables runtime D3 power management for Radeon discrete graphics when hybrid switching is active."
+  - "Offload render commands with 'DRI_PRIME=1' or 'asura gpu run <cmd>'."

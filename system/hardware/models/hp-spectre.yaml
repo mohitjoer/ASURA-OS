@@ -1,0 +1,20 @@
+id: hp-spectre
+name: "HP Spectre Laptops"
+description: "HP Spectre premium 2-in-1 hardware profile: thermal management and auto-rotate sensors"
+layer: family
+
+match:
+  sys_vendor: "*HP*"
+  product_family: "*Spectre*"
+
+packages: []
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel drivers/platform/x86/hp/hp-wmi.c."
+  - "HP Spectre thermal profiles and convertible mode detection."

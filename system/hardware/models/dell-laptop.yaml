@@ -1,0 +1,25 @@
+id: dell-laptop
+name: "Dell Laptops (Latitude, Inspiron, Precision, Vostro)"
+description: "Dell laptop hardware profile: dell-wmi platform profile and keyboard backlight"
+
+match:
+  sys_vendor: "Dell Inc."
+  chassis: "laptop"
+
+packages: []
+
+kernel_parameters: []
+
+files:
+  udev:
+    - target: "/etc/udev/rules.d/90-dell-backlight.rules"
+      content: |
+        # Permissions for Dell keyboard backlight
+        SUBSYSTEM=="leds", KERNEL=="dell::kbd_backlight", ACTION=="add", RUN+="/bin/chmod a+w /sys/class/leds/dell::kbd_backlight/brightness"
+      reason: "Grant write permissions to dell::kbd_backlight"
+
+services: []
+
+notes:
+  - "Dell WMI platform_profile thermal management (quiet, balanced, performance) via 'asura power profile'."
+  - "Native Dell SMBIOS thermal modes exposed through kernel platform_profile."

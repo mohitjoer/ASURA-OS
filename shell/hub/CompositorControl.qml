@@ -100,7 +100,7 @@ Column {
             Text {
                 width: parent.width
                 wrapMode: Text.WordWrap
-                text: I18n.tr("Asura runs on Hyprland. Window rules, animations and keybinds are written for it into your Asura config, and your edits survive updates.")
+                text: I18n.tr("Toren runs on Hyprland. Window rules, animations and keybinds are written for it into your Toren config, and your edits survive updates.")
                 color: Tokens.inkFaint
                 font.family: Tokens.ui
                 font.pixelSize: Tokens.fSmall

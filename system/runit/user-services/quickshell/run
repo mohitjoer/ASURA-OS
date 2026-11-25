@@ -9,6 +9,14 @@ export XDG_CURRENT_DESKTOP=Asura
 export XDG_SESSION_DESKTOP=asura
 export DESKTOP_SESSION=asura
 export GDK_BACKEND=wayland
+# What a Wayland session's apps expect, for anything the shell starts itself:
+# this runs under a runit supervisor that can start before the compositor,
+# with none of the session's environment.
+export XDG_SESSION_TYPE=wayland
+export MOZ_ENABLE_WAYLAND=1
+if [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ] && [ -S "$RUNTIME_DIR/bus" ]; then
+	export DBUS_SESSION_BUS_ADDRESS="unix:path=$RUNTIME_DIR/bus"
+fi
 
 # Resolve WAYLAND_DISPLAY from runtime socket if empty or invalid
 for _ in $(seq 1 50); do
@@ -43,19 +51,20 @@ mkdir -p "$LOG_DIR"
 exec >>"$LOG_DIR/quickshell.log" 2>&1
 
 # Which desktop shell: org.asura.shell desktop-shell picks ASURA's own shell
-# (asura) or end-4's illogical-impulse desktop (end4). ASURA_DESKTOP_SHELL
+# (asura) or the desktop shell (desktop). ASURA_DESKTOP_SHELL
 # overrides it for a test run, and ASURA_SHELL_DIR overrides the directory.
 DESKTOP_SHELL="${ASURA_DESKTOP_SHELL:-$(gsettings get org.asura.shell desktop-shell 2>/dev/null | tr -d "'")}"
-DESKTOP_SHELL="${DESKTOP_SHELL:-end4}"
+DESKTOP_SHELL="${DESKTOP_SHELL:-desktop}"
 
-# A desktop that dies at once would leave the user with no bar, no launcher and
-# no way to reach the Hub to switch back. If the end-4 shell exits within 15
-# seconds three times in a row, this session falls back to ASURA's shell; the
-# log says so, and the next login tries end-4 again.
-CRASHES="$LOG_DIR/end4-quick-exits"
-if [ "$DESKTOP_SHELL" = "end4" ]; then
+# The desktop is the default shell. ASURA's own shell runs only when the user chooses it
+# (org.asura.shell desktop-shell = asura); it is never switched to on its own.
+# When the desktop exits within 15 seconds three times in a row, it is restarted
+# after a pause instead, so a crash loop does not spin the CPU, and the user
+# is told once where the log is.
+CRASHES="$LOG_DIR/desktop-quick-exits"
+if [ "$DESKTOP_SHELL" = "desktop" ]; then
 	now=$(date +%s)
-	last=$(cat "$LOG_DIR/end4-last-start" 2>/dev/null || echo 0)
+	last=$(cat "$LOG_DIR/desktop-last-start" 2>/dev/null || echo 0)
 	count=$(cat "$CRASHES" 2>/dev/null || echo 0)
 	if [ "$last" -gt 0 ] && [ $((now - last)) -lt 15 ]; then
 		count=$((count + 1))
@@ -63,24 +72,25 @@ if [ "$DESKTOP_SHELL" = "end4" ]; then
 		count=0
 	fi
 	echo "$count" >"$CRASHES"
-	echo "$now" >"$LOG_DIR/end4-last-start"
 	if [ "$count" -ge 3 ]; then
-		echo "quickshell: the end-4 desktop exited within 15s three times; using ASURA's shell for this session" >&2
-		DESKTOP_SHELL=asura
+		echo "quickshell: the desktop exited within 15s $count times in a row; restarting it in 5s" >&2
+		if [ "$count" -eq 3 ] && command -v notify-send >/dev/null 2>&1; then
+			notify-send -a ASURA "The desktop keeps restarting" "See ~/.local/state/asura/quickshell.log" 2>/dev/null || true
+		fi
+		sleep 5
 	fi
+	date +%s >"$LOG_DIR/desktop-last-start"
 fi
 
 case "$DESKTOP_SHELL" in
-	end4) DEFAULT_DIR=/usr/share/asura/shell-end4 ;;
+	desktop) DEFAULT_DIR=/usr/share/asura/shell-desktop ;;
 	*) DEFAULT_DIR=/usr/share/asura/shell ;;
 esac
 SHELL_DIR="${ASURA_SHELL_DIR:-$DEFAULT_DIR}"
-if [ ! -d "$SHELL_DIR" ]; then
-	echo "quickshell: $SHELL_DIR is missing; using ASURA's shell" >&2
-	SHELL_DIR=/usr/share/asura/shell
-fi
-if [ ! -d "$SHELL_DIR" ] && [ -d "$HOME/code/Asura-OS/shell" ]; then
-	SHELL_DIR="$HOME/code/Asura-OS/shell"
+if [ ! -f "$SHELL_DIR/shell.qml" ]; then
+	echo "quickshell: $SHELL_DIR/shell.qml is missing; reinstall with: asura update --force" >&2
+	sleep 10
+	exit 1
 fi
 echo "quickshell: starting the $DESKTOP_SHELL desktop from $SHELL_DIR"
 

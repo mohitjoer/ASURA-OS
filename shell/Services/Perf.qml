@@ -121,7 +121,7 @@ Singleton {
     // is SILENT (with audio playing it reacts regardless -- that is streamLive's
     // audioLive term, not this). This passive drift is the shell's one
     // continuously-repainting idle surface, and it is why a default box idled far
-    // above the shells in #60: caelestia and end-4 only animate the bar while a
+    // above the shells in #60: caelestia and desktop only animate the bar while a
     // player isPlaying, and a Waybar box has no GPU canvas at all.
     //
     // By default the silent drift is Performance-only: Balanced and Saver leave the

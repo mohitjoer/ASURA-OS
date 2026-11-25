@@ -38,7 +38,7 @@ Item {
     // full-screen layer that promotion is the whole cost. And it runs only where
     // the power profile allows it (Perf.ambientMotion: Performance), the same rule
     // ParticleStream applies, so a silent bar sits still on Balanced and Saver,
-    // like caelestia and end-4. Music still animates the bar on every profile.
+    // like caelestia and desktop. Music still animates the bar on every profile.
     // `time` is in seconds, matching stream.frag's time units.
     readonly property bool streamLive: root.visible && (root.audioLive || Perf.ambientMotion)
     readonly property int motionTick: (root.mode === 5 || root.mode === 6) ? 16 : 33

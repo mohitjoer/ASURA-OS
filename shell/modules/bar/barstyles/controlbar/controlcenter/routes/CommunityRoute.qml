@@ -137,7 +137,7 @@ Item {
                             id: warnText
                             anchors.verticalCenter: parent.verticalCenter
                             width: parent.width - Tokens.fRow - parent.spacing
-                            text: I18n.tr("Community plugin. Asura does not review or maintain it: it runs inside your shell with your permissions, so inspect its code before you trust it.")
+                            text: I18n.tr("Community plugin. Toren does not review or maintain it: it runs inside your shell with your permissions, so inspect its code before you trust it.")
                             color: Tokens.inkDim
                             font.family: Tokens.ui
                             font.pixelSize: Tokens.fSmall
@@ -196,7 +196,7 @@ Item {
                         }
                         UiText {
                             width: parent.width
-                            text: I18n.tr("A bar plugin from a git repo or Asura Store lands here.")
+                            text: I18n.tr("A bar plugin from a git repo or Toren Store lands here.")
                             color: Tokens.inkMuted
                             font.family: Tokens.ui
                             font.pixelSize: Tokens.fSmall
@@ -315,12 +315,12 @@ Item {
                         anchors.right: parent.right
                         divider: true
                         controlWidth: 150
-                        label: I18n.tr("From Asura Store")
+                        label: I18n.tr("From Toren Store")
                         desc: I18n.tr("The curated shelf")
                         Btn {
                             anchors.right: parent.right
                             anchors.verticalCenter: parent.verticalCenter
-                            text: I18n.tr("OPEN RYOSTORE")
+                            text: I18n.tr("OPEN Toren Store")
                             onAct: {
                                 Quickshell.execDetached(["asura-store", "open", "plugins"])
                                 if (page.cc) page.cc.close()

@@ -13,8 +13,14 @@ import Quickshell.Io
 Singleton {
     id: root
 
-    readonly property color accent:  vivid(adapter.color4)
-    readonly property color accent2: vivid(adapter.color5)
+    readonly property color accent: {
+        var c = adapter.primary ? adapter.primary : adapter.color4;
+        return (c && c !== "#000000" && c !== "") ? c : vivid(adapter.color4);
+    }
+    readonly property color accent2: {
+        var c = adapter.secondary ? adapter.secondary : adapter.color5;
+        return (c && c !== "#000000" && c !== "") ? c : vivid(adapter.color5);
+    }
 
     readonly property var ramp: [
         vivid(adapter.color1),
@@ -62,6 +68,9 @@ Singleton {
             property color color4: "#7aa2f7"
             property color color5: "#bb9af7"
             property color color6: "#7dcfff"
+            property color primary: "#e2342a"
+            property color secondary: "#7fbbb3"
+            property color tertiary: "#e0af68"
         }
     }
 }

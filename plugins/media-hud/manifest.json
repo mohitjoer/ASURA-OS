@@ -1,0 +1,48 @@
+{
+  "id": "media-hud",
+  "name": "Media HUD",
+  "version": "1.0.0",
+  "author": "mohitjoer <mohitjoe.r@gmail.com>",
+  "description": "Wayland now-playing media controller with track progress and playback controls.",
+  "license": "GPL-3.0",
+  "official": false,
+  "hosts": [
+    "topbarGlyph",
+    "desktopWidget"
+  ],
+  "entryPoints": {
+    "main": "service/Main.qml",
+    "content": "content/Widget.qml",
+    "panel": "content/Panel.qml"
+  },
+  "panel": {
+    "width": 320
+  },
+  "files": [],
+  "capabilities": {
+    "densities": [
+      "glyph",
+      "compact"
+    ]
+  },
+  "defaults": {
+    "host": "topbarGlyph",
+    "label": "Media HUD"
+  },
+  "dependencies": {
+    "commands": [
+      "playerctl"
+    ]
+  },
+  "metadata": {
+    "settings": [
+      {
+        "key": "showArtist",
+        "type": "toggle",
+        "label": "Show Artist alongside Track",
+        "group": "Display",
+        "default": true
+      }
+    ]
+  }
+}

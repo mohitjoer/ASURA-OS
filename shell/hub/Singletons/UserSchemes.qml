@@ -3,7 +3,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// Installed colour schemes (the RyoStore Themes library), read from the daemon's
+// Installed colour schemes (the Asura Store Themes library), read from the daemon's
 // theme catalog so the Hub Appearance picker lists downloaded schemes beside the
 // built-ins. `asura-shell theme catalog` prints every card; only library schemes
 // carry a provider, so filtering to provider-tagged cards yields the user set.

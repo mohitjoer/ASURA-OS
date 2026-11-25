@@ -504,7 +504,7 @@ PanelWindow {
             ["org.gnome.Nautilus"],
             ["com.mitchellh.ghostty", "org.gnome.Ptyxis", "org.gnome.Terminal"],
             ["org.gnome.TextEditor", "org.gnome.gedit"],
-            ["brave-browser", "google-chrome", "firefox"],
+            ["chromium", "brave-browser", "google-chrome", "firefox"],
             ["org.gnome.Settings"]
         ];
 

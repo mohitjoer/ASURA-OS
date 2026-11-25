@@ -1,0 +1,31 @@
+id: intel-gpu-i915
+name: "Intel HD / UHD / Iris Xe Graphics (i915)"
+description: "GuC/HuC hardware submission and power-saving for Intel graphics via i915 driver"
+layer: component
+
+match:
+  pci:
+    - "8086:*"
+  module:
+    - "i915"
+
+packages:
+  - intel-video-accel
+  - mesa-dri
+
+kernel_parameters:
+  - "i915.enable_guc=3"
+
+files:
+  modprobe:
+    - target: "/etc/modprobe.d/i915.conf"
+      content: |
+        # Enable GuC and HuC firmware loading and submission for Gen9+ Intel GPUs
+        options i915 enable_guc=3
+      reason: "Enable Intel GuC firmware submission and HuC media decoding (Linux kernel Documentation/gpu/i915.rst)"
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel Documentation/gpu/i915.rst."
+  - "i915.enable_guc=3 activates hardware scheduling and media decoding offload on Intel Skylake through Raptor Lake."

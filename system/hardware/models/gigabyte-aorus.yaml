@@ -1,0 +1,20 @@
+id: gigabyte-aorus
+name: "Gigabyte AORUS Gaming Laptops"
+description: "Gigabyte AORUS gaming hardware profile: turbo cooling modes and gaming profiles"
+layer: family
+
+match:
+  sys_vendor: "GIGABYTE*"
+  product_family: "*AORUS*"
+
+packages: []
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel drivers/platform/x86/gigabyte-wmi.c."
+  - "AORUS extreme cooling and performance profiles."

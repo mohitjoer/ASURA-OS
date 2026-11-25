@@ -1,9 +1,9 @@
 # The store's two trees must never drift.
 #
-# The standalone asura-store repository (github.com/ASURA-OS/asura-store,
+# The standalone asura-store repository (github.com/Toren-Linux/asura-store,
 # public) owns the backend and the window: the ISO builder builds the binary
 # from it whenever it is available (`ASURA_STORE_SRC`, with the checkout under
-# the tree next to this one winning), and `desktop/cmd/asura-store/` and
+# the tree next to this one winning), and `desktop/cmd/toren-store/` and
 # `shell/store/` here are its byte-identical copies, with `desktop/catalog/`
 # carrying the same catalogue JSON so a desktop-tree build still finds a shop.
 #
@@ -17,7 +17,7 @@ on:
   push:
     branches: [main, dev-unstable]
     paths:
-      - 'desktop/cmd/asura-store/**'
+      - 'desktop/cmd/toren-store/**'
       - 'shell/store/**'
       - 'shell/store.qml'
       - 'desktop/catalog/**'
@@ -25,7 +25,7 @@ on:
   pull_request:
     branches: [main, dev-unstable]
     paths:
-      - 'desktop/cmd/asura-store/**'
+      - 'desktop/cmd/toren-store/**'
       - 'shell/store/**'
       - 'shell/store.qml'
       - 'desktop/catalog/**'
@@ -42,21 +42,21 @@ jobs:
   parity:
     runs-on: ubuntu-24.04
     steps:
-      - name: Check out ASURA-OS
-        uses: actions/checkout@v7
+      - name: Check out Toren-Linux
+        uses: actions/checkout@v5
         with:
           fetch-depth: 1
 
       - name: Check out the standalone store repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v5
         with:
-          repository: ASURA-OS/asura-store
+          repository: Toren-Linux/asura-store
           ref: main
           path: store-upstream
           fetch-depth: 1
 
       - name: Set up Go at the version this module pins
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@v6
         with:
           go-version-file: desktop/go.mod
           cache-dependency-path: desktop/go.mod
@@ -69,20 +69,25 @@ jobs:
       - name: The embedded backend passes the standalone repo's checks as-is
         run: |
           cd desktop
-          drift="$(gofmt -l cmd/asura-store)"
+          drift="$(gofmt -l cmd/toren-store)"
           if [ -n "$drift" ]; then
             echo "gofmt would change:"
             echo "$drift"
             exit 1
           fi
-          go vet ./cmd/asura-store
-          go test -count=1 -race ./cmd/asura-store
+          go vet ./cmd/toren-store
+          go test -count=1 -race ./cmd/toren-store
 
       - name: The window's JavaScript helpers pass their tests
         run: node --test shell/store/lib/store.test.mjs
 
       - name: The embedded backend is byte-identical with the standalone repo
-        run: diff -r desktop/cmd/asura-store store-upstream/cmd/asura-store
+        run: |
+          if [ -d store-upstream/cmd/toren-store ]; then
+            diff -r desktop/cmd/toren-store store-upstream/cmd/toren-store
+          else
+            diff -r desktop/cmd/toren-store store-upstream/cmd/asura-store
+          fi
 
       - name: The window is byte-identical (store.qml, the entry file, resolved below)
         run: |

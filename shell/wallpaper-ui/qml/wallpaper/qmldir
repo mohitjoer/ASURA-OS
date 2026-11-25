@@ -26,7 +26,7 @@ SliceDelegate 1.0 SliceDelegate.qml
 RiceWorkshop 1.0 RiceWorkshop.qml
 BrowseSurface 1.0 BrowseSurface.qml
 MockDesktop 1.0 MockDesktop.qml
-RyowallsSource 1.0 RyowallsSource.qml
+WallpaperSource 1.0 WallpaperSource.qml
 LibraryBrowser 1.0 LibraryBrowser.qml
 WallhavenBrowser 1.0 WallhavenBrowser.qml
 WallhavenDownloadProc 1.0 WallhavenDownloadProc.qml

@@ -488,3 +488,33 @@ func TestConfigurationLocations(t *testing.T) {
 		})
 	}
 }
+
+// The shipped configuration is what doctor reads on a real machine: it has to
+// satisfy the check, with sections spelled as the backends declare them.
+func TestShippedPortalConfigSatisfiesTheCheck(t *testing.T) {
+	body, err := os.ReadFile("../../../session/toren-portals.conf")
+	if err != nil {
+		t.Fatal(err)
+	}
+	config, err := Parse(string(body))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if problems := checkBackends(*config); len(problems) != 0 {
+		t.Errorf("session/asura-portals.conf fails doctor: %v", problems)
+	}
+}
+
+// The [preferred] form is read per interface.
+func TestPreferredGroupIsRead(t *testing.T) {
+	config, err := Parse("[preferred]\ndefault=hyprland;gtk;\norg.freedesktop.impl.portal.FileChooser=gtk;\n")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, ok := config.Backend("default"); !ok || got != "hyprland" {
+		t.Errorf("default = %q, %v", got, ok)
+	}
+	if got, ok := config.Backend("org.freedesktop.impl.portal.FileChooser"); !ok || got != "gtk" {
+		t.Errorf("FileChooser = %q, %v", got, ok)
+	}
+}

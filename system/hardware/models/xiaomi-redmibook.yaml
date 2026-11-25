@@ -1,0 +1,26 @@
+id: xiaomi-redmibook
+name: "Xiaomi & Redmi Laptops"
+description: "Xiaomi and Redmi laptop hardware profile: xiaomi-wmi hotkey handling and backlight"
+layer: vendor
+
+match:
+  sys_vendor: "TIMI"
+  chassis: "laptop"
+
+packages: []
+
+kernel_parameters: []
+
+files:
+  udev:
+    - target: "/etc/udev/rules.d/90-xiaomi-backlight.rules"
+      content: |
+        # Permissions for Xiaomi keyboard backlight
+        SUBSYSTEM=="leds", KERNEL=="*::kbd_backlight", ACTION=="add", RUN+="/bin/chmod a+w /sys/class/leds/%k/brightness"
+      reason: "Grant write permissions to Xiaomi keyboard backlight"
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel drivers/platform/x86/xiaomi-wmi.c."
+  - "Fn-lock and hotkeys handled via xiaomi-wmi driver."

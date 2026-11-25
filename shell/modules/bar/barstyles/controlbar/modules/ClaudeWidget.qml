@@ -4,7 +4,7 @@ import Quickshell
 import Quickshell.Io
 import qs.Ui.Singletons
 
-// AI-usage bar display in the omarchy-agent-usage presentation: one inline chip
+// AI-usage bar display: one inline chip
 // per tracked provider (Claude Code · OpenAI Codex · OpenCode), each showing the
 // provider mark, its WEEKLY allowance used, and the countdown to reset —
 // "Claude 31% · 15h 59m". A provider turns red when it is burning faster than

@@ -1,0 +1,20 @@
+id: dell-latitude
+name: "Dell Latitude Laptops"
+description: "Dell Latitude enterprise hardware profile: battery charge thresholds and dock management"
+layer: family
+
+match:
+  sys_vendor: "Dell Inc."
+  product_family: "*Latitude*"
+
+packages: []
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel Documentation/admin-guide/laptops/dell-laptop.rst."
+  - "Dell enterprise SMBIOS thermal profiles and battery longevity thresholds."

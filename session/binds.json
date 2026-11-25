@@ -222,7 +222,8 @@
       "label": "Resource Monitor",
       "chord": "CTRL + SHIFT + Escape",
       "kind": "app",
-      "action": "asura-sysmon",
+      "action": "asura-app",
+      "argument": "terminal -- btop",
       "also": [
         {
           "chord": "SUPER + SHIFT + Escape"
@@ -635,9 +636,6 @@
       "kind": "app",
       "action": "asura-shot",
       "also": [
-        {
-          "chord": "XF86Print"
-        },
         {
           "chord": "SUPER + SHIFT + S"
         }

@@ -1,0 +1,21 @@
+id: fprintd-goodix
+name: "Goodix Fingerprint Sensor"
+description: "USB fingerprint authentication support for Goodix biometric sensors via libfprint"
+layer: component
+
+match:
+  usb:
+    - "27c6:*"
+
+packages:
+  - fprintd
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: libfprint supported devices list (vendor 27c6 Goodix Moch/Spi sensors)."
+  - "Enables biometric authentication via 'asura enable fingerprint' or fprintd."

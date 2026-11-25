@@ -1,0 +1,20 @@
+id: razer-blade
+name: "Razer Blade Gaming Laptops"
+description: "Razer Blade gaming laptop hardware profile: thermal profile and keyboard lighting permissions"
+layer: vendor
+
+match:
+  sys_vendor: "Razer"
+  chassis: "laptop"
+
+packages: []
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel drivers/platform/x86/ and OpenRazer driver documentation."
+  - "High-performance fan cooling and thermal modes."

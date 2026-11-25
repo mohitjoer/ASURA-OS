@@ -1,0 +1,27 @@
+id: lenovo-ideapad
+name: "Lenovo IdeaPad & Slim"
+description: "Lenovo IdeaPad hardware profile: battery conservation mode, touchpad toggle, and thermal management"
+layer: family
+
+match:
+  sys_vendor: "LENOVO"
+  product_family: "*IdeaPad*"
+
+packages: []
+
+kernel_parameters: []
+
+files:
+  udev:
+    - target: "/etc/udev/rules.d/99-lenovo-battery.rules"
+      content: |
+        # Lenovo battery conservation mode (caps charge at 60-80% for battery longevity)
+        SUBSYSTEM=="platform", DRIVERS=="ideapad_acpi", ATTR{conservation_mode}="1"
+      reason: "Enable Lenovo battery conservation mode (Linux drivers/platform/x86/lenovo/ideapad-laptop.c)"
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel drivers/platform/x86/lenovo/ideapad-laptop.c."
+  - "Battery conservation mode: limits state of charge around 60-80% via ideapad_acpi conservation_mode."
+  - "Thermal profiles: quiet, balanced, and performance profiles via ideapad_laptop platform_profile ('asura power profile')."

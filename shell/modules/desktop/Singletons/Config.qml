@@ -9,6 +9,10 @@ import Quickshell.Io
 Singleton {
     id: root
     property bool ready: false
+    // Bumped on every file change. Referenced by Desktop loader active
+    // bindings to force re-evaluation even when the adapter's property
+    // values lag behind (the JsonAdapter may not re-read on reload).
+    property int fileVersion: 0
 
     // -- clock ---------------------------------------------------------------
     property alias clockEnabled: adapter.clockEnabled
@@ -119,12 +123,27 @@ Singleton {
     property alias notesColor2:   adapter.notesColor2
     property alias notesGradient: adapter.notesGradient
 
+    // battery widget ----------------------------------------------------------
+    property alias batteryEnabled: adapter.batteryEnabled
+    property alias batteryDesign: adapter.batteryDesign
+    property alias batteryScale: adapter.batteryScale
+    property alias batteryAnchor: adapter.batteryAnchor
+    property alias batteryX: adapter.batteryX
+    property alias batteryY: adapter.batteryY
+    property alias batteryLocked: adapter.batteryLocked
+    property alias batteryOpacity: adapter.batteryOpacity
+    property alias batteryBg: adapter.batteryBg
+    property alias batteryRadius: adapter.batteryRadius
+    property alias batteryColor: adapter.batteryColor
+    property alias batteryColor2: adapter.batteryColor2
+    property alias batteryGradient: adapter.batteryGradient
+
     // brand: the desktop's mark + name, user-overridable from Asura Settings ->
     // Shell -> Global. a small cross-cutting identity master (like theme.json).
     // markText is the glyph/short-text seal (default A); markImage an optional
     // image path that wins over the text; markTint recolours a single-colour
     // image to the accent; name is the wordmark ("Asura") shown in chrome copy.
-    // Asura's own apps (the Hub, ryo* apps) never read this and keep the Asura brand.
+    // Asura's own apps (the Hub, related apps) never read this and keep the Asura brand.
     property alias markText:  brandAdapter.markText
     property alias markImage: brandAdapter.markImage
     property alias markTint:  brandAdapter.markTint
@@ -175,7 +194,10 @@ Singleton {
         watchChanges: true
         printErrors: false
         atomicWrites: true
-        onFileChanged: reload()
+        onFileChanged: {
+            reload();
+            root.fileVersion++;
+        }
         onLoaded: root.ready = true
         onLoadFailed: root.ready = true
 
@@ -275,6 +297,19 @@ Singleton {
             property string notesColor: ""
             property string notesColor2: ""
             property bool notesGradient: false
+            property bool batteryEnabled: true
+            property string batteryDesign: "default"
+            property real batteryScale: 1.0
+            property string batteryAnchor: "top-right"
+            property int batteryX: 80
+            property int batteryY: 80
+            property bool batteryLocked: false
+            property real batteryOpacity: 1.0
+            property string batteryBg: "none"
+            property int batteryRadius: 8
+            property string batteryColor: ""
+            property string batteryColor2: ""
+            property bool batteryGradient: false
         }
     }
 

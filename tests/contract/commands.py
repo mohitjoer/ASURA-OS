@@ -42,11 +42,11 @@ ALIAS = {
     "sensors": ["lm_sensors", "lm-sensors"], "ffprobe": ["ffmpeg"], "ffplay": ["ffmpeg"], "makoctl": ["mako-notifier", "mako"],
     "nmcli": ["NetworkManager", "network-manager"], "bluetoothctl": ["bluez"], "wpctl": ["wireplumber"], "pactl": ["pipewire", "pulseaudio-utils", "pipewire-pulse"],
     "pw-cli": ["pipewire", "pipewire-bin"], "pw-dump": ["pipewire", "pipewire-bin"], "pw-metadata": ["pipewire", "pipewire-bin"],
-    "hyprctl": ["hyprland"], "xdg-open": ["xdg-utils"], "xdg-settings": ["xdg-utils"], "fc-list": ["fontconfig"],
+    "hyprctl": ["hyprland"], "Hyprland": ["hyprland"], "xdg-open": ["xdg-utils"], "xdg-settings": ["xdg-utils"], "fc-list": ["fontconfig"],
     "notify-send": ["libnotify", "libnotify-bin"], "gsettings": ["glib", "libglib2.0-bin"], "gio": ["glib", "libglib2.0-bin"],
     "glib-compile-schemas": ["glib", "libglib2.0-bin"], "update-desktop-database": ["desktop-file-utils"],
     "powerprofilesctl": ["power-profiles-daemon"], "killall": ["psmisc"], "lspci": ["pciutils"],
-    "fprintd-list": ["fprintd"], "fprintd-delete": ["fprintd"], "rfkill": ["rfkill"], "nvidia-smi": ["nvidia-utils", "nvidia"],
+    "fwupdmgr": ["fwupd"], "fprintd-list": ["fprintd"], "fprintd-delete": ["fprintd"], "fprintd-enroll": ["fprintd"], "fprintd-verify": ["fprintd"], "tailscale": ["tailscale"], "rfkill": ["rfkill"], "nvidia-smi": ["nvidia-utils", "nvidia"],
     "ssh": ["openssh", "openssh-client"], "ssh-add": ["openssh", "openssh-client"], "ssh-copy-id": ["openssh", "openssh-client"], "ssh-keygen": ["openssh", "openssh-client"],
     "qemu-img": ["qemu", "qemu-utils"], "quickget": ["quickemu"], "lsusb": ["usbutils"],
     "btrfs": ["btrfs-progs"], "grub-mkconfig": ["grub", "grub2-common"], "grub-reboot": ["grub", "grub2-common"], "pkexec": ["polkit", "policykit-1"],
@@ -68,7 +68,7 @@ BASE_COMMANDS = {
     "modinfo", "nice", "nproc", "numfmt", "od", "pidof", "reboot",
     "apt", "apt-get", "apt-cache", "dpkg", "dpkg-query", "dpkg-deb", "usermod",
     "dbus-update-activation-environment",
-    "xbps-install", "xbps-query", "xbps-reconfigure", "xbps-remove", "xbps-rindex",
+    "xbps-install", "xbps-query", "xbps-reconfigure", "xbps-remove", "xbps-rindex", "xbps-uhelper", "xbps-pkgdb",
     "sv", "chpst", "runsv", "runsvdir", "file", "lspci", "lsusb", "rfkill",
     "grub-mkconfig", "grub-reboot", "pkexec", "btrfs", "git",
 }
@@ -125,7 +125,7 @@ def providers():
         for entry in os.listdir(cmd_dir):
             if os.path.isdir(os.path.join(cmd_dir, entry)):
                 bins.add(entry)
-    bins.update(["asura-vmd", "asura-vm-mon", "asura-vm-ssh", "os-ctl", "asura-installer", "void-installer", "asura-user-services"])
+    bins.update(["toren-vmd", "asura-vmd", "toren-vm-mon", "asura-vm-mon", "toren-vm-ssh", "asura-vm-ssh", "os-ctl", "toren-installer", "asura-installer", "void-installer", "toren-user-services", "asura-user-services"])
 
     runit_dir = os.path.join(ROOT, "session", "runit")
     if os.path.isdir(runit_dir):
@@ -133,7 +133,8 @@ def providers():
             if os.path.isfile(os.path.join(runit_dir, s)):
                 bins.add(s)
 
-    for s in ("asura-hub", "asura-idle", "asura-pin", "asura-reload-cover", "asura-shot", "asura-vm", "asura-wallpaper-ui", "asura-welcome", "asura-greeter"):
+    for s in ("toren-hub", "toren-idle", "toren-pin", "toren-reload-cover", "toren-shot", "toren-vm", "toren-wallpaper-ui", "toren-welcome", "toren-greeter",
+              "asura-hub", "asura-idle", "asura-pin", "asura-reload-cover", "asura-shot", "asura-vm", "asura-wallpaper-ui", "asura-welcome", "asura-greeter"):
         if os.path.isfile(os.path.join(ROOT, "session", s)):
             bins.add(s)
     session_scripts = os.path.join(ROOT, "session", "scripts")
@@ -155,6 +156,13 @@ def providers():
     for extra in ("prime-run", "fan-profile"):
         if os.path.isfile(os.path.join(ROOT, "system", "helpers", extra)):
             bins.add(extra)
+
+    # Stage 2 transition: installed systems keep asura* -> toren* symlinks in /usr/bin.
+    for b in list(bins):
+        if b == "toren":
+            bins.add("asura")
+        elif b.startswith("toren-"):
+            bins.add("asura-" + b[len("toren-"):])
 
     return bins, pkgs, unavail, bad
 
@@ -189,7 +197,13 @@ def owners(names):
 def path_ok(path):
     m = re.match(r"/usr/share/asura/(shell|session|hyprland)/(.*)", path)
     if m:
-        return os.path.exists(os.path.join(ROOT, {"hyprland": "session/hyprland"}.get(m.group(1), m.group(1)), m.group(2)))
+        sub = {"hyprland": "session/hyprland"}.get(m.group(1), m.group(1))
+        rest = m.group(2)
+        if os.path.exists(os.path.join(ROOT, sub, rest)):
+            return True
+        if rest.startswith("asura-"):
+            return os.path.exists(os.path.join(ROOT, sub, "toren-" + rest[6:]))
+        return False
     return any(path == re.sub(r"^\s*\S+\s*->\s*(\S+).*", r"\1", l) for _, _, l in read("release/build.d/*.build"))
 
 

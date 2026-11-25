@@ -1,0 +1,13 @@
+#!/bin/sh
+exec 2>&1
+# Out-of-memory protection: protect the compositor and desktop shell, prefer
+# killing large applications.
+if ! command -v earlyoom >/dev/null 2>&1; then
+	if command -v pause >/dev/null 2>&1; then
+		exec pause
+	else
+		exec sleep infinity
+	fi
+fi
+
+exec earlyoom -m 10 -s 10 --avoid 'Hyprland|quickshell|asura' --prefer 'chrome|firefox|electron|java'

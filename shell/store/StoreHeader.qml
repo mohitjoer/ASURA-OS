@@ -162,7 +162,7 @@ Item {
                 Accessible.ignored: true
             }
             Text {
-                text: I18n.tr("ASURA STORE")
+                text: I18n.tr("TOREN STORE")
                 color: Tokens.ink
                 font.family: Tokens.mono
                 font.pixelSize: 15
@@ -217,7 +217,7 @@ Item {
                 clip: true
                 activeFocusOnTab: true
                 Accessible.role: Accessible.EditableText
-                Accessible.name: header.offline ? I18n.tr("Search Asura Store (offline)") : I18n.tr("Search Asura Store")
+                Accessible.name: header.offline ? I18n.tr("Search Toren Store (offline)") : I18n.tr("Search Toren Store")
                 Accessible.description: I18n.tr("Type to filter the store")
                 onTextEdited: header.queryEdited(text)
                 onActiveFocusChanged: if (activeFocus) header.searchActivated()

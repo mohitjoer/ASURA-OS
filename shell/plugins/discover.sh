@@ -11,9 +11,8 @@
 # no entry or enabled=false = skipped. the shell only loads what the user
 # actually turned on. --all lists every installed plugin (Settings wants that).
 #
-# ported from Ryoku's discover.sh. Ryoku also required a store receipt and a
-# pinned content view for every installed plugin; here the folder with its
-# manifest is the install, so that chain is gone.
+# The folder with its
+# manifest is the install.
 #
 # one pass, one jq. this script runs on every placement write -- every time a
 # desktop widget is dragged, resized or recoloured -- and a per-plugin jq call

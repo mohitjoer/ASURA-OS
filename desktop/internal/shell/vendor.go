@@ -82,7 +82,6 @@ var vendoredRoots = map[string]bool{
 	"store":        true,
 	"vm":           true,
 	"wallpaper-ui": true,
-	"sysmon":       true,
 }
 
 // overlayFiles are the files Asura supplies at upstream's paths.
@@ -105,15 +104,20 @@ var vendoredRoots = map[string]bool{
 // about which paths are Asura's. TestTheOverlayListMatchesTheVendorScript
 // keeps them together.
 var overlayFiles = map[string]string{
-	"GlobalStates.qml":                             "the vendored components read these flags by name",
-	"modules/common/Appearance.qml":                "the vendored components read these tokens by name",
-	"modules/common/Config.qml":                    "the vendored components read these options by name",
-	"modules/common/utils/ScreenshotAction.qml":    "builds the selector's commands with the OCR engine's base-layer name, tesseract-ocr, which is what the base layer calls it because plain tesseract is a game",
-	"modules/common/widgets/AppIcon.qml":           "the vendored components read this icon by name",
-	"modules/common/widgets/MaterialSymbol.qml":    "maps Material Symbol names to Font Awesome 4.7 codepoints; upstream expects a font the base layer does not carry",
-	"modules/ii/regionSelector/RegionSelector.qml": "the selector's entry point reaches its one Asura action, text recognition, through the shell's own IPC bridge instead of registering its own",
-	"modules/ii/sessionScreen/SessionScreen.qml":   "the session menu's entry point reaches its four Asura actions through the shell's own IPC bridge, the daemon's hyprlock and the confirmation dialog instead of registering its own IPC and shortcuts or calling upstream's Session singleton",
-	"modules/ii/screenCorners/ScreenCorners.qml":   "the corner-panel module reaches its four sidebar-toggle actions through GlobalStates.sidebarLeftOpen / sidebarRightOpen instead of registering its own IPC or shortcuts",
+	"GlobalStates.qml":                                                               "the vendored components read these flags by name",
+	"modules/common/Appearance.qml":                                                  "the vendored components read these tokens by name",
+	"modules/common/Config.qml":                                                      "the vendored components read these options by name",
+	"modules/common/utils/ScreenshotAction.qml":                                      "builds the selector's commands with the OCR engine's base-layer name, tesseract-ocr, which is what the base layer calls it because plain tesseract is a game",
+	"modules/common/widgets/AppIcon.qml":                                             "the vendored components read this icon by name",
+	"modules/common/widgets/MaterialSymbol.qml":                                      "maps Material Symbol names to Font Awesome 4.7 codepoints; upstream expects a font the base layer does not carry",
+	"modules/ii/regionSelector/RegionSelector.qml":                                   "the selector's entry point reaches its one Asura action, text recognition, through the shell's own IPC bridge instead of registering its own",
+	"modules/ii/sessionScreen/SessionScreen.qml":                                     "the session menu's entry point reaches its four Asura actions through the shell's own IPC bridge, the daemon's hyprlock and the confirmation dialog instead of registering its own IPC and shortcuts or calling upstream's Session singleton",
+	"modules/ii/screenCorners/ScreenCorners.qml":                                     "the corner-panel module reaches its four sidebar-toggle actions through GlobalStates.sidebarLeftOpen / sidebarRightOpen instead of registering its own IPC or shortcuts",
+	"modules/common/functions/Session.qml":                                           "provides hibernation readiness check via /run/asura/hibernate.ready without altering upstream Session singleton",
+	"modules/ii/overview/SearchItem.qml":                                             "renders search item subtitle and application classification with ASURA styling",
+	"modules/ii/overview/SearchWidget.qml":                                           "configures search bar and results sizing and visual hierarchy for ASURA overview",
+	"modules/ii/sidebarRight/quickToggles/androidStyle/AndroidQuickToggleButton.qml": "styles quick toggle buttons with ASURA fonts and chevron indicators",
+	"services/AppSearch.qml":                                                         "deduplicates applications, filters removed packages, and maps ASURA desktop icon substitutions",
 }
 
 // isVendored reports whether a file belongs to the vendored upstream tree.

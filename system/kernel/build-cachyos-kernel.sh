@@ -3,7 +3,7 @@
 set -eu
 
 REPO_ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
-DOTCONFIG="$REPO_ROOT/system/kernel/x86_64-dotconfig-asura"
+DOTCONFIG="$REPO_ROOT/system/kernel/x86_64-dotconfig-toren"
 BUILD_DIR="${1:-$REPO_ROOT/build/kernel}"
 CONF_FILE="$REPO_ROOT/packaging/xbps/conf/xbps-v3.conf"
 

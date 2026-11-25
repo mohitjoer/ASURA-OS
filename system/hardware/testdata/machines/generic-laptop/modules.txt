@@ -1,0 +1,1 @@
+snd_hda_intel 16384 0 - Live 0x0

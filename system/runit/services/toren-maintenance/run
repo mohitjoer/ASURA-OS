@@ -1,0 +1,35 @@
+#!/bin/sh
+exec 2>&1
+# Scheduled maintenance without a cron daemon: weekly fstrim, monthly btrfs scrub.
+STATE_DIR="/var/lib/asura/maintenance"
+mkdir -p "$STATE_DIR"
+
+WEEK=604800
+MONTH=2592000
+
+while true; do
+	now=$(date +%s 2>/dev/null || echo 0)
+
+	# Weekly fstrim on SSDs (skips filesystems that do not support it).
+	last=$(cat "$STATE_DIR/fstrim" 2>/dev/null || echo 0)
+	if [ "$((now - last))" -ge "$WEEK" ]; then
+		if command -v fstrim >/dev/null 2>&1; then
+			fstrim -av / >/dev/null 2>&1 || true
+		fi
+		echo "$now" > "$STATE_DIR/fstrim" 2>/dev/null || true
+	fi
+
+	# Monthly btrfs scrub on btrfs roots (skips other filesystems).
+	last=$(cat "$STATE_DIR/btrfs-scrub" 2>/dev/null || echo 0)
+	if [ "$((now - last))" -ge "$MONTH" ]; then
+		if command -v btrfs >/dev/null 2>&1; then
+			rootfstype=$(findmnt -no FSTYPE / 2>/dev/null || echo "")
+			if [ "$rootfstype" = "btrfs" ]; then
+				btrfs scrub start -B / >/dev/null 2>&1 || true
+			fi
+		fi
+		echo "$now" > "$STATE_DIR/btrfs-scrub" 2>/dev/null || true
+	fi
+
+	sleep 86400
+done

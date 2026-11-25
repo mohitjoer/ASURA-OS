@@ -55,12 +55,12 @@ Singleton {
         }
     }
 
-    // Every first-party Quickshell app (the Hub, Ryostore, Ryoport) reaches the
+    // Every first-party Quickshell app (the Hub, Asura Store, Asura VM) reaches the
     // compositor as class org.quickshell: Quickshell owns the Wayland app id
     // and offers no way to set one per config. The title is the only thing
     // that tells them apart, so it maps to the desktop entry id the dock
     // groups, launches and draws them by; anything else keeps its class.
-    readonly property var quickshellApps: ({ "Asura Settings": "asura-hub", "Asura Store": "asura-store", "asura-vm": "asura-vm" })
+    readonly property var quickshellApps: ({ "Toren Settings": "asura-hub", "Toren Store": "asura-store", "asura-vm": "asura-vm", "Asura Settings": "asura-hub", "Asura Store": "asura-store" })
     function classOf(w) {
         if (!w) return "";
         const cls = w.appId;
@@ -115,7 +115,7 @@ Singleton {
     function starterPins() {
         void root.iconRev;
         const out = [];
-        for (const role of [["asura-installer"], ["com.mitchellh.ghostty"], ["firefox", "brave-browser", "chromium", "google-chrome"], ["asura-store"], ["org.gnome.Nautilus"]]) {
+        for (const role of [["asura-installer"], ["com.mitchellh.ghostty"], ["chromium", "firefox", "brave-browser", "google-chrome"], ["asura-store"], ["org.gnome.Nautilus"]]) {
             const hit = role.find(id => DesktopEntries.heuristicLookup(id));
             if (hit) out.push(hit);
         }

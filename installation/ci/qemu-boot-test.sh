@@ -57,7 +57,7 @@ echo "Waiting for boot sequence (~60-90s in software emulation)..."
 BOOT_DETECTED=0
 for i in $(seq 1 45); do
 	sleep 2
-	if [ -f "$SERIAL_LOG" ] && grep -qaE "runit: enter stage: /etc/runit/2|asura-os login:|turnstiled: Initializing|Linux version|dracut|ISOLINUX" "$SERIAL_LOG"; then
+	if [ -f "$SERIAL_LOG" ] && grep -qaE "runit: enter stage: /etc/runit/2|toren-linux login:|asura-os login:|turnstiled: Initializing|Linux version|dracut|ISOLINUX" "$SERIAL_LOG"; then
 		echo "Detected boot progress in serial log at ~$((i * 2))s!"
 		BOOT_DETECTED=1
 		break

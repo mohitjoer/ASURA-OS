@@ -37,8 +37,6 @@ components:
         blob: 94da6d371de3ebdef1771037ff092b0f4845777d
       - path: modules/common/functions/ObjectUtils.qml
         blob: d1204cddcd0b116b1f91b04120cb9ea8db511187
-      - path: modules/common/functions/Session.qml
-        blob: 184bd34c39b4e665bf7d5147346da1dba2c553d6
       - path: modules/common/functions/StringUtils.qml
         blob: 0839b5386cfc270b24fda60cbffec93e8fa93b6d
       - path: modules/common/Icons.qml
@@ -513,10 +511,6 @@ components:
         blob: 0032bf0610bd6d408528b8a48c686d099b01adf2
       - path: modules/ii/overview/SearchBar.qml
         blob: 56a7f05746ee751cad741e23c0be939aae1296a5
-      - path: modules/ii/overview/SearchItem.qml
-        blob: 42649b9a312173ea9bd048a4970b9cad1efaefa6
-      - path: modules/ii/overview/SearchWidget.qml
-        blob: c99b930c11a2cfb782677935bbfe0b6323500c08
       - path: modules/ii/regionSelector/CircleSelectionDetails.qml
         blob: c0f823fbe7031d15b29477595409df659730deb5
       - path: modules/ii/regionSelector/CursorGuide.qml
@@ -599,8 +593,6 @@ components:
         blob: 3c97977ea7bf2f54fd5ba6cfae4abc92f6a2085e
       - path: modules/ii/sidebarRight/quickToggles/androidStyle/AndroidPowerProfileToggle.qml
         blob: 0ac826cdd71afe517171eb2891afee04bbfd8dec
-      - path: modules/ii/sidebarRight/quickToggles/androidStyle/AndroidQuickToggleButton.qml
-        blob: 3245f042e02fc1cd46c24cdd18867264fb4ebdb1
       - path: modules/ii/sidebarRight/quickToggles/androidStyle/AndroidScreenSnipToggle.qml
         blob: 703a6ef83989b1fbdc9b9c85fb73d1d0f3e25102
       - path: modules/ii/sidebarRight/quickToggles/androidStyle/AndroidToggleDelegateChooser.qml
@@ -673,8 +665,6 @@ components:
         blob: a049abf30ba527c7e1f5efce9951eae996af283e
       - path: services/Ai.qml
         blob: 8ee5dfe8ac572b04b68969b8b53d1e3360f36aa8
-      - path: services/AppSearch.qml
-        blob: 358b8d20719cde30cd0ba107f3cb60296f53f7fe
       - path: services/Audio.qml
         blob: 68ebc3ae0aeee184184717e7eb5825dc3d4a8d53
       - path: services/Battery.qml

@@ -96,13 +96,13 @@ Column {
 
     SettingsCard {
         colors: root.colors
-        title: I18n.tr("Asura Palette Bridge")
-        subtitle: I18n.tr("Live Asura wallpaper colours for Zen, Spotify, and Vesktop.")
+        title: I18n.tr("Toren Palette Bridge")
+        subtitle: I18n.tr("Live Toren wallpaper colours for Zen, Spotify, and Vesktop.")
 
         RowTextInput {
             colors: root.colors
             title: I18n.tr("Build source")
-            description: I18n.tr("Use a local checkout, or Asura's packaged source.")
+            description: I18n.tr("Use a local checkout, or Toren's packaged source.")
             value: Config.paletteBridgeSource
             placeholder: "/usr/share/asura/palette-bridge"
             onCommit: function(v) {

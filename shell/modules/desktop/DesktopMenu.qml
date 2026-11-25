@@ -16,7 +16,7 @@ Item {
     id: menu
 
     // A MenuRow finds its enclosing menu by this marker to close on trigger.
-    readonly property bool ryoMenu: true
+    readonly property bool desktopMenu: true
 
     anchors.fill: parent
     visible: menu.open || panel.opacity > 0.01

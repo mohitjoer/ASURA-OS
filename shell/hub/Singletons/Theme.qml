@@ -9,12 +9,12 @@ import Quickshell
 // gradients. Display face is Fraunces (editorial serif); UI is Space Grotesk;
 // labels are JetBrains Mono. Mirrors asura-site/app/assets/css/tokens.css.
 Singleton {
-    // brand: one vermillion, sparingly + boldly. (site --sun / --sun-deep)
-    readonly property color brand:     "#e2342a"
-    readonly property color ember:     "#e83b30"   // a hair brighter for hover/active
-    readonly property color emberDeep: "#b81f19"
-    readonly property color sun:       "#e2342a"   // explicit alias (red-sun disc, accents)
-    readonly property color sunDeep:   "#b81f19"
+    // brand: follows live scheme accent, falling back to one vermillion (#e2342a)
+    readonly property color brand:     Scheme.accent || "#e2342a"
+    readonly property color ember:     Scheme.accent || "#e83b30"   // a hair brighter for hover/active
+    readonly property color emberDeep: Scheme.accent2 || "#b81f19"
+    readonly property color sun:       Scheme.accent || "#e2342a"   // explicit alias (red-sun disc, accents)
+    readonly property color sunDeep:   Scheme.accent2 || "#b81f19"
     readonly property color sunInk:    "#fbeee2"   // text on vermillion
     readonly property color gold:      "#d9a441"   // kintsugi seams, warnings, sparingly
 

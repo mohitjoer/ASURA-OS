@@ -39,7 +39,7 @@ Item {
         id: loader
         anchors.fill: parent
         focus: true
-        source: Qt.resolvedUrl("themes/asura/Main.qml")
+        source: Qt.resolvedUrl("themes/toren/Main.qml")
     }
 
     TestCase {

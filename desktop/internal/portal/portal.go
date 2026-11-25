@@ -37,19 +37,31 @@ type Config struct {
 // Backend returns the backend named in `use=` for a section, and whether the
 // section said anything.
 func (c Config) Backend(section string) (string, bool) {
+	first := func(list string) string {
+		// "hyprland;gtk;" is a list in preference order; the first is the
+		// one that answers. Trim around the semicolons, as "use = hyprland ;"
+		// would otherwise leave a space inside the name.
+		return strings.TrimSpace(strings.SplitN(strings.TrimSpace(list), ";", 2)[0])
+	}
+	// portals.conf(5): one [preferred] group, `default` plus a key per
+	// interface.
+	if preferred, ok := c.Sections["preferred"]; ok {
+		if v, ok := preferred[section]; ok && first(v) != "" {
+			return first(v), true
+		}
+	}
+	// The older per-section form ([section] use=...), still read so a stale
+	// file a previous desktop wrote is reported by what it selects.
 	values, present := c.Sections[section]
 	if !present {
 		return "", false
 	}
-	use, present := values["use"]
-	if !present {
-		return "", false
+	for _, key := range []string{"use", "default"} {
+		if v, ok := values[key]; ok && first(v) != "" {
+			return first(v), true
+		}
 	}
-	// `use=hyprland;` is a single backend in a list. A trailing semicolon is
-	// syntax, not part of the name — and the trim has to happen after the
-	// semicolon is removed as well as before, because "use = hyprland ;" leaves
-	// a space that would end up inside the name and match nothing.
-	return strings.TrimSpace(strings.TrimSuffix(strings.TrimSpace(use), ";")), true
+	return "", false
 }
 
 // ConfigFile is the per-desktop configuration file name for a desktop identity.
@@ -234,15 +246,14 @@ var required = []struct {
 	backend string
 }{
 	{"default", "hyprland"},
-	{"org.gnome.impl.portal.ScreenCast", "hyprland"},
-	{"org.gnome.impl.portal.Screenshot", "hyprland"},
-	{"org.gnome.impl.portal.FileChooser", "gtk"},
-	{"org.gnome.impl.portal.OpenURI", "gtk"},
-	{"org.gnome.impl.portal.Print", "gtk"},
-	// Secret names lxqt, not gtk. It used to name gtk, which does not implement
-	// it — a confident answer in a configuration file is worse than no answer,
-	// because a reader checking the file sees the interface handled.
-	{"org.gnome.impl.portal.Secret", "lxqt"},
+	{"org.freedesktop.impl.portal.ScreenCast", "hyprland"},
+	{"org.freedesktop.impl.portal.Screenshot", "hyprland"},
+	{"org.freedesktop.impl.portal.FileChooser", "gtk"},
+	{"org.freedesktop.impl.portal.OpenURI", "gtk"},
+	{"org.freedesktop.impl.portal.Print", "gtk"},
+	// Secret is not required: no backend in the image implements it (lxqt is
+	// not packaged yet), and asura-portals.conf deliberately names none.
+
 	// Access is named explicitly because [default] is hyprland, which does not
 	// implement it. Access is what the dispatcher's own Camera portal asks for
 	// consent, so leaving it to the default meant Camera could never open a
@@ -252,7 +263,7 @@ var required = []struct {
 	// Camera is deliberately not in this list. It is not a backend interface at
 	// all: desktop-portal/camera.c lives in the dispatcher binary. Naming a
 	// backend for it would be asking for something no backend has.
-	{"org.gnome.impl.portal.Access", "gtk"},
+	{"org.freedesktop.impl.portal.Access", "gtk"},
 }
 
 // The Secret gap is closed.
@@ -277,7 +288,14 @@ func checkBackends(config Config) []string {
 	var problems []string
 
 	for _, want := range required {
+		// A section may be spelled with the backend's own interface name
+		// (org.freedesktop.impl.portal.*, what asura-portals.conf uses) or the
+		// legacy org.gnome.impl.portal.* alias; either one counts.
 		got, present := config.Backend(want.section)
+		if !present {
+			got, present = config.Backend(strings.Replace(want.section,
+				"org.freedesktop.impl.portal.", "org.gnome.impl.portal.", 1))
+		}
 		if !present {
 			problems = append(problems, fmt.Sprintf(
 				"[%s] names no backend; %s is required",

@@ -1,21 +1,21 @@
-# Contributing to ASURA OS
+# Contributing to Toren Linux
 
-ASURA is a distribution, and a distribution is a union of other people's work. Nobody can test
+Toren is a distribution, and a distribution is a union of other people's work. Nobody can test
 every laptop; everybody can test one. Those two facts decide what a contribution to this
 project is worth.
 
-ASURA runs pre-alpha. Nothing is bootable yet, so the contributions that matter today are a
-hardware profile, a decision, or documentation. See [`docs/roadmap.md`](docs/roadmap.md) for
+Toren is in beta: the ISO boots, installs and updates. The contributions that matter most are
+a hardware profile, a bug report from a real machine, or documentation. See [`docs/roadmap.md`](docs/roadmap.md) for
 what lands in what order.
 
 ---
 
 ## Hardware profiles — the primary path
 
-This is the most valuable contribution in ASURA and the cheapest to make. It needs one machine
+This is the most valuable contribution in Toren and the cheapest to make. It needs one machine
 and no code.
 
-1. Install ASURA and boot it.
+1. Install Toren and boot it.
 2. Run `asura hardware report`. It emits a candidate profile from live detection, with
    identifying data stripped.
 3. Fill in what only a human on the machine knows: does suspend work, does the GPU switch,
@@ -28,7 +28,7 @@ contain. Do not write a profile from memory — the report is the input, and
 [`profiles/example.yaml`](system/hardware/profiles/example.yaml) is the annotated target.
 
 A profile submitted from real detection output lands at **tier 2, community confirmed**. Tier
-1 requires a maintainer's sign-off, because it is a claim about hardware ASURA has not been run
+1 requires a maintainer's sign-off, because it is a claim about hardware Toren has not been run
 on by the people who answer for it. Expect the tier rather than asking for it.
 
 ### If your machine is boring
@@ -56,7 +56,7 @@ in the same pull request, or it does not land.
 
 **Never edit a shipped file in place.** Files laid into the system by a package are replaced
 on update. A change to one belongs in an override, in the store the owning tool reads, or in
-the tool itself. ASURA's packages write only to `/usr/share/asura/` and `/etc/asura/` — never to
+the tool itself. Toren's packages write only to `/usr/share/asura/` and `/etc/asura/` — never to
 another package's files, and never to `~`. A patch against `/etc/NetworkManager/` is not a
 contribution, it is a fork, and it is what stops the next clean base system update.
 
@@ -85,7 +85,7 @@ git push --force-with-lease
 ```
 
 An unsigned commit is not rejected on principle; it is unmergeable, because the licence of
-the contribution is undetermined. See [`LICENSING.md`](LICENSING.md) for what ASURA's own
+the contribution is undetermined. See [`LICENSING.md`](LICENSING.md) for what Toren's own
 GPL-3.0 code, the base layer, and the firmware blobs each oblige you to.
 
 ---

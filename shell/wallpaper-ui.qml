@@ -1,6 +1,5 @@
 // The wallpaper picker's window.
 //
-// Ported from Ryoku's wall-ui (itself the skwd-wall picker, see wallpaper-ui/LICENSE).
 // The entry file sits at the shell root so that `qs.*` imports resolve; the picker's
 // own tree is wallpaper-ui/. session/asura-wallpaper-ui starts it with
 // `quickshell -p`, and the asura-wallpaper daemon keeps one instance resident and

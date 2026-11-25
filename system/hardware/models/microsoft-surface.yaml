@@ -1,0 +1,20 @@
+id: microsoft-surface
+name: "Microsoft Surface Laptops & Tablets"
+description: "Microsoft Surface hardware profile: safe mainline kernel defaults and status documentation"
+layer: vendor
+
+match:
+  sys_vendor: "Microsoft Corporation"
+  chassis: "laptop"
+
+packages: []
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel drivers/platform/surface/ and linux-surface project documentation."
+  - "STATUS: Standard display, keyboard, and Wi-Fi operate on mainline kernel. Advanced features (Surface Aggregator Module battery reporting on newer models, IPTS touchscreen/stylus, camera) require linux-surface kernel patches which Void Linux does not provide in official repositories."

@@ -19,7 +19,7 @@ Flow {
         RowTextInput {
             colors: root.colors
             title: I18n.tr("Wallpaper directory")
-            description: I18n.tr("Folder Ryogami scans for image and video wallpapers. Restart required after change.")
+            description: I18n.tr("Folder Toren Wallpaper scans for image and video wallpapers. Restart required after change.")
             value: Config.wallpaperDir
             placeholder: I18n.tr("~/Pictures/Wallpapers")
             onCommit: function(v) { if (root.saveConfigKey) root.saveConfigKey("paths.wallpaper", v) }

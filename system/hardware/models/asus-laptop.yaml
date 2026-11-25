@@ -1,0 +1,31 @@
+id: asus-laptop
+name: "ASUS Laptops (ZenBook, VivoBook, ROG, TUF)"
+description: "ASUS laptop hardware profile: asus-wmi thermal controls, battery health limit, and keyboard backlight"
+
+match:
+  sys_vendor: "ASUSTeK COMPUTER INC."
+  chassis: "laptop"
+
+packages: []
+
+kernel_parameters:
+  - "asus_wmi.fnlock_default=1"
+
+files:
+  udev:
+    - target: "/etc/udev/rules.d/99-battery-threshold.rules"
+      source: "system/udev/99-battery-threshold.rules"
+      reason: "Persist 80% charge threshold on ASUS BAT0 charge_control_end_threshold"
+    - target: "/etc/udev/rules.d/90-asus-backlight.rules"
+      content: |
+        # Allow users to adjust ASUS keyboard backlight brightness
+        SUBSYSTEM=="leds", KERNEL=="asus::kbd_backlight", ACTION=="add", RUN+="/bin/chmod a+w /sys/class/leds/asus::kbd_backlight/brightness"
+      reason: "Grant write permissions to asus::kbd_backlight brightness interface"
+
+services: []
+
+notes:
+  - "Thermal and fan profiles: asus-wmi exposes /sys/firmware/acpi/platform_profile (quiet, balanced, performance), controlled via 'asura power profile'."
+  - "Battery charge limit: /sys/class/power_supply/BAT0/charge_control_end_threshold persists at 80%."
+  - "Keyboard backlight: asus::kbd_backlight brightness is mapped to Fn keys and /sys/class/leds/."
+  - "Native kernel interfaces: uses standard kernel asus-wmi sysfs without requiring out-of-tree daemons."

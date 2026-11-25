@@ -1232,7 +1232,7 @@ Item {
             width: parent.width
             horizontalAlignment: Text.AlignHCenter
             text: Needle.ready
-                ? I18n.tr("It knows this machine, your desktop, and the Asura source. Drop in an image to ask about it.")
+                ? I18n.tr("It knows this machine, your desktop, and the Toren source. Drop in an image to ask about it.")
                 : (Needle.readyReason !== "" ? Needle.readyReason : I18n.tr("No agent engine configured: set engine.command in ~/.config/asura/agent/config.json"))
             wrapMode: Text.WordWrap
             color: Theme.inkOn(Theme.effectiveSurface, Theme.onSurfaceVariant, 3.0)

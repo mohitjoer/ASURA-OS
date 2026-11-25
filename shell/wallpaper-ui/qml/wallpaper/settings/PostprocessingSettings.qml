@@ -31,7 +31,7 @@ Column {
         RowToggle {
             colors: root.colors
             title: I18n.tr("Disable internal wallpaper application")
-            description: I18n.tr("When enabled, Ryogami will not apply wallpapers itself. Use the post-processing commands below to drive your own setter.")
+            description: I18n.tr("When enabled, Toren Wallpaper will not apply wallpapers itself. Use the post-processing commands below to drive your own setter.")
             checked: Config.pickOnlyMode
             onToggle: function(v) { if (root.saveConfigKey) root.saveConfigKey("pickOnlyMode", v) }
         }

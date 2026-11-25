@@ -1,0 +1,26 @@
+id: msi-laptop
+name: "MSI Laptops (Stealth, Raider, Prestige, Modern)"
+description: "MSI laptop hardware profile: msi-wmi hotkey mapping and keyboard backlight"
+layer: vendor
+
+match:
+  sys_vendor: "Micro-Star International*"
+  chassis: "laptop"
+
+packages: []
+
+kernel_parameters: []
+
+files:
+  udev:
+    - target: "/etc/udev/rules.d/90-msi-backlight.rules"
+      content: |
+        # Permissions for MSI keyboard backlight
+        SUBSYSTEM=="leds", KERNEL=="*::kbd_backlight", ACTION=="add", RUN+="/bin/chmod a+w /sys/class/leds/%k/brightness"
+      reason: "Grant write permissions to MSI keyboard backlight"
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel drivers/platform/x86/msi-wmi.c and msi-ec.c."
+  - "MSI hotkey handling and battery thresholds via msi-wmi / msi-ec."

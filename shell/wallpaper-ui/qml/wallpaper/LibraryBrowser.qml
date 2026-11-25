@@ -6,9 +6,9 @@ import "../services"
 import qs.Ui.Singletons
 
 // Generic remote-source browser: a search field over a thumbnail grid, backed
-// by a RyowallsSource (moewalls / motionbgs / github repos). Clicking a tile
+// by a WallpaperSource (moewalls / motionbgs / github repos). Clicking a tile
 // downloads the master into the video library and applies it through the
-// asura-wallpaper daemon. One pane serves every ryowalls-shaped source, so Browse is
+// asura-wallpaper daemon. One pane serves every wallpaper-shaped source, so Browse is
 // extensible without a bespoke browser each.
 Item {
     id: browser
@@ -44,7 +44,7 @@ Item {
 
     property string _applied: ""      // last-applied id, for a brief tick
 
-    RyowallsSource {
+    WallpaperSource {
         id: svc
         searchVerb: browser.searchVerb
         downloadVerb: browser.downloadVerb

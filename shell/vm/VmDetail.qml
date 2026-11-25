@@ -1183,7 +1183,7 @@ Item {
                         anchors.centerIn: parent
                         spacing: 26
                         Text {
-                            text: I18n.tr("ASURA VM · TYPE V-01")
+                            text: I18n.tr("TOREN VM · TYPE V-01")
                             color: Tokens.inkMuted
                             font.family: Tokens.mono
                             font.pixelSize: 10

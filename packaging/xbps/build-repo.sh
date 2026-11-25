@@ -1,99 +1,121 @@
 #!/bin/sh
-# Build Asura XBPS binary package and repository index using xbps-create and xbps-rindex
+# Build ASURA's XBPS package and repository.
+#
+# Usage: packaging/xbps/build-repo.sh OUT_DIR STAGE_DIR
+#
+# STAGE_DIR is a tree installation/apply-repo.sh has already filled (with the
+# Go tools built): the package holds exactly what an update installs. This
+# script, which needs xbps-create and xbps-rindex (a Void container in CI),
+# turns that tree into the `asura` package, indexes OUT_DIR, and signs both
+# when XBPS_SIGNING_KEY names a private key (PEM) file.
+#
+# The version is 0.1.<commits on the branch>_1, so every newer commit is a
+# newer package and xbps upgrades to it; ASURA_PKG_VERSION overrides it.
 set -eu
 
-REPO_ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
-BUILD_DIR="${1:-$REPO_ROOT/build/xbps-repo}"
-VERSION="${ASURA_VERSION:-0.1}"
-BIN_DIR="${2:-$REPO_ROOT/build/bin}"
+OUT_DIR=${1:?usage: build-repo.sh OUT_DIR STAGE_DIR}
+STAGE=${2:?usage: build-repo.sh OUT_DIR STAGE_DIR}
+STAGE=$(CDPATH='' cd -- "$STAGE" && pwd)
+REPO_ROOT=$(CDPATH='' cd -- "$(dirname -- "$0")/../.." && pwd)
+ARCH=x86_64
 
-STAGE=$(mktemp -d /tmp/asura-stage.XXXXXX)
-cleanup() {
-	rm -rf "$STAGE"
-}
-trap cleanup EXIT
-
-echo "build-repo: staging Asura files into $STAGE..."
-mkdir -p \
-	"$STAGE/usr/bin" \
-	"$STAGE/usr/share/asura/session" \
-	"$STAGE/usr/share/asura/runit/services" \
-	"$STAGE/usr/share/asura/shell/agent/skills/asura" \
-	"$STAGE/usr/share/applications" \
-	"$STAGE/usr/share/wayland-sessions" \
-	"$STAGE/usr/lib/udev/rules.d" \
-	"$STAGE/etc/sv/asura-sysd" \
-	"$STAGE/usr/share/licenses/asura"
-
-# Build binaries if not provided in build/bin
-if [ ! -f "$BIN_DIR/asura" ]; then
-	echo "build-repo: compiling Go binaries..."
-	mkdir -p "$BIN_DIR"
-	(
-		cd "$REPO_ROOT/desktop"
-		for cmd in asura asura-agent asura-sysd asura-userd asura-hubd asura-shell asura-wallpaper apm; do
-			CGO_ENABLED=0 go build -trimpath -ldflags "-s -w" -o "$BIN_DIR/$cmd" "./cmd/$cmd"
-		done
-	)
+if [ -n "${ASURA_PKG_VERSION:-}" ]; then
+	VERSION=$ASURA_PKG_VERSION
+else
+	count=$(git -C "$REPO_ROOT" rev-list --count HEAD 2>/dev/null || echo 0)
+	VERSION="0.1.$count"
 fi
+PKGVER="asura-${VERSION}_1"
 
-# Install Go control plane daemons and utilities
-for cmd in asura asura-agent asura-sysd asura-userd asura-hubd asura-shell asura-wallpaper apm; do
-	install -m 755 "$BIN_DIR/$cmd" "$STAGE/usr/bin/$cmd"
-done
-
-# Install scripts and helpers
-install -m 755 "$REPO_ROOT/system/helpers/prime-run" "$STAGE/usr/bin/prime-run"
-install -m 755 "$REPO_ROOT/session/runit/asura-user-services" "$STAGE/usr/bin/asura-user-services"
-install -m 755 "$REPO_ROOT/installation/asura-installer.sh" "$STAGE/usr/bin/asura-installer"
-install -m 755 "$REPO_ROOT/session/asura-session" "$STAGE/usr/share/asura/session/asura-session"
-install -m 755 "$REPO_ROOT/session/asura-activate" "$STAGE/usr/share/asura/session/asura-activate"
-
-# Install desktop and wayland session entries
-install -m 644 "$REPO_ROOT/session/applications/asura-installer.desktop" "$STAGE/usr/share/applications/asura-installer.desktop"
-install -m 644 "$REPO_ROOT/session/asura.desktop" "$STAGE/usr/share/wayland-sessions/asura.desktop"
-
-# Install user-level runit service templates
-cp -r "$REPO_ROOT/system/runit/user-services/"* "$STAGE/usr/share/asura/runit/services/"
-find "$STAGE/usr/share/asura/runit/services" -name "run" -exec chmod 755 {} +
-
-# Install local coding agent skills
-mkdir -p "$STAGE/usr/share/asura/shell/agent/skills/asura"
-cp -r "$REPO_ROOT/shell/agent/skills/asura/"* "$STAGE/usr/share/asura/shell/agent/skills/asura/"
-chmod -R 644 "$STAGE/usr/share/asura/shell/agent/skills/asura/"*
-
-# Install system runit services (asura-sysd, scx-lavd, ananicy-cpp)
-for svc_dir in "$REPO_ROOT/system/runit/services"/*; do
-	if [ -d "$svc_dir" ]; then
-		svc_name=$(basename "$svc_dir")
-		mkdir -p "$STAGE/etc/sv/$svc_name"
-		cp -r "$svc_dir"/* "$STAGE/etc/sv/$svc_name/"
-		chmod +x "$STAGE/etc/sv/$svc_name/run" 2>/dev/null || true
+# The package must hold what makes a machine ASURA: refuse a stage that is
+# missing any of these (an apply-repo run that failed part way).
+for f in \
+	usr/bin/asura \
+	usr/bin/asura-session \
+	usr/share/asura/session/asura-activate \
+	usr/share/asura/shell-desktop/shell.qml \
+	usr/share/asura/hyprland/hyprland.lua \
+	usr/share/asura/hyprland/hyprland.conf \
+	usr/share/asura/migrations; do
+	if [ ! -e "$STAGE/$f" ]; then
+		echo "build-repo: $f is not in $STAGE; run installation/apply-repo.sh into it first" >&2
+		exit 1
 	fi
 done
-
-# Install all system udev rules and license
-for rule in "$REPO_ROOT/system/udev"/*.rules; do
-	[ -f "$rule" ] && install -m 644 "$rule" "$STAGE/usr/lib/udev/rules.d/$(basename "$rule")"
+for f in usr/bin/asura usr/bin/asura-session usr/share/asura/session/asura-activate; do
+	[ -x "$STAGE/$f" ] || { echo "build-repo: $f is not executable" >&2; exit 1; }
 done
-install -m 644 "$REPO_ROOT/LICENSE" "$STAGE/usr/share/licenses/asura/LICENSE"
 
-echo "build-repo: creating XBPS binary package..."
-mkdir -p "$BUILD_DIR"
-xbps-create \
-	-A x86_64 \
-	-n "asura-daemon-${VERSION}_1" \
-	-s "Asura OS control plane, session daemons, and system integration" \
-	-m "Asura OS Project <dev@asuraos.dev>" \
-	-l "MIT" \
-	-H "https://asuraos.dev" \
-	-D "hyprland quickshell seatd turnstile ghostty papirus-icon-theme font-awesome" \
-	"$STAGE"
+# Files another Void package owns cannot be in this one (xbps refuses the
+# install); apply-repo.sh keeps installing ASURA's copies of them.
+for f in etc/nftables.conf etc/turnstile/turnstile.conf; do
+	rm -f "$STAGE/$f"
+done
 
-mv "asura-daemon-${VERSION}_1.x86_64.xbps" "$BUILD_DIR/"
+# Files under /etc are the machine's: xbps keeps a locally edited one and
+# installs the new copy beside it, instead of overwriting the edit. Service
+# scripts (/etc/sv) are ASURA's code, not configuration, and always update.
+conf_files=$(cd "$STAGE" && find etc -type f ! -path 'etc/sv/*' 2>/dev/null | sed 's#^#/#' | sort | tr '\n' ' ')
 
-echo "build-repo: indexing repository at $BUILD_DIR..."
-xbps-rindex -a "$BUILD_DIR"/asura-daemon-*.xbps
+mkdir -p "$OUT_DIR"
+OUT_DIR=$(CDPATH='' cd -- "$OUT_DIR" && pwd)
+echo "build-repo: creating $PKGVER"
+(
+	cd "$OUT_DIR"
+	xbps-create \
+		-A "$ARCH" \
+		-n "$PKGVER" \
+		-s "Toren Linux: the desktop, its tools, and its system configuration" \
+		-m "mohitjoer <mohitjoe.r@gmail.com>" \
+		-l "GPL-3.0-only" \
+		-H "https://github.com/mohitjoer/Toren-Linux" \
+		-D "hyprland>=0.57 quickshell>=0 seatd>=0 turnstile>=0" \
+		-F "$conf_files" \
+		"$STAGE"
+)
 
-echo "build-repo: repository ready at $BUILD_DIR:"
-ls -lh "$BUILD_DIR"
+echo "build-repo: indexing $OUT_DIR"
+xbps-rindex -a "$OUT_DIR/$PKGVER.$ARCH.xbps"
+
+# Retain up to 3 versions per package name, then clean obsolete index entries
+if command -v python3 >/dev/null 2>&1; then
+	python3 - "$OUT_DIR" <<'PY'
+import os, sys, glob, re
+
+out_dir = sys.argv[1]
+xbps_files = glob.glob(os.path.join(out_dir, "*.xbps"))
+pkgs = {}
+for f in xbps_files:
+    fname = os.path.basename(f)
+    m = re.match(r"^(.+)-([0-9].+)\.([^.]+)\.xbps$", fname)
+    if m:
+        name = m.group(1)
+        pkgs.setdefault(name, []).append((os.path.getmtime(f), f))
+
+for name, files in pkgs.items():
+    if len(files) > 3:
+        files.sort(key=lambda x: x[0], reverse=True)
+        for _, old_f in files[3:]:
+            try:
+                os.remove(old_f)
+                sig_f = old_f + ".sig2"
+                if os.path.exists(sig_f):
+                    os.remove(sig_f)
+            except OSError:
+                pass
+PY
+fi
+
+xbps-rindex -c "$OUT_DIR" 2>/dev/null || true
+# A rolling repository: drop packages the index no longer names.
+xbps-rindex -r "$OUT_DIR"
+
+if [ -n "${XBPS_SIGNING_KEY:-}" ]; then
+	echo "build-repo: signing the repository and the package"
+	xbps-rindex --sign --signedby "Toren Linux" --privkey "$XBPS_SIGNING_KEY" "$OUT_DIR"
+	xbps-rindex --sign-pkg --privkey "$XBPS_SIGNING_KEY" "$OUT_DIR/$PKGVER.$ARCH.xbps"
+else
+	echo "build-repo: XBPS_SIGNING_KEY is not set; the repository is unsigned (not publishable)"
+fi
+
+ls -l "$OUT_DIR"

@@ -963,7 +963,7 @@ Item {
     }
 
     // Asura pushed an update (UpdateWidget's 6h poll flipped to available)
-    readonly property bool upd7: theme.omarchyUpdateAvail === true
+    readonly property bool upd7: theme.asuraUpdateAvail === true
     onUpd7Changed: if (armed7 && upd7) pushText("UPDATE READY", "ASURA", 1, "long")
 
     // do-not-disturb toggled

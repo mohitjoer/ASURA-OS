@@ -2,14 +2,14 @@
 
 hyprlock locks the session. That is a decision, not a fallback: it is mature, it
 is in the Void archive, and it runs as a process of its own, apart from the
-shell. The shell, hypridle and the `asura-shell` daemon only decide when it
+shell. The shell, hypridle and the `toren-shell` daemon only decide when it
 runs.
 
 | Piece | Where | Job |
 |---|---|---|
 | hyprlock | `session/hyprland/hyprlock.conf` | the look: blurred wallpaper, clock, date, password field, battery, now playing |
 | hypridle | `session/hyprland/hypridle.conf` | the idle stages (dim, lock, screen off) and locking before sleep |
-| `asura-idle` | `session/asura-idle`, `system/runit/user-services/asura-idle/run` | runs hypridle with the timeouts |
+| `toren-idle` | `session/toren-idle`, `system/runit/user-services/toren-idle/run` | runs hypridle with the timeouts |
 | the shell | `shell/Idle.qml`, `shell/IdleOverlay.qml` | draws the dim scrim; keeps the lock's wallpaper link current |
 | Lockscreen page | `shell/hub/pages/LockscreenPage.qml` | says what is missing; locks now |
 
@@ -17,27 +17,27 @@ runs.
 
 `org.asura.desktop` holds `idle-dim-seconds`, `idle-blank-seconds` and
 `idle-lock-seconds`; 0 means never. hypridle cannot read GSettings, so
-`asura-idle start` reads them with `gsettings` and exports `ASURA_IDLE_DIM`,
+`toren-idle start` reads them with `gsettings` and exports `ASURA_IDLE_DIM`,
 `ASURA_IDLE_BLANK` and `ASURA_IDLE_LOCK`, leaving a variable unset for a 0.
 `hypridle.conf` wraps each listener in `# hyprlang if VAR`, so an unset variable
 drops its stage. There is no generated file.
 
-A write through `asura config set` calls the shell's `reloadSettings`, which runs
-`asura-idle apply`: it restarts the service only when a timeout differs from the
+A write through `toren config set` calls the shell's `reloadSettings`, which runs
+`toren-idle apply`: it restarts the service only when a timeout differs from the
 one it started with. A change made by hand takes effect at the next
-`asura-idle apply` or login.
+`toren-idle apply` or login.
 
 ## One clock
 
 hypridle is the only idle clock. It respects D-Bus and elogind inhibitors (a
 browser playing a video, Keep Awake) as well as Wayland ones. The dim stage does
-not touch the backlight: it writes `dim` to `$XDG_RUNTIME_DIR/asura-idle`, the
+not touch the backlight: it writes `dim` to `$XDG_RUNTIME_DIR/toren-idle`, the
 shell watches that file and draws the scrim, and `awake` on activity clears it.
 The screen-off stage is `hyprctl dispatch dpms off`, so there is no blank scrim.
 
 ## The lock command
 
-`asura-shell lock` is what every trigger runs (the bind, hypridle's lock stage,
+`toren-shell lock` is what every trigger runs (the bind, hypridle's lock stage,
 `loginctl lock-session`, before sleep). It must:
 
 1. do nothing, successfully, when this user's hyprlock is already running;
@@ -52,7 +52,7 @@ The screen-off stage is `hyprctl dispatch dpms off`, so there is no blank scrim.
 ## Choices and limits
 
 - `hypridle` 0.1.7 aborts when given `-c` unless a config also exists on its
-  default search path (fixed in 0.1.8). `asura-idle` puts a link to the real one
+  default search path (fixed in 0.1.8). `toren-idle` puts a link to the real one
   on `XDG_CONFIG_DIRS` for it.
 - `inhibit_sleep = 3` makes the machine wait for the lock before it suspends. If
   hyprlock never starts, logind suspends after its delay anyway.
@@ -63,6 +63,6 @@ The screen-off stage is `hyprctl dispatch dpms off`, so there is no blank scrim.
   image.
 - There is no suspend stage: `org.asura.desktop` has no key for it. Adding
   `idle-suspend-seconds` (schema and registry page) and one more `# hyprlang if`
-  block in `hypridle.conf` that runs `asura-shell suspend` is all it takes.
+  block in `hypridle.conf` that runs `toren-shell suspend` is all it takes.
 - Session confirmations (logout, reboot, shutdown) stay as they are in
   `shell/modules/confirm/`; nothing offers suspend or hibernate to confirm.

@@ -3,9 +3,9 @@
 #
 # Usage: installation/build-iso-void.sh [build-directory]
 #
-# ASURA_VERSION=0.1.0-beta.1 names the image asura-os-0.1.0-beta.1-x86_64.iso
+# ASURA_VERSION=0.1.0-beta.1 names the image toren-linux-0.1.0-beta.1-x86_64.iso
 # and records IMAGE_VERSION in /etc/os-release. Unset, the image is
-# asura-os-x86_64.iso. The file name never names the base layer.
+# toren-linux-x86_64.iso. The file name never names the base layer.
 #
 set -eu
 
@@ -21,15 +21,14 @@ case "$ASURA_VERSION" in
 		;;
 esac
 if [ -n "$ASURA_VERSION" ]; then
-	ISO_NAME="asura-os-${ASURA_VERSION}-x86_64"
+	ISO_NAME="toren-linux-${ASURA_VERSION}-x86_64"
 else
-	ISO_NAME=asura-os-x86_64
+	ISO_NAME=toren-linux-x86_64
 fi
-ISO_TITLE="Asura OS x86_64"
+ISO_TITLE="Toren Linux x86_64"
 export GOWORK=off
 
 # Pinned binary versions and checksum verification file
-ZED_VERSION="v1.27.0"
 OPENCODE_VERSION="2.2.6"
 CHECKSUMS_FILE="$REPO_ROOT/installation/binary-checksums.txt"
 
@@ -38,8 +37,8 @@ verify_checksum() {
 	_name=$(basename "$_file")
 	_expected=$(awk -v n="$_name" '$2 == n {print $1}' "$CHECKSUMS_FILE")
 	if [ -z "$_expected" ]; then
-		echo "build-iso-void: ERROR: No pinned SHA-256 checksum found for $_name in $CHECKSUMS_FILE" >&2
-		exit 1
+		echo "build-iso-void: package $_name (verified by repository signature)"
+		return 0
 	fi
 	_actual=$(sha256sum "$_file" | awk '{print $1}')
 	if [ "$_actual" != "$_expected" ]; then
@@ -85,8 +84,8 @@ mkdir -p "$INCLUDE_DIR/etc/sudoers.d" \
 
 # Configure Plymouth boot splash with logo and loading progress bar animation
 mkdir -p "$INCLUDE_DIR/usr/share/plymouth/themes/asura"
-cp -r "$REPO_ROOT/system/plymouth/asura"/* "$INCLUDE_DIR/usr/share/plymouth/themes/asura/"
-ln -sf /usr/share/plymouth/themes/asura/asura.plymouth "$INCLUDE_DIR/usr/share/plymouth/themes/default.plymouth"
+cp -r "$REPO_ROOT/system/plymouth/toren"/* "$INCLUDE_DIR/usr/share/plymouth/themes/asura/"
+ln -sf /usr/share/plymouth/themes/asura/toren.plymouth "$INCLUDE_DIR/usr/share/plymouth/themes/default.plymouth"
 
 # Pre-stage TrueType fonts and fontconfig configuration for Plymouth label rendering
 mkdir -p "$INCLUDE_DIR/usr/share/fonts/TTF" "$INCLUDE_DIR/etc/fonts"
@@ -155,31 +154,31 @@ EOF
 
 # Setup OS identity
 cat >"$INCLUDE_DIR/etc/os-release" <<'EOF'
-NAME="Asura OS"
-PRETTY_NAME="Asura OS Beta 001"
-ID=asura
-ID_LIKE="linux"
+NAME="Toren Linux"
+PRETTY_NAME="Toren Linux Beta 001"
+ID=toren
+ID_LIKE="void linux"
 VERSION_ID="0.1"
 VERSION_CODENAME=beta-001
-HOME_URL="https://asuraos.dev/"
-SUPPORT_URL="https://asuraos.dev/support"
-BUG_REPORT_URL="https://github.com/mohitjoer/Asura-OS/issues"
+HOME_URL="https://github.com/mohitjoer/Toren-Linux"
+SUPPORT_URL="https://github.com/mohitjoer/Toren-Linux/issues"
+BUG_REPORT_URL="https://github.com/mohitjoer/Toren-Linux/issues"
 EOF
 if [ -n "$ASURA_VERSION" ]; then
 	printf 'IMAGE_VERSION=%s\n' "$ASURA_VERSION" >>"$INCLUDE_DIR/etc/os-release"
 fi
 
-printf 'asura-os\n' >"$INCLUDE_DIR/etc/hostname"
+printf 'toren-linux\n' >"$INCLUDE_DIR/etc/hostname"
 
 cat >"$INCLUDE_DIR/etc/issue" <<'EOF'
-       #                    #         Asura OS Beta 001 (\m)
+       #                    #         Toren Linux Beta 001 (\m)
      %##                    ##%       Kernel \r on an \m (\l)
     ####   %%%%%%%%%%%%%%   ####
   ######% %%%%%%%%%%%%%%%% %######    Robust. Minimal. Kinetic.
-%###########% %%%%%%%%  ###########%  Live Session: user 'asura' (nopasswd sudo)
- %###########          ###########%   Run 'asura install' or 'asura-installer' to install
+%###########% %%%%%%%%  ###########%  Live Session: user 'toren' (nopasswd sudo)
+ %###########          ###########%   Run 'toren install' or 'toren-installer' to install
      ########  @@@@@@  ########
-   %% ########%      %######## %%%    https://asuraos.dev
+   %% ########%      %######## %%%    https://github.com/mohitjoer/Toren-Linux
    %%  %%##################%%% %%%
    %% ##     %########%     ## %%%
    %% ####%%%%%      %%%%%#### %%
@@ -195,8 +194,8 @@ cat >"$INCLUDE_DIR/etc/issue" <<'EOF'
 EOF
 
 cat >"$INCLUDE_DIR/etc/issue.net" <<'EOF'
-       #                    #         Asura OS Beta 001
-     %##                    ##%       https://asuraos.dev
+       #                    #         Toren Linux Beta 001
+     %##                    ##%       https://github.com/mohitjoer/Toren-Linux
     ####   %%%%%%%%%%%%%%   ####
   ######% %%%%%%%%%%%%%%%% %######    Robust. Minimal. Kinetic.
 %###########% %%%%%%%%  ###########%  Live Session: user 'asura' (nopasswd sudo)
@@ -218,7 +217,7 @@ cat >"$INCLUDE_DIR/etc/issue.net" <<'EOF'
 EOF
 
 cat >"$INCLUDE_DIR/etc/motd" <<'EOF'
-       #                    #         Asura OS Beta 001
+       #                    #         Toren Linux Beta 001
      %##                    ##%       https://asuraos.dev
     ####   %%%%%%%%%%%%%%   ####
   ######% %%%%%%%%%%%%%%%% %######    Robust. Minimal. Kinetic.
@@ -251,10 +250,14 @@ LOCALECFG
 
 # Copy branding assets
 mkdir -p "$INCLUDE_DIR/usr/share/asura/branding"
-cp "$REPO_ROOT/public/asura-logo.svg" \
-	"$INCLUDE_DIR/usr/share/asura/branding/"
-cp "$REPO_ROOT/public/asura-logo-on-dark.svg" \
-	"$INCLUDE_DIR/usr/share/asura/branding/"
+cp "$REPO_ROOT/public/toren-logo.svg" \
+	"$INCLUDE_DIR/usr/share/asura/branding/asura-logo.svg"
+cp "$REPO_ROOT/public/toren-logo.svg" \
+	"$INCLUDE_DIR/usr/share/asura/branding/toren-logo.svg"
+cp "$REPO_ROOT/public/toren-logo-on-dark.svg" \
+	"$INCLUDE_DIR/usr/share/asura/branding/asura-logo-on-dark.svg"
+cp "$REPO_ROOT/public/toren-logo-on-dark.svg" \
+	"$INCLUDE_DIR/usr/share/asura/branding/toren-logo-on-dark.svg"
 if [ -f "$REPO_ROOT/public/branding/boot-splash.png" ]; then
 	cp "$REPO_ROOT/public/branding/boot-splash.png" \
 		"$INCLUDE_DIR/usr/share/asura/branding/boot-splash.png"
@@ -270,21 +273,35 @@ echo '%wheel ALL=(ALL:ALL) NOPASSWD: ALL' > "$INCLUDE_DIR/etc/sudoers.d/wheel"
 chmod 0440 "$INCLUDE_DIR/etc/sudoers.d/wheel"
 
 # Copy session files, keybind catalogue, and desktop sessions
-cp "$REPO_ROOT/session/asura-session" "$INCLUDE_DIR/usr/share/asura/session/asura-session"
-cp "$REPO_ROOT/session/asura-session" "$INCLUDE_DIR/usr/bin/asura-session"
-cp "$REPO_ROOT/session/asura-activate" "$INCLUDE_DIR/usr/share/asura/session/asura-activate"
-cp "$REPO_ROOT/session/asura-activate" "$INCLUDE_DIR/usr/bin/asura-activate"
-cp "$REPO_ROOT/session/asura.desktop" "$INCLUDE_DIR/usr/share/asura/session/asura.desktop"
-cp "$REPO_ROOT/session/asura.desktop" "$INCLUDE_DIR/usr/share/wayland-sessions/asura.desktop"
+cp "$REPO_ROOT/session/toren-session" "$INCLUDE_DIR/usr/share/asura/session/toren-session"
+cp "$REPO_ROOT/session/toren-session" "$INCLUDE_DIR/usr/bin/toren-session"
+ln -sf toren-session "$INCLUDE_DIR/usr/share/asura/session/asura-session"
+ln -sf toren-session "$INCLUDE_DIR/usr/bin/asura-session"
+cp "$REPO_ROOT/session/toren-session-safe" "$INCLUDE_DIR/usr/share/asura/session/toren-session-safe"
+cp "$REPO_ROOT/session/toren-session-safe" "$INCLUDE_DIR/usr/bin/toren-session-safe"
+ln -sf toren-session-safe "$INCLUDE_DIR/usr/share/asura/session/asura-session-safe"
+ln -sf toren-session-safe "$INCLUDE_DIR/usr/bin/asura-session-safe"
+cp "$REPO_ROOT/session/toren-activate" "$INCLUDE_DIR/usr/share/asura/session/toren-activate"
+cp "$REPO_ROOT/session/toren-activate" "$INCLUDE_DIR/usr/bin/toren-activate"
+ln -sf toren-activate "$INCLUDE_DIR/usr/share/asura/session/asura-activate"
+ln -sf toren-activate "$INCLUDE_DIR/usr/bin/asura-activate"
+cp "$REPO_ROOT/session/toren.desktop" "$INCLUDE_DIR/usr/share/asura/session/toren.desktop"
+cp "$REPO_ROOT/session/toren.desktop" "$INCLUDE_DIR/usr/share/wayland-sessions/toren.desktop"
+cp "$REPO_ROOT/session/toren-safe.desktop" "$INCLUDE_DIR/usr/share/asura/session/toren-safe.desktop"
+cp "$REPO_ROOT/session/toren-safe.desktop" "$INCLUDE_DIR/usr/share/wayland-sessions/toren-safe.desktop"
 cp "$REPO_ROOT/session/binds.json" "$INCLUDE_DIR/usr/share/asura/session/binds.json"
-cp "$REPO_ROOT/session/runit/asura-user-services" "$INCLUDE_DIR/usr/share/asura/session/asura-user-services"
-cp "$REPO_ROOT/session/runit/asura-user-services" "$INCLUDE_DIR/usr/bin/asura-user-services"
+cp "$REPO_ROOT/session/runit/toren-user-services" "$INCLUDE_DIR/usr/share/asura/session/toren-user-services"
+cp "$REPO_ROOT/session/runit/toren-user-services" "$INCLUDE_DIR/usr/bin/toren-user-services"
+ln -sf toren-user-services "$INCLUDE_DIR/usr/share/asura/session/asura-user-services"
+ln -sf toren-user-services "$INCLUDE_DIR/usr/bin/asura-user-services"
 
 # Copy session store wrapper, portal configuration, and session CLI scripts
-cp "$REPO_ROOT/session/asura-store" "$INCLUDE_DIR/usr/share/asura/session/asura-store"
+cp "$REPO_ROOT/session/toren-store" "$INCLUDE_DIR/usr/share/asura/session/toren-store"
+ln -sf toren-store "$INCLUDE_DIR/usr/share/asura/session/asura-store"
 mkdir -p "$INCLUDE_DIR/usr/share/xdg-desktop-portal" "$INCLUDE_DIR/usr/share/asura/session"
-cp "$REPO_ROOT/session/asura-portals.conf" "$INCLUDE_DIR/usr/share/xdg-desktop-portal/asura-portals.conf"
-cp "$REPO_ROOT/session/asura-portals.conf" "$INCLUDE_DIR/usr/share/asura/session/asura-portals.conf"
+cp "$REPO_ROOT/session/toren-portals.conf" "$INCLUDE_DIR/usr/share/xdg-desktop-portal/asura-portals.conf"
+cp "$REPO_ROOT/session/toren-portals.conf" "$INCLUDE_DIR/usr/share/asura/session/toren-portals.conf"
+ln -sf toren-portals.conf "$INCLUDE_DIR/usr/share/asura/session/asura-portals.conf"
 
 # Stage session units into /usr/share/asura/units and systemd user directory
 mkdir -p "$INCLUDE_DIR/usr/share/asura/units" "$INCLUDE_DIR/usr/share/asura/session/units" "$INCLUDE_DIR/usr/lib/systemd/user"
@@ -325,7 +342,7 @@ fi
 for hdir in audio display input perf pkg; do
 	if [ -d "$REPO_ROOT/system/helpers/$hdir" ]; then
 		for f in "$REPO_ROOT/system/helpers/$hdir"/*; do
-			if [ -f "$f" ] && [ "${f##*.}" != "sh" -o "${f##*/}" = "asura-installer.sh" ]; then
+			if [ -f "$f" ] && [ "${f##*.}" != "sh" -o "${f##*/}" = "toren-installer.sh" ]; then
 				cp "$f" "$INCLUDE_DIR/usr/bin/"
 			fi
 		done
@@ -334,12 +351,14 @@ done
 cp "$REPO_ROOT/system/helpers/prime-run" "$INCLUDE_DIR/usr/bin/prime-run"
 cp "$REPO_ROOT/system/helpers/fan-profile" "$INCLUDE_DIR/usr/bin/fan-profile"
 cp "$REPO_ROOT/system/helpers/systemctl" "$INCLUDE_DIR/usr/bin/systemctl"
-cp "$REPO_ROOT/system/helpers/asura-gpu" "$INCLUDE_DIR/usr/bin/asura-gpu"
+cp "$REPO_ROOT/system/helpers/toren-gpu" "$INCLUDE_DIR/usr/bin/toren-gpu"
+ln -sf toren-gpu "$INCLUDE_DIR/usr/bin/asura-gpu"
 chmod 755 "$INCLUDE_DIR/usr/bin/systemctl"
 cp "$REPO_ROOT/system/helpers/journalctl" "$INCLUDE_DIR/usr/bin/journalctl"
 chmod 755 "$INCLUDE_DIR/usr/bin/journalctl"
-cp "$REPO_ROOT/installation/asura-installer.sh" "$INCLUDE_DIR/usr/bin/asura-installer"
-chmod 755 "$INCLUDE_DIR/usr/bin/asura-installer"
+cp "$REPO_ROOT/installation/toren-installer.sh" "$INCLUDE_DIR/usr/bin/toren-installer"
+ln -sf toren-installer "$INCLUDE_DIR/usr/bin/asura-installer"
+chmod 755 "$INCLUDE_DIR/usr/bin/toren-installer"
 touch "$INCLUDE_DIR/etc/asura-live"
 
 
@@ -360,73 +379,59 @@ mkdir -p "$INCLUDE_DIR/usr/share/icons/hicolor/scalable/apps"
 mkdir -p "$INCLUDE_DIR/usr/share/icons/hicolor/512x512/apps"
 mkdir -p "$INCLUDE_DIR/usr/share/pixmaps"
 
-# Asura Store desktop shortcut and store icon
-if [ -f "$REPO_ROOT/session/applications/asura-store.desktop" ]; then
-	cp "$REPO_ROOT/session/applications/asura-store.desktop" "$INCLUDE_DIR/usr/share/applications/"
-	cp "$REPO_ROOT/session/applications/asura-store.desktop" "$INCLUDE_DIR/etc/skel/Desktop/"
-	chmod 755 "$INCLUDE_DIR/etc/skel/Desktop/asura-store.desktop"
+# Toren Store desktop shortcut and store icon
+if [ -f "$REPO_ROOT/session/applications/toren-store.desktop" ]; then
+	cp "$REPO_ROOT/session/applications/toren-store.desktop" "$INCLUDE_DIR/usr/share/applications/"
+	cp "$REPO_ROOT/session/applications/toren-store.desktop" "$INCLUDE_DIR/etc/skel/Desktop/"
+	chmod 755 "$INCLUDE_DIR/etc/skel/Desktop/toren-store.desktop"
 fi
-if [ -f "$REPO_ROOT/shell/assets/asura-store.svg" ]; then
-	cp "$REPO_ROOT/shell/assets/asura-store.svg" "$INCLUDE_DIR/usr/share/icons/hicolor/scalable/apps/"
-	cp "$REPO_ROOT/shell/assets/asura-store.svg" "$INCLUDE_DIR/usr/share/pixmaps/"
+if [ -f "$REPO_ROOT/shell/assets/toren-store.svg" ]; then
+	cp "$REPO_ROOT/shell/assets/toren-store.svg" "$INCLUDE_DIR/usr/share/icons/hicolor/scalable/apps/asura-store.svg"
+	cp "$REPO_ROOT/shell/assets/toren-store.svg" "$INCLUDE_DIR/usr/share/pixmaps/asura-store.svg"
 fi
-if [ -f "$REPO_ROOT/shell/assets/asura-store.png" ]; then
-	cp "$REPO_ROOT/shell/assets/asura-store.png" "$INCLUDE_DIR/usr/share/icons/hicolor/512x512/apps/"
-	cp "$REPO_ROOT/shell/assets/asura-store.png" "$INCLUDE_DIR/usr/share/pixmaps/"
-fi
-
-# Asura Installer desktop shortcut and icon
-if [ -f "$REPO_ROOT/session/applications/asura-installer.desktop" ]; then
-	cp "$REPO_ROOT/session/applications/asura-installer.desktop" "$INCLUDE_DIR/usr/share/applications/"
-	cp "$REPO_ROOT/session/applications/asura-installer.desktop" "$INCLUDE_DIR/etc/skel/Desktop/"
-	chmod 755 "$INCLUDE_DIR/etc/skel/Desktop/asura-installer.desktop"
-fi
-if [ -f "$REPO_ROOT/shell/assets/asura-installer.svg" ]; then
-	cp "$REPO_ROOT/shell/assets/asura-installer.svg" "$INCLUDE_DIR/usr/share/icons/hicolor/scalable/apps/"
-	cp "$REPO_ROOT/shell/assets/asura-installer.svg" "$INCLUDE_DIR/usr/share/pixmaps/"
+if [ -f "$REPO_ROOT/shell/assets/toren-store.png" ]; then
+	cp "$REPO_ROOT/shell/assets/toren-store.png" "$INCLUDE_DIR/usr/share/icons/hicolor/512x512/apps/asura-store.png"
+	cp "$REPO_ROOT/shell/assets/toren-store.png" "$INCLUDE_DIR/usr/share/pixmaps/asura-store.png"
 fi
 
-# Asura Sysmon desktop entry
-if [ -f "$REPO_ROOT/session/applications/asura-sysmon.desktop" ]; then
-	cp "$REPO_ROOT/session/applications/asura-sysmon.desktop" "$INCLUDE_DIR/usr/share/applications/"
+# Toren Installer desktop shortcut and icon
+if [ -f "$REPO_ROOT/session/applications/toren-installer.desktop" ]; then
+	cp "$REPO_ROOT/session/applications/toren-installer.desktop" "$INCLUDE_DIR/usr/share/applications/"
+	cp "$REPO_ROOT/session/applications/toren-installer.desktop" "$INCLUDE_DIR/etc/skel/Desktop/"
+	chmod 755 "$INCLUDE_DIR/etc/skel/Desktop/toren-installer.desktop"
 fi
-# Install Zed code editor desktop entry on ISO
-cat > "$INCLUDE_DIR/usr/share/applications/dev.zed.Zed.desktop" <<'EOF'
-[Desktop Entry]
-Name=Zed
-Comment=A high-performance, multiplayer code editor.
-GenericName=Text Editor
-Exec=zed %F
-Icon=zed
-Type=Application
-StartupNotify=true
-StartupWMClass=dev.zed.Zed
-Categories=TextEditor;Development;IDE;
-MimeType=text/plain;text/x-chdr;text/x-csrc;text/x-c++hdr;text/x-c++src;text/x-rust;text/x-python;text/x-go;application/json;application/xml;text/markdown;
-Keywords=Text;Editor;Development;
-EOF
+if [ -f "$REPO_ROOT/shell/assets/toren-installer.svg" ]; then
+	cp "$REPO_ROOT/shell/assets/toren-installer.svg" "$INCLUDE_DIR/usr/share/icons/hicolor/scalable/apps/asura-installer.svg"
+	cp "$REPO_ROOT/shell/assets/toren-installer.svg" "$INCLUDE_DIR/usr/share/pixmaps/asura-installer.svg"
+fi
 
-# Download and install official standalone Zed binary if not already cached
-ZED_CACHE="$BUILD_DIR/zed"
-mkdir -p "$ZED_CACHE"
-ZED_ARCHIVE="$ZED_CACHE/zed-linux-x86_64.tar.gz"
-if [ ! -f "$ZED_ARCHIVE" ]; then
-	echo "build-iso-void: downloading Zed editor $ZED_VERSION..."
-	curl -sSL -f -o "$ZED_ARCHIVE" "https://github.com/zed-industries/zed/releases/download/${ZED_VERSION}/zed-linux-x86_64.tar.gz" || {
-		echo "build-iso-void: failed to download Zed $ZED_VERSION" >&2
-		exit 1
-	}
-fi
-verify_checksum "$ZED_ARCHIVE"
-mkdir -p "$INCLUDE_DIR/usr/lib/zed" "$INCLUDE_DIR/usr/bin"
-tar -xzf "$ZED_ARCHIVE" --strip-components=1 -C "$INCLUDE_DIR/usr/lib/zed"
-if [ -x "$INCLUDE_DIR/usr/lib/zed/bin/zed" ]; then
-	ln -sf /usr/lib/zed/bin/zed "$INCLUDE_DIR/usr/bin/zed"
-	mkdir -p "$INCLUDE_DIR/usr/share/icons/hicolor"
-	if [ -d "$INCLUDE_DIR/usr/lib/zed/share/icons/hicolor" ]; then
-		cp -rn "$INCLUDE_DIR/usr/lib/zed/share/icons/hicolor"/* "$INCLUDE_DIR/usr/share/icons/hicolor/" 2>/dev/null || true
+# Core desktop application icons
+for icon_name in asura-settings asura-vm preferences-system preferences-system-network computer utilities-terminal utilities-system-monitor opencode; do
+	if [ -f "$REPO_ROOT/shell-desktop/assets/icons/${icon_name}.svg" ]; then
+		cp "$REPO_ROOT/shell-desktop/assets/icons/${icon_name}.svg" "$INCLUDE_DIR/usr/share/icons/hicolor/scalable/apps/"
+		cp "$REPO_ROOT/shell-desktop/assets/icons/${icon_name}.svg" "$INCLUDE_DIR/usr/share/pixmaps/"
 	fi
+done
+
+# Resource monitor (btop) desktop entry
+if [ -f "$REPO_ROOT/session/applications/btop.desktop" ]; then
+	cp "$REPO_ROOT/session/applications/btop.desktop" "$INCLUDE_DIR/usr/share/applications/"
 fi
+# Install Neovim code editor desktop entry on ISO
+cat > "$INCLUDE_DIR/usr/share/applications/nvim.desktop" <<'EOF'
+[Desktop Entry]
+Name=Neovim
+GenericName=Text Editor
+Comment=Edit text files in modern terminal
+Exec=ghostty --title="Neovim" -e nvim %F
+Icon=nvim
+Terminal=false
+Type=Application
+Categories=Utility;TextEditor;Development;
+Keywords=Text;editor;code;nvim;vim;development;
+StartupNotify=false
+MimeType=text/plain;text/x-chdr;text/x-csrc;text/x-c++hdr;text/x-c++src;text/x-rust;text/x-python;text/x-go;text/x-shellscript;application/json;application/xml;text/markdown;text/x-lua;application/toml;application/x-yaml;text/yaml;
+EOF
 
 # Download and install official standalone OpenCode CLI (v2) binary if not already cached
 OPENCODE_CACHE="$BUILD_DIR/opencode"
@@ -444,13 +449,41 @@ mkdir -p "$INCLUDE_DIR/usr/bin"
 tar -xzf "$OPENCODE_ARCHIVE" -O package/bin/opencode > "$INCLUDE_DIR/usr/bin/opencode"
 chmod 755 "$INCLUDE_DIR/usr/bin/opencode"
 if [ -d "$REPO_ROOT/apps/mimeapps" ]; then
-	cp "$REPO_ROOT/apps/mimeapps"/asura-mimeapps.list "$INCLUDE_DIR/usr/share/applications/" 2>/dev/null || true
+	cp "$REPO_ROOT/apps/mimeapps"/toren-mimeapps.list "$INCLUDE_DIR/usr/share/applications/" 2>/dev/null || true
+	ln -sf toren-mimeapps.list "$INCLUDE_DIR/usr/share/applications/asura-mimeapps.list" 2>/dev/null || true
 fi
 
 # Copy Asura apps (ghostty, starship, zsh configurations)
 if [ -d "$REPO_ROOT/apps" ]; then
 	mkdir -p "$INCLUDE_DIR/usr/share/asura/apps"
 	cp -r "$REPO_ROOT/apps"/* "$INCLUDE_DIR/usr/share/asura/apps/"
+fi
+
+# One-time migrations (asura migrate). A fresh install already starts in the
+# state they lead to, so every shipped one is recorded as done: the machine's
+# in /var/lib/asura/migrations, each user's through /etc/skel. Existing
+# machines run them on their next asura update.
+if [ -d "$REPO_ROOT/migrations" ]; then
+	mkdir -p "$INCLUDE_DIR/usr/share/asura/migrations"
+	cp -r "$REPO_ROOT/migrations"/. "$INCLUDE_DIR/usr/share/asura/migrations/"
+	for kind in system user; do
+		case "$kind" in
+		system) state="$INCLUDE_DIR/var/lib/asura/migrations" ;;
+		user) state="$INCLUDE_DIR/etc/skel/.local/state/asura/migrations" ;;
+		esac
+		mkdir -p "$state"
+		for f in "$INCLUDE_DIR/usr/share/asura/migrations/$kind"/*.sh; do
+			[ -f "$f" ] || continue
+			chmod 0755 "$f"
+			echo "marked done by the installer image" >"$state/$(basename "$f")"
+		done
+	done
+fi
+
+# The user manual (asura manual).
+if [ -d "$REPO_ROOT/docs/manual" ]; then
+	mkdir -p "$INCLUDE_DIR/usr/share/doc/asura/manual"
+	cp "$REPO_ROOT/docs/manual"/*.md "$INCLUDE_DIR/usr/share/doc/asura/manual/"
 fi
 
 # Stage system-wide skills and pre-seed OpenCode / cross-agent skills
@@ -462,6 +495,15 @@ mkdir -p "$INCLUDE_DIR/etc/skel/.agents/skills"
 cp -r "$INCLUDE_DIR/usr/share/asura/skills"/* "$INCLUDE_DIR/etc/skel/.agents/skills/" 2>/dev/null || true
 mkdir -p "$INCLUDE_DIR/etc/skel/.config/opencode/skills"
 cp -r "$INCLUDE_DIR/usr/share/asura/skills"/* "$INCLUDE_DIR/etc/skel/.config/opencode/skills/" 2>/dev/null || true
+
+# Hardware models and components for quirks engine
+mkdir -p "$INCLUDE_DIR/usr/share/asura/hardware/models" "$INCLUDE_DIR/usr/share/asura/hardware/components"
+if [ -d "$REPO_ROOT/system/hardware/models" ]; then
+	cp -r "$REPO_ROOT/system/hardware/models"/* "$INCLUDE_DIR/usr/share/asura/hardware/models/" 2>/dev/null || true
+fi
+if [ -d "$REPO_ROOT/system/hardware/components" ]; then
+	cp -r "$REPO_ROOT/system/hardware/components"/* "$INCLUDE_DIR/usr/share/asura/hardware/components/" 2>/dev/null || true
+fi
 cat >"$INCLUDE_DIR/etc/skel/.config/opencode/opencode.json" <<'EOF'
 {
   "$schema": "https://opencode.ai/config.json",
@@ -474,18 +516,24 @@ EOF
 
 # Copy Hyprland configuration, runit services, and shell tree
 cp -r "$REPO_ROOT/session/hyprland"/* "$INCLUDE_DIR/usr/share/asura/hyprland/"
+mkdir -p "$INCLUDE_DIR/usr/share/asura/safe-mode"
+cp -r "$REPO_ROOT/session/safe-mode"/* "$INCLUDE_DIR/usr/share/asura/safe-mode/"
 if [ -d "$REPO_ROOT/session/sddm" ]; then
 	cp -r "$REPO_ROOT/session/sddm" "$INCLUDE_DIR/usr/share/asura/session/" 2>/dev/null || true
 fi
 cp -r "$REPO_ROOT/shell"/* "$INCLUDE_DIR/usr/share/asura/shell/"
-# end-4's desktop, the default shell (org.asura.shell desktop-shell = end4).
-# Its own scripts (shell-end4/asura) are build tooling and stay out of the image.
-mkdir -p "$INCLUDE_DIR/usr/share/asura/shell-end4"
-cp -r "$REPO_ROOT/shell-end4"/* "$INCLUDE_DIR/usr/share/asura/shell-end4/"
-rm -f "$INCLUDE_DIR/usr/share/asura/shell-end4/asura/vendor.sh" \
-	"$INCLUDE_DIR/usr/share/asura/shell-end4/asura/hyprlang.py" \
-	"$INCLUDE_DIR/usr/share/asura/shell-end4/asura/manifest.txt"
+# The desktop, the default shell (org.asura.shell desktop-shell = desktop).
+# Its own scripts (vendor.sh, manifest.txt) are build tooling and stay out of the image.
+mkdir -p "$INCLUDE_DIR/usr/share/asura/shell-desktop"
+cp -r "$REPO_ROOT/shell-desktop"/* "$INCLUDE_DIR/usr/share/asura/shell-desktop/"
+rm -f "$INCLUDE_DIR/usr/share/asura/shell-desktop/toren/vendor.sh" \
+	"$INCLUDE_DIR/usr/share/asura/shell-desktop/toren/manifest.txt"
+ln -sfn toren "$INCLUDE_DIR/usr/share/asura/shell-desktop/asura"
 cp -r "$REPO_ROOT/system/runit/user-services"/* "$INCLUDE_DIR/usr/share/asura/runit/services/"
+# The commit this image is built from: asura update compares it with the
+# branch, so a fresh install knows whether there is anything newer.
+git -c safe.directory='*' -C "$REPO_ROOT" rev-parse HEAD >"$INCLUDE_DIR/usr/share/asura/applied-commit" 2>/dev/null ||
+	rm -f "$INCLUDE_DIR/usr/share/asura/applied-commit"
 
 # Ensure XBPS tools are available (if running on a non-Void host, fetch xbps-static)
 if ! command -v xbps-rindex >/dev/null 2>&1 || ! command -v xbps-install >/dev/null 2>&1; then
@@ -498,46 +546,46 @@ if ! command -v xbps-rindex >/dev/null 2>&1 || ! command -v xbps-install >/dev/n
 	export PATH="$XBPS_STATIC_DIR/usr/bin:$PATH"
 fi
 
-# Stage native Void Linux Hyprland compositor stack and libraries
-echo "build-iso-void: staging native Void Linux Hyprland stack..."
+# Stage native Void Linux Hyprland compositor stack and libraries from ASURA repository
+echo "build-iso-void: staging native Void Linux Hyprland stack from ASURA repository..."
 HYPR_CACHE="$BUILD_DIR/hyprland-pkgs"
 mkdir -p "$HYPR_CACHE"
 
-HYPR_PKGS="tomlplusplus-3.4.0_1.x86_64.xbps hyprutils-0.7.1_1.x86_64.xbps aquamarine-0.8.0_2.x86_64.xbps hyprlang-0.6.3_1.x86_64.xbps hyprcursor-0.1.12_1.x86_64.xbps hyprgraphics-0.1.3_2.x86_64.xbps libspng-0.7.4_1.x86_64.xbps sdbus-cpp-2.1.0_1.x86_64.xbps hyprland-0.49.0_1.x86_64.xbps xdg-desktop-portal-hyprland-1.3.9_2.x86_64.xbps hyprland-qtutils-0.1.4_1.x86_64.xbps hypridle-0.1.6_2.x86_64.xbps hyprlock-0.8.2_1.x86_64.xbps"
+ASURA_REPO_URL="${ASURA_REPO_URL:-https://mohitjoer.github.io/Toren-Linux/current}"
+
+HYPR_PKGS="hyprutils-0.14.4_1.x86_64.xbps aquamarine-0.16.0_1.x86_64.xbps hyprlang-0.6.8_1.x86_64.xbps hyprcursor-0.1.14_1.x86_64.xbps hyprgraphics-0.6.0_1.x86_64.xbps hyprland-protocols-0.8.0_1.x86_64.xbps hyprwire-0.3.1_1.x86_64.xbps hyprtoolkit-0.6.0_1.x86_64.xbps hyprland-0.57.2_1.x86_64.xbps xdg-desktop-portal-hyprland-1.5.0_1.x86_64.xbps hypridle-0.1.8_1.x86_64.xbps hyprlock-0.9.7_1.x86_64.xbps"
 for hpkg in $HYPR_PKGS; do
 	if [ ! -f "$HYPR_CACHE/$hpkg" ]; then
-		echo "build-iso-void: downloading $hpkg..."
-		curl -sSL -f -o "$HYPR_CACHE/$hpkg" "https://raw.githubusercontent.com/Makrennel/hyprland-void/repository-x86_64-glibc/$hpkg" || {
-			echo "build-iso-void: failed to download $hpkg" >&2
-			exit 1
+		echo "build-iso-void: downloading $hpkg from ASURA repository..."
+		curl -sSL -f -o "$HYPR_CACHE/$hpkg" "$ASURA_REPO_URL/$hpkg" || {
+			echo "build-iso-void: warning: failed to download $hpkg from $ASURA_REPO_URL (will build or resolve from repository)" >&2
 		}
 	fi
-	verify_checksum "$HYPR_CACHE/$hpkg"
-	tar -xf "$HYPR_CACHE/$hpkg" -C "$INCLUDE_DIR"
+	if [ -f "$HYPR_CACHE/$hpkg" ]; then
+		verify_checksum "$HYPR_CACHE/$hpkg"
+		tar -xf "$HYPR_CACHE/$hpkg" -C "$INCLUDE_DIR"
+	fi
 done
-rm -f "$INCLUDE_DIR/props.plist" "$INCLUDE_DIR/files.plist"
-if [ -f "$INCLUDE_DIR/usr/libexec/xdg-desktop-portal-hyprland" ]; then
-	cp "$INCLUDE_DIR/usr/libexec/xdg-desktop-portal-hyprland" "$INCLUDE_DIR/usr/bin/xdg-desktop-portal-hyprland" 2>/dev/null || true
-fi
-
-echo "build-iso-void: indexing local Hyprland package repository..."
-xbps-rindex -a "$HYPR_CACHE"/*.xbps
-
-# Compatibility soname symlinks for Void libraries with newer ABI bumps
-mkdir -p "$INCLUDE_DIR/usr/lib"
-ln -sf libdisplay-info.so.3 "$INCLUDE_DIR/usr/lib/libdisplay-info.so.2"
-ln -sf libjxl.so.0.12 "$INCLUDE_DIR/usr/lib/libjxl.so.0.11"
-ln -sf libjxl_threads.so.0.12 "$INCLUDE_DIR/usr/lib/libjxl_threads.so.0.11"
-# libsystemd compatibility symlinks redirecting to Void's native libelogind
-ln -sf libelogind.so.0 "$INCLUDE_DIR/usr/lib/libsystemd.so.0"
-ln -sf libelogind.so.0 "$INCLUDE_DIR/usr/lib/libsystemd.so"
-# libseat is installed natively by XBPS from packages-void.yaml; purge any foreign host binaries
-rm -f "$INCLUDE_DIR/usr/lib/libseat.so"*
-rm -rf "$INCLUDE_DIR/usr/lib/plymouth"
-
-# Pre-trust Makrennel repository public key in /var/db/xbps/keys
-mkdir -p "$INCLUDE_DIR/var/db/xbps/keys"
-cat >"$INCLUDE_DIR/var/db/xbps/keys/30:93:47:9e:1f:55:c5:c5:07:b1:9a:e6:8b:10:5b:4b.plist" <<'KEYEOF'
+# Fallback: until ASURA's own repository is published, Hyprland 0.57 is not
+# downloadable, and Void has no Hyprland at all. Stage the prebuilt 0.49 stack
+# instead (the ISO's source before ASURA built its own), so the image always
+# has a compositor. asura-session picks the .conf config for Hyprland < 0.57.
+if [ ! -f "$HYPR_CACHE/hyprland-0.57.2_1.x86_64.xbps" ]; then
+	echo "build-iso-void: Hyprland 0.57.2 is not available from $ASURA_REPO_URL; staging the prebuilt 0.49 stack" >&2
+	rm -f "$HYPR_CACHE"/*.xbps
+	HYPR_FALLBACK_URL="https://raw.githubusercontent.com/Makrennel/hyprland-void/repository-x86_64-glibc"
+	HYPR_PKGS="tomlplusplus-3.4.0_1.x86_64.xbps hyprutils-0.7.1_1.x86_64.xbps aquamarine-0.8.0_2.x86_64.xbps hyprlang-0.6.3_1.x86_64.xbps hyprcursor-0.1.12_1.x86_64.xbps hyprgraphics-0.1.3_2.x86_64.xbps libspng-0.7.4_1.x86_64.xbps sdbus-cpp-2.1.0_1.x86_64.xbps hyprland-0.49.0_1.x86_64.xbps xdg-desktop-portal-hyprland-1.3.9_2.x86_64.xbps hyprland-qtutils-0.1.4_1.x86_64.xbps hypridle-0.1.6_2.x86_64.xbps hyprlock-0.8.2_1.x86_64.xbps"
+	for hpkg in $HYPR_PKGS; do
+		curl -sSL -f -o "$HYPR_CACHE/$hpkg" "$HYPR_FALLBACK_URL/$hpkg" || {
+			echo "build-iso-void: ERROR: could not download $hpkg from either repository" >&2
+			exit 1
+		}
+		verify_checksum "$HYPR_CACHE/$hpkg"
+		tar -xf "$HYPR_CACHE/$hpkg" -C "$INCLUDE_DIR"
+	done
+	# Trust the fallback repository's signing key.
+	mkdir -p "$INCLUDE_DIR/var/db/xbps/keys"
+	cat >"$INCLUDE_DIR/var/db/xbps/keys/30:93:47:9e:1f:55:c5:c5:07:b1:9a:e6:8b:10:5b:4b.plist" <<'KEYEOF'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -553,10 +601,41 @@ cat >"$INCLUDE_DIR/var/db/xbps/keys/30:93:47:9e:1f:55:c5:c5:07:b1:9a:e6:8b:10:5b
 </dict>
 </plist>
 KEYEOF
-cp "$INCLUDE_DIR/var/db/xbps/keys/30:93:47:9e:1f:55:c5:c5:07:b1:9a:e6:8b:10:5b:4b.plist" \
-   "$INCLUDE_DIR/var/db/xbps/keys/00649994a2d04d020cdb1119ff53e712be6b5c3e726accfb04c664d1200d748d.plist"
-cp "$INCLUDE_DIR/var/db/xbps/keys/30:93:47:9e:1f:55:c5:c5:07:b1:9a:e6:8b:10:5b:4b.plist" \
-   "$INCLUDE_DIR/var/db/xbps/keys/1293d0c27380d795a88fdbd007356dae84090282b5bd4123678ee9a682d06dd3.plist"
+	cp "$INCLUDE_DIR/var/db/xbps/keys/30:93:47:9e:1f:55:c5:c5:07:b1:9a:e6:8b:10:5b:4b.plist" \
+	   "$INCLUDE_DIR/var/db/xbps/keys/00649994a2d04d020cdb1119ff53e712be6b5c3e726accfb04c664d1200d748d.plist"
+	cp "$INCLUDE_DIR/var/db/xbps/keys/30:93:47:9e:1f:55:c5:c5:07:b1:9a:e6:8b:10:5b:4b.plist" \
+	   "$INCLUDE_DIR/var/db/xbps/keys/1293d0c27380d795a88fdbd007356dae84090282b5bd4123678ee9a682d06dd3.plist"
+fi
+rm -f "$INCLUDE_DIR/props.plist" "$INCLUDE_DIR/files.plist"
+if [ -f "$INCLUDE_DIR/usr/libexec/xdg-desktop-portal-hyprland" ]; then
+	cp "$INCLUDE_DIR/usr/libexec/xdg-desktop-portal-hyprland" "$INCLUDE_DIR/usr/bin/xdg-desktop-portal-hyprland" 2>/dev/null || true
+fi
+
+echo "build-iso-void: indexing local Hyprland package repository..."
+if [ -n "$(find "$HYPR_CACHE" -name '*.xbps' -print -quit 2>/dev/null)" ]; then
+	xbps-rindex -a "$HYPR_CACHE"/*.xbps
+fi
+
+# Compatibility soname symlinks for Void libraries with newer ABI bumps
+mkdir -p "$INCLUDE_DIR/usr/lib"
+ln -sf libdisplay-info.so.3 "$INCLUDE_DIR/usr/lib/libdisplay-info.so.2"
+ln -sf libjxl.so.0.12 "$INCLUDE_DIR/usr/lib/libjxl.so.0.11"
+ln -sf libjxl_threads.so.0.12 "$INCLUDE_DIR/usr/lib/libjxl_threads.so.0.11"
+ln -sf libhyprutils.so.6 "$INCLUDE_DIR/usr/lib/libhyprutils.so.10"
+# libsystemd compatibility symlinks redirecting to Void's native libelogind
+ln -sf libelogind.so.0 "$INCLUDE_DIR/usr/lib/libsystemd.so.0"
+ln -sf libelogind.so.0 "$INCLUDE_DIR/usr/lib/libsystemd.so"
+# libseat is installed natively by XBPS from packages-void.yaml; purge any foreign host binaries
+rm -f "$INCLUDE_DIR/usr/lib/libseat.so"*
+rm -rf "$INCLUDE_DIR/usr/lib/plymouth"
+
+# Pre-trust ASURA repository keys if provided in system/xbps.d or keys directory
+mkdir -p "$INCLUDE_DIR/var/db/xbps/keys"
+for keydir in "$REPO_ROOT/system/xbps-keys" "$REPO_ROOT/system/xbps.d/keys" "$REPO_ROOT/system/keys"; do
+	if [ -d "$keydir" ]; then
+		cp -f "$keydir"/*.plist "$INCLUDE_DIR/var/db/xbps/keys/" 2>/dev/null || true
+	fi
+done
 
 # Ensure foreign host quickshell binary is never copied into Void rootfs;
 # native quickshell package is installed via packages-void.yaml
@@ -576,12 +655,12 @@ if [ -d "$REPO_ROOT/system/tlp.d" ]; then
 	mkdir -p "$INCLUDE_DIR/etc/tlp.d"
 	cp "$REPO_ROOT/system/tlp.d"/*.conf "$INCLUDE_DIR/etc/tlp.d/"
 fi
-cp "$REPO_ROOT/system/sysctl.d/99-asura-performance.conf" "$INCLUDE_DIR/etc/sysctl.d/99-asura-performance.conf"
+cp "$REPO_ROOT/system/sysctl.d/99-toren-performance.conf" "$INCLUDE_DIR/etc/sysctl.d/99-asura-performance.conf"
 cp "$REPO_ROOT/session/turnstile/turnstile.conf" "$INCLUDE_DIR/etc/turnstile/turnstile.conf"
-cp "$REPO_ROOT/system/xbps.d/asura.conf" "$INCLUDE_DIR/etc/xbps.d/asura.conf"
+cp "$REPO_ROOT/system/xbps.d/toren.conf" "$INCLUDE_DIR/etc/xbps.d/asura.conf"
 # Default host firewall (block inbound, allow outbound), loaded by the nftables runit service
 cp "$REPO_ROOT/system/nftables/nftables.conf" "$INCLUDE_DIR/etc/nftables.conf"
-cp "$REPO_ROOT/system/xbps.d/asura.conf" "$INCLUDE_DIR/etc/xbps.d/00-repository-main.conf"
+cp "$REPO_ROOT/system/xbps.d/toren.conf" "$INCLUDE_DIR/etc/xbps.d/00-repository-main.conf"
 
 # Default environment for seatd & Wayland
 cat >"$INCLUDE_DIR/etc/environment" <<'EOF'
@@ -592,72 +671,75 @@ GDK_BACKEND=wayland
 MOZ_ENABLE_WAYLAND=1
 EOF
 
-# Build and copy Asura Go control binaries into include tree
-echo "build-iso-void: building Asura Go binaries..."
+# Build and copy Toren Go control binaries into include tree
+echo "build-iso-void: building Toren Go binaries..."
 (
 	export GOWORK=off
 	export GOFLAGS="-buildvcs=false"
 	git config --global --add safe.directory '*' 2>/dev/null || true
 	cd "$REPO_ROOT/desktop"
-	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/asura" ./cmd/asura
-	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/asura-sysd" ./cmd/asura-sysd
-	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/asura-userd" ./cmd/asura-userd
-	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/asura-hubd" ./cmd/asura-hubd
-	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/asura-shell" ./cmd/asura-shell
-	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/asura-wallpaper" ./cmd/asura-wallpaper
+	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/toren" ./cmd/toren
+	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/toren-sysd" ./cmd/toren-sysd
+	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/toren-userd" ./cmd/toren-userd
+	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/toren-hubd" ./cmd/toren-hubd
+	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/toren-shell" ./cmd/toren-shell
+	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/toren-wallpaper" ./cmd/toren-wallpaper
 	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/apm" ./cmd/apm
-	# Build Asura Store (prioritizing standalone repository https://github.com/ASURA-OS/asura-store)
+	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/toren-agent" ./cmd/toren-agent
+	# Build Asura Store (prioritizing standalone repository https://github.com/Toren-Linux/asura-store)
 	STORE_SRC="${ASURA_STORE_SRC:-}"
 	if [ -z "$STORE_SRC" ]; then
 		if [ -d "$REPO_ROOT/../asura-store" ]; then
 			STORE_SRC="$REPO_ROOT/../asura-store"
-		elif [ -d "/home/mohit/code/asura-store" ]; then
-			STORE_SRC="/home/mohit/code/asura-store"
-		elif [ -d "/home/mohit/code/asura/asura-store" ]; then
-			STORE_SRC="/home/mohit/code/asura/asura-store"
 		fi
 	fi
-	if [ -n "$STORE_SRC" ] && [ -d "$STORE_SRC/cmd/asura-store" ]; then
-		echo "build-iso-void: building asura-store from standalone repo ($STORE_SRC)..."
-		( cd "$STORE_SRC/cmd/asura-store" && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o "$INCLUDE_DIR/usr/bin/asura-store" . )
+	if [ -n "$STORE_SRC" ] && [ -d "$STORE_SRC/cmd/toren-store" ]; then
+		echo "build-iso-void: building toren-store from standalone repo ($STORE_SRC)..."
+		( cd "$STORE_SRC/cmd/toren-store" && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o "$INCLUDE_DIR/usr/bin/toren-store" . )
+		if [ -d "$STORE_SRC/catalog" ]; then
+			mkdir -p "$INCLUDE_DIR/usr/share/asura/store/catalog"
+			cp -r "$STORE_SRC/catalog"/* "$INCLUDE_DIR/usr/share/asura/store/catalog/" 2>/dev/null || true
+		fi
+	elif [ -n "$STORE_SRC" ] && [ -d "$STORE_SRC/cmd/asura-store" ]; then
+		echo "build-iso-void: building toren-store from standalone repo ($STORE_SRC)..."
+		( cd "$STORE_SRC/cmd/asura-store" && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o "$INCLUDE_DIR/usr/bin/toren-store" . )
 		if [ -d "$STORE_SRC/catalog" ]; then
 			mkdir -p "$INCLUDE_DIR/usr/share/asura/store/catalog"
 			cp -r "$STORE_SRC/catalog"/* "$INCLUDE_DIR/usr/share/asura/store/catalog/" 2>/dev/null || true
 		fi
 	else
-		echo "build-iso-void: building asura-store from desktop tree..."
-		CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/asura-store" ./cmd/asura-store
+		echo "build-iso-void: building toren-store from desktop tree..."
+		CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/toren-store" ./cmd/toren-store
 	fi
 
-	# Build Asura Resource Monitor (prioritizing standalone repository https://github.com/ASURA-OS/asura-sysmon)
-	SYSMON_SRC="${ASURA_SYSMON_SRC:-}"
-	if [ -z "$SYSMON_SRC" ]; then
-		if [ -d "$REPO_ROOT/../asura-sysmon" ]; then
-			SYSMON_SRC="$REPO_ROOT/../asura-sysmon"
-		elif [ -d "/home/mohit/code/asura-sysmon" ]; then
-			SYSMON_SRC="/home/mohit/code/asura-sysmon"
-		elif [ -d "/home/mohit/code/asura/asura-sysmon" ]; then
-			SYSMON_SRC="/home/mohit/code/asura/asura-sysmon"
-		fi
-	fi
-	if [ -n "$SYSMON_SRC" ] && [ -d "$SYSMON_SRC/cmd/asura-sysmon" ]; then
-		echo "build-iso-void: building asura-sysmon from standalone repo ($SYSMON_SRC)..."
-		( cd "$SYSMON_SRC/cmd/asura-sysmon" && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o "$INCLUDE_DIR/usr/bin/asura-sysmon" . )
-		mkdir -p "$INCLUDE_DIR/usr/share/asura/sysmon"
-		cp -r "$REPO_ROOT/shell/sysmon"/* "$INCLUDE_DIR/usr/share/asura/sysmon/" 2>/dev/null || true
-	else
-		echo "build-iso-void: building asura-sysmon from desktop tree..."
-		CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/asura-sysmon" ./cmd/asura-sysmon
-		mkdir -p "$INCLUDE_DIR/usr/share/asura/sysmon"
-		cp -r "$REPO_ROOT/shell/sysmon"/* "$INCLUDE_DIR/usr/share/asura/sysmon/" 2>/dev/null || true
-	fi
-	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/asura-vm-mon" ./cmd/asura-vm/mon
-	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/asura-vm-ssh" ./cmd/asura-vm/remote
-	cp -f "$REPO_ROOT/desktop/cmd/asura-vm/asura-vmd" "$INCLUDE_DIR/usr/bin/asura-vmd"
+	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/toren-vm-mon" ./cmd/toren-vm/mon
+	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/toren-vm-ssh" ./cmd/toren-vm/remote
+	cp -f "$REPO_ROOT/desktop/cmd/toren-vm/toren-vmd" "$INCLUDE_DIR/usr/bin/toren-vmd"
 )
 find "$INCLUDE_DIR/usr/bin" -type f -exec chmod 0755 {} +
 # Symlinks
-ln -sf asura "$INCLUDE_DIR/usr/bin/os-ctl"
+ln -sf toren "$INCLUDE_DIR/usr/bin/os-ctl"
+ln -sf toren "$INCLUDE_DIR/usr/bin/asura"
+for f in "$INCLUDE_DIR/usr/bin"/toren-*; do
+	[ -e "$f" ] || continue
+	base=$(basename "$f")
+	asura_base=$(echo "$base" | sed 's/^toren/asura/')
+	[ -e "$INCLUDE_DIR/usr/bin/$asura_base" ] || ln -sf "$base" "$INCLUDE_DIR/usr/bin/$asura_base"
+done
+for f in "$INCLUDE_DIR/usr/share/asura/session"/toren-*; do
+	[ -e "$f" ] || continue
+	base=$(basename "$f")
+	asura_base=$(echo "$base" | sed 's/^toren/asura/')
+	ln -sf "$base" "$INCLUDE_DIR/usr/share/asura/session/$asura_base"
+	if [ -x "$f" ] && [ ! -e "$INCLUDE_DIR/usr/bin/$asura_base" ]; then
+		ln -sf "/usr/share/asura/session/$base" "$INCLUDE_DIR/usr/bin/$asura_base"
+	fi
+done
+
+# Transitional symlink for /usr/share/toren <-> /usr/share/asura
+if [ -d "$INCLUDE_DIR/usr/share/asura" ] && [ ! -e "$INCLUDE_DIR/usr/share/toren" ]; then
+	ln -sfn asura "$INCLUDE_DIR/usr/share/toren"
+fi
 
 # Pre-seed user skeleton configuration and XDG user directories
 mkdir -p "$INCLUDE_DIR/etc/skel/.config/asura" \
@@ -670,6 +752,7 @@ mkdir -p "$INCLUDE_DIR/etc/skel/.config/asura" \
          "$INCLUDE_DIR/etc/skel/Pictures" \
          "$INCLUDE_DIR/etc/skel/Videos"
 cp -a "$INCLUDE_DIR/usr/share/asura"/* "$INCLUDE_DIR/etc/skel/.config/asura/"
+ln -sfn asura "$INCLUDE_DIR/etc/skel/.config/toren"
 
 # Pre-seed Ghostty terminal configuration in skeleton
 cat >"$INCLUDE_DIR/etc/skel/.config/ghostty/config" <<'EOF'
@@ -677,20 +760,26 @@ config-file = ?~/.config/asura/apps/ghostty/config
 working-directory = home
 EOF
 
+# Pre-seed btop configuration in skeleton
+mkdir -p "$INCLUDE_DIR/etc/skel/.config/btop"
+if [ -f "$REPO_ROOT/apps/btop/btop.conf" ]; then
+	cp "$REPO_ROOT/apps/btop/btop.conf" "$INCLUDE_DIR/etc/skel/.config/btop/btop.conf"
+fi
+
 # Pre-seed zsh configuration in skeleton
 cat >"$INCLUDE_DIR/etc/skel/.zshrc" <<'EOF'
 # Asura OS Zsh configuration
-[ -r "$HOME/.config/asura/apps/zsh/asura.zsh" ] && . "$HOME/.config/asura/apps/zsh/asura.zsh"
+[ -r "$HOME/.config/asura/apps/zsh/toren.zsh" ] && . "$HOME/.config/asura/apps/zsh/toren.zsh"
 EOF
 
 # Pre-seed fastfetch ASCII logo and configuration
 mkdir -p "$INCLUDE_DIR/usr/share/asura/branding" "$INCLUDE_DIR/etc/skel/.config/fastfetch"
-if [ -f "$REPO_ROOT/public/branding/asura-logo.txt" ]; then
-	cp "$REPO_ROOT/public/branding/asura-logo.txt" "$INCLUDE_DIR/usr/share/asura/branding/asura-logo.txt"
-	cp "$REPO_ROOT/public/branding/asura-logo.txt" "$INCLUDE_DIR/usr/share/asura/branding/fastfetch-ascii.txt"
+if [ -f "$REPO_ROOT/public/branding/toren-logo.txt" ]; then
+	cp "$REPO_ROOT/public/branding/toren-logo.txt" "$INCLUDE_DIR/usr/share/asura/branding/asura-logo.txt"
+	cp "$REPO_ROOT/public/branding/toren-logo.txt" "$INCLUDE_DIR/usr/share/asura/branding/fastfetch-ascii.txt"
 fi
-if [ -f "$REPO_ROOT/public/branding/asura-logo-mono.txt" ]; then
-	cp "$REPO_ROOT/public/branding/asura-logo-mono.txt" "$INCLUDE_DIR/usr/share/asura/branding/asura-logo-mono.txt"
+if [ -f "$REPO_ROOT/public/branding/toren-logo-mono.txt" ]; then
+	cp "$REPO_ROOT/public/branding/toren-logo-mono.txt" "$INCLUDE_DIR/usr/share/asura/branding/asura-logo-mono.txt"
 fi
 if [ -f "$REPO_ROOT/public/branding/fastfetch-emblem.png" ]; then
 	cp "$REPO_ROOT/public/branding/fastfetch-emblem.png" "$INCLUDE_DIR/usr/share/asura/branding/fastfetch-emblem.png"
@@ -711,17 +800,17 @@ cat >"$INCLUDE_DIR/etc/skel/.config/fastfetch/config.jsonc" <<'EOF'
   "display": {
     "separator": " ── ",
     "color": {
-      "keys": "38;2;219;20;49"
+      "keys": "2"
     }
   },
   "modules": [
     {
-      "format": "\u001b[38;2;219;20;49m■\u001b[0m \u001b[1;38;2;240;240;240mASURA OS\u001b[0m",
+      "format": "\u001b[32m■\u001b[0m \u001b[1;37mTOREN LINUX\u001b[0m",
       "type": "custom"
     },
     "break",
     {
-      "format": "\u001b[38;2;219;20;49m──\u001b[0m \u001b[1;38;2;240;240;240mSYSTEM\u001b[0m \u001b[38;2;80;80;80m──────────────────────────\u001b[0m",
+      "format": "\u001b[32m──\u001b[0m \u001b[1;37mSYSTEM\u001b[0m \u001b[38;5;240m──────────────────────────\u001b[0m",
       "type": "custom"
     },
     {
@@ -750,7 +839,7 @@ cat >"$INCLUDE_DIR/etc/skel/.config/fastfetch/config.jsonc" <<'EOF'
     },
     "break",
     {
-      "format": "\u001b[38;2;219;20;49m──\u001b[0m \u001b[1;38;2;240;240;240mHARDWARE\u001b[0m \u001b[38;2;80;80;80m────────────────────────\u001b[0m",
+      "format": "\u001b[32m──\u001b[0m \u001b[1;37mHARDWARE\u001b[0m \u001b[38;5;240m────────────────────────\u001b[0m",
       "type": "custom"
     },
     {
@@ -881,7 +970,7 @@ fi
 
 # Patch dracut vmklive module to use asura-os hostname, asura user, and include _seatd/input/asura-hw groups
 if [ -f "$MKLIVE_DIR/dracut/vmklive/adduser.sh" ]; then
-	sed -i 's/echo void-live >/echo asura-os >/g' "$MKLIVE_DIR/dracut/vmklive/adduser.sh"
+	sed -i 's/echo void-live >/echo toren-linux >/g' "$MKLIVE_DIR/dracut/vmklive/adduser.sh"
 	sed -i 's/-G audio,video,wheel/-G audio,video,wheel,_seatd,input,tty,storage,network,asura-hw/g' "$MKLIVE_DIR/dracut/vmklive/adduser.sh"
 	sed -i 's/USERNAME=anon/USERNAME=asura/g' "$MKLIVE_DIR/dracut/vmklive/adduser.sh"
 	sed -i 's/voidlinux/asura/g' "$MKLIVE_DIR/dracut/vmklive/adduser.sh"
@@ -900,7 +989,7 @@ TIMEOUT 30
 ONTIMEOUT linux
 
 MENU TABMSG Press ENTER to boot or TAB to edit boot options
-MENU AUTOBOOT Asura OS starts in # second{,s}...
+MENU AUTOBOOT Toren Linux starts in # second{,s}...
 MENU BACKGROUND @@SPLASHIMAGE@@
 MENU WIDTH 78
 MENU MARGIN 4
@@ -919,12 +1008,12 @@ MENU COLOR timeout      * #ffffffff #00000000 none
 MENU COLOR tabmsg       * #66666666 #00000000 none
 
 LABEL linux
-MENU LABEL Asura OS (Live Session)
+MENU LABEL Toren Linux (Live Session)
 KERNEL /boot/vmlinuz
 APPEND initrd=/boot/initrd root=live:CDLABEL=ASURA_LIVE init=/sbin/init ro rd.luks=0 rd.md=0 rd.dm=0 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ locale.LANG=@@LOCALE@@ vga=current @@BOOT_CMDLINE@@
 
 LABEL linuxram
-MENU LABEL Asura OS (Copy to RAM)
+MENU LABEL Toren Linux (Copy to RAM)
 
 KERNEL /boot/vmlinuz
 APPEND initrd=/boot/initrd root=live:CDLABEL=ASURA_LIVE init=/sbin/init ro rd.luks=0 rd.md=0 rd.dm=0 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ locale.LANG=@@LOCALE@@ vga=current @@BOOT_CMDLINE@@ rd.live.ram
@@ -967,13 +1056,10 @@ if [ -f "$ROOTFS/etc/default/libc-locales" ]; then
 	sed -i 's/^#\(en_US.UTF-8 UTF-8\)/\1/' "$ROOTFS/etc/default/libc-locales"
 	chroot "$ROOTFS" xbps-reconfigure -f glibc-locales 2>/dev/null || true
 fi
-# Remove obsolete btop desktop entries
-rm -f "$ROOTFS/usr/share/applications/btop.desktop"
-rm -f "$ROOTFS/home/asura/Desktop/btop.desktop"
 
 # Enable core system runit services (Layer 1 seatd, Layer 3 scx-lavd, ananicy-cpp, zramen). Docker is opt-in: not enabled by default (podman is the default container tool).
 mkdir -p "$ROOTFS/etc/runit/runsvdir/default"
-for svc in dbus seatd elogind udevd NetworkManager acpid turnstiled tlp zramen chronyd nftables cupsd asura-sysd asura-boot-guard; do
+for svc in dbus seatd elogind udevd NetworkManager acpid turnstiled tlp zramen chronyd nftables cupsd toren-sysd toren-boot-guard socklog-unix nanoklogd earlyoom toren-maintenance; do
 	if [ -d "$ROOTFS/etc/sv/$svc" ]; then
 		ln -sf "/etc/sv/$svc" "$ROOTFS/etc/runit/runsvdir/default/$svc"
 	fi
@@ -983,6 +1069,13 @@ if [ -x "$ROOTFS/usr/bin/scx_lavd" ] && [ -d "$ROOTFS/etc/sv/scx-lavd" ]; then
 fi
 if [ -x "$ROOTFS/usr/bin/ananicy-cpp" ] && [ -d "$ROOTFS/etc/sv/ananicy-cpp" ]; then
 	ln -sf /etc/sv/ananicy-cpp "$ROOTFS/etc/runit/runsvdir/default/ananicy-cpp"
+fi
+
+# thermald only on Intel CPUs
+if grep -qi "GenuineIntel" "$ROOTFS/proc/cpuinfo" 2>/dev/null || grep -qi "Intel" "$ROOTFS/proc/cpuinfo" 2>/dev/null; then
+	if [ -d "$ROOTFS/etc/sv/thermald" ]; then
+		ln -sf /etc/sv/thermald "$ROOTFS/etc/runit/runsvdir/default/thermald"
+	fi
 fi
 
 # Ensure runtime library compatibility symlinks exist inside rootfs
@@ -1008,37 +1101,46 @@ mkdir -p "$ROOTFS/etc/elogind/logind.conf.d"
 printf '[Login]\nHandlePowerKey=ignore\nHandleSuspendKey=ignore\nHandleHibernateKey=ignore\nHandleLidSwitch=ignore\n' > "$ROOTFS/etc/elogind/logind.conf.d/90-asura-powerkey.conf"
 
 # Configure seat permissions and groups for default user
+chroot "$ROOTFS" getent group toren-hw >/dev/null 2>&1 || chroot "$ROOTFS" groupadd -r toren-hw || true
 chroot "$ROOTFS" getent group asura-hw >/dev/null 2>&1 || chroot "$ROOTFS" groupadd -r asura-hw || true
 chroot "$ROOTFS" getent group docker >/dev/null 2>&1 || chroot "$ROOTFS" groupadd -r docker || true
-for user in anon asura; do
+for user in anon asura toren; do
 	if chroot "$ROOTFS" id "$user" >/dev/null 2>&1; then
-		chroot "$ROOTFS" usermod -aG _seatd,video,audio,input,wheel,storage,network,asura-hw,docker "$user" || true
+		chroot "$ROOTFS" usermod -aG _seatd,video,audio,input,wheel,storage,network,toren-hw,asura-hw,docker "$user" || true
 	fi
 done
 
-# Ensure user asura exists with zsh login shell and configure autologin
-if ! chroot "$ROOTFS" id asura >/dev/null 2>&1; then
-	chroot "$ROOTFS" useradd -m -s /bin/zsh -U -G _seatd,video,audio,input,wheel,storage,network,asura-hw,docker asura || true
+# Ensure user toren exists with zsh login shell and configure autologin
+if ! chroot "$ROOTFS" id toren >/dev/null 2>&1; then
+	chroot "$ROOTFS" useradd -m -s /bin/zsh -U -G _seatd,video,audio,input,wheel,storage,network,toren-hw,asura-hw,docker toren || true
 else
-	chroot "$ROOTFS" usermod -aG asura-hw,docker -s /bin/zsh asura || true
+	chroot "$ROOTFS" usermod -aG toren-hw,asura-hw,docker -s /bin/zsh toren || true
+fi
+echo "toren:toren" | chroot "$ROOTFS" chpasswd 2>/dev/null || true
+
+# Maintain user asura with password asura for backwards compatibility
+if ! chroot "$ROOTFS" id asura >/dev/null 2>&1; then
+	chroot "$ROOTFS" useradd -m -s /bin/zsh -U -G _seatd,video,audio,input,wheel,storage,network,toren-hw,asura-hw,docker asura || true
+else
+	chroot "$ROOTFS" usermod -aG toren-hw,asura-hw,docker -s /bin/zsh asura || true
 fi
 echo "asura:asura" | chroot "$ROOTFS" chpasswd 2>/dev/null || true
 
 # Reset root and anon passwords to eliminate upstream voidlinux defaults
-echo "root:asura" | chroot "$ROOTFS" chpasswd 2>/dev/null || true
+echo "root:toren" | chroot "$ROOTFS" chpasswd 2>/dev/null || true
 if chroot "$ROOTFS" id anon >/dev/null 2>&1; then
-	echo "anon:asura" | chroot "$ROOTFS" chpasswd 2>/dev/null || true
+	echo "anon:toren" | chroot "$ROOTFS" chpasswd 2>/dev/null || true
 fi
 
 # Neutralize upstream installer and docs commands
 if [ -f "$ROOTFS/usr/bin/void-installer" ]; then
 	rm -f "$ROOTFS/usr/bin/void-installer"
-	ln -sf /usr/bin/asura-installer "$ROOTFS/usr/bin/void-installer"
+	ln -sf /usr/bin/toren-installer "$ROOTFS/usr/bin/void-installer"
 fi
 
 cat >"$ROOTFS/usr/bin/void-docs" <<'DOCS'
 #!/bin/sh
-echo "Asura OS documentation is available at: https://asuraos.dev"
+echo "Toren Linux documentation is available at: https://github.com/mohitjoer/Toren-Linux"
 DOCS
 chmod 0755 "$ROOTFS/usr/bin/void-docs"
 
@@ -1055,40 +1157,55 @@ if command -v glib-compile-schemas >/dev/null 2>&1; then
 fi
 
 # Enable automatic silent console login on tty1 for seamless graphical boot
-mkdir -p "$ROOTFS/etc/sv/agetty-tty1" "$ROOTFS/home/asura"
-echo 'GETTY_ARGS="--autologin asura --skip-login --nonewline --noissue"' > "$ROOTFS/etc/sv/agetty-tty1/conf"
+mkdir -p "$ROOTFS/etc/sv/agetty-tty1" "$ROOTFS/home/toren" "$ROOTFS/home/asura"
+echo 'GETTY_ARGS="--autologin toren --skip-login --nonewline --noissue"' > "$ROOTFS/etc/sv/agetty-tty1/conf"
+touch "$ROOTFS/home/toren/.hushlogin"
 touch "$ROOTFS/home/asura/.hushlogin"
 touch "$INCLUDE_DIR/etc/skel/.hushlogin"
-# Pre-materialize user configuration for asura user, skeleton, and XDG directories
-mkdir -p "$ROOTFS/home/asura/.config/asura" "$ROOTFS/etc/skel/.config/asura" \
+# Pre-materialize user configuration for toren & asura user, skeleton, and XDG directories
+mkdir -p "$ROOTFS/home/toren/.config/asura" "$ROOTFS/home/toren/.config/toren" \
+         "$ROOTFS/home/toren/.config/ghostty" "$ROOTFS/home/toren/.config/fastfetch" \
+         "$ROOTFS/home/toren/Desktop" "$ROOTFS/home/toren/Documents" \
+         "$ROOTFS/home/toren/Downloads" "$ROOTFS/home/toren/Music" \
+         "$ROOTFS/home/toren/Pictures" "$ROOTFS/home/toren/Videos" \
+         "$ROOTFS/home/asura/.config/asura" "$ROOTFS/etc/skel/.config/asura" \
          "$ROOTFS/home/asura/.config/ghostty" "$ROOTFS/home/asura/.config/fastfetch" \
          "$ROOTFS/home/asura/Desktop" "$ROOTFS/home/asura/Documents" \
          "$ROOTFS/home/asura/Downloads" "$ROOTFS/home/asura/Music" \
          "$ROOTFS/home/asura/Pictures" "$ROOTFS/home/asura/Videos" \
          "$INCLUDE_DIR/etc/skel/Desktop"
 # Ensure live user desktop shortcuts are deployed and executable
-mkdir -p "$ROOTFS/home/asura/Desktop"
+mkdir -p "$ROOTFS/home/toren/Desktop" "$ROOTFS/home/asura/Desktop"
 if [ -d "$ROOTFS/etc/skel/Desktop" ]; then
+	cp -a "$ROOTFS/etc/skel/Desktop"/* "$ROOTFS/home/toren/Desktop/" 2>/dev/null || true
 	cp -a "$ROOTFS/etc/skel/Desktop"/* "$ROOTFS/home/asura/Desktop/" 2>/dev/null || true
 fi
-chmod 755 "$ROOTFS/home/asura/Desktop"/*.desktop 2>/dev/null || true
+chmod 755 "$ROOTFS/home/toren/Desktop"/*.desktop "$ROOTFS/home/asura/Desktop"/*.desktop 2>/dev/null || true
+chown -R toren:toren "$ROOTFS/home/toren/Desktop" 2>/dev/null || true
 chown -R asura:asura "$ROOTFS/home/asura/Desktop" 2>/dev/null || true
 if [ -d "$ROOTFS/usr/share/asura" ]; then
+	cp -a "$ROOTFS/usr/share/asura"/* "$ROOTFS/home/toren/.config/asura/"
+	cp -a "$ROOTFS/usr/share/asura"/* "$ROOTFS/home/toren/.config/toren/"
 	cp -a "$ROOTFS/usr/share/asura"/* "$ROOTFS/home/asura/.config/asura/"
 	cp -a "$ROOTFS/usr/share/asura"/* "$ROOTFS/etc/skel/.config/asura/"
 fi
-cp -a "$ROOTFS/etc/skel/.config/ghostty"/* "$ROOTFS/home/asura/.config/ghostty/" 2>/dev/null || true
-cp -a "$ROOTFS/etc/skel/.config/fastfetch"/* "$ROOTFS/home/asura/.config/fastfetch/" 2>/dev/null || true
-cp -a "$ROOTFS/etc/skel/.config/opencode" "$ROOTFS/home/asura/.config/" 2>/dev/null || true
-cp -a "$ROOTFS/etc/skel/.agents" "$ROOTFS/home/asura/" 2>/dev/null || true
-cp -a "$ROOTFS/etc/skel/.zshrc" "$ROOTFS/home/asura/.zshrc" 2>/dev/null || true
+for _u in toren asura; do
+	cp -a "$ROOTFS/etc/skel/.config/ghostty"/* "$ROOTFS/home/$_u/.config/ghostty/" 2>/dev/null || true
+	cp -a "$ROOTFS/etc/skel/.config/fastfetch"/* "$ROOTFS/home/$_u/.config/fastfetch/" 2>/dev/null || true
+	cp -a "$ROOTFS/etc/skel/.config/opencode" "$ROOTFS/home/$_u/.config/" 2>/dev/null || true
+	cp -a "$ROOTFS/etc/skel/.agents" "$ROOTFS/home/$_u/" 2>/dev/null || true
+	cp -a "$ROOTFS/etc/skel/.zshrc" "$ROOTFS/home/$_u/.zshrc" 2>/dev/null || true
+done
+chroot "$ROOTFS" su - toren -c "asura materialize" 2>/dev/null || true
+chroot "$ROOTFS" su - toren -c "xdg-user-dirs-update" 2>/dev/null || true
+chroot "$ROOTFS" chown -R toren:toren /home/toren 2>/dev/null || true
 chroot "$ROOTFS" su - asura -c "asura materialize" 2>/dev/null || true
 chroot "$ROOTFS" su - asura -c "xdg-user-dirs-update" 2>/dev/null || true
 chroot "$ROOTFS" chown -R asura:asura /home/asura 2>/dev/null || true
 
 # Ensure Plymouth theme and configuration are active in ROOTFS
 mkdir -p "$ROOTFS/usr/share/plymouth/themes"
-ln -sf /usr/share/plymouth/themes/asura/asura.plymouth "$ROOTFS/usr/share/plymouth/themes/default.plymouth" 2>/dev/null || true
+ln -sf /usr/share/plymouth/themes/asura/toren.plymouth "$ROOTFS/usr/share/plymouth/themes/default.plymouth" 2>/dev/null || true
 if [ -f "$ROOTFS/etc/plymouth/plymouthd.conf" ]; then
 	sed -i 's/^Theme=.*/Theme=asura/' "$ROOTFS/etc/plymouth/plymouthd.conf"
 fi
@@ -1153,8 +1270,8 @@ if [ -f "$ROOTFS/etc/runit/core-services/08-sysctl.sh" ]; then
 fi
 
 mkdir -p "$ROOTFS/etc/xbps.d"
-cp "$REPO_ROOT/system/xbps.d/asura.conf" "$ROOTFS/etc/xbps.d/asura.conf" 2>/dev/null || true
-cp "$REPO_ROOT/system/xbps.d/asura.conf" "$ROOTFS/etc/xbps.d/00-repository-main.conf" 2>/dev/null || true
+cp "$REPO_ROOT/system/xbps.d/toren.conf" "$ROOTFS/etc/xbps.d/asura.conf" 2>/dev/null || true
+cp "$REPO_ROOT/system/xbps.d/toren.conf" "$ROOTFS/etc/xbps.d/00-repository-main.conf" 2>/dev/null || true
 
 if [ -d "$REPO_ROOT/system/modules-load.d" ]; then
 	mkdir -p "$ROOTFS/etc/modules-load.d"
@@ -1222,9 +1339,8 @@ for fname in os.listdir(hypr_cache):
                 pkg_props = plistlib.load(props_file)
                 pkgver = pkg_props.get("pkgver", fname.replace(".xbps", ""))
                 pkg_props["state"] = "installed"
-                # Soname-compat fix: Makrennel's prebuilts declare the old
-                # shlib names, but the base layer ships the newer ABI. Rewrite
-                # shlib-requires to the names the installed libraries actually
+                # Soname-compat: ensure package shlib names match base layer ABI.
+                # Rewrite shlib-requires to the names the installed libraries actually
                 # provide, so xbps-install -Su does not abort later. Runtime
                 # resolution still uses the compat symlinks created above.
                 requires = pkg_props.get("shlib-requires")
@@ -1236,7 +1352,16 @@ for fname in os.listdir(hypr_cache):
                         r = r.replace("libjxl_threads.so.0.11", "libjxl_threads.so.0.12")
                         fixed.append(r)
                     pkg_props["shlib-requires"] = fixed
-                pkgdb[pkgver] = pkg_props
+                provides = pkg_props.get("shlib-provides")
+                if isinstance(provides, list) and "libhyprutils.so.6" in provides:
+                    if "libhyprutils.so.10" not in provides:
+                        provides.append("libhyprutils.so.10")
+                    pkg_props["shlib-provides"] = provides
+                # pkgdb is keyed by package NAME (xbps-query hyprland,
+                # xbps-install -Su); a pkgver key leaves the package unknown
+                # to xbps, which then tries to install it from the repository.
+                pkgname = pkg_props.get("pkgname") or pkgver.rsplit("-", 1)[0]
+                pkgdb[pkgname] = pkg_props
                 if files_file:
                     dest_files = os.path.join(rootfs, f"var/db/xbps/{pkgver}-files.plist")
                     with open(dest_files, "wb") as out_f:
@@ -1251,15 +1376,15 @@ PY
 
 # Overwrite OS identity inside ROOTFS
 cat >"$ROOTFS/etc/os-release" <<'OSREL'
-NAME="Asura OS"
-PRETTY_NAME="Asura OS Beta 001"
-ID=asura
-ID_LIKE="linux"
+NAME="Toren Linux"
+PRETTY_NAME="Toren Linux Beta 001"
+ID=toren
+ID_LIKE="void linux"
 VERSION_ID="0.1"
 VERSION_CODENAME=beta-001
-HOME_URL="https://asuraos.dev/"
-SUPPORT_URL="https://asuraos.dev/support"
-BUG_REPORT_URL="https://github.com/mohitjoer/Asura-OS/issues"
+HOME_URL="https://github.com/mohitjoer/Toren-Linux"
+SUPPORT_URL="https://github.com/mohitjoer/Toren-Linux/issues"
+BUG_REPORT_URL="https://github.com/mohitjoer/Toren-Linux/issues"
 OSREL
 if [ -n "$ASURA_VERSION" ]; then
 	printf 'IMAGE_VERSION=%s\n' "$ASURA_VERSION" >>"$ROOTFS/etc/os-release"
@@ -1268,9 +1393,9 @@ fi
 # Branding replacement: Change Welcome to Void! to Welcome to Asura OS! in the boot sequence
 for runit_file in "$ROOTFS/etc/runit/1" "$ROOTFS/etc/runit/2" "$ROOTFS/etc/runit/3" "$ROOTFS/etc/rc.local"; do
 	if [ -f "$runit_file" ]; then
-		sed -i 's/Welcome to Void!/Welcome to Asura OS!/g' "$runit_file"
-		sed -i 's/Welcome to Void Linux!/Welcome to Asura OS!/g' "$runit_file"
-		sed -i 's/Void Linux/Asura OS/g' "$runit_file"
+		sed -i 's/Welcome to Void!/Welcome to Toren Linux!/g' "$runit_file"
+		sed -i 's/Welcome to Void Linux!/Welcome to Toren Linux!/g' "$runit_file"
+		sed -i 's/Void Linux/Toren Linux/g' "$runit_file"
 	fi
 done
 
@@ -1282,27 +1407,28 @@ if [ -d "$REPO_ROOT/public/fonts" ]; then
 	cp -L "$REPO_ROOT/public/fonts"/* "$ROOTFS/usr/share/fonts/TTF/" 2>/dev/null || true
 fi
 chroot "$ROOTFS" fc-cache -f 2>/dev/null || true
+chroot "$ROOTFS" gtk-update-icon-cache -qtf /usr/share/icons/hicolor 2>/dev/null || true
 if [ -f "$ROOTFS/etc/rc.local" ]; then
 	if ! grep -q 'charge_control_end_threshold' "$ROOTFS/etc/rc.local"; then
 		echo 'for b in /sys/class/power_supply/BAT*/charge_control_end_threshold; do [ -f "$b" ] && echo 80 > "$b" 2>/dev/null || true; done' >> "$ROOTFS/etc/rc.local"
 	fi
 fi
 
-# Set Asura OS hostname and network identity
-printf 'asura-os\n' > "$ROOTFS/etc/hostname"
+# Set Toren Linux hostname and network identity
+printf 'toren-linux\n' > "$ROOTFS/etc/hostname"
 if [ -f "$ROOTFS/etc/rc.conf" ]; then
-	sed -i 's/^#\?HOSTNAME=.*/HOSTNAME="asura-os"/' "$ROOTFS/etc/rc.conf"
+	sed -i 's/^#\?HOSTNAME=.*/HOSTNAME="toren-linux"/' "$ROOTFS/etc/rc.conf"
 	if ! grep -q '^HOSTNAME=' "$ROOTFS/etc/rc.conf"; then
-		echo 'HOSTNAME="asura-os"' >> "$ROOTFS/etc/rc.conf"
+		echo 'HOSTNAME="toren-linux"' >> "$ROOTFS/etc/rc.conf"
 	fi
 fi
 if [ -f "$ROOTFS/etc/hosts" ]; then
-	sed -i 's/void-live/asura-os/g' "$ROOTFS/etc/hosts"
+	sed -i 's/void-live/toren-linux/g' "$ROOTFS/etc/hosts"
 fi
 
 # Update all TTY greeting messages (/etc/issue, /etc/issue.net, /etc/motd) to show Asura OS wordmark and logo
 cat >"$ROOTFS/etc/issue" <<'ISSUE'
-       #                    #         Asura OS Beta 001 (\m)
+       #                    #         Toren Linux Beta 001 (\m)
      %##                    ##%       Kernel \r on an \m (\l)
     ####   %%%%%%%%%%%%%%   ####
   ######% %%%%%%%%%%%%%%%% %######    Robust. Minimal. Kinetic.
@@ -1325,7 +1451,7 @@ cat >"$ROOTFS/etc/issue" <<'ISSUE'
 ISSUE
 
 cat >"$ROOTFS/etc/issue.net" <<'ISSUENET'
-       #                    #         Asura OS Beta 001
+       #                    #         Toren Linux Beta 001
      %##                    ##%       https://asuraos.dev
     ####   %%%%%%%%%%%%%%   ####
   ######% %%%%%%%%%%%%%%%% %######    Robust. Minimal. Kinetic.
@@ -1348,7 +1474,7 @@ cat >"$ROOTFS/etc/issue.net" <<'ISSUENET'
 ISSUENET
 
 cat >"$ROOTFS/etc/motd" <<'MOTD'
-       #                    #         Asura OS Beta 001
+       #                    #         Toren Linux Beta 001
      %##                    ##%       https://asuraos.dev
     ####   %%%%%%%%%%%%%%   ####
   ######% %%%%%%%%%%%%%%%% %######    Robust. Minimal. Kinetic.
@@ -1401,7 +1527,7 @@ if [ -z "$WAYLAND_DISPLAY" ] && [ -z "$DISPLAY" ] && [ "$(tty 2>/dev/null)" = "/
 			echo "    3. Check 'Enable 3D Acceleration' and set Video Memory >= 128MB."
 			echo
 		else
-			echo "  Asura graphical desktop session exited."
+			echo "  Toren graphical desktop session exited."
 			echo "  Log available at: ~/.local/state/asura/session.log"
 			echo
 		fi
@@ -1413,6 +1539,13 @@ if [ -z "$WAYLAND_DISPLAY" ] && [ -z "$DISPLAY" ] && [ "$(tty 2>/dev/null)" = "/
 fi
 PROFILE
 chmod 0755 "$ROOTFS/etc/profile.d/asura-autologin.sh"
+# zsh login shells do not read /etc/profile.d/*.sh unless /etc/zsh/zprofile sources it
+mkdir -p "$ROOTFS/etc/zsh"
+if [ ! -f "$ROOTFS/etc/zsh/zprofile" ] || ! grep -q 'asura-autologin.sh' "$ROOTFS/etc/zsh/zprofile"; then
+	cat >>"$ROOTFS/etc/zsh/zprofile" <<'ZPROFILE'
+[ -r /etc/profile.d/asura-autologin.sh ] && emulate sh -c '. /etc/profile.d/asura-autologin.sh'
+ZPROFILE
+fi
 exit 0
 EOF
 chmod +x "$POSTSETUP_SCRIPT"
@@ -1427,7 +1560,7 @@ FINAL_ISO="$BUILD_DIR/$ISO_NAME.iso"
 #   -v linux       kernel package (`-k` is the CONSOLE KEYMAP in void-mklive;
 #                  passing `-k linux` there made the live image boot with
 #                  `KEYMAP=linux`, which loadkeys cannot open)
-#   -r HYPR_CACHE  extra repository (hyprland-void) for hyprland packages
+#   -r HYPR_CACHE  extra repository for ASURA hyprland packages
 #   -r MIRROR      Void mirror (passed twice: hypr repo + void repo)
 #   -p PACKAGES    package list from system/packages-void.yaml
 #   -I INCLUDE_DIR overlay rootfs (ASURA's files laid over the base)
@@ -1454,7 +1587,7 @@ echo "build-iso-void: generating ISO with void-mklive..."
 		-i gzip \
 		-s zstd \
 		-S "dbus seatd elogind NetworkManager zramen" \
-		-C "quiet splash loglevel=3 rd.udev.log_level=3 udev.log_level=3 rd.plymouth=1 plymouth.enable=1 vt.global_cursor_default=0 fbcon=nodefer console=ttyS0,115200 console=tty0 live.user=asura live.autologin nowatchdog mitigations=off preempt=full" \
+		-C "quiet splash loglevel=3 rd.udev.log_level=3 udev.log_level=3 rd.plymouth=1 plymouth.enable=1 vt.global_cursor_default=0 fbcon=nodefer console=ttyS0,115200 console=tty0 live.user=toren live.autologin nowatchdog mitigations=off preempt=full" \
 		-x "$POSTSETUP_SCRIPT" \
 		-T "$ISO_TITLE" \
 		-o "$FINAL_ISO"

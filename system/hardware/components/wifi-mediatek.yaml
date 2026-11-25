@@ -1,0 +1,25 @@
+id: wifi-mediatek
+name: "MediaTek Wi-Fi (mt7921 / mt7922)"
+description: "Firmware and power management for MediaTek Wi-Fi 6/6E chipsets"
+layer: component
+
+match:
+  module:
+    - "mt7921e"
+    - "mt7921s"
+    - "mt7922e"
+    - "mt7925e"
+
+packages:
+  - linux-firmware-network
+  - wireless-regdb
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel drivers/net/wireless/mediatek/mt7921."
+  - "Supports MediaTek Filogic / MT7921 / MT7922 PCI wireless interfaces commonly installed in ASUS and Lenovo laptops."

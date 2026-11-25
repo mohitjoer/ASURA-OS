@@ -1,0 +1,22 @@
+id: camera-intel-ipu6
+name: "Intel IPU6 / IPU7 Imaging Processor Unit"
+description: "MIPI CSI-2 camera processor found in Intel 11th Gen+ laptops"
+layer: component
+
+match:
+  pci:
+    - "8086:9a19"
+    - "8086:465d"
+    - "8086:7d19"
+
+packages: []
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel drivers/media/pci/intel/ipu6 and Intel IPU6 documentation."
+  - "STATUS: Intel IPU6/IPU7 MIPI webcams require out-of-tree drivers (intel-ipu6-dkms) and proprietary camera HAL userspace (ipu6-camera-hal, v4l2loopback or libcamera with IPU6 pipeline), which are not currently available in Void Linux repositories. USB webcams operate normally."

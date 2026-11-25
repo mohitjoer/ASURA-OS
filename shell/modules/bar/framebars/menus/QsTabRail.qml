@@ -70,7 +70,7 @@ Item {
             onClicked: { Quickshell.execDetached(["asura-cmd-qr-scan"]); root.requestClose(); }
         }
         RailIconBtn {
-            icon: "settings"; tipText: I18n.tr("Asura Hub")
+            icon: "settings"; tipText: I18n.tr("Toren Hub")
             onClicked: { Quickshell.execDetached(["asura-shell", "hub", "open"]); root.requestClose(); }
         }
     }

@@ -1,6 +1,6 @@
-# Adapted from Ryoku's starship.toml (GPL-3.0).
+# TOREN LINUX starship configuration (GPL-3.0)
 add_newline = false
-palette = "asura"
+palette = "toren"
 
 format = """
 $cmd_duration $directory$git_branch
@@ -94,7 +94,23 @@ format = '[](bold fg:blue)[󰉋 $path]($style)[](bold fg:blue) '
 min_time = 0
 format = '[](bold fg:peach)[󰪢 $duration](bold bg:peach fg:surface)[](bold fg:peach) '
 
-# Monochrome Asura terminal palette for starship prompt badges
+# Monochrome Toren terminal palette for starship prompt badges
+[palettes.toren]
+ink = "#F2F2F2"
+ink_dim = "#CCCCCC"
+ink_faint = "#A1A1A1"
+surface = "#242424"
+blue = "#CCCCCC"
+sapphire = "#A1A1A1"
+mauve = "#F2F2F2"
+green = "#CCCCCC"
+peach = "#F5A524"
+red = "#E5484D"
+teal = "#A1A1A1"
+yellow = "#F5A524"
+error = "#E5484D"
+
+# Monochrome Asura terminal palette for backwards compatibility
 [palettes.asura]
 ink = "#F2F2F2"
 ink_dim = "#CCCCCC"

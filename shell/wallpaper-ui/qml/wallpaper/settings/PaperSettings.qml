@@ -17,7 +17,7 @@ Column {
     // (skwd-wall v2's taxonomy; the nine gl-transition ports v2 dropped are
     // classed by what their math visibly does, and v2's Sand family is absent
     // because it is an instanced particle system the shell's ShaderEffect cannot
-    // run). The Reveal row is Ryogami's original 22-preset mask engine, carried
+    // run). The Reveal row is Asura's original 22-preset mask engine, carried
     // over from the wallpaper daemon and the upstream ii set. Random stays first
     // and ungrouped, and rotates across the whole pool.
     readonly property var _shaderOptions: [
@@ -202,7 +202,7 @@ Column {
     SettingsCard {
         colors: root.colors
         title: I18n.tr("Transitions")
-        subtitle: I18n.tr("Every transition the shell can play, in one list: the 39 skwd shaders (Fade, Wipe, Warp, Break up) and Ryogami's 22 reveal presets (Reveal). Random rotates the whole pool with no repeats; picking one pins it.")
+        subtitle: I18n.tr("Every transition the shell can play, in one list: the 39 skwd shaders (Fade, Wipe, Warp, Break up) and the 22 reveal presets (Reveal). Random rotates the whole pool with no repeats; picking one pins it.")
 
         RowToggle {
             colors: root.colors

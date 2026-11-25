@@ -1,0 +1,20 @@
+id: asus-proart
+name: "ASUS ProArt Studiobook"
+description: "ASUS ProArt creator laptop hardware profile: sustained performance profiles"
+layer: family
+
+match:
+  sys_vendor: "ASUSTeK COMPUTER INC."
+  product_family: "*ProArt*"
+
+packages: []
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel drivers/platform/x86/asus-wmi.c."
+  - "ProArt high-performance thermal modes for rendering and content creation."

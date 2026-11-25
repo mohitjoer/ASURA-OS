@@ -1,6 +1,6 @@
 # The Hub
 
-Asura Settings: Ryoku's Hub, ported (a navigation rail in groups, a global search, one page per
+Asura Settings: the Hub (a navigation rail in groups, a global search, one page per
 area of the desktop), plus one extra group, **Asura**, for the settings the GSettings schemas
 declare. `session/asura-hub [PAGE]` runs `quickshell -p /usr/share/asura/shell/hub.qml`; the
 window is titled exactly `Asura Settings` (its Wayland class is `org.quickshell`), which is what
@@ -13,13 +13,13 @@ A Quickshell configuration's root is the directory of the file it is started on,
 
 | What | Where |
 |---|---|
-| The window: rail, search, page host, action bar | `Hub.qml` (from Ryoku) |
-| The pages | `pages/` (Ryoku's, one file per rail entry), their rows in `schema/` |
+| The window: rail, search, page host, action bar | `Hub.qml` |
+| The pages | `pages/` (one file per rail entry), their rows in `schema/` |
 | Page chrome shared by them | `SchemaPage.qml`, `SettingsSheet.qml`, `Combos.js`, `fuzzy.js` |
 | The daemon, as the Hub sees it | `Singletons/` (`Settings.qml` is the `asura-shell` socket) |
 | The Asura group | `AsuraPage.qml`, drawn with `PageView.qml`, `Editor.qml`, `Controls/`, `Asura.qml`, `GVariant.qml` |
 
-Ryoku pages edit `shell.json` through the daemon and the compositor files through `asura-hubd`.
+Hub pages edit `shell.json` through the daemon and the compositor files through `asura-hubd`.
 The Asura group is the other store: GSettings, written only through `asura config set`. It shows a
 control only for a setting something reads (today the idle timeouts); the rest are on the `Unread`
 list in `desktop/internal/hub`, with the reason, and come off it when something starts reading them.

@@ -1,13 +1,13 @@
 # Wallpaper
 
-`asura-wallpaper` owns the wallpaper. It is a Go daemon (`desktop/cmd/asura-wallpaper`, user
-unit `asura-wallpaper.service`) ported from another project's wallpaper daemon; the picker is the ported
+`toren-wallpaper` owns the wallpaper. It is a Go daemon (`desktop/cmd/toren-wallpaper`, user
+unit `toren-wallpaper.service`) ported from another project's wallpaper daemon; the picker is the ported
 wall-ui (itself the skwd-wall picker), and the shell draws what the daemon publishes.
 
 | Part | Where |
 |---|---|
-| daemon, socket `$XDG_RUNTIME_DIR/asura-wallpaper.sock` | `desktop/cmd/asura-wallpaper` |
-| picker window (entry file at the shell root so `qs.*` resolves) | `shell/wallpaper-ui.qml`, `shell/wallpaper-ui/`, launcher `session/asura-wallpaper-ui` |
+| daemon, socket `$XDG_RUNTIME_DIR/toren-wallpaper.sock` | `desktop/cmd/toren-wallpaper` |
+| picker window (entry file at the shell root so `qs.*` resolves) | `shell/wallpaper-ui.qml`, `shell/wallpaper-ui/`, launcher `session/toren-wallpaper-ui` |
 | the surface that paints the frame | `shell/modules/wallpaper/` (`Wallpaper.qml` subscribes, `Backdrop.qml` reveals and plays clips) |
 | Depth/Parallax cut-out engine | `shell/scripts/asura-stage`, drawn by `shell/modules/stage/` |
 
@@ -15,14 +15,14 @@ wall-ui (itself the skwd-wall picker), and the shell draws what the daemon publi
 
 | What | Path |
 |---|---|
-| daemon config (`paths`, `restoreOnStartup`, `resource_tier`, `matugen.videoFrame`) | `~/.config/asura/asura-wallpaper.json` |
-| picker config (layout, transitions, day/night, sources) | `~/.config/asura-wallpaper-wall/config.json` |
+| daemon config (`paths`, `restoreOnStartup`, `resource_tier`, `matugen.videoFrame`) | `~/.config/asura/toren-wallpaper.json` |
+| picker config (layout, transitions, day/night, sources) | `~/.config/toren-wallpaper-wall/config.json` |
 | catalogue, thumbnails, stored choice (`outputs.json`), playlists, transcodes, logs | `~/.cache/asura/wallpaper/` |
-| the wallpaper on screen, one absolute path | `$XDG_STATE_HOME/asura-wallpaper` |
+| the wallpaper on screen, one absolute path | `$XDG_STATE_HOME/toren-wallpaper` |
 | library | `~/Pictures/Wallpapers`, or an existing `Pictures/wallpaper` spelling of it |
 
 The look settings the picker shows (fit, video engine, transcode) are `wallpaper.*` in `shell.json`.
-The picker changes them with `settings.patch` on `asura-shell.sock`; it never writes the file.
+The picker changes them with `settings.patch` on `toren-shell.sock`; it never writes the file.
 
 ## The wire
 
@@ -30,13 +30,13 @@ One socket carries three things: `subscribe wallpaper` streams the full frame
 `{default: ENTRY, outputs: {connector: ENTRY}}` (path, revision, fit, live, videoPath, mute,
 volume, transition, depth), verb lines (`wallpaper set|random|next|ui|restore|repaint|resource|live-reload`,
 `depth set|clear`) answer `ok`/`err ...`, and JSON-RPC lines (`wall.*`, `playlist.*`, `effects.*`,
-`grade.*`, `optimize.*`, `wm.*`) serve the picker, which also receives `asura-wallpaper.wall.*` events.
+`grade.*`, `optimize.*`, `wm.*`) serve the picker, which also receives `toren-wallpaper.wall.*` events.
 
 ## The palette handshake
 
-The daemon never computes colours. `asura-shell` subscribes to the `wallpaper` topic
-(`desktop/cmd/asura-shell/wallpaper.go`); when the default slot's path or live flag changes it
-schedules its theming pass, which runs `asura theme generate` on the picture (a clip's extracted
+The daemon never computes colours. `toren-shell` subscribes to the `wallpaper` topic
+(`desktop/cmd/toren-shell/wallpaper.go`); when the default slot's path or live flag changes it
+schedules its theming pass, which runs `toren theme generate` on the picture (a clip's extracted
 still) and renders the templates. The topic replays the current frame on every connect, so a
 shell daemon that starts after the wallpaper still themes from it. Cut-outs come back the other
 way: the shell daemon's stage worker sends `depth set <json>` / `depth clear`.

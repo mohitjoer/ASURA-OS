@@ -5,7 +5,7 @@ import Quickshell.Io
 import Quickshell.Wayland
 import qs.Ui.Singletons
 
-// AI usage panel in the omarchy-agent-usage presentation: one stacked card per
+// AI usage panel: one stacked card per
 // provider (Claude Code · OpenAI Codex · OpenCode). Each card carries the
 // provider mark, its weekly allowance used and reset countdown, a full-width
 // weekly meter, the prorated-pace line with the expected-used figure, a LAST 7
@@ -478,7 +478,7 @@ PanelWindow {
                     recent: aiPanel.ocRecent; extras: aiPanel.ocExtras
                 }
 
-                // OpenCode per-model breakdown (no omarchy equivalent; kept)
+                // OpenCode per-model breakdown
                 Item {
                     visible: aiPanel.ocShow && aiPanel.ocModels.length > 0
                     width: parent.width; height: 16

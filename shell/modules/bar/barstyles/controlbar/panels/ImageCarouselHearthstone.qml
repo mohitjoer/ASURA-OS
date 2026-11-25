@@ -217,7 +217,7 @@ PanelWindow {
         var path = filtered[selFilt].filePath; if (!path) return
         if (isThemeMode) {
             var name = Model.nameForPath(path)
-            applyThemeProc.command = ["env", "ASURA_PATH=" + root.omarchyInstallRoot, "true", name]
+            applyThemeProc.command = ["env", "ASURA_PATH=" + root.asuraInstallRoot, "true", name]
             applyThemeProc.running = false; applyThemeProc.running = true
         } else {
             applyBgProc.command = ["asura-wallpaper", "wallpaper", "set", path]

@@ -491,7 +491,7 @@ Item {
         }
         Text {
             width: Math.min(parent.width, 720)
-            text: I18n.tr("Bring another setup onto Asura. Everything it touches is backed up.")
+            text: I18n.tr("Bring another setup onto Toren. Everything it touches is backed up.")
             color: Tokens.inkMuted; font.family: Tokens.ui
             font.pixelSize: Tokens.fBody; wrapMode: Text.WordWrap
         }
@@ -585,8 +585,8 @@ Item {
                     width: parent.width
                     horizontalAlignment: Text.AlignHCenter
                     text: pg.providerName.length
-                        ? I18n.tr("Bringing an existing setup across, its keybinds, window rules and app configs, is available on another Asura desktop today. It lands on the %1 desktop in a future release.").arg(pg.providerName)
-                        : I18n.tr("Bringing an existing setup across, its keybinds, window rules and app configs, is available on another Asura desktop today. It lands on this desktop in a future release.")
+                        ? I18n.tr("Bringing an existing setup across, its keybinds, window rules and app configs, is available on another Toren desktop today. It lands on the %1 desktop in a future release.").arg(pg.providerName)
+                        : I18n.tr("Bringing an existing setup across, its keybinds, window rules and app configs, is available on another Toren desktop today. It lands on this desktop in a future release.")
                     color: Tokens.inkMuted; font.family: Tokens.ui
                     font.pixelSize: Tokens.fSmall; wrapMode: Text.WordWrap
                 }
@@ -660,7 +660,7 @@ Item {
                             }
                             Text {
                                 width: parent.width
-                                text: I18n.tr("It looks like you came from another %1 setup. Scan it to bring your keybinds, rules and app configs onto Asura.").arg(pg.providerCased())
+                                text: I18n.tr("It looks like you came from another %1 setup. Scan it to bring your keybinds, rules and app configs onto Toren.").arg(pg.providerCased())
                                 color: Tokens.inkMuted; font.family: Tokens.ui
                                 font.pixelSize: Tokens.fSmall; wrapMode: Text.WordWrap
                             }
@@ -895,7 +895,7 @@ Item {
                 Text {
                     width: resCol.width
                     visible: pg.conflictTotal > 0
-                    text: I18n.tr("Each combo your config wants that Asura already uses. Keep Asura's shortcut, use yours (Asura unbinds its own so yours actually wins), or remap yours to a free chord. Untouched rows keep Asura's.")
+                    text: I18n.tr("Each combo your config wants that Toren already uses. Keep Toren's shortcut, use yours (Toren unbinds its own so yours actually wins), or remap yours to a free chord. Untouched rows keep Toren's.")
                     color: Tokens.inkMuted; font.family: Tokens.ui
                     font.pixelSize: Tokens.fSmall; wrapMode: Text.WordWrap; lineHeight: 1.3
                 }

@@ -1,0 +1,25 @@
+id: hp-laptop
+name: "HP Laptops (Spectre, Envy, Pavilion, EliteBook)"
+description: "HP laptop hardware profile: hp-wmi thermal profile and keyboard backlight"
+
+match:
+  sys_vendor: "*HP*"
+  chassis: "laptop"
+
+packages: []
+
+kernel_parameters: []
+
+files:
+  udev:
+    - target: "/etc/udev/rules.d/90-hp-backlight.rules"
+      content: |
+        # Permissions for HP keyboard backlight
+        SUBSYSTEM=="leds", KERNEL=="hp::kbd_backlight", ACTION=="add", RUN+="/bin/chmod a+w /sys/class/leds/hp::kbd_backlight/brightness"
+      reason: "Grant write permissions to hp::kbd_backlight"
+
+services: []
+
+notes:
+  - "HP WMI thermal management exposed via platform_profile ('asura power profile')."
+  - "Keyboard backlight permissions for ambient sensor and manual keys."

@@ -1,6 +1,6 @@
 # Hardware detection
 
-How ASURA identifies a machine, matches it to a profile, and decides what to install. Read this
+How Toren identifies a machine, matches it to a profile, and decides what to install. Read this
 before touching `system/hardware/` or writing a probe. The tier definitions, the profile
 schema and the loop that grows the matrix live in
 [`../system/hardware/README.md`](../system/hardware/README.md) and
@@ -12,9 +12,9 @@ implementation record for the part between the kernel and the profile.
 ## Why detection is load-bearing
 
 Detection is the only subsystem whose failure mode is *no machine at all*. Everything else in
-ASURA degrades into a lesser desktop. Detection getting it wrong means a machine that will not
+Toren degrades into a lesser desktop. Detection getting it wrong means a machine that will not
 boot, or will boot without a network and no way to recover, which is indistinguishable from
-ASURA not supporting the machine at all.
+Toren not supporting the machine at all.
 
 One detection result decides nearly everything the installer does:
 
@@ -25,7 +25,7 @@ One detection result decides nearly everything the installer does:
 | Hybrid mux mode | profile + vendor tool detection | External display dead, or suspend broken |
 | Firmware packages | probe + profile | Network device present, never comes up |
 | Microcode | DMI CPU family, PCI | Subtle corruption, or an early boot failure |
-| Support tier | profile database | A promise ASURA cannot keep |
+| Support tier | profile database | A promise Toren cannot keep |
 | Offline rescue set | probe | The machine cannot install at all |
 
 Five things therefore have to be true, and they are the acceptance criteria for any change to
@@ -38,7 +38,7 @@ this subsystem.
 2. **Degrade, never guess.** A probe that cannot read its input returns `unknown`. It never
    substitutes a plausible default, because a wrong default is a profile-shaped lie: it
    produces a machine that boots into a broken desktop with a tier number attached.
-3. **Unprivileged by default.** `asura hardware report` runs as the user. Root is requested only
+3. **Unprivileged by default.** `toren hardware report` runs as the user. Root is requested only
    where a source genuinely needs it — the `dmidecode` fallback and the ACPI table dump — and
    both are opt-in.
 4. **Bounded.** The common path is fast enough that the installer never shows a spinner for it.
@@ -270,7 +270,7 @@ any of them.
 
 The deep path is **opt-in and off by default**, for three reasons: it writes a few hundred
 kilobytes to disk, `iasl -d` is CPU-bound, and the answer it produces is needed by roughly one
-profile in fifty — the machine with a sleep problem. `asura hardware report --deep` runs it and
+profile in fifty — the machine with a sleep problem. `toren hardware report --deep` runs it and
 records the derived facts.
 
 **A trap worth stating plainly: an AML table dump must never appear in a report.** ACPI tables
@@ -325,7 +325,7 @@ maximum refresh, range limits, colour characteristics, and HDR metadata where pr
 - **Which physical port an external monitor is in**, or whether a dock is passing video or
   charging at the rate the port advertises.
 - **That a listed mode works.** EDID describes what the panel was told to support. Runtime
-  behaviour is `asura hardware verify`'s job.
+  behaviour is `toren hardware verify`'s job.
 - **Everything the firmware omitted.** Many internal panels ship a sparse block with no HDR
   metadata, no display name, and no serial at all. Absence in EDID is absence of data, not
   absence of capability.
@@ -410,15 +410,15 @@ to tier 3 with the conservative defaults. Silently picking one of two verified r
 than picking neither, because the user cannot tell which one they got.
 
 The same disagreement, when the two profiles differ in tier or specificity, is resolved by the
-table above — but `asura hardware lint-profiles` warns about it at review time, because a narrow
+table above — but `toren hardware lint-profiles` warns about it at review time, because a narrow
 tier-2 profile and a broad tier-1 profile covering the same machines is the shape that most
 often turns into a conflict once someone adds a third.
 
 ### Resolution output
 
 The resolution is written to `/etc/asura/hardware/resolution.yaml` at install time, which is
-inside the only directory structure ASURA owns outright, so nothing is written outside
-`/usr/share/asura/` and `/etc/asura/`. `asura hardware match` reads it and answers the two questions a
+inside the only directory structure Toren owns outright, so nothing is written outside
+`/usr/share/asura/` and `/etc/asura/`. `toren hardware match` reads it and answers the two questions a
 user actually has: which tier am I, and what would change it.
 
 ```yaml
@@ -456,7 +456,7 @@ answer, and it is what the lint uses to spot a database about to develop a confl
 
 ---
 
-## PII stripping for `asura hardware report`
+## PII stripping for `toren hardware report`
 
 Reports are attached to public pull requests. The redaction policy is therefore part of the
 detection contract, not a formatting pass, and it is specified so that it can be implemented
@@ -530,7 +530,7 @@ Including `field_name` in the MAC input means a token cannot be lifted from one 
 another — the DMI UUID token and the EDID serial token for the same machine differ, which is
 correct, because they are different fields that happen to be equal.
 
-Both salt locations are ones ASURA already owns: a user-state path from the ownership model, and
+Both salt locations are ones Toren already owns: a user-state path from the ownership model, and
 `/etc/asura/`. Nothing is written to `~` by a package and nothing is written outside
 `/usr/share/asura/` and `/etc/asura/` by anything shipped.
 
@@ -598,11 +598,11 @@ a package, a firmware file or a kernel flavour outside the reviewed set.
 
 | Invocation | Emits | Contains serials |
 |---|---|---|
-| `asura hardware report` | Diagnostic text, for pasting into the hardware support form | Tokens only |
-| `asura hardware report --format json` | The same content, machine-readable | Tokens only |
-| `asura hardware report --profile` | Candidate profile YAML, schema-validated | No tokens at all |
-| `asura hardware report --deep` | Diagnostic text plus ACPI-derived facts | Tokens only |
-| `asura hardware report --raw` | Unredacted local dump for debugging | **Yes** |
+| `toren hardware report` | Diagnostic text, for pasting into the hardware support form | Tokens only |
+| `toren hardware report --format json` | The same content, machine-readable | Tokens only |
+| `toren hardware report --profile` | Candidate profile YAML, schema-validated | No tokens at all |
+| `toren hardware report --deep` | Diagnostic text plus ACPI-derived facts | Tokens only |
+| `toren hardware report --raw` | Unredacted local dump for debugging | **Yes** |
 
 `--raw` writes to a path matching the patterns already excluded in
 [`.gitignore`](../.gitignore) — `*.hardware.raw.yaml`, `*-report-raw.yaml` — prints the
@@ -611,8 +611,8 @@ outright when `CI` is set**, so a pipeline cannot produce a file intended for hu
 local.
 
 ```console
-$ asura hardware report --profile
-# Candidate hardware profile — generated by `asura hardware report`.
+$ toren hardware report --profile
+# Candidate hardware profile — generated by `toren hardware report`.
 # Review before opening a pull request. `verified:` is for a human on this
 # machine; detection cannot fill it in. Fields that would identify this
 # machine have been removed, not redacted.
@@ -670,7 +670,7 @@ is the single most common way a correct profile fails to select its own machine.
 
 The failure this section exists for: **a laptop whose wireless adapter needs a driver cannot
 fetch that driver over the network it does not have.** This is the wall every distribution hits,
-and it is the single largest source of "ASURA does not support my machine" reports. It is also
+and it is the single largest source of "Toren does not support my machine" reports. It is also
 the hardest failure to detect, because the machine that cannot report its problem is the
 machine with the problem.
 
@@ -701,8 +701,8 @@ Offline risk is computable, and it is computed before anything is installed:
 > `driver` symlink is an offline-risk machine.**
 
 The same rule covers a wireless device that enumerated under USB, and a machine whose only
-network path is WWAN. `asura hardware match` prints the finding at the top of its output, and
-`asura hardware report` records it as `offline_risk: true` with the specific devices:
+network path is WWAN. `toren hardware match` prints the finding at the top of its output, and
+`toren hardware report` records it as `offline_risk: true` with the specific devices:
 
 ```yaml
 offline_risk: true
@@ -755,7 +755,7 @@ anything useful to say, which is the only condition under which the bundle matte
 Verification is not optional, because firmware loaded from removable media is an untrusted
 input path and [`SECURITY.md`](../SECURITY.md) scopes it accordingly. `BUNDLE.IDX` is verified
 against the public key at `/usr/share/asura/hardware/keys/firmware-bundle.pub` — inside the
-directory ASURA owns outright, so the key ships with the image and cannot be replaced by a
+directory Toren owns outright, so the key ships with the image and cannot be replaced by a
 mounted stick. Every `.xbps` is checked against the digest in the verified repository index (`xbps-rindex`) before it is
 installed. A failed signature aborts the whole load; there is no partial-apply path.
 
@@ -813,7 +813,7 @@ a machine's working state moved as data, not a downloaded bundle.
 
 ```console
 # On a machine that already has the driver, for the machine that does not
-$ asura-firmware push asura-installer:/srv/asura-firmware
+$ asura-firmware push toren-installer:/srv/asura-firmware
 indexed 3 hardware ids from 2 installed packages, wrote /srv/asura-firmware (412 KiB)
 
 # On the machine that needs it
@@ -848,9 +848,9 @@ Four things in that output are deliberate and are each load-bearing:
 
 Worth stating because it looks like a violation and is not. `asura-firmware load` runs `xbps-install`
 on packages from the base layer and its firmware archive. Those packages write to `/lib/firmware`
-and `/usr/lib/modules`, which ASURA does not own. The boundary rule constrains *ASURA's* packages
+and `/usr/lib/modules`, which Toren does not own. The boundary rule constrains *Toren's* packages
 to `/usr/share/asura/` and `/etc/asura/`; installing a base-layer package is the base layer
-writing its own files. ASURA installs the package and never touches its contents.
+writing its own files. Toren installs the package and never touches its contents.
 
 ---
 
@@ -864,7 +864,7 @@ between them.
 | Transition | Automatic | Performed by | Gate |
 |---|---|---|---|
 | No profile → 3 | Yes | The matcher | The `fallback:` block, plus `warn_tier: true` |
-| 3 → 2 | Yes, at submission | The contributor, and CI enforces the floor | The profile passes `asura hardware lint-profiles` and was generated by `asura hardware report` on the machine it describes |
+| 3 → 2 | Yes, at submission | The contributor, and CI enforces the floor | The profile passes `toren hardware lint-profiles` and was generated by `toren hardware report` on the machine it describes |
 | 2 → 2, editing a profile | Yes | The contributor | Re-validation. A narrower `match:` cannot lower a tier, because the tier is a claim about the machine, not about how precisely the profile found it. |
 | 2 → 1 | **No** | A maintainer | The `tiers.yaml` `requires:` checklist satisfied, evidence attached, machine physically run |
 | 1 → 2, or any → 3 | Yes, downward only | The loader | The profile names a kernel flavour, firmware package or DKMS module outside the reviewed set, or matches nothing in the database |
@@ -880,7 +880,7 @@ Three reasons, and the first is the practical one.
 `external_display` and — for some machines — `bluetooth` and `fingerprint`. Whether suspend
 and resume are *clean* on a given laptop, whether an external display works through that
 machine's USB-C dock, is a judgement made by a person looking at the machine. No probe reads
-it and no script infers it. `asura hardware verify` collects what *can* be collected — boots,
+it and no script infers it. `toren hardware verify` collects what *can* be collected — boots,
 login manager, session, network, audio output, GPU acceleration, panel backlight writable,
 bluetooth enumerated — and leaves exactly the judgement calls to the human.
 
@@ -901,10 +901,10 @@ The rule is enforced in three places, because a rule only one reviewer remembers
 - **The profile loader clamps.** A profile that claims `tier: 1` without a maintainer's
   sign-off is loaded at tier 2. The loader will not let a contributor raise a tier, which is
   what the profile schema already says it does not.
-- **CI rejects it.** `asura hardware lint-profiles` fails a pull request whose profile claims
+- **CI rejects it.** `toren hardware lint-profiles` fails a pull request whose profile claims
   tier 1 without the sign-off, so the question is never asked in review.
 - **The installer states it.** The installer displays the resolved tier and the profile ID
-  before it writes anything, and `asura hardware match` prints both afterwards. A machine that
+  before it writes anything, and `toren hardware match` prints both afterwards. A machine that
   silently drops from tier 2 to tier 3 — a BIOS update rewriting a DMI string is the usual
   cause — is the failure mode here, and it is only visible if something says so out loud.
 
@@ -953,7 +953,7 @@ is testable against a directory tree on disk.
 
 ### Fixtures are machines
 
-`asura hardware capture --out tests/fixtures/asus-tuf-gaming-f15-fx507zc4/` runs the same readers
+`toren hardware capture --out tests/fixtures/asus-tuf-gaming-f15-fx507zc4/` runs the same readers
 with `root` set to that directory and writes exactly the files those readers consume: the DMI
 fields, one directory per PCI function, the USB device tree, the ACPI sysfs attributes, and the
 raw EDID blobs. Captures are passed through the same redactor before being committed, so a
@@ -984,7 +984,7 @@ applied to the code.
 | `redact` | Synthetic DMI tree seeded with canaries | Zero canaries in the rendered bytes |
 | `redact` | An injected serial, MAC and home path | The sweep refuses, names the key, exits non-zero |
 | `lint` | Every file in `profiles/` | No patch-version kernel pin, no firmware file, no unclassified field, `id` matches its filename stem, every `match:` field is in the detection vocabulary |
-| Golden | `asura hardware report --format json` per fixture | Byte-identical to the committed output; a diff is a review artefact |
+| Golden | `toren hardware report --format json` per fixture | Byte-identical to the committed output; a diff is a review artefact |
 
 ### Negative fixtures and fuzzing
 
@@ -1039,4 +1039,4 @@ conflates them.
 | Detection on every boot, or once at install | A BIOS update can rewrite a DMI string, and a machine silently drops from tier 2 to tier 3. Re-detecting at boot would catch it; it would also make the resolution non-deterministic across an update, which is a different cost. |
 | Whether the report carries any failure context | A journal excerpt would help enormously and is full of usernames, hostnames and paths. The hardware support form asks for journal text in its own field, beside the report, which keeps the report a pure inventory. Whether that separation survives contact with a real submission is worth watching. |
 | Rescue bundle signing granularity | Per ISO or per release. Per release means a machine with an old ISO cannot be helped by a current bundle; per ISO means more keys in the image. |
-| Tier 1 evidence collection | `asura hardware verify` can check most of the `tiers.yaml` checklist mechanically. Whether the machine-generated evidence block is ever attached to a tier 1 sign-off, or whether it is deliberately kept out to preserve the human judgement, is a call to make before the first tier 1 is granted. |
+| Tier 1 evidence collection | `toren hardware verify` can check most of the `tiers.yaml` checklist mechanically. Whether the machine-generated evidence block is ever attached to a tier 1 sign-off, or whether it is deliberately kept out to preserve the human judgement, is a call to make before the first tier 1 is granted. |

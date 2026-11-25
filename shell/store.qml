@@ -12,7 +12,7 @@ ShellRoot {
     FloatingWindow {
         id: win
         // Literal, not translated: the compositor's float rule matches this title.
-        title: "Asura Store"
+        title: "Toren Store"
         // A screen object that dangles during a monitor switch reports size 0;
         // sizing from it would hand the compositor a zero-size window that is
         // invisible and click-dead while its lock stays held.

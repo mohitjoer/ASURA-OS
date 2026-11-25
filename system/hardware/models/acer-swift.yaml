@@ -1,0 +1,20 @@
+id: acer-swift
+name: "Acer Swift Laptops"
+description: "Acer Swift ultrabook hardware profile: quiet thermal modes and battery life optimization"
+layer: family
+
+match:
+  sys_vendor: "Acer*"
+  product_family: "*Swift*"
+
+packages: []
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel drivers/platform/x86/acer-wmi.c."
+  - "Acer Swift quiet and balanced thermal modes."

@@ -1,0 +1,25 @@
+id: wifi-realtek
+name: "Realtek Wi-Fi (rtw88 / rtw89)"
+description: "Firmware and driver support for Realtek 802.11ac/ax PCI and USB Wi-Fi adapters"
+layer: component
+
+match:
+  module:
+    - "rtw88_core"
+    - "rtw88_pci"
+    - "rtw89_core"
+    - "rtw89_pci"
+
+packages:
+  - linux-firmware-network
+  - wireless-regdb
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel drivers/net/wireless/realtek/rtw88 and rtw89."
+  - "Supports Realtek RTL8821CE, RTL8822CE, RTL8852AE, RTL8852BE, and RTL8852CE Wi-Fi adapters."

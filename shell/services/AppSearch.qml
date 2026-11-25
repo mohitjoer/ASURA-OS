@@ -20,6 +20,14 @@ Singleton {
         "wps": "wps-office2019-kprometheus",
         "wpsoffice": "wps-office2019-kprometheus",
         "footclient": "foot",
+        "asura-vm": "computer",
+        "asura-hub": "preferences-system",
+        "asura-settings": "preferences-system",
+        "nm-connection-editor": "preferences-system-network",
+        "utilities-terminal": "com.mitchellh.ghostty",
+        "utilities-system-monitor": "system-run",
+        "opencode": "com.mitchellh.ghostty",
+        "btop": "system-run",
     })
     property var regexSubstitutions: [
         {
@@ -40,9 +48,12 @@ Singleton {
         }
     ]
 
-    // Deduped list to fix double icons
+    // Deduped list to fix double icons and filter out removed packages (such as zed)
     readonly property list<DesktopEntry> list: Array.from(DesktopEntries.applications.values)
         .filter((app, index, self) => 
+            app && app.id && app.name &&
+            !app.id.toLowerCase().includes("zed") &&
+            !app.name.toLowerCase().includes("zed") &&
             index === self.findIndex((t) => (
                 t.id === app.id
             ))

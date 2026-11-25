@@ -68,7 +68,7 @@ Scope {
         case "logout":
         case "reboot":
         case "shutdown": ShellState.askSessionAction(id, root.modelData ? root.modelData.name : ""); break;
-        case "screenshot": Spawn.run(["sh", "-c", "flock -n -o /tmp/ryoshot.lock qs -c ryoshot"]); break;
+        case "screenshot": Quickshell.execDetached(["asura-shot"]); break;
         case "wallpaper": Quickshell.execDetached(["asura-wallpaper", "wallpaper", "ui"]); break;
         case "color-picker": Quickshell.execDetached(["asura-cmd-color-picker"]); break;
         case "app-launcher": if (root.state) root.state.launcherOpen = !root.state.launcherOpen; break;

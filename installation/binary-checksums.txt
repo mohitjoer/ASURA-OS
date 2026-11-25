@@ -1,12 +1,9 @@
 # Known SHA-256 checksums for external binary downloads pinned in build-iso-void.sh
 
-# Zed Editor (v1.27.0 - verified from GitHub Releases API asset sha256 digest)
-719f6bf649ea8d87961adbf728e178561bac3f598d72d7949558d1150cfc43dd  zed-linux-x86_64.tar.gz
-
 # OpenCode CLI (v2.2.6 - verified from official npm registry dist metadata)
 dfcd69f1d511ae10ed626768b41d84b8100cc4aa64cecb69da38ba7a29d33551  opencode-v2.2.6-linux-x64.tgz
 
-# Hyprland Void Linux packages from Makrennel (verified from repository-x86_64-glibc/x86_64-repodata index.plist)
+# Hyprland packages (from ASURA package repository)
 70a604b5a43ff09ea346063ef3d9c72e244834d79d1aedac0f26895cbcfd6265  tomlplusplus-3.4.0_1.x86_64.xbps
 904020801798fadf121b5ecd35517ba8d3f9f15b8b34024b70d114c2eb5e97a3  hyprutils-0.7.1_1.x86_64.xbps
 a37b9e9a1589ff166baa0e7a54fe2232cc02ace90077f5e63d2f615a458006bb  aquamarine-0.8.0_2.x86_64.xbps

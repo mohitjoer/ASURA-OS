@@ -1,0 +1,20 @@
+id: hp-zbook
+name: "HP ZBook Mobile Workstations"
+description: "HP ZBook mobile workstation hardware profile: sustained thermal profiles"
+layer: family
+
+match:
+  sys_vendor: "*HP*"
+  product_family: "*ZBook*"
+
+packages: []
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel Documentation/admin-guide/laptops/hp-laptop.rst."
+  - "Workstation-class cooling and power profiles."

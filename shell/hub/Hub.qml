@@ -525,7 +525,7 @@ Rectangle {
         "mirror": false, "segments": 10, "fps": 30,
         "adaptive": true, "smoothing": 0.5, "gain": 1.0, "peaks": false,
         "spin": 0, "x": 0, "y": 0.58, "w": 1, "h": 0.42, "grow": "up", "angle": 0, "tiltX": 0, "tiltY": 0,
-        "markText": "A", "markImage": "", "markTint": true, "name": "Asura",
+        "markText": "T", "markImage": "", "markTint": true, "name": "Toren",
         "reloadCover": ReloadCoverModel.empty(),
         "language": "auto", "barStyle": "qsbar", "obi": {}, "nacre": NacreConfig.defaultConfig(), "qsbar": {}, "dock": {},
         "qsbar.barPosition": "top", "qsbar.barShellStyle": "full", "qsbar.barScale": 1.0,
@@ -903,7 +903,7 @@ Rectangle {
             property string markText: "A"
             property string markImage: ""
             property bool markTint: true
-            property string name: "Asura"
+            property string name: "Toren"
             property var reloadCover: ReloadCoverModel.empty()
         }
     }
@@ -1101,7 +1101,7 @@ Rectangle {
                         spacing: 1
                         anchors.verticalCenter: parent.verticalCenter
                         Text {
-                            text: "ASURA"; color: Tokens.ink; font.family: Tokens.ui
+                            text: "TOREN"; color: Tokens.ink; font.family: Tokens.ui
                             font.pixelSize: 14; font.weight: Font.DemiBold; font.letterSpacing: 2.4
                         }
                         Text {

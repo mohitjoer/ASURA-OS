@@ -1,0 +1,27 @@
+id: power-huawei
+name: "Huawei MateBook Battery Protection"
+description: "Persists battery charge threshold (40-80%) via huawei-wmi driver"
+layer: component
+
+match:
+  module:
+    - "huawei_wmi"
+
+packages: []
+
+kernel_parameters: []
+
+files:
+  udev:
+    - target: "/etc/udev/rules.d/99-huawei-battery.rules"
+      content: |
+        # Huawei battery charge protection: start at 40%, stop at 80%. huawei-wmi
+        # adds the standard charge_control_*_threshold files to the battery.
+        SUBSYSTEM=="power_supply", KERNEL=="BAT[0-9]*", ATTR{charge_control_start_threshold}="40", ATTR{charge_control_end_threshold}="80"
+      reason: "Persist battery charge threshold on Huawei laptops (Linux kernel Documentation/ABI/testing/sysfs-platform-huawei-wmi)"
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel Documentation/ABI/testing/sysfs-platform-huawei-wmi."
+  - "Configures battery health limits via the kernel huawei-wmi platform driver."

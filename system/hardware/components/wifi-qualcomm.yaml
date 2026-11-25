@@ -1,0 +1,24 @@
+id: wifi-qualcomm
+name: "Qualcomm Atheros Wi-Fi (ath10k / ath11k / ath12k)"
+description: "Firmware and driver support for Qualcomm Atheros PCIe wireless adapters"
+layer: component
+
+match:
+  module:
+    - "ath10k_pci"
+    - "ath11k_pci"
+    - "ath12k"
+
+packages:
+  - linux-firmware-network
+  - wireless-regdb
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel drivers/net/wireless/ath/ath11k."
+  - "Supports Qualcomm Atheros QCA6174, QCA6390, WCN6855 Wi-Fi 6/6E adapters."

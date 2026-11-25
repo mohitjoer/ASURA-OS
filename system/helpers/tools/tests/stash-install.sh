@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# hermetic test for shell/scripts/stash-install.sh, ported from Ryoku's. stash
+# hermetic test for shell/scripts/stash-install.sh, ported from upstream's. stash
 # makes dropped files launchable: AppImages + self-contained tarballs get a synth
 # desktop entry; a .deb is a system package and must go through `apt-get install`
 # via pkexec, never extracted into ~/.local where its /opt binary would not work.

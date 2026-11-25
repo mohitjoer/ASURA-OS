@@ -8,6 +8,17 @@ exec 2>&1
 # script exports.
 export XDG_CURRENT_DESKTOP="${XDG_CURRENT_DESKTOP:-Asura}"
 
+# The runtime directory and the session bus, as the other user services set
+# them: the bounded wait below asks the session bus with gdbus, and the
+# dispatcher must reach the same bus. Without them (a runsvdir started with a
+# minimal environment) gdbus fails at once, the wait burns its whole budget
+# and the dispatcher starts on no bus.
+RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+export XDG_RUNTIME_DIR="$RUNTIME_DIR"
+if [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ] && [ -S "$RUNTIME_DIR/bus" ]; then
+	export DBUS_SESSION_BUS_ADDRESS="unix:path=$RUNTIME_DIR/bus"
+fi
+
 # The dispatcher builds its interface map from the backends that own their bus
 # names when it starts, and a backend that appears later is never added: the
 # Hyprland backend crash-loops for a few seconds while Hyprland's IPC socket

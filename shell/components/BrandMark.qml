@@ -5,7 +5,7 @@ import qs.Services
 
 // The desktop brand seal, A by default. Users swap it globally (their own
 // glyph/text, or an image) from Asura Settings -> Shell -> Global; stored in
-// ~/.config/asura/brand.json. Asura's own apps (the Hub, ryo* apps) never use
+// ~/.config/asura/brand.json. Asura's own apps (the Hub, related apps) never use
 // this and keep the Asura brand. Drop-in for the old
 // `Text { text: "A"; font.family: Theme.fontJp; color: Theme.primary }` seal:
 // pass the old pixelSize as `size` and the old colour as `color`.

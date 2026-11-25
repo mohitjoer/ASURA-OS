@@ -50,8 +50,7 @@ Singleton {
 
     // dock: the first-class app dock surface (modules/dock). A top-level store,
     // not a bar-style key, because the dock is now style-agnostic -- neither qsbar
-    // nor Sumi owns it. On by default (Ryoku ships it off; Asura's brief wants
-    // it visible on a fresh desktop); Hub -> Bar Studio -> Dock turns it off.
+    // nor Sumi owns it. On by default; Hub -> Bar Studio -> Dock turns it off.
     // Read and written through the services Dock singleton so every consumer goes
     // through one place.
     property alias dock: adapter.dock
@@ -159,7 +158,7 @@ Singleton {
     // markText is the glyph/short-text seal (default A); markImage an optional
     // image path that wins over the text; markTint recolours a single-colour
     // image to the accent; name is the wordmark ("Asura") shown in chrome copy.
-    // Asura's own apps (the Hub, ryo* apps) never read this and keep the Asura brand.
+    // Asura's own apps (the Hub, related apps) never read this and keep the Asura brand.
     property alias markText:  brandAdapter.markText
     property alias markImage: brandAdapter.markImage
     property alias markTint:  brandAdapter.markTint
@@ -247,7 +246,7 @@ Singleton {
             property string markText: "A"
             property string markImage: ""
             property bool markTint: true
-            property string name: "Asura"
+            property string name: "Toren"
         }
     }
 

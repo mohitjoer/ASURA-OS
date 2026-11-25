@@ -15,7 +15,7 @@
 
   <enum id="org.asura.shell.DesktopShell">
     <value nick="asura" value="0"/>
-    <value nick="end4" value="1"/>
+    <value nick="desktop" value="1"/>
   </enum>
 
   <enum id="org.asura.shell.Edge">
@@ -43,7 +43,7 @@
     </key>
 
     <key name="wallpaper-path-dark" type="s">
-      <default>'file:///usr/share/asura/backgrounds/galaxy.png'</default>
+      <default>'file:///usr/share/asura/backgrounds/eva-berserk.jpg'</default>
       <summary>Dark-mode wallpaper</summary>
       <description>
         A URI, used when the colour scheme is prefer-dark. The default is the
@@ -148,11 +148,11 @@
     </key>
 
     <key name="desktop-shell" enum="org.asura.shell.DesktopShell">
-      <default>'end4'</default>
+      <default>'desktop'</default>
       <summary>Which desktop shell runs</summary>
       <description>
-        end4 runs end-4's illogical-impulse desktop (bar, sidebars, overview,
-        dock, notifications, OSD, lock screen) from /usr/share/asura/shell-end4;
+        desktop runs the desktop (bar, sidebars, overview,
+        dock, notifications, OSD, lock screen) from /usr/share/asura/shell-desktop;
         asura runs ASURA's own shell from /usr/share/asura/shell. Both answer
         the same keybindings. Takes effect at the next login, or after
         `sv restart ~/.local/share/asura/runit/quickshell`.

@@ -1,0 +1,20 @@
+id: asus-zenbook
+name: "ASUS ZenBook Laptops"
+description: "ASUS ZenBook ultrabook hardware profile: battery longevity and quiet thermal profile"
+layer: family
+
+match:
+  sys_vendor: "ASUSTeK COMPUTER INC."
+  product_family: "*ZenBook*"
+
+packages: []
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel drivers/platform/x86/asus-wmi.c."
+  - "ZenBook quiet thermal profiles and standard touchpad integration."

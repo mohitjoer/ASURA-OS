@@ -17,7 +17,7 @@ import "Singletons"
 // which exposes the backdrop, reveals it.
 //
 // Mapped only when the compositor advertises the overviewBackdrop capability and
-// the user enabled it in ryogami's picker. On a compositor with no backdrop to
+// the user enabled it in the wallpaper picker. On a compositor with no backdrop to
 // place a surface in, a second full-screen wallpaper would just paint over the
 // desktop, so nothing maps there.
 Item {

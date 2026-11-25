@@ -1,0 +1,26 @@
+id: power-samsung
+name: "Samsung Laptop Battery Life Extender"
+description: "Persists battery life extender (caps charge at 80%) via samsung-laptop platform driver"
+layer: component
+
+match:
+  module:
+    - "samsung_laptop"
+
+packages: []
+
+kernel_parameters: []
+
+files:
+  udev:
+    - target: "/etc/udev/rules.d/99-samsung-battery.rules"
+      content: |
+        # Samsung battery life extender mode
+        SUBSYSTEM=="platform", DRIVERS=="samsung-laptop", ATTR{battery_life_extender}="1"
+      reason: "Enable battery life extender on Samsung laptops (Linux kernel Documentation/ABI/testing/sysfs-platform-samsung-laptop)"
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel Documentation/ABI/testing/sysfs-platform-samsung-laptop."
+  - "Caps charge at 80% to prolong battery cell life."

@@ -10,7 +10,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 read = lambda f: open(f, errors="replace").read()
 verbs = {n: set(re.findall(r'"([a-z][a-z0-9_-]*) ?"', "".join(read(f) for f in glob.glob(f"{ROOT}/desktop/cmd/{n}/*.go")
                                                           if not f.endswith("_test.go"))))
-         for n in ("asura", "asura-shell", "asura-hubd", "asura-wallpaper")}
+         for n in ("toren", "toren-shell", "toren-hubd", "toren-wallpaper")}
 ipc = {}  # IpcHandler target -> its functions
 for f in glob.glob(f"{ROOT}/shell/**/*.qml", recursive=True):
     if extract.excluded(os.path.relpath(f, ROOT), extract.DEFAULT_EXCLUDES):

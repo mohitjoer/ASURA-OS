@@ -49,7 +49,7 @@ Item {
             Image {
                 width: 12; height: 12
                 anchors.verticalCenter: parent.verticalCenter
-                source: Qt.resolvedUrl("../../assets/asura-logo-on-dark.svg")
+                source: Qt.resolvedUrl(Tokens.light ? "../../assets/asura-logo.svg" : "../../assets/asura-logo-on-dark.svg")
                 sourceSize.width: 24; sourceSize.height: 24
                 fillMode: Image.PreserveAspectFit
                 smooth: true
@@ -98,17 +98,17 @@ Item {
             minColumnWidth: 320
             maxColumns: 2
 
-            // ── Card 1: ASURA OS ──
+            // ── Card 1: Toren Linux ──
             SettingCard {
                 width: col.colWidth
-                title: I18n.tr("ASURA OS")
+                title: I18n.tr("Toren Linux")
                 collapsible: false
 
                 SettingRow {
                     anchors.left: parent.left; anchors.right: parent.right
                     divider: false
                     label: I18n.tr("Operating System")
-                    value: "Asura OS"
+                    value: "Toren Linux"
                     desc: I18n.tr("Pure monochrome desktop OS")
                 }
 

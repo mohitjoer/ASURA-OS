@@ -463,7 +463,7 @@ Item {
         }
         Text {
             width: Math.min(parent.width, 720)
-            text: I18n.tr("How Asura records: quality, encoder, and where files land.")
+            text: I18n.tr("How Toren records: quality, encoder, and where files land.")
             color: Tokens.inkMuted; font.family: Tokens.ui
             font.pixelSize: Tokens.fBody; wrapMode: Text.WordWrap
         }

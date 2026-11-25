@@ -1,0 +1,21 @@
+id: samsung-galaxybook
+name: "Samsung Galaxy Book Laptops"
+description: "Samsung Galaxy Book hardware profile: battery longevity limit and performance profiles"
+layer: vendor
+
+match:
+  sys_vendor: "SAMSUNG ELECTRONICS CO., LTD."
+  chassis: "laptop"
+
+packages: []
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel drivers/platform/x86/samsung-galaxybook.c and samsung-laptop.c."
+  - "The battery limit comes from the power-samsung-galaxybook component (samsung_galaxybook driver)."
+  - "Fan mode (silent, optimized, high-performance) mapped to platform_profile."

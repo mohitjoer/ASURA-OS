@@ -57,11 +57,26 @@ essential:
     - file
     - plymouth
     - plymouth-data
+    # System services (Workstream C)
+    - socklog-void
+    - earlyoom
+    - thermald
 
 desktop:
   packages:
     # Wayland Compositor & helpers
     - hyprland
+    - muparser # libmuparser.so.2 required by Hyprland 0.57
+    - lua55 # liblua5.5.so.5.5 required by Hyprland 0.57
+    - glslang
+    - iniparser
+    - libei
+    - lcms2
+    - libcanberra
+    - pugixml
+    - sdbus-c++
+    - tomlplusplus
+    - udis86
     # Void's own package (0.3.2 at the time of writing), built with the Polkit,
     # PAM, PipeWire, Hyprland and screencopy integrations the shell needs.
     # ASURA does not build its own Quickshell.
@@ -91,10 +106,13 @@ desktop:
     - qt6-qt5compat
     - qt6-position
     - qt6-shadertools
-    # end-4's desktop (shell-end4): app icons through Kirigami, and the
+    # Desktop (shell-desktop): app icons through Kirigami, and the
     # syntax highlighting its sidebar uses.
     - kf6-kirigami
     - kf6-syntax-highlighting
+    # switchwall.sh turns the wallpaper into the desktop's palette
+    # with matugen (templates: shell-desktop/matugen).
+    - matugen
     # Core utilities
     - dconf
     - glib
@@ -102,7 +120,6 @@ desktop:
     - jq
     - ImageMagick
     - librsvg
-    - hyprpicker
     - playerctl
     - cliphist
     - desktop-file-utils
@@ -144,7 +161,7 @@ session:
 
 applications:
   packages:
-    - firefox
+    - chromium
     - flatpak
     - Thunar
     - thunar-volman
@@ -160,9 +177,10 @@ terminal-and-shell:
     - zsh
     - starship
     - fastfetch
+    - btop
     # The terminal editor: $EDITOR/$VISUAL for git, sudoedit, crontab and
     # visudo, and the editor that works with no graphical session (TTY, SSH,
-    # recovery). Zed stays the graphical default through mimeapps.
+    # recovery). It is also the default editor.
     - neovim
     - zoxide
     - fzf
@@ -230,6 +248,8 @@ power-and-hardware-services:
     - fwupd
     - cups
     - cups-filters
+    - fprintd
+    - tailscale
 
 fonts-and-icons:
   packages:

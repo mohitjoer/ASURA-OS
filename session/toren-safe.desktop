@@ -1,0 +1,15 @@
+# Toren Safe Mode session registration.
+#
+# Packaged at /usr/share/asura/session/asura-safe.desktop and materialized to
+# /usr/share/wayland-sessions/asura-safe.desktop.
+# Provides a minimal rescue desktop in login managers (SDDM/GDM) with Hyprland
+# and a terminal window, bypassing desktop shells, user configs, and plugins.
+
+[Desktop Entry]
+Type=Application
+Name=Toren Linux (safe mode)
+Comment=Toren Linux minimal recovery session
+TryExec=/usr/share/asura/session/asura-session-safe
+Exec=/usr/share/asura/session/asura-session-safe
+DesktopNames=Asura
+Keywords=Hyprland;Recovery;SafeMode;Toren;

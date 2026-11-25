@@ -15,7 +15,7 @@ ShellRoot {
         id: win
         // The literal, not I18n.tr: the compositor's window rule matches this
         // exact title, and a translated one would not match.
-        title: "Asura Settings"
+        title: "Toren Settings"
         // Asura Settings is a page, not a dialog: it opens at 99% of the screen
         // width, filling the height the shell bar leaves, so the settings get the
         // room the layout is designed for instead of a fixed 1200px strip. The

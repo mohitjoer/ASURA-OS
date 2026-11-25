@@ -2,7 +2,7 @@
 name: systemd-bridge
 description: >
   Manage and troubleshoot system services, third-party installer scripts, and
-  systemd compatibility on Asura OS (Void Linux + runit). Use when dealing with
+  systemd compatibility on Toren Linux (Void Linux + runit). Use when dealing with
   `systemctl`, `journalctl`, `runit`, `sv`, background daemons, `.service` unit files,
   vendor install scripts (such as `curl | sh`), or setting up developer services
   like Docker, Ollama, Tailscale, databases, and microservices.
@@ -10,13 +10,13 @@ metadata:
   namespace: system
 ---
 
-# Asura OS Systemd Compatibility Bridge Skill
+# Toren Linux Systemd Compatibility Bridge Skill
 
 ## Overview
 
-Asura OS uses **Void Linux x86_64 (glibc)** with **`runit`** supervision as its init system. There is **no systemd** on the host.
+Toren Linux uses **Void Linux x86_64 (glibc)** with **`runit`** supervision as its init system. There is **no systemd** on the host.
 
-To ensure frictionless compatibility with the broader Linux developer ecosystem—including online tutorials, vendor `curl | sh` scripts, and third-party tools—Asura OS provides a built-in compatibility layer:
+To ensure frictionless compatibility with the broader Linux developer ecosystem—including online tutorials, vendor `curl | sh` scripts, and third-party tools—Toren Linux provides a built-in compatibility layer:
 - **`/usr/bin/systemctl`**: Intercepts systemd control commands and maps them directly to `runit` (`sv` and `/var/service` symlinks). It also parses newly dropped `.service` files and generates `runit` services on the fly.
 - **`/usr/bin/journalctl`**: Bridges systemd log inspection to `svlogd` log streams at `/var/log/<service>/current`.
 
@@ -121,7 +121,7 @@ If a service fails or exits:
    - Fix: Ensure the command has its foreground flag enabled (e.g., `--foreground`, `-f`, `-D`, or `daemon off;`).
 
 ### 4. Privilege Dropping
-- In Asura OS, `chpst -u <user>:<group>` (from `runit`) is the standard tool to run a daemon as a non-root user.
+- In Toren Linux, `chpst -u <user>:<group>` (from `runit`) is the standard tool to run a daemon as a non-root user.
 - If creating custom services, avoid `su` or `sudo` inside the run script; prefer `exec chpst -u <user> <command>`.
 
 ---
@@ -129,9 +129,9 @@ If a service fails or exits:
 ## Repository Implementation Files
 
 - **Bridge Implementation**:
-  - [`system/helpers/systemctl`](file:///home/mohit/code/ASURA-OS/system/helpers/systemctl)
-  - [`system/helpers/journalctl`](file:///home/mohit/code/ASURA-OS/system/helpers/journalctl)
+  - `system/helpers/systemctl`
+  - `system/helpers/journalctl`
 - **Automated Tests**:
-  - [`system/helpers/tools/tests/systemctl-bridge_test.sh`](file:///home/mohit/code/ASURA-OS/system/helpers/tools/tests/systemctl-bridge_test.sh)
+  - `system/helpers/tools/tests/systemctl-bridge_test.sh`
 - **ISO Deployment**:
-  - Staged in [`installation/build-iso-void.sh`](file:///home/mohit/code/ASURA-OS/installation/build-iso-void.sh) to `/usr/bin/systemctl` and `/usr/bin/journalctl`.
+  - Staged in `installation/build-iso-void.sh` to `/usr/bin/systemctl` and `/usr/bin/journalctl`.

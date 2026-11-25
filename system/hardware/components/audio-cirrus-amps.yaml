@@ -1,0 +1,24 @@
+id: audio-cirrus-amps
+name: "Cirrus Logic CS35L41 Smart Audio Amplifier"
+description: "Firmware and configuration for Cirrus Logic CS35L41 laptop speaker amplifiers"
+layer: component
+
+match:
+  module:
+    - "snd_soc_cs35l41_spi"
+    - "snd_soc_cs35l41_i2c"
+    - "snd_hda_scodec_cs35l41_spi"
+    - "snd_hda_scodec_cs35l41_i2c"
+
+packages:
+  - linux-firmware-intel
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel Documentation/sound/designs/cs35l41.rst and kernel commit 8b5f3a0."
+  - "Laptops with dual or quad Cirrus CS35L41 amplifiers (ASUS ROG/ZenBook, Lenovo Legion, HP Spectre) require ACPI _DSD properties and /lib/firmware/cirrus/ calibrations."

@@ -1,5 +1,5 @@
 #!/bin/sh
-# Asura OS systemctl compatibility bridge for runit
+# Toren Linux systemctl compatibility bridge for runit
 # Translates standard systemd commands and unit files into runit services.
 
 set -e
@@ -26,7 +26,7 @@ while [ $# -gt 0 ]; do
             shift
             ;;
         --version)
-            echo "systemd 255 (Asura OS runit compatibility bridge)"
+            echo "systemd 255 (Toren Linux runit compatibility bridge)"
             exit 0
             ;;
         daemon-reload)
@@ -50,7 +50,7 @@ if [ "$SHOW_HELP" -eq 1 ] || [ -z "$ACTION" ]; then
     cat <<'EOF'
 systemctl [OPTIONS...] COMMAND [UNIT...]
 
-Asura OS runit compatibility shim. Supported commands:
+Toren Linux runit compatibility shim. Supported commands:
   start <unit>         Start (activate) service via runit
   stop <unit>          Stop (deactivate) service via runit
   restart <unit>       Restart service

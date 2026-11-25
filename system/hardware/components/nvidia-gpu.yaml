@@ -1,0 +1,43 @@
+id: nvidia-gpu
+name: "NVIDIA Discrete Graphics (PCIe RTD3, Modeset & Wayland)"
+description: "Runtime D3cold power management, GSP firmware, nvidia-drm modeset, and Hyprland Wayland environment"
+layer: component
+
+match:
+  pci:
+    - "10de:*"
+
+packages:
+  - nvidia
+  - nvidia-dkms
+
+kernel_parameters:
+  - "nvidia-drm.modeset=1"
+  - "nvidia-drm.fbdev=1"
+
+files:
+  udev:
+    - target: "/etc/udev/rules.d/80-nvidia-pm.rules"
+      source: "system/udev/80-nvidia-pm.rules"
+      reason: "Enable PCIe RTD3 runtime power management for NVIDIA discrete GPUs (Linux kernel Documentation/power/pci.rst)"
+  modprobe:
+    - target: "/etc/modprobe.d/nvidia-optimus.conf"
+      source: "system/modprobe.d/nvidia-optimus.conf"
+      reason: "Configure NVreg_DynamicPowerManagement=0x02 for dynamic hybrid power off (NVIDIA Driver README Appendix B)"
+  sysctl:
+    - target: "/etc/environment.d/10-asura-nvidia.conf"
+      content: |
+        # Wayland and hardware video acceleration environment for NVIDIA GPUs
+        LIBVA_DRIVER_NAME=nvidia
+        GBM_BACKEND=nvidia-drm
+        __GLX_VENDOR_LIBRARY_NAME=nvidia
+        NVD_BACKEND=direct
+      reason: "Set Wayland compositor and hardware decoding environment for NVIDIA proprietary driver (Hyprland NVIDIA guide)"
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel Documentation/power/pci.rst and NVIDIA Driver Documentation on Runtime Power Management."
+  - "PCIe RTD3 dynamic power management shuts down GPU power rails (D3cold) when display server and compute are idle."
+  - "nvidia-drm.modeset=1 and fbdev=1 enable atomic kernel modesetting required for Wayland compositors (Hyprland)."
+  - "Run applications offloaded to discrete NVIDIA GPU with 'asura gpu run <command>'."

@@ -1,0 +1,46 @@
+id: asus-tuf-fx507zc4
+name: "ASUS TUF Gaming F15 (FX507ZC4)"
+description: "Intel 12th-Gen Core i5-12500H + NVIDIA GeForce RTX 3050 Laptop GPU (GA107M)"
+
+match:
+  sys_vendor: "ASUSTeK COMPUTER INC."
+  product_name: "ASUS TUF Gaming F15 FX507ZC4_FX507ZC4"
+  product_family: "ASUS TUF Gaming F15"
+  board_name: "FX507ZC4"
+  pci:
+    gpu: "10de:25a2"
+
+packages:
+  - nvidia
+  - nvidia-dkms
+
+kernel_parameters:
+  - "nvidia-drm.modeset=1"
+  - "nvidia-drm.fbdev=1"
+
+files:
+  udev:
+    - target: "/etc/udev/rules.d/80-nvidia-pm.rules"
+      source: "system/udev/80-nvidia-pm.rules"
+      reason: "Enable PCIe RTD3 runtime D3cold power management for NVIDIA GA107M RTX 3050"
+    - target: "/etc/udev/rules.d/99-battery-threshold.rules"
+      source: "system/udev/99-battery-threshold.rules"
+      reason: "Persist 80% charge threshold on ASUS BAT0 charge_control_end_threshold"
+    - target: "/etc/udev/rules.d/90-asus-backlight.rules"
+      content: |
+        # Allow users to adjust ASUS keyboard backlight brightness
+        SUBSYSTEM=="leds", KERNEL=="asus::kbd_backlight", ACTION=="add", RUN+="/bin/chmod a+w /sys/class/leds/asus::kbd_backlight/brightness"
+      reason: "Grant write permissions to asus::kbd_backlight brightness interface"
+  modprobe:
+    - target: "/etc/modprobe.d/nvidia-optimus.conf"
+      source: "system/modprobe.d/nvidia-optimus.conf"
+      reason: "Configure NVreg_DynamicPowerManagement=0x02 for dynamic hybrid power off"
+
+services: []
+
+notes:
+  - "Fan and thermal profiles: asus-wmi exposes /sys/firmware/acpi/platform_profile (quiet, balanced, performance), controlled via 'asura power profile'."
+  - "Battery charge limit: /sys/class/power_supply/BAT0/charge_control_end_threshold persists at 80%."
+  - "Keyboard backlight: asus::kbd_backlight brightness is mapped to Fn keys and /sys/class/leds/."
+  - "NVIDIA hybrid graphics: RTX 3050 enters D3cold (0W) dynamically when idle. Run applications on dGPU with 'asura gpu run <cmd>'."
+  - "asusctl / supergfxctl: Not packaged in Void Linux; kernel native interfaces (asus-wmi and RTD3 sysfs) are used directly."

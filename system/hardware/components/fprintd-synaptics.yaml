@@ -1,0 +1,21 @@
+id: fprintd-synaptics
+name: "Synaptics Prometheus Fingerprint Sensor"
+description: "USB fingerprint authentication support for Synaptics biometric devices"
+layer: component
+
+match:
+  usb:
+    - "06cb:*"
+
+packages:
+  - fprintd
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: libfprint supported devices list (vendor 06cb Synaptics Prometheus)."
+  - "Enables biometric authentication via fprintd and pam_fprintd on supported Synaptics match-on-chip sensors."

@@ -1,0 +1,20 @@
+id: msi-gaming
+name: "MSI Gaming Laptops (Raider, Stealth, Katana)"
+description: "MSI gaming laptop hardware profile: high-performance thermal modes and cooler boost"
+layer: family
+
+match:
+  sys_vendor: "Micro-Star International*"
+  product_family: "*Raider*"
+
+packages: []
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel drivers/platform/x86/msi-wmi.c and msi-ec.c."
+  - "MSI Cooler Boost thermal profiles."

@@ -10,7 +10,7 @@ import Quickshell.Io
 // Colour resolves live from the daemon palette the same way the pill's Theme
 // does: a fixed named colour scheme (shell.json themePalette) wins, then the
     // live wallpaper palette (~/.cache/asura/colors.json Material roles), then the
-// compiled signature default. So every Asura app (the Hub, Ryowalls, ...)
+// compiled signature default. So every Asura app (the Hub, the wallpaper picker, ...)
 // retints on ANY scheme change, a named theme or a wallpaper switch, with no
 // colour math of its own. The kit's role names are kept; only their source moved
 // onto the Material roles.
@@ -32,16 +32,28 @@ Singleton {
     // colors.json (mid-write) or a scheme missing a role never paints black.
     function usable(v) { return typeof v === "string" && v.length > 0; }
 
+    function toSnakeCase(s) {
+        if (!s || typeof s !== "string") return "";
+        return s.replace(/[A-Z]/g, function(c) { return "_" + c.toLowerCase(); });
+    }
+
     // Resolve one Material role through the layer chain: a named scheme wins,
     // then the live wallpaper palette while Match wallpaper is on, then the base.
     // Mid-cross-fade the wallpaper layer is a mix of the two palettes.
     function role(key, base) {
-        if (namedScheme && usable(namedScheme[key]))
-            return namedScheme[key];
-        if (matchWallpaper && usable(wall[key])) {
-            if (blend >= 0.999 || !usable(wallPrev[key]))
-                return wall[key];
-            return t.mixRole(Qt.color(wallPrev[key]), Qt.color(wall[key]), blend);
+        var sk = toSnakeCase(key);
+        if (namedScheme) {
+            if (usable(namedScheme[key])) return namedScheme[key];
+            if (sk && usable(namedScheme[sk])) return namedScheme[sk];
+        }
+        if (matchWallpaper) {
+            var curr = usable(wall[key]) ? wall[key] : (sk && usable(wall[sk]) ? wall[sk] : null);
+            if (curr) {
+                var prev = usable(wallPrev[key]) ? wallPrev[key] : (sk && usable(wallPrev[sk]) ? wallPrev[sk] : null);
+                if (blend >= 0.999 || !prev)
+                    return curr;
+                return t.mixRole(Qt.color(prev), Qt.color(curr), blend);
+            }
         }
         return base;
     }
@@ -49,12 +61,9 @@ Singleton {
     // ── default signature constants (the base each role falls back to) ───────
     readonly property color defaultPaper: "#000000"
     readonly property color defaultPaperLift: "#0a0a0a"
-    readonly property color defaultInk: "#cdc4ba"
-    readonly property color defaultInkDim: "#b0a9a0"
 
     // ── paper ────────────────────────────────────────────────────────────
     readonly property color paper: role("surface", defaultPaper)
-    readonly property color paperLift: role("surfaceContainerLow", defaultPaperLift)
 
     // ── mode flag ────────────────────────────────────────────────────────
     // True when the resolved surface is light. Decoration authored for a dark
@@ -62,13 +71,17 @@ Singleton {
     // flip its scrim to stay legible in a light palette; this is that switch.
     readonly property bool light: (0.299 * paper.r + 0.587 * paper.g + 0.114 * paper.b) > 0.5
 
+    readonly property color defaultInk: light ? "#1a1816" : "#cdc4ba"
+    readonly property color defaultInkDim: light ? "#49454e" : "#b0a9a0"
+    readonly property color paperLift: role("surfaceContainerLow", light ? Qt.darker(paper, 1.05) : defaultPaperLift)
+
     // ── ink, on paper ────────────────────────────────────────────────────
     // Text uses the Material on-surface roles so it inverts with the palette; muted
     // and faint are the secondary role at reduced opacity, so they stay legible on a
     // light surface too (never the outline roles, which wash out on white).
     readonly property color ink: role("onSurface", defaultInk)
     readonly property color inkDim: role("onSurfaceVariant", defaultInkDim)
-    // 0.88/0.68 over pure-black paper keep both tiers above the 4.5:1 legibility
+    // 0.88/0.68 over paper keep both tiers above the 4.5:1 legibility
     // floor the doc guarantees; the old 0.78/0.55 dipped under it once the
     // wallpaper dimmed onSurfaceVariant, which read as "options hard to see".
     readonly property color inkMuted: Qt.rgba(inkDim.r, inkDim.g, inkDim.b, 0.88)
@@ -76,8 +89,8 @@ Singleton {
 
     // ── bone stock (inverted): the Material inverse-surface pair, so the light
     // plate and its dark ink keep contrast on a light OR dark theme ───────────
-    readonly property color bone: role("inverseSurface", defaultInk)
-    readonly property color inkOnBone: role("inverseOnSurface", "#000000")
+    readonly property color bone: role("inverseSurface", light ? "#2b2620" : defaultInk)
+    readonly property color inkOnBone: role("inverseOnSurface", light ? "#fdf8ff" : "#000000")
     readonly property color inkOnBoneDim: Qt.rgba(inkOnBone.r, inkOnBone.g, inkOnBone.b, 0.62)
     readonly property color lineOnBone: Qt.rgba(inkOnBone.r, inkOnBone.g, inkOnBone.b, 0.26)
 

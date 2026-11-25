@@ -234,10 +234,10 @@ Item {
         SettingRow {
             anchors.left: parent.left; anchors.right: parent.right
             divider: true
-            label: I18n.tr("Asura controls this device")
+            label: I18n.tr("Toren controls this device")
             desc: card.managed
-                  ? I18n.tr("Turning this off puts the device back to %1, the effect it was on before Asura touched it.").arg(card.dev.restore || I18n.tr("its own effect"))
-                  : I18n.tr("Left off, Asura never writes to it: its own software, onboard profile or hardware switch stays in charge.")
+                  ? I18n.tr("Turning this off puts the device back to %1, the effect it was on before Toren touched it.").arg(card.dev.restore || I18n.tr("its own effect"))
+                  : I18n.tr("Left off, Toren never writes to it: its own software, onboard profile or hardware switch stays in charge.")
             controlWidth: 54
             Sw {
                 anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
@@ -254,8 +254,8 @@ Item {
             visible: card.managed && (card.dev.effects || []).length > 0
             divider: true
             block: true
-            label: I18n.tr("Asura effects")
-            desc: I18n.tr("Painted by Asura on this device's per-key mode, so they work whatever its firmware supports. They need Asura running.")
+            label: I18n.tr("Toren effects")
+            desc: I18n.tr("Painted by Toren on this device's per-key mode, so they work whatever its firmware supports. They need Toren running.")
             Flow {
                 anchors.left: parent.left; anchors.right: parent.right
                 spacing: Tokens.s2
@@ -278,7 +278,7 @@ Item {
             divider: true
             block: true
             label: I18n.tr("This device's effects")
-            desc: I18n.tr("Run by the device itself, so they keep going with Asura closed. An effect that does nothing is its firmware; a Asura effect above will work instead.")
+            desc: I18n.tr("Run by the device itself, so they keep going with Toren closed. An effect that does nothing is its firmware; a Toren effect above will work instead.")
             Flow {
                 anchors.left: parent.left; anchors.right: parent.right
                 spacing: Tokens.s2
@@ -388,7 +388,7 @@ Item {
             divider: true
             label: I18n.tr("Brightness"); unit: "%"
             desc: card.painted
-                  ? I18n.tr("Dims the effect Asura draws.")
+                  ? I18n.tr("Dims the effect Toren draws.")
                   : I18n.tr("Scaled into the steps this device offers, not a number it has to fake.")
             value: String(card.briShown)
             controlWidth: card.colWidth
@@ -406,7 +406,7 @@ Item {
             divider: true
             label: I18n.tr("Speed"); unit: "%"
             desc: card.painted
-                  ? I18n.tr("How fast Asura moves the effect.")
+                  ? I18n.tr("How fast Toren moves the effect.")
                   : I18n.tr("How fast the device runs the effect on its own.")
             value: String(card.speedShown)
             controlWidth: card.colWidth
@@ -439,10 +439,10 @@ Item {
             footH: 32
             label: I18n.tr("This device's memory")
             desc: card.painted
-                  ? I18n.tr("A Asura effect is drawn live, so there is nothing to store in the device. One of its own effects can be saved, if it offers that.")
+                  ? I18n.tr("A Toren effect is drawn live, so there is nothing to store in the device. One of its own effects can be saved, if it offers that.")
                   : (card.canSave
-                     ? I18n.tr("Store this look in the device so it holds with Asura closed. It replaces what is in the device's active profile slot.")
-                     : I18n.tr("This device does not offer storing a look in its own memory, so Asura puts it back at every login instead."))
+                     ? I18n.tr("Store this look in the device so it holds with Toren closed. It replaces what is in the device's active profile slot.")
+                     : I18n.tr("This device does not offer storing a look in its own memory, so Toren puts it back at every login instead."))
             Row {
                 anchors { left: parent.left; verticalCenter: parent.verticalCenter }
                 spacing: Tokens.s3
@@ -484,7 +484,7 @@ Item {
                     width: parent.width
                     leftPadding: Tokens.s4; rightPadding: Tokens.s4
                     topPadding: Tokens.s3; bottomPadding: Tokens.s2
-                    text: I18n.tr("Keyboards, mice and other RGB hardware, through OpenRGB and native laptop providers. While this is off Asura never looks for a device and never writes to one, so hardware driven by its own software or a switch on the board is left alone. Turn it on and hand over the devices you want Asura to light, one at a time.")
+                    text: I18n.tr("Keyboards, mice and other RGB hardware, through OpenRGB and native laptop providers. While this is off Toren never looks for a device and never writes to one, so hardware driven by its own software or a switch on the board is left alone. Turn it on and hand over the devices you want Toren to light, one at a time.")
                     color: Tokens.inkMuted; font.family: Tokens.ui
                     font.pixelSize: Tokens.fSmall; wrapMode: Text.WordWrap
                 }
@@ -492,7 +492,7 @@ Item {
                 SettingRow {
                     anchors.left: parent.left; anchors.right: parent.right
                     divider: true
-                    label: I18n.tr("Let Asura control lighting")
+                    label: I18n.tr("Let Toren control lighting")
                     desc: !lt.available
                           ? I18n.tr("No supported lighting provider is installed, so no device can be reached.")
                           : I18n.tr("Your picks are kept in ~/.config/asura/lighting.json: an update, a shell restart or a reboot leaves them exactly as they are.")
@@ -544,7 +544,7 @@ Item {
             Text {
                 width: Math.min(col.width, 620)
                 visible: lt.lightingOn && lt.keys.length === 0 && !lt.busy
-                text: I18n.tr("No lighting device answered. OpenRGB reaches USB keyboards, mice and headsets; supported ASUS laptops use asusd for their built-in Aura controller. Motherboard and memory lighting still needs the i2c-dev module loaded, which Asura leaves to you.")
+                text: I18n.tr("No lighting device answered. OpenRGB reaches USB keyboards, mice and headsets; supported ASUS laptops use asusd for their built-in Aura controller. Motherboard and memory lighting still needs the i2c-dev module loaded, which Toren leaves to you.")
                 color: Tokens.inkMuted
                 font.family: Tokens.ui; font.pixelSize: Tokens.fSmall
                 wrapMode: Text.WordWrap
@@ -553,7 +553,7 @@ Item {
             Text {
                 width: Math.min(col.width, 620)
                 visible: lt.lightingOn
-                text: I18n.tr("Handing a device to Asura lets its provider talk to it. Hardware that keeps profiles in its own memory can be left showing Asura's look after you hand it back; Asura restores the effect it found, but only the device's own software can rebuild a profile you overwrote with Save to device.")
+                text: I18n.tr("Handing a device to Toren lets its provider talk to it. Hardware that keeps profiles in its own memory can be left showing Toren's look after you hand it back; Toren restores the effect it found, but only the device's own software can rebuild a profile you overwrote with Save to device.")
                 color: Tokens.inkFaint
                 font.family: Tokens.ui; font.pixelSize: Tokens.fTiny
                 wrapMode: Text.WordWrap

@@ -1,0 +1,20 @@
+id: apple-macbook-t2
+name: "Apple MacBook with T2 Security Chip"
+description: "Apple Intel MacBooks with T2 security chip: safe mainline defaults and kernel patch notes"
+layer: family
+
+match:
+  sys_vendor: "Apple Inc."
+  product_name: "*MacBookPro15,*"
+
+packages: []
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel Documentation/admin-guide/laptops/apple-gmux.rst and t2linux project documentation."
+  - "STATUS: Apple Intel MacBooks with T2 chip (2018-2020) require out-of-tree patched kernels for internal keyboard, trackpad, audio, and Wi-Fi drivers. Void Linux does not package T2 kernel patches. On mainline kernel, external USB input and USB networking work safely."

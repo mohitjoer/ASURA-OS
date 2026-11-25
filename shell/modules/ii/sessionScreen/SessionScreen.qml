@@ -128,7 +128,7 @@ Scope {
                 }
 
                 GridLayout {
-                    columns: 4
+                    columns: sessionHibernate.visible ? 5 : 4
                     columnSpacing: 15
                     rowSpacing: 15
 
@@ -160,6 +160,22 @@ Scope {
                                 sessionRoot.subtitle = buttonText;
                         }
                         KeyNavigation.left: sessionLock
+                        KeyNavigation.right: sessionHibernate.visible ? sessionHibernate : sessionReboot
+                    }
+                    SessionActionButton {
+                        id: sessionHibernate
+                        visible: Session.canHibernate
+                        buttonIcon: "downloading"
+                        buttonText: Translation.tr("Hibernate")
+                        onClicked: {
+                            Session.hibernate();
+                            sessionRoot.hide();
+                        }
+                        onFocusChanged: {
+                            if (focus)
+                                sessionRoot.subtitle = buttonText;
+                        }
+                        KeyNavigation.left: sessionLogout
                         KeyNavigation.right: sessionReboot
                     }
                     SessionActionButton {
@@ -174,7 +190,7 @@ Scope {
                             if (focus)
                                 sessionRoot.subtitle = buttonText;
                         }
-                        KeyNavigation.left: sessionLogout
+                        KeyNavigation.left: sessionHibernate.visible ? sessionHibernate : sessionLogout
                         KeyNavigation.right: sessionShutdown
                     }
                     SessionActionButton {

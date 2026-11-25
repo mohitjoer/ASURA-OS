@@ -87,7 +87,7 @@ Item {
 
                         Repeater {
                             model: [
-                                { mode: "text", label: I18n.tr("Wordmark"), glyph: "ASURA" },
+                                { mode: "text", label: I18n.tr("Wordmark"), glyph: "TOREN" },
                                 { mode: "icon", label: I18n.tr("Glyph"),    glyph: "A" }
                             ]
 

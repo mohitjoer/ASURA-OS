@@ -1,0 +1,20 @@
+id: acer-nitro
+name: "Acer Nitro Gaming Laptops"
+description: "Acer Nitro gaming laptop hardware profile: NitroSense thermal modes and fan boost"
+layer: family
+
+match:
+  sys_vendor: "Acer*"
+  product_family: "*Nitro*"
+
+packages: []
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel drivers/platform/x86/acer-wmi.c."
+  - "Acer Nitro gaming thermal profile and fan curves mapped to platform_profile."

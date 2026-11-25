@@ -18,14 +18,14 @@ key, and nothing is run or logged for it.
 | Provider | Prefix | Needs | Without it |
 |---|---|---|---|
 | apps | none | Quickshell desktop entries | n/a |
-| windows | none | the daemon's `wm` topic (`asura-shell`) | no rows until the daemon is up |
+| windows | none | the daemon's `wm` topic (`toren-shell`) | no rows until the daemon is up |
 | actions | `/` | the command each action runs | that action is left out |
 | calc | `=`, a leading digit | `asura-cmd-calc` (uses `qalc` when installed) | not registered |
 | packages | `>` | `xbps-query`, `apm`; installs use `pkexec` and a terminal | not registered |
 | find | `/file /folder /image /video`, the IMG and FILE keys | `plocate` with a readable database | not registered, keys hidden |
 | radio | `@` | `asura-cmd-radio` (mpv, yt-dlp) | not registered, status never polled |
 | web | `?` | a browser; the instant answer uses `curl` | no answer panel |
-| ask | `\` | `asura-agent` | the panel says "not available: install asura-agent" |
+| ask | `\` | `toren-agent` | the panel says "not available: install toren-agent" |
 | recent, snippets, script, mpris | various | files under `~/.config/asura/`, D-Bus | n/a |
 
 ## Packages
@@ -45,17 +45,17 @@ the finder is hidden.
 
 ## Icons
 
-`shell/Services/Icons.qml` loads one name-to-file index. It asks `asura-shell icons` and falls
-back to `asura icons`, which prints the same JSON without the daemon. The index follows the
+`shell/Services/Icons.qml` loads one name-to-file index. It asks `toren-shell icons` and falls
+back to `toren icons`, which prints the same JSON without the daemon. The index follows the
 active icon theme (gsettings, then GTK 4 and GTK 3 `settings.ini`), the themes it inherits,
 Adwaita, and hicolor last. A scalable SVG wins; otherwise the smallest raster of 256 px or
 more, so a 1024 px PNG is not decoded to draw a small icon.
 
 ## Applications
 
-`asura apps` reads the desktop entries in the specification's order (the user's first, then
+`toren apps` reads the desktop entries in the specification's order (the user's first, then
 Flatpak's export directories, then `XDG_DATA_DIRS`) and applies `Hidden`, `NoDisplay`,
-`OnlyShowIn` and `NotShowIn` against `XDG_CURRENT_DESKTOP` (`ASURA` in an ASURA session) and
+`OnlyShowIn` and `NotShowIn` against `XDG_CURRENT_DESKTOP` (`Toren` in an Toren session) and
 `TryExec`. The launcher itself lists Quickshell's `DesktopEntries` and honours `NoDisplay`
 only, so a GNOME-only entry that does not set it still appears. Launch counts, which rank
 results, are kept in `~/.local/state/asura/launcher-usage.json`.

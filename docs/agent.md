@@ -1,123 +1,86 @@
-# ASURA Agent
+# Toren Agent
 
-ASURA Agent is the optional resident assistant: a machine-generated knowledge vault
-(hardware, packages, the desktop map, what the user changed, habits), a local daemon with
-a browser dashboard, the launcher's `\` quick ask, the sidebar chat, and a terminal ask
-that proposes commands. It is ported from the prior project's Rashin (GPL-3.0, see `NOTICE.md`) and
-lives in `desktop/cmd/asura-agent`. It is off until the user switches it on in Settings,
-Agent, and while it is off nothing runs, indexes, or reaches a network.
+Toren Agent (`toren-agent`) connects local coding assistants and resident agents directly to the
+Toren Linux desktop and system state. It lives in `desktop/cmd/toren-agent` and provides both the
+CLI wiring harness for local coding agents and the knowledge skill suite.
 
-It ships without an agent engine. The vault, the dashboard and the shell's surfaces work
-on their own; the part that thinks is yours to plug in (next section).
+---
 
-## Plug in your own engine
+## The CLI Wiring Harness
 
-OpenCode is included as a default application in Asura OS (`opencode.desktop` in the launcher,
-configured with full ACP integration). You can also plug in any other agent engine.
+The `toren-agent` binary automatically detects, wires, and inspects agent harnesses installed on
+the machine.
 
-The engine is one key in `~/.config/asura/agent/config.json`:
+### Commands
 
-```json
-{ "engine": { "command": ["opencode", "acp"] } }
+```sh
+# Report detection in PATH and skill wiring status for all supported agents
+toren-agent status [--json]
+
+# Symlink the Toren skill suite into all or a specific agent
+toren-agent wire [agent]
+
+# Wire every supported agent that is installed (toren-session runs this at login)
+toren-agent wire --installed
+
+# Remove the Toren skill symlink from all or a specific agent
+toren-agent unwire [agent]
 ```
 
-`engine.command` is an argv for any program that speaks the Agent Client Protocol
-(newline-delimited JSON-RPC 2.0) over its stdin and stdout. The daemon starts it in the
-vault directory the first time the chat is used, never at boot, starts a fresh one on the
-next message if it dies, and replaces it on the next turn when the command changes. It is
-not installed, looked up on PATH or guessed for you. The client side is `acp.go`; the key
-and the messages around it are `engine.go`. An engine needs `initialize`, `session/new`,
-`session/prompt` and `session/update`; `session/request_permission`, `session/load`,
-`session/list`, models and commands are used when it offers them. If it dies, the last
-line it wrote to stderr is shown. `asura-agent setup` prints this, and `asura-agent
-status` says whether the command resolves.
+`toren-agent` is installed with the system (`/usr/bin/toren-agent`), and every login wires the
+skills into the assistants that are on PATH, so OpenCode (shipped in the ISO) knows Toren out of
+the box. Assistants that are not installed get no folders.
 
-## Google Open Knowledge Format (OKF v0.1)
+### The shell panels (`ask`, `chat`)
 
-The system vault (`~/.local/share/asura/agent/`) is generated as a structured Google Open Knowledge
-Format (OKF v0.1) bundle. Every document carries structured YAML frontmatter (`type`, `title`,
-`description`, `resource`, `tags`, `timestamp`) and graph links:
+Toren's own shell has a quick-ask panel and a chat panel that run `toren-agent ask` and
+`toren-agent chat`. Toren does not ship a resident assistant, so these hand the question to
+OpenCode in a terminal (`asura-app terminal -- opencode`) and answer in the panels' line
+protocols (`@answer {json}` for ask; JSON lines ending in `{"type":"done"}` for chat), instead of
+failing. `toren-agent chat --skills` lists the wired skills.
 
-- `index.md`: Type `Index`. Root table of contents, high-level system overview, and knowledge graph links to all subsystem documents.
-- `log.md`: Type `Changelog`. Chronological audit log of system indexing events, package drift, and state changes over time.
-- `system.md`: Type `Hardware Component`. CPU, GPU, memory, disks, battery, and displays telemetry.
-- `desktop.md`: Type `Desktop Subsystem`. Compositor map, shell surfaces, config paths, reload commands, bar layout, and GUI deep-links.
-- `packages.md`: Type `Package Inventory`. Native XBPS packages, Flatpaks, and pending updates.
-- `asura-repo.md`: Type `Repository Architecture`. Asura OS source tree architecture and directory map.
-- `user.md`: Type `User Configuration`. User dotfile overrides and live configuration diffs against baseline.
-- `habits.md`: Type `Workflow Patterns`. Locally mined shell history frequency, developer tool stack, and rhythms.
-- `memory/`: Persistent memory notes authored by agents across sessions.
-- `journal/`: Dated session notes named `YYYY-MM-DD.md`.
+### Supported Agents
 
-**With no engine** the daemon still runs when enabled and keeps the vault current. `status`
-reports `ready: false` with `no agent engine configured: set engine.command in
-~/.config/asura/agent/config.json`, and the sidebar chat, the launcher ask and the
-terminal ask answer with that same sentence once, then stop. Nothing is started and
-nothing retries. A config file that does not parse is reported as such, and the daemon
-will not overwrite it.
-
-## Names
-
-The name is spelled once, in `product.go` (`productName`). The binary (`asura-agent`),
-the unit (`asura-agent.service`), the socket (`$XDG_RUNTIME_DIR/asura-agent.sock`), the
-config, data and state directories, the `ASURA_AGENT_*` environment and the markers
-written into other agents' files all derive from it. `product_test.go` fails until the
-names a compiler cannot compute follow a rename: the cmd directory, the unit file, this
-doc, `shell/hub/pages/AgentPage.qml`, `shell/agent/skills`, and the shell's call sites.
-The embedded dashboard under `web/` is static text and needs a find and replace.
-
-| What | Where |
+| Agent | Configured Skill Target Path |
 |---|---|
-| config (gate, port, `engine.command`, fast-lane provider) | `~/.config/asura/agent/config.json` |
-| vault (the maps agents read; `memory/`, `journal/` are theirs) | `~/.local/share/asura/agent/` |
-| ask history, recipes, run reports, remembered model | `~/.local/state/asura/agent/` |
-| lock, pid | `$XDG_RUNTIME_DIR/asura-agent/` |
-| skill shipped to agents | `/usr/share/asura/shell/agent/skills/asura` |
+| **OpenCode** | `~/.config/opencode/skills/asura` |
+| **Pi** | `~/.pi/agent/skills/asura` |
+| **Claude Code** | `~/.claude/skills/asura` |
+| **Gemini CLI / Antigravity** | `~/.gemini/skills/asura` |
 
-## Doors
+When wired, the agent gains direct access to the Toren skill suite (`shell/agent/skills/asura`)
+and runit system shims (`shell/agent/skills/systemd-bridge`).
 
-The daemon serves one handler set on two doors. The unix socket (mode 0600 in the
-per-user runtime directory) is for the CLI, the shell and the Hub, and carries the verbs
-only they call (`/api/ask`, `/api/term*`, `/api/perm`). The loopback port (default 3600)
-is for the browser dashboard and never carries those: any web page can aim a request at
-127.0.0.1, and `/api/perm` answers an engine's approval request. WebSocket upgrades on
-the port also check that the Origin is localhost.
+---
 
-## How it answers, and what it may do
+## The Skill Suite
 
-- **Quick ask (launcher) and terminal ask** call an OpenAI-compatible endpoint directly,
-  with four read-only tools (system state, read file, list directory, code search), when a
-  fast-lane provider is set: `asura-agent backend <provider>[:model]`. `ollama` and
-  `local` need no key, the hosted presets read their key from the daemon's environment
-  (edit `~/.config/service/asura-agent/run`). A key is never read from or written to
-  a file. Without a provider, or when a question needs more than those tools, the ask goes
-  to the engine.
-- **Chat** (sidebar and dashboard) is the engine's session. `asura-agent agent --json`
-  lists the engine, or nothing; `agent use` has one engine to name and says how to change it.
-- **The daemon never runs a command.** The terminal ask returns a plan with a danger tier
-  per command (`danger.go`: read, write, system, danger; unknown binaries are write, never
-  read); only `term --run` executes, after `y` or, for danger, typing `yes`. The engine's
-  own permission requests are relayed to the sidebar, the dashboard or the terminal, and
-  nothing proceeds while one is open.
+The skills located in `shell/agent/skills/` (and staged to `/usr/share/asura/shell/agent/skills/` on
+installed systems) expose deep OS integration to coding agents:
 
-## Verbs
+- **`toren`**: the system skill. `SKILL.md` sets the rules (never edit shipped files, user files
+  and commands instead) and routes to:
+  - `desktop.md`: the default desktop: its settings file, Hyprland files, keybind functions,
+    and the overlay rule for changing desktop code.
+  - `update.md`: `toren update`, the CI gate, `--check`/`--wait`/`--force`, rollback.
+  - `store.md`: installing apps, themes and plugins with `toren-store`.
+  - `diagnostics.md`: `toren doctor --json`, logs, runit services, a desktop that will not load.
+  - `bar.md`, `gui.md`, `plugins.md`: Toren's own shell (`desktop-shell` = `toren`) only.
+- **`systemd-bridge`**: Bridges traditional `systemctl` and `journalctl` invocations to native
+  Void Linux `runit` (`sv`) and `svlogd` logging structures.
 
-`serve [--if-enabled]`, `enable` / `disable`, `status [--json]`, `ask <q> | --recent |
---cancel`, `chat [text] | --image P | --new | --cancel | --models | --commands | --skills |
---history | --sessions | --load ID | --set-model ID | --perm ID OPTION`, `term ...`,
-`agent [--json | use ID]`, `backend`, `wire` / `unwire [agent]`, `paths [--json |
---snippet]`, `index`, `repo-index`, `setup`. `TestShellCallSitesAreImplemented` reads the
-QML and fails if the shell calls a verb or flag that is not here.
+A Go test (`desktop/cmd/toren/skills_commands_test.go`) fails when a skill names an `toren`
+subcommand or `asura-*` tool that does not exist, so the skills cannot drift from the commands.
 
-## Not ported or changed from the prior project
+---
 
-- No engine ships. The prior project's resident agent, its installer, its config wiring and its
-  PATH auto-detection of other coding agents are gone; `engine.command` replaces them.
-- No Secret Service key storage and no built-in model session: fast-lane keys come from
-  the daemon's environment only.
-- No daemon pre-warm of the engine at start, no default-on `ensure`, no `rashin` alias.
-- `chat --skills` lists nothing: a skill on disk is a document, and an engine advertises
-  the commands it can run over ACP.
-- The `term` shell adapter (zsh) belongs to the apps lane; it must call `asura-agent term
-  --buffer` and export `ASURA_AGENT_LAST_CMD` and `ASURA_AGENT_LAST_STATUS`.
-- `prowl` (code index) is not in the Void archive; the code card and `search_code` say so.
+## Planned Architecture: Resident ACP Daemon
+
+A resident knowledge vault and Agent Client Protocol (ACP) daemon are planned for future
+milestones:
+
+- **Google Open Knowledge Format (OKF v0.1)**: Structured markdown vault generated under
+  `~/.local/share/asura/agent/` (`index.md`, `system.md`, `desktop.md`, `packages.md`, `habits.md`).
+- **Pluggable ACP Engine**: Connecting agents via JSON-RPC 2.0 through `engine.command` in
+  `~/.config/asura/agent/config.json`.
+- **Launcher & Terminal Integration**: Quick ask from the launcher and terminal command safety tiers.

@@ -1,0 +1,20 @@
+id: clevo-laptop
+name: "Clevo & ODM Laptops (System76, Tuxedo, Schenker, XMG)"
+description: "Clevo ODM laptop hardware profile: clevo-wmi thermal and fan profile integration"
+layer: vendor
+
+match:
+  sys_vendor: "Notebook"
+  chassis: "laptop"
+
+packages: []
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel drivers/platform/x86/clevo-wmi.c and tuxedo-keyboard documentation."
+  - "Covers Clevo chassis rebranded by System76, Tuxedo, Schenker, and XMG."

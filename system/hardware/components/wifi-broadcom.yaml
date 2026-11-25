@@ -1,0 +1,24 @@
+id: wifi-broadcom
+name: "Broadcom Wireless (PCIe / SDIO)"
+description: "Hardware layer for Broadcom BCM43xx wireless adapters"
+layer: component
+
+match:
+  pci:
+    - "14e4:43a0"
+    - "14e4:43ba"
+    - "14e4:4359"
+    - "14e4:4365"
+    - "14e4:43a3"
+
+packages: []
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel drivers/net/wireless/broadcom/brcm80211."
+  - "Broadcom Wi-Fi chips with native kernel support use brcmfmac. Proprietary broadcom-wl is in Void nonfree repository and requires user consent before installation."

@@ -3,7 +3,7 @@ import "Singletons"
 import qs.Ui.Singletons
 
 // The block a page puts a live preview in. Shell, Widgets, Appearance and
-// ryowalls each grew their own, with their own gradient and their own badge, so
+// the wallpaper picker each grew their own, with their own gradient and their own badge, so
 // the previews look like four products. The frame is here; what goes inside is
 // the page's, because only the page knows what it is previewing.
 //

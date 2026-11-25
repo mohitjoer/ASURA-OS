@@ -635,9 +635,8 @@ Item {
         // read back what the compositor actually accepted (it may still adjust
         // a value); the delayed reload keeps "matches your displays" honest.
         listRefresh.start();
-        // a custom (non-advertised) mode can come up wrong; offer a timed
-        // keep-or-revert like every other display manager.
-        if (pg.hasCustomMode())
+        // Offer a 15-second keep-or-revert countdown safety mechanism
+        if (prev && prev !== "" && prev !== next)
             pg.startRevert(prev);
     }
     // any enabled monitor whose staged mode is a typed WxH@rate not in the
@@ -1105,7 +1104,7 @@ Item {
                         anchors.left: parent.left; anchors.right: parent.right
                         divider: true
                         label: I18n.tr("SHOW BAR")
-                        desc: I18n.tr("Show the active Asura bar style on this display.")
+                        desc: I18n.tr("Show the active Toren bar style on this display.")
                         source: "shell.json"
                         controlWidth: 54
                         Sw {
@@ -1643,7 +1642,7 @@ Item {
             spacing: Tokens.s4
             Text {
                 anchors.verticalCenter: parent.verticalCenter
-                text: I18n.tr("Keep this resolution? Reverting in %1s").arg(pg.revertSecs)
+                text: I18n.tr("Keep these display settings? Reverting in %1s").arg(pg.revertSecs)
                 color: Tokens.ink
                 font.family: Tokens.ui; font.pixelSize: Tokens.fSmall
             }

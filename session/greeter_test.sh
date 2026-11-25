@@ -15,7 +15,7 @@
 set -eu
 
 REPO_ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-GREETER="$REPO_ROOT/session/asura-greeter"
+GREETER="$REPO_ROOT/session/toren-greeter"
 WORK=$(mktemp -d)
 trap 'rm -rf "$WORK"' EXIT
 
@@ -154,7 +154,7 @@ check "without a keyboard file weston keeps its default and still starts" $rc
 # --------------------------------------------------------------- the SDDM theme
 echo
 echo "checking the SDDM theme"
-THEME="$REPO_ROOT/session/sddm/themes/asura"
+THEME="$REPO_ROOT/session/sddm/themes/toren"
 
 # Without this line SDDM looks for the Qt5 greeter, which 26.04 does not ship,
 # and quietly shows its built-in theme instead.

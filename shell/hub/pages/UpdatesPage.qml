@@ -84,6 +84,26 @@ Item {
 
     Process { id: saveInterval }
 
+    property var snapshots: []
+    Process {
+        id: loadSnapshots
+        command: ["asura-hubd", "updates", "snapshots"]
+        running: true
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    pg.snapshots = JSON.parse(this.text);
+                } catch (e) {
+                    pg.snapshots = [];
+                }
+            }
+        }
+    }
+    function refreshSnapshots() {
+        loadSnapshots.running = false;
+        loadSnapshots.running = true;
+    }
+
     // re-check on the configured cadence.
     readonly property int intervalMs: {
         switch (pg.interval) {
@@ -358,10 +378,10 @@ Item {
                         Text {
                             visible: true
                             text: Updates.currentName !== ""
-                                ? ("ASURA " + Updates.currentName
+                                ? ("Toren " + Updates.currentName
                                   + (Updates.available && Updates.latestName !== "" && Updates.latestName !== Updates.currentName
                                      ? "  \u2192  " + Updates.latestName : ""))
-                                : "ASURA OS"
+                                : "Toren Linux"
                             color: Tokens.ink; font.family: Tokens.display
                             font.pixelSize: Tokens.fHero; font.weight: Font.Medium
                         }
@@ -619,7 +639,7 @@ Item {
                 // the section has to name what moves the rest.
                 Text {
                     width: idleCol.width
-                    text: I18n.tr("From the base archive, kernel included. `asura update` moves Asura's own packages; take the rest with:  sudo xbps-install -Syu")
+                    text: I18n.tr("From the base archive, kernel included. `asura update` moves Toren's own packages; take the rest with:  sudo xbps-install -Syu")
                     color: Tokens.inkFaint
                     font.family: Tokens.ui; font.pixelSize: Tokens.fTiny
                     wrapMode: Text.WordWrap
@@ -691,6 +711,101 @@ Item {
                             }
                         }
                         HoverHandler { id: pkgHover }
+                    }
+                }
+            }
+
+            // ── SYSTEM SNAPSHOTS ──
+            Column {
+                width: idleCol.width
+                spacing: 0
+                visible: pg.snapshots.length > 0
+
+                Item {
+                    width: parent.width
+                    height: 30
+                    Row {
+                        id: snapLabel
+                        anchors.left: parent.left
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: Tokens.s2
+                        Rectangle {
+                            width: 4; height: 4; color: Tokens.ink
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+                        Text {
+                            text: I18n.tr("SYSTEM SNAPSHOTS") + "  " + pg.snapshots.length
+                            color: Tokens.ink; font.family: Tokens.ui; font.pixelSize: Tokens.fMicro
+                            font.weight: Font.Medium; font.letterSpacing: Tokens.trackMark
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+                    }
+                    Rectangle {
+                        anchors.left: snapLabel.right; anchors.leftMargin: Tokens.s3
+                        anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
+                        height: 1; color: Tokens.lineSoft
+                    }
+                }
+
+                Text {
+                    width: idleCol.width
+                    text: I18n.tr("Btrfs snapshots captured before system updates or changes. Restoring rolls back the root filesystem.")
+                    color: Tokens.inkFaint
+                    font.family: Tokens.ui; font.pixelSize: Tokens.fTiny
+                    wrapMode: Text.WordWrap
+                    bottomPadding: Tokens.s2
+                }
+
+                Repeater {
+                    model: pg.snapshots
+                    delegate: Item {
+                        id: srow
+                        required property var modelData
+                        required property int index
+                        width: idleCol.width
+                        height: 44
+
+                        Rectangle {
+                            anchors.fill: parent
+                            anchors.topMargin: 3; anchors.bottomMargin: 3
+                            radius: Tokens.radius
+                            color: snapHover.hovered ? Tokens.tint5 : "transparent"
+                            Behavior on color { ColorAnimation { duration: Tokens.snap } }
+                        }
+                        Rectangle {
+                            anchors { left: parent.left; right: parent.right; top: parent.top }
+                            anchors.leftMargin: Tokens.s4; anchors.rightMargin: Tokens.s4
+                            height: 1
+                            color: Tokens.lineSoft
+                            visible: srow.index > 0
+                        }
+                        Row {
+                            anchors.left: parent.left; anchors.leftMargin: Tokens.s4
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: Tokens.s3
+                            Text {
+                                text: srow.modelData.id || ""
+                                color: Tokens.ink
+                                font.family: Tokens.mono; font.pixelSize: Tokens.fSmall; font.weight: Font.Medium
+                            }
+                            Text {
+                                text: srow.modelData.reason || ""
+                                color: Tokens.inkMuted
+                                font.family: Tokens.ui; font.pixelSize: Tokens.fMicro
+                            }
+                            Text {
+                                text: srow.modelData.date || ""
+                                color: Tokens.inkFaint
+                                font.family: Tokens.mono; font.pixelSize: Tokens.fMicro
+                            }
+                        }
+                        Btn {
+                            anchors.right: parent.right; anchors.rightMargin: Tokens.s4
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: I18n.tr("RESTORE")
+                            onAct: pg.inTerminal("asura rollback --system " + (srow.modelData.id || ""))
+                        }
+                        HoverHandler { id: snapHover }
                     }
                 }
             }

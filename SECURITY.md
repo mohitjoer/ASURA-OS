@@ -1,6 +1,6 @@
 # Security policy
 
-ASURA ships a signed repository, a signed ISO, an installer that partitions a disk, an updater
+Toren ships a signed repository, a signed ISO, an installer that partitions a disk, an updater
 that runs as root, and a set of privileged helpers that materialise files into system
 directories. A Linux distribution's attack surface is dominated by the code that runs before
 anyone gets to log in. Report accordingly.
@@ -15,7 +15,7 @@ than a machine.
 
 Include:
 
-- The ASURA version or the commit you tested, and the base layer (`26.04`).
+- The Toren version or the commit you tested, and the base layer (`26.04`).
 - The reproduction steps, ideally minimal.
 - What the impact is: local privilege escalation, arbitrary file write as root, signature
   bypass, silent rollback past a security fix, information disclosure.
@@ -38,7 +38,7 @@ restores a previous revision.
 
 - An unprivileged path from a user-writable location into the base or the overlay.
 - A signature check that can be skipped, bypassed by a partial failure, or satisfied by a
-  repository that is not ASURA's.
+  repository that is not Toren's.
 - `asura rollback` restoring a state that silently drops a security fix, or losing an overlay
   file in a way the user is not told about.
 - A snapshot of `~/.config` written somewhere an unprivileged local process can read or
@@ -77,7 +77,7 @@ and the offline firmware rescue bundle.
 
 ### Packaging
 
-- An ASURA package writing outside `/usr/share/asura/` and `/etc/asura/`, into another package's
+- An Toren package writing outside `/usr/share/asura/` and `/etc/asura/`, into another package's
   files, or into `~`.
 - A setuid or file-capability bit on a binary that does not need one.
 - A post-install script running with privileges it does not require, or a dependency pulled
@@ -101,19 +101,19 @@ File these as normal issues, using the hardware support form where it applies:
 - A build that is unreproducible or a package that is missing — these matter, but report them
   as bugs and they will be triaged.
 - A vulnerability in Void Linux's own packages. Those are fixed upstream; report them to Void
-  Linux unless the fix is present in Void Linux and missing from ASURA after ASURA's repository is current.
+  Linux unless the fix is present in Void Linux and missing from Toren after Toren's repository is current.
 
 ## Supported versions
 
-| ASURA release | Status | Security fixes |
+| Toren release | Status | Security fixes |
 |---|---|---|
-| `asura-0.1` — pre-alpha development line | Current | Yes |
+| `0.1.0-beta.1` and the `dev-unstable` line `asura update` follows | Current | Yes |
 | Anything older | No releases exist | No |
 
-No release has shipped. There is nothing installable yet, so there is nothing to backport a
-fix to. This table becomes the record of what receives fixes once the first release exists,
-and the previous line moves to security-fixes-only.
+`0.1.0-beta.1` is the first release. Installed machines follow `dev-unstable` through
+`asura update` (only commits that passed CI), so a fix reaches them as soon as it is merged.
+When a later release line starts, the previous one moves to security fixes only.
 
 **Base layer: Void Linux (rolling).** Security updates for the substrate arrive through Void Linux's
 own repository and reach users through `xbps-install -Su` or `asura update`. When a fix is present in Void Linux's repository
-and absent from an up-to-date ASURA installation, that is an ASURA bug — report it here.
+and absent from an up-to-date Toren installation, that is an Toren bug — report it here.

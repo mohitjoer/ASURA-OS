@@ -1,0 +1,36 @@
+hl.config({
+    input = {
+        kb_layout = "us",
+        kb_variant = "",
+        kb_options = "",
+        follow_mouse = 1,
+        sensitivity = 0,
+        touchpad = {
+            natural_scroll = false,
+            tap_to_click = true,
+            tap_and_drag = true,
+            clickfinger_behavior = false,
+            middle_button_emulation = false,
+            scroll_factor = 1.0,
+            disable_while_typing = true,
+        },
+    },
+    gestures = {
+        workspace_swipe_distance = 300,
+        workspace_swipe_invert = true,
+        workspace_swipe_min_speed_to_force = 30,
+        workspace_swipe_cancel_ratio = 0.5,
+        workspace_swipe_create_new = true,
+        workspace_swipe_forever = true,
+    },
+    cursor = {
+        no_hardware_cursors = false,
+    },
+})
+
+hl.gesture({ fingers = 3, direction = "horizontal", action = "workspace" })
+
+-- Hyprland enables every touchpad again when it rereads its config, and `exec`
+-- (unlike exec-once) runs on every reload, so a pad turned off with the Fn key
+-- stays off. It does nothing when the pad is on.
+hl.exec_cmd("asura-touchpad restore")

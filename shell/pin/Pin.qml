@@ -82,7 +82,7 @@ PanelWindow {
     }
 
     function editShot() {
-        Spawn.run(["sh", "-c", "RYOSHOT_OPEN=$1 exec asura-shot", "sh", entry.path]);
+        Spawn.run(["sh", "-c", "ASURA_SHOT_OPEN=$1 exec asura-shot", "sh", entry.path]);
         pin.closeSelf();
     }
     function copyShot() { Quickshell.execDetached(["asura-shell", "clip-copy", "image/png", entry.path]); }

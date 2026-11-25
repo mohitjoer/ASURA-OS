@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Toren Settings
+GenericName=Settings
+Comment=Configure the Toren desktop: appearance, bar, inputs, keybinds and more
+Exec=asura-shell hub open
+Terminal=false
+Icon=preferences-system
+Categories=Settings;DesktopSettings;
+Keywords=hub;settings;preferences;asura;configure;appearance;keybinds;bar;input;toren;

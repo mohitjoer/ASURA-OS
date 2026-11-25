@@ -254,7 +254,7 @@ Flickable {
                 id: hint
                 width: col.width - 24
                 wrapMode: Text.WordWrap
-                text: I18n.tr("Colours, window rounding and the deeper shell knobs wait for you in Asura Settings.")
+                text: I18n.tr("Colours, window rounding and the deeper shell knobs wait for you in Toren Settings.")
 
                 color: Tokens.inkFaint
                 font.family: Tokens.ui

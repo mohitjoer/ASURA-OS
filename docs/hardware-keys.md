@@ -6,21 +6,21 @@ the ASUS TUF Gaming F15 (FX507ZC4) they were checked against.
 
 ## Brightness and the keyboard backlight
 
-`/sys/class/backlight/*/brightness` is group `video` and mode `0664`. ASURA does not
-rely on `elogind`/`logind` for brightness control. Instead, `asura brightness` makes
+`/sys/class/backlight/*/brightness` is group `video` and mode `0664`. Toren does not
+rely on `elogind`/`logind` for brightness control. Instead, `toren brightness` makes
 a multi-tiered attempt:
 
 1. **`elogind` (if active)**: `org.freedesktop.login1.Session.SetBrightness(subsystem, name, value)` writes the value as root for the owner of the active session.
 2. **`brightnessctl`**: Falls back to `brightnessctl` if available.
 3. **Direct sysfs write**: If the sysfs file is writable by the user.
-4. **`asura-sysd` fallback**: Falls back seamlessly to `asura-sysd` via `/run/asura/sysd.sock`. `asura-sysd` runs as root under runit and writes to the appropriate `/sys/class/backlight/<device>/brightness` file on behalf of the user session.
+4. **`toren-sysd` fallback**: Falls back seamlessly to `toren-sysd` via `/run/asura/sysd.sock`. `toren-sysd` runs as root under runit and writes to the appropriate `/sys/class/backlight/<device>/brightness` file on behalf of the user session.
 
-`asura brightness list` prints which route each device has.
+`toren brightness list` prints which route each device has.
 
 | Entry point | Does |
 |---|---|
 | `asura-cmd-brightness +5`, `-5`, `40%` | what the keys, the daemon and the sliders call |
-| `asura brightness up\|down\|set\|get [--device kbd]` | the same, with the keyboard backlight (whole levels) |
+| `toren brightness up\|down\|set\|get [--device kbd]` | the same, with the keyboard backlight (whole levels) |
 | `asura-hw-backlight` | prints the screen's backlight, for readers that need the name |
 
 Steps are five points of *perceived* brightness (a cube-root curve), about sixteen

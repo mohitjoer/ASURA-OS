@@ -17,6 +17,7 @@
 package overlay
 
 import (
+	"bytes"
 	"fmt"
 	"io/fs"
 	"os"
@@ -309,11 +310,12 @@ func Doctor(paths Paths) ([]Drift, error) {
 		case SourceUserEdit:
 			findings = append(findings, Drift{Path: relative, Reason: DriftUserEdit})
 		case SourceMaterialized:
-			same, err := sameContent(path, filepath.Join(paths.Config, relative))
+			dest := filepath.Join(paths.Config, relative)
+			same, err := sameContent(path, dest)
 			if err != nil {
 				return err
 			}
-			if !same {
+			if !same && !isThemeRendered(dest) {
 				findings = append(findings, Drift{Path: relative, Reason: DriftStale})
 			}
 		default:
@@ -381,6 +383,14 @@ func sameContent(a, b string) (bool, error) {
 	return string(first) == string(second), nil
 }
 
+func isThemeRendered(path string) bool {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return false
+	}
+	return bytes.Contains(data, []byte("Rendered by asura theme"))
+}
+
 // cleanRelative validates a path the user typed.
 //
 // A path that escapes the tree is rejected rather than normalized. An update
@@ -415,7 +425,8 @@ func isUserConfig(relative string) bool {
 	}
 	if parts[0] == "hyprland" && len(parts) == 2 {
 		switch parts[1] {
-		case "monitors-auto.conf", "monitors-user.conf", "settings.conf", "rebinds.conf", "asura.conf", "user.conf":
+		case "monitors-auto.conf", "monitors-user.conf", "settings.conf", "rebinds.conf", "asura.conf", "user.conf",
+			"shell.conf", "vm-perf.conf":
 			return true
 		}
 	}

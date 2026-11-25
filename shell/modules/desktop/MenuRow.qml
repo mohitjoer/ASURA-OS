@@ -25,7 +25,7 @@ Item {
     function closeMenu() {
         var p = row.parent;
         while (p) {
-            if (p.ryoMenu === true) {
+            if (p.desktopMenu === true) {
                 p.close();
                 return;
             }

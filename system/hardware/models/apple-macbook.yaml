@@ -1,0 +1,25 @@
+id: apple-macbook
+name: "Apple MacBook (Intel & T2)"
+description: "Apple MacBook hardware profile: Apple SMC fan, keyboard backlight, and suspend optimizations"
+
+match:
+  sys_vendor: "Apple Inc."
+  chassis: "laptop"
+
+packages: []
+
+kernel_parameters: []
+
+files:
+  udev:
+    - target: "/etc/udev/rules.d/90-apple-backlight.rules"
+      content: |
+        # Permissions for Apple SMC keyboard backlight
+        SUBSYSTEM=="leds", KERNEL=="smc::kbd_backlight", ACTION=="add", RUN+="/bin/chmod a+w /sys/class/leds/smc::kbd_backlight/brightness"
+      reason: "Grant write permissions to Apple SMC keyboard backlight"
+
+services: []
+
+notes:
+  - "Apple SMC hardware interface: maps keyboard backlight and fan speed interfaces."
+  - "Suspend-to-RAM optimizations for Intel-based MacBooks."

@@ -1,0 +1,25 @@
+id: acer-laptop
+name: "Acer Laptops (Nitro, Predator, Swift, Aspire)"
+description: "Acer laptop hardware profile: acer-wmi thermal profile and keyboard backlight"
+
+match:
+  sys_vendor: "Acer*"
+  chassis: "laptop"
+
+packages: []
+
+kernel_parameters: []
+
+files:
+  udev:
+    - target: "/etc/udev/rules.d/90-acer-backlight.rules"
+      content: |
+        # Permissions for Acer keyboard backlight
+        SUBSYSTEM=="leds", KERNEL=="*::kbd_backlight", ACTION=="add", RUN+="/bin/chmod a+w /sys/class/leds/%k/brightness"
+      reason: "Grant write permissions to Acer keyboard backlight"
+
+services: []
+
+notes:
+  - "Acer WMI thermal profile and fan control via acer-wmi platform_profile ('asura power profile')."
+  - "Gaming mode and fan curves mapped to standard platform profiles."

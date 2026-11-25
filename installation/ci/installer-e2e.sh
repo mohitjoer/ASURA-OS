@@ -10,7 +10,7 @@
 #               checked. (Booting it would need the passphrase typed on the
 #               serial console; that is a follow-up.)
 #
-# The installer that runs is this checkout's installation/asura-installer.sh,
+# The installer that runs is this checkout's installation/toren-installer.sh,
 # inside the ISO's own live rootfs (read-only, with a tmpfs overlay on top),
 # so it copies exactly the system the ISO would install. Firmware is forced to
 # BIOS by hiding the host's /sys/firmware/efi: a UEFI install inside CI would
@@ -81,7 +81,7 @@ sudo mount -t tmpfs tmpfs "$CHROOT/sys/firmware"
 sudo mount -t tmpfs tmpfs "$CHROOT/run"
 
 # This checkout's installer, not the one baked into the ISO.
-sudo install -m 0755 "$REPO_ROOT/installation/asura-installer.sh" "$CHROOT/tmp/asura-installer.sh"
+sudo install -m 0755 "$REPO_ROOT/installation/toren-installer.sh" "$CHROOT/tmp/toren-installer.sh"
 printf '%s\n' "$PASSPHRASE" | sudo tee "$CHROOT/tmp/luks-passphrase" >/dev/null
 
 # ── 2. The target disk ──────────────────────────────────────────────────────
@@ -106,7 +106,7 @@ set +e
 # shellcheck disable=SC2024,SC2086
 printf '1\nasura-ci\n%s\n%s\n%s\nY\nYES\nn\n\n' "$USER_NAME" "$USER_PASS" "$USER_PASS" |
 	sudo chroot "$CHROOT" /usr/bin/env -i PATH=/usr/bin:/usr/sbin:/bin:/sbin TERM=dumb HOME=/root $ENC_ENV \
-		sh /tmp/asura-installer.sh "$ENC_FLAG" "$LOOP" >"$OUT/install.log" 2>&1
+		sh /tmp/toren-installer.sh "$ENC_FLAG" "$LOOP" >"$OUT/install.log" 2>&1
 rc=$?
 set -e
 tail -n 40 "$OUT/install.log"

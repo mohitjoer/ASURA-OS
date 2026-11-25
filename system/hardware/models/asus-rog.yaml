@@ -1,0 +1,21 @@
+id: asus-rog
+name: "ASUS ROG Gaming Laptops"
+description: "ASUS ROG (Republic of Gamers) Strix and Flow gaming laptop hardware profile: high-performance thermal modes and fan curves"
+layer: family
+
+match:
+  sys_vendor: "ASUSTeK COMPUTER INC."
+  product_family: "*ROG*"
+
+packages: []
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel drivers/platform/x86/asus-wmi.c and asus-nb-wmi.c."
+  - "ASUS ROG gaming thermal profiles: performance, turbo, and silent modes via platform_profile."
+  - "Custom fan curves exposed via asus-wmi sysfs interfaces."

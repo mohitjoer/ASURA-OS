@@ -1,0 +1,25 @@
+id: framework-laptop
+name: "Framework Laptop (13 & 16)"
+description: "Framework Laptop hardware profile: NVMe power management, battery threshold, and expansion cards"
+
+match:
+  sys_vendor: "Framework"
+  chassis: "laptop"
+
+packages: []
+
+kernel_parameters:
+  - "nvme.noacpi=1"
+
+files:
+  udev:
+    - target: "/etc/udev/rules.d/99-battery-threshold.rules"
+      source: "system/udev/99-battery-threshold.rules"
+      reason: "Persist 80% charge threshold on Framework BAT0 charge_control_end_threshold"
+
+services: []
+
+notes:
+  - "NVMe sleep power saving: nvme.noacpi=1 ensures SSDs reach lowest power states without ACPI controller hangs."
+  - "Battery charge limit supported natively via charge_control_end_threshold."
+  - "Ambient light sensor and expansion card power management."

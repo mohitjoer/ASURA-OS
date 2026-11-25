@@ -1,0 +1,20 @@
+id: hp-envy
+name: "HP Envy Laptops"
+description: "HP Envy hardware profile: thermal management and privacy camera shutter support"
+layer: family
+
+match:
+  sys_vendor: "*HP*"
+  product_family: "*Envy*"
+
+packages: []
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel drivers/platform/x86/hp/hp-wmi.c."
+  - "HP Envy thermal profiles and electronic privacy shutter key reporting."

@@ -1,0 +1,1 @@
+cros_ec_lpcs 16384 0 - Live 0x0

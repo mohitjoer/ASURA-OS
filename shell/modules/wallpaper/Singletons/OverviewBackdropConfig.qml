@@ -4,8 +4,8 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// The overview-backdrop knobs, read straight from ryogami's wallpaper config
-// (~/.config/ryogami-wall/config.json), the same overviewBackdrop.* block the
+// The overview-backdrop knobs, read straight from wallpaper config
+// (~/.config/asura-wallpaper-wall/config.json), the same overviewBackdrop.* block the
 // picker's "Overview backdrop" panel writes. Those settings had no consumer:
 // nothing rendered a backdrop, so the picker wrote them into a void. The shell
 // paints the surface itself now (modules/wallpaper -> OverviewBackdrop) and
@@ -14,11 +14,11 @@ Singleton {
     id: root
 
     readonly property string configPath: {
-        const override = Quickshell.env("RYOGAMI_WALL_CONFIG");
+        const override = Quickshell.env("ASURA_WALLPAPER_WALL_CONFIG");
         if (override && override.length > 0)
             return override + "/config.json";
         const base = Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config");
-        return base + "/ryogami-wall/config.json";
+        return base + "/asura-wallpaper-wall/config.json";
     }
 
     // The overviewBackdrop sub-object, refreshed on every file write below.

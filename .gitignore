@@ -89,5 +89,5 @@ desktop/cmd/*/asura-shell
 desktop/cmd/*/asura-wallpaper
 desktop/cmd/*/asura-store
 desktop/cmd/*/asura-vm
-desktop/cmd/asura/asura
+desktop/cmd/toren/toren
 /→/

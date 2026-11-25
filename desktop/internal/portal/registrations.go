@@ -42,32 +42,14 @@ type Registration struct {
 var registrations = []Registration{
 	{
 		Name:       "session file",
-		Path:       "/usr/share/wayland-sessions/asura.desktop",
-		Target:     "/usr/share/asura/session/asura.desktop",
+		Path:       "/usr/share/wayland-sessions/toren.desktop",
+		Target:     "/usr/share/asura/session/toren.desktop",
 		Sanctioned: true,
 	},
 	{
 		Name:       "portal preference",
 		Path:       "/usr/share/xdg-desktop-portal/asura-portals.conf",
 		Target:     "/usr/share/asura/session/asura-portals.conf",
-		Sanctioned: true,
-	},
-	{
-		Name:       "shell unit",
-		Path:       "/usr/lib/systemd/user/asura-shell.service",
-		Target:     "/usr/share/asura/units/asura-shell.service",
-		Sanctioned: true,
-	},
-	{
-		Name:       "portal unit",
-		Path:       "/usr/lib/systemd/user/asura-portal.service",
-		Target:     "/usr/share/asura/units/asura-portal.service",
-		Sanctioned: true,
-	},
-	{
-		Name:       "session target",
-		Path:       "/usr/lib/systemd/user/asura-session.target",
-		Target:     "/usr/share/asura/units/asura-session.target",
 		Sanctioned: true,
 	},
 	{
@@ -79,18 +61,6 @@ var registrations = []Registration{
 	{
 		Name:       "desktop schema",
 		Path:       "/usr/share/glib-2.0/schemas/org.asura.desktop.gschema.xml",
-		Target:     "",
-		Sanctioned: true,
-	},
-	{
-		Name: "login manager preferences",
-		Path: "/etc/sddm.conf.d/10-asura.conf",
-		// No target yet, because there is no greeter. The drop-in's whole
-		// purpose is DisplayServer=wayland with CompositorCommand=asura-greeter,
-		// and shipping it before the greeter exists would take the login screen
-		// down rather than leave it alone: SDDM has no way to start a Wayland
-		// greeter that is not there. It is registered here so the gap is visible
-		// rather than forgotten, and it ships with the greeter.
 		Target:     "",
 		Sanctioned: true,
 	},
@@ -255,10 +225,10 @@ func ExecStartTarget(root, unitPath string) (string, bool) {
 func CheckUnits(env RegistrationEnv) []RegistrationFinding {
 	var findings []RegistrationFinding
 
-	units := []struct{ name, path string }{
-		{"asura-shell.service", "/usr/share/asura/units/asura-shell.service"},
-		{"asura-portal.service", "/usr/share/asura/units/asura-portal.service"},
-	}
+	// ASURA runs its session under runit (system/runit/user-services), not
+	// systemd: there are no units of its own to check unless a package ships
+	// one under /usr/share/asura/units, which this still covers.
+	var units []struct{ name, path string }
 	for _, name := range shippedUnits(env) {
 		if strings.HasSuffix(name, ".service") {
 			units = append(units, struct{ name, path string }{name, "/usr/share/asura/units/" + name})
@@ -294,6 +264,8 @@ func CheckUnits(env RegistrationEnv) []RegistrationFinding {
 	// is only visible before the login, not during it.
 	findings = append(findings, checkDirectory(env, "shell configuration",
 		"/usr/share/asura/shell")...)
+	findings = append(findings, checkDirectory(env, "desktop shell",
+		"/usr/share/asura/shell-desktop")...)
 
 	return findings
 }

@@ -1,0 +1,20 @@
+id: hp-pavilion
+name: "HP Pavilion Laptops"
+description: "HP Pavilion hardware profile: thermal profile and keyboard backlight"
+layer: family
+
+match:
+  sys_vendor: "*HP*"
+  product_family: "*Pavilion*"
+
+packages: []
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel Documentation/admin-guide/laptops/hp-laptop.rst."
+  - "HP WMI thermal modes (cool, quiet, performance) via 'asura power profile'."

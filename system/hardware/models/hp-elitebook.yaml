@@ -1,0 +1,20 @@
+id: hp-elitebook
+name: "HP EliteBook Laptops"
+description: "HP EliteBook enterprise hardware profile: business thermal profiles and hotkey management"
+layer: family
+
+match:
+  sys_vendor: "*HP*"
+  product_family: "*EliteBook*"
+
+packages: []
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel Documentation/admin-guide/laptops/hp-laptop.rst."
+  - "HP EliteBook thermal management and hotkey handling."

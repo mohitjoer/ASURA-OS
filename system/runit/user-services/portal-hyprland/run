@@ -26,7 +26,7 @@ if [ -z "${HYPRLAND_INSTANCE_SIGNATURE:-}" ] && [ -d "$RUNTIME_DIR/hypr" ]; then
 	done
 fi
 EXE=""
-for p in /usr/libexec/xdg-desktop-portal-hyprland /usr/lib/xdg-desktop-portal-hyprland; do
+for p in /usr/libexec/xdg-desktop-portal-hyprland /usr/lib/xdg-desktop-portal-hyprland /usr/bin/xdg-desktop-portal-hyprland /usr/lib64/xdg-desktop-portal-hyprland; do
 	if [ -x "$p" ]; then
 		EXE="$p"
 		break

@@ -1,9 +1,10 @@
 import QtQuick
+import qs.Ui.Singletons
 
 Item {
     id: root
     property real size: 28
-    property string variant: "white" // "white" (default) or "dark"
+    property string variant: Tokens.light ? "dark" : "white" // "white" (default for dark bg) or "dark" (for light bg)
     implicitWidth: size
     implicitHeight: size
 

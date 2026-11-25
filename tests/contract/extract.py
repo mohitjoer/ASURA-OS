@@ -72,7 +72,7 @@ DEFAULT_EXCLUDES = [
     "shell/vendor/**",
     "shell/i18n/**",
     "shell/modules/ii/**",
-    "shell-end4/**",
+    "shell-desktop/**",
     "shell/modules/common/**",
     "shell/services/**",
     "shell/Blobs-src/**",

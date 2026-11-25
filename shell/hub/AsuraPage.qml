@@ -4,7 +4,7 @@ pragma ComponentBehavior: Bound
 // (org.asura.shell, org.asura.desktop), drawn from the page registry that
 // `asura config export` writes, and changed only through `asura config set`.
 //
-// This is the Hub as it was before Ryoku's was ported in, kept as the one extra
+// This is the Hub's Asura group, kept as the dedicated
 // page because the rule in docs/architecture.md still holds: every setting that
 // has a command also has a page. The pages are not listed here. A page added to
 // the registry in Go (desktop/internal/hub) shows up below with nothing in this
@@ -111,7 +111,7 @@ Item {
         StyledText {
             Layout.fillWidth: true
             horizontalAlignment: Text.AlignHCenter
-            text: "Asura's settings could not be read"
+            text: "Toren's settings could not be read"
             font.pixelSize: Common.Appearance.font.pixelSize.large
             font.weight: Font.Medium
         }
@@ -129,7 +129,7 @@ Item {
     StyledText {
         anchors.centerIn: parent
         visible: root.loaded && root.loadError === "" && root.pages.length === 0
-        text: "Asura has no settings"
+        text: "Toren has no settings"
         color: Common.Appearance.colors.colSubtext
         font.pixelSize: Common.Appearance.font.pixelSize.normal
     }

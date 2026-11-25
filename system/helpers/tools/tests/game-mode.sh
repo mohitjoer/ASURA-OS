@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # fixture test for asura-cmd-game-mode (the one-click competitive toggle), ported
-# from Ryoku's. stubs hyprctl, pkexec, powerprofilesctl and both privileged
+# from upstream's. stubs hyprctl, pkexec, powerprofilesctl and both privileged
 # helpers, points state + sysfs at a tmp dir, so the real compositor, the real
 # wifi radio and the real power profile are never touched. verifies:
 #   - toggle lifecycle

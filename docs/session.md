@@ -1,14 +1,14 @@
 # The session path
 
-ASURA from power-on to a desktop, and back down again. This document fixes the order of
+Toren from power-on to a desktop, and back down again. This document fixes the order of
 everything on that path and names the owner of each step. A desktop with two owners for one
 job is a desktop that breaks in ways nobody can reproduce, so every stage below has exactly
 one owner and the reason for every ordering is written next to it.
 
 Three rules run through the whole document:
 
-- **One owner per stage.** Where a base-layer component owns a step, ASURA does not
-  duplicate it. Where no base-layer component owns it, ASURA does.
+- **One owner per stage.** Where a base-layer component owns a step, Toren does not
+  duplicate it. Where no base-layer component owns it, Toren does.
 - **Order is a dependency, not a preference.** Where two things must happen in a particular
   sequence, the failure that the sequence avoids is named.
 - **Everything is a file.** Every unit, config file and desktop entry named here is a file
@@ -20,9 +20,9 @@ Where this document repeats a decision, it repeats the reason with it.
 
 ---
 
-## Where ASURA's files live
+## Where Toren's files live
 
-ASURA's packages write to `/usr/share/asura/` and `/etc/asura/`, and to nothing else that
+Toren's packages write to `/usr/share/asura/` and `/etc/asura/`, and to nothing else that
 belongs to another package. A handful of files have to sit outside those two directories
 anyway, because the components that read them look nowhere else. Listing them is the point:
 a boundary that is not written down gets crossed by accident.
@@ -30,33 +30,33 @@ a boundary that is not written down gets crossed by accident.
 | Path | What it is | Why it cannot live under `/usr/share/asura/` |
 |---|---|---|
 | `/usr/share/wayland-sessions/asura.desktop` | Session registration | The login manager scans the fixed `wayland-sessions` directory and nowhere else |
-| `/etc/sv/asura-sysd`, `/etc/sv/scx-lavd`, `/etc/sv/ananicy-cpp` and `~/.config/service/` user services | runit service registration | runit supervises services from `/etc/sv/` (system) and `~/.config/service/` (user) |
+| `/etc/sv/toren-sysd`, `/etc/sv/scx-lavd`, `/etc/sv/ananicy-cpp` and `~/.config/service/` user services | runit service registration | runit supervises services from `/etc/sv/` (system) and `~/.config/service/` (user) |
 | `/usr/share/glib-2.0/schemas/org.asura.*.gschema.xml` | GSettings schema | GLib compiles schemas from the fixed schema directory |
-| `/usr/share/xdg-desktop-portal/asura-portals.conf` | Portal backend preference | The dispatcher reads it from a fixed directory. On the sanctioned list in [`architecture.md`](architecture.md#the-sanctioned-list-outside-the-boundary) |
+| `/usr/share/xdg-desktop-portal/toren-portals.conf` | Portal backend preference | The dispatcher reads it from a fixed directory. On the sanctioned list in [`architecture.md`](architecture.md#the-sanctioned-list-outside-the-boundary) |
 | `/usr/bin/asura`, `/usr/bin/asura-*` and the bare-name helpers | The executables, and the scripts the shell and the compositor call by name | `PATH` resolution looks nowhere else, and the user manager's `PATH` has no `~/.local/bin`. Same list |
-| `/usr/share/applications/asura-*.desktop`, `asura-mimeapps.list` | Desktop entries, and the default applications for ASURA sessions | The desktop-entry and mime-apps lookups scan `XDG_DATA_DIRS/applications` and nowhere else. Same list |
+| `/usr/share/applications/asura-*.desktop`, `asura-mimeapps.list` | Desktop entries, and the default applications for Toren sessions | The desktop-entry and mime-apps lookups scan `XDG_DATA_DIRS/applications` and nowhere else. Same list |
 | `/boot/grub/grub.cfg` | Boot configuration | The boot loader reads its configuration from the boot volume, which the installer writes via `grub-mkconfig` |
 
-These are registrations — pointers a third-party binary must find — not ASURA-owned content.
+These are registrations — pointers a third-party binary must find — not Toren-owned content.
 The content stays at `/usr/share/asura/session/`, `/usr/share/asura/shell/`,
-`/usr/share/asura/portal/` and `/usr/share/asura/schemas/`, and `asura doctor` reports
+`/usr/share/asura/portal/` and `/usr/share/asura/schemas/`, and `toren doctor` reports
 drift between the two the same way it reports drift everywhere else.
 
 **Runtime state is not a registration.** The state daemon's socket is at
-`$XDG_RUNTIME_DIR/asura-shell.sock`, and the wallpaper daemon's and the agent's sit beside
+`$XDG_RUNTIME_DIR/toren-shell.sock`, and the wallpaper daemon's and the agent's sit beside
 it, and none of them is on the list because it is not a file a package installs. Each daemon
-creates its socket at run time, in the per-user runtime directory, which no ASURA package
+creates its socket at run time, in the per-user runtime directory, which no Toren package
 writes to, and it is removed when the session ends. A path that exists only while the session
 does cannot be a registration, and a registration is by definition a path that exists on
 every boot.
 
-And the list of things ASURA deliberately does **not** touch:
+And the list of things Toren deliberately does **not** touch:
 
 - `/etc/sddm.conf` and `/etc/sddm.conf.d/` — the login manager's configuration. No package
   writes it; the opt-in `10-asura.conf` drop-in is installed by the user, with the command
-  `asura greeter enable` prints.
+  `toren greeter enable` prints.
 - `/etc/pam.d/` — the PAM stack. The keyring is unlocked by the base layer's own PAM module.
-- `/etc/dracut.conf` — the initramfs configuration. ASURA's copy lives in
+- `/etc/dracut.conf` — the initramfs configuration. Toren's copy lives in
   `/etc/asura/initramfs/`.
 - `/usr/share/xdg-desktop-portal/portals/` — the dispatcher's backend directory.
 - `/usr/lib/udev/rules.d/`, `/etc/NetworkManager/`, and every other package's configuration.
@@ -65,20 +65,20 @@ And the list of things ASURA deliberately does **not** touch:
 
 ## Boot chain
 
-The shipped boot chain is **GRUB EFI**. The installer (`installation/asura-installer.sh`)
+The shipped boot chain is **GRUB EFI**. The installer (`installation/toren-installer.sh`)
 writes `/boot/grub/grub.cfg` via `grub-mkconfig`, and the ISO boots through GRUB on both
 BIOS and UEFI firmware. Secure Boot is not supported yet; disable it in the firmware
 settings before booting the ISO (see [`system-services.md`](system-services.md#secure-boot)).
 
 ### Stages and owners
 
-| Stage | Owner | What it owns | ASURA's part |
+| Stage | Owner | What it owns | Toren's part |
 |---|---|---|---|
 | Firmware | The machine | Secure Boot verification, the EFI variable store, the boot order | Nothing |
 | Secure Boot shim | Base layer (Void-shipped GRUB shim) | First-stage verification, the MOK manager, the chainloader slot | Nothing |
 | GRUB | Base layer | The boot menu, loading the kernel and the initramfs, the boot parameters | The installer writes `/boot/grub/grub.cfg` |
 | Kernel | Base layer, pinned by `system/kernel/` | Drivers, the initramfs unpacker, early microcode | The fleet, the initramfs contents |
-| initramfs | Base layer's dracut integration, tuned by ASURA | Root discovery, the microcode blob, zram | The config directory, the module list |
+| initramfs | Base layer's dracut integration, tuned by Toren | Root discovery, the microcode blob, zram | The config directory, the module list |
 | runit | Base layer | The system manager and the user-level service supervisor | The service files (`/etc/sv/`, `~/.config/service/`) |
 
 ### The boot volume
@@ -95,7 +95,7 @@ applies it before unpacking the real initramfs.
 
 ### The initramfs
 
-The base layer's dracut integration builds the initramfs. ASURA customises it through
+The base layer's dracut integration builds the initramfs. Toren customises it through
 `/etc/asura/initramfs/`.
 
 zram is configured by `zramen` in `/etc/sv/zramen/conf`.
@@ -108,12 +108,12 @@ The system side first, then the user side.
 
 ### The system instance
 
-runit (system services in `/etc/sv/`) starts the base layer. ASURA adds:
+runit (system services in `/etc/sv/`) starts the base layer. Toren adds:
 
-- `asura-sysd` (`system/runit/services/asura-sysd/run`) — root daemon at `/run/asura/sysd.sock`
+- `toren-sysd` (`system/runit/services/toren-sysd/run`) — root daemon at `/run/asura/sysd.sock`
 - `scx-lavd` (`system/runit/services/scx-lavd/run`) — sched_ext LAVD scheduler
 - `ananicy-cpp` (`system/runit/services/ananicy-cpp/run`) — gaming/desktop priority rules
-- `asura-boot-guard` (`system/runit/services/asura-boot-guard/run`) — boot health marker
+- `toren-boot-guard` (`system/runit/services/toren-boot-guard/run`) — boot health marker
 
 runit services are enabled by creating a symlink in `/etc/runit/runsvdir/default/`.
 
@@ -123,32 +123,30 @@ The session is not a system service. It is a set of user-level runit services su
 `asura-user-services` (`session/runit/asura-user-services`, installed at
 `~/.config/service/asura-user-services` via the user runit supervisor):
 
-- `asura-userd` (`system/runit/user-services/asura-userd/run`)
-- `asura-agent` (`system/runit/user-services/asura-agent/run`) — opt-in, off until the user
-  switches it on in Settings
-- `asurad` (`system/runit/user-services/asurad/run`) — shell state daemon
-- `asura-wallpaper` (`system/runit/user-services/asura-wallpaper/run`) — wallpaper daemon
+- `toren-userd` (`system/runit/user-services/toren-userd/run`)
+- `torend` (`system/runit/user-services/torend/run`) — shell state daemon
+- `toren-wallpaper` (`system/runit/user-services/toren-wallpaper/run`) — wallpaper daemon
 - `quickshell` (`system/runit/user-services/quickshell/run`) — the shell
 - `portal` (`system/runit/user-services/portal/run`) — xdg-desktop-portal dispatcher
 - `portal-hyprland` (`system/runit/user-services/portal-hyprland/run`) — Hyprland backend
-- `asura-idle` (`system/runit/user-services/asura-idle/run`) — hypridle with the idle timeouts
+- `toren-idle` (`system/runit/user-services/toren-idle/run`) — hypridle with the idle timeouts
 - `pipewire` (`system/runit/user-services/pipewire/run`) — audio
 - `wireplumber` (`system/runit/user-services/wireplumber/run`) — audio policy
 
 So the session owns its anchor, and starts it once the compositor is up:
 
-### The services ASURA ships
+### The services Toren ships
 
 The runit service scripts (`system/runit/user-services/*/run`) are the units. Whichever
 daemon each one runs is fixed by its `run` script. The shell's QML is read by
 `quickshell -p /usr/share/asura/shell` from the `quickshell` runit service.
 
-The daemon listens on a Unix socket at `$XDG_RUNTIME_DIR/asura-shell.sock` and speaks
-`asura-shell/1` over it — line-framed, one JSON document per line. The socket lives in the
+The daemon listens on a Unix socket at `$XDG_RUNTIME_DIR/toren-shell.sock` and speaks
+`toren-shell/1` over it — line-framed, one JSON document per line. The socket lives in the
 per-user runtime directory rather than under `/usr/share/asura/`, because it is created at
 run time by a process, and a path a process creates is not a file a package installs.
 
-The base layer's portal dispatcher and ASURA's cannot both run. Two dispatchers on one bus
+The base layer's portal dispatcher and Toren's cannot both run. Two dispatchers on one bus
 is one dispatcher that wins the name and one that loses it, and the loser exits — the name
 is taken from the bus, not from the service, so the second instance terminates with "dbus
 name was lost" and takes the session's portal with it. Only one portal service directory
@@ -158,7 +156,7 @@ should be supervised.
 
 ## The login manager and the session file
 
-The login manager is the base layer's, and ASURA uses it as shipped.
+The login manager is the base layer's, and Toren uses it as shipped.
 
 ### What it does
 
@@ -167,9 +165,9 @@ The login manager is the base layer's, and ASURA uses it as shipped.
 3. Starts the session file the user selected, as that user, with the session's environment.
 
 The greeter is a **Wayland** surface. The base layer's login manager has no Wayland greeter of
-its own, so ASURA supplies one: `DisplayServer=wayland` in a drop-in under `/etc/sddm.conf.d/`,
-with `CompositorCommand` pointing at `asura-greeter`, which runs `weston --shell=kiosk` to hold
-the DRM card and hosts ASURA's own login surface on it. The package manifest therefore excludes
+its own, so Toren supplies one: `DisplayServer=wayland` in a drop-in under `/etc/sddm.conf.d/`,
+with `CompositorCommand` pointing at `toren-greeter`, which runs `weston --shell=kiosk` to hold
+the DRM card and hosts Toren's own login surface on it. The package manifest therefore excludes
 the Xorg metapackage and ships XWayland, and nothing is needed for the login screen at all —
 which is the point. XWayland remains the compositor serving X11 applications inside the session;
 it is not a second session type, and it is not what draws the login screen.
@@ -190,19 +188,19 @@ login profile and then executes it.
 Type=Application
 Name=ASURA
 Comment=ASURA desktop
-TryExec=/usr/share/asura/session/asura-session
-Exec=/usr/share/asura/session/asura-session
+TryExec=/usr/share/asura/session/toren-session
+Exec=/usr/share/asura/session/toren-session
 DesktopNames=ASURA
 Keywords=Hyprland;Quickshell;
 ```
 
 Three lines carry the design:
 
-- **`Exec=/usr/share/asura/session/asura-session`.** The session entry point is ASURA's
+- **`Exec=/usr/share/asura/session/toren-session`.** The session entry point is Toren's
   own script, and it runs from the packaged base rather than from a copy in the user's home.
 - **`DesktopNames=ASURA`**, not `GNOME`. The login manager uses this to group and label
   the session, and the portal dispatcher derives its per-desktop configuration file name
-  from it. Setting it to anything else would make a display manager treat an ASURA session
+  from it. Setting it to anything else would make a display manager treat an Toren session
   as one of its own.
 - **The file lives in `/usr/share/wayland-sessions/`, not `/usr/share/xsessions/`.** The
   directory is what decides the session type: the login manager sets
@@ -212,21 +210,21 @@ Three lines carry the design:
 `~/.config/asura/session/` — through the usual overlay — overrides both. That is where a
 machine-specific `Exec` line goes.
 
-### What `asura-session` does
+### What `toren-session` does
 
-`/usr/share/asura/session/asura-session` is a small shell script, because it runs before
+`/usr/share/asura/session/toren-session` is a small shell script, because it runs before
 anything else exists and it must be readable when the disk is having a bad day.
 
 ```sh
 #!/bin/sh
-# /usr/share/asura/session/asura-session
+# /usr/share/asura/session/toren-session
 set -eu
 
 LOG="${XDG_STATE_HOME:-$HOME/.local/state}/asura/session.log"
 mkdir -p "$(dirname "$LOG")"
 exec >>"$LOG" 2>&1
 
-echo "--- asura-session $(date -Is) ${XDG_SESSION_ID:-no-session-id}"
+echo "--- toren-session $(date -Is) ${XDG_SESSION_ID:-no-session-id}"
 
 export XDG_SESSION_DESKTOP=asura
 export XDG_CURRENT_DESKTOP=ASURA
@@ -252,11 +250,11 @@ export XCURSOR_THEME=Adwaita
 # Machine-level additions, then the user's overlay. Written as `if`, not as
 # `[ -r f ] && . f` — under `set -e` a false test in an AND-list aborts the
 # session before the compositor ever starts, which is a confusing way to fail.
-if [ -r /etc/asura/session/asura-session.env ]; then
-    . /etc/asura/session/asura-session.env
+if [ -r /etc/asura/session/toren-session.env ]; then
+    . /etc/asura/session/toren-session.env
 fi
-if [ -r "${XDG_CONFIG_HOME:-$HOME/.config}/asura/session/asura-session.env" ]; then
-    . "${XDG_CONFIG_HOME:-$HOME/.config}/asura/session/asura-session.env"
+if [ -r "${XDG_CONFIG_HOME:-$HOME/.config}/asura/session/toren-session.env" ]; then
+    . "${XDG_CONFIG_HOME:-$HOME/.config}/asura/session/toren-session.env"
 fi
 
 # Make dbus-activated user services and anything the compositor spawns see the
@@ -265,11 +263,11 @@ export XDG_SESSION_DESKTOP XDG_CURRENT_DESKTOP DESKTOP_SESSION XDG_SESSION_TYPE 
 dbus-update-activation-environment XDG_SESSION_DESKTOP XDG_CURRENT_DESKTOP \
     DESKTOP_SESSION XDG_SESSION_TYPE WAYLAND_DISPLAY
 
-echo "asura-session: env ok, starting Hyprland"
+echo "toren-session: env ok, starting Hyprland"
 exec /usr/bin/Hyprland -c /usr/share/asura/hyprland/hyprland.conf
 ```
 
-The compositor is started with ASURA's own configuration, because the keybinds live there
+The compositor is started with Toren's own configuration, because the keybinds live there
 and nowhere else. It is the only place the keyboard is described: a bind names the shell's
 IPC target and the shell decides what the key means, so the compositor never has to know
 what a launcher is. A compositor started without that file runs on Hyprland's own
@@ -282,7 +280,7 @@ exist; the user's half is theirs, and it is sourced after the packaged one, so i
 override anything and add anything.
 
 The `exec` at the end is what makes a failure safe: anything that goes wrong before it — a
-bad `/etc/asura/session/asura-session.env`, an unreadable schema, a disk-full — exits with
+bad `/etc/asura/session/toren-session.env`, an unreadable schema, a disk-full — exits with
 the compositor never started, and the display manager puts the user back on the login
 screen. A broken session that exits before the compositor is a safe failure mode by
 construction. Every step above is also written so that it cannot exit for a trivial reason,
@@ -292,18 +290,18 @@ Two details in the script are load-bearing beyond the obvious:
 
 - **`XDG_CURRENT_DESKTOP=ASURA` and `XDG_SESSION_DESKTOP=asura` are different strings,
   and both are deliberate.** The dispatcher lower-cases the current desktop to derive its
-  per-desktop configuration file name, so `ASURA` finds `asura-portals.conf`. The session
+  per-desktop configuration file name, so `Toren` finds `toren-portals.conf`. The session
   desktop is the lower-case name the login manager records in `loginctl show-session`.
 
 ### How this differs from a stock desktop session
 
-| | A stock desktop session | The ASURA session |
+| | A stock desktop session | The Toren session |
 |---|---|---|
 | Session file | `/usr/share/wayland-sessions/<desktop>.desktop` | The same mechanism, `asura.desktop` |
 | `Exec=` | A session manager that owns a private list of what a session is | A shell script that sets the environment and hands over to the compositor |
 | Services | Started by the session manager from a private list | runit user services with the user-level supervisor |
 | The display | The session manager talks to the compositor | The compositor is the session's anchor |
-| The display name | The stock desktop's own name | `ASURA`, which is what every library branches on |
+| The display name | The stock desktop's own name | `Toren`, which is what every library branches on |
 
 ---
 
@@ -311,11 +309,11 @@ Two details in the script are load-bearing beyond the obvious:
 
 | Order | Service | Started by | What it is |
 |---|---|---|---|
-| 0 | `asura-session` | The display manager | Environment, bus activation, `exec Hyprland` |
+| 0 | `toren-session` | The display manager | Environment, bus activation, `exec Hyprland` |
 | 1 | `wireplumber` | runit user supervisor | Audio policy, so the shell's volume widget has something to talk to |
 | 2 | `portal` | runit user supervisor | The portal dispatcher, which activates the backends on demand |
-| 3 | `asurad` | runit user supervisor | The shell daemon, which the shell subscribes to over its socket |
-| 4 | `asura-wallpaper`, `asura-idle` | runit user supervisor | The wallpaper daemon, and hypridle with the idle timeouts |
+| 3 | `torend` | runit user supervisor | The shell daemon, which the shell subscribes to over its socket |
+| 4 | `toren-wallpaper`, `toren-idle` | runit user supervisor | The wallpaper daemon, and hypridle with the idle timeouts |
 | 5 | `quickshell` | runit user supervisor | The shell |
 | 6 | The shell's children | The shell | Quick settings, notification server — inside the shell, not separate services |
 
@@ -363,8 +361,8 @@ started has no effect on it.
 base layer's GTK backend implements `org.freedesktop.impl.portal.Notification`, and the
 Hyprland backend does not. With no explicit configuration, the dispatcher resolves the
 Notification interface to the GTK backend, and a portal notification is rendered by a GTK
-window instead of by the shell's own surface. The notification server ASURA does not ship
-is replaced by one ASURA did not ask for, and nothing in the interface says so.
+window instead of by the shell's own surface. The notification server Toren does not ship
+is replaced by one Toren did not ask for, and nothing in the interface says so.
 
 **The shell's first interaction with the portal races the dispatcher's activation.** The
 shell draws a launcher with an "open file" action, a screen-share entry point and a print
@@ -377,20 +375,20 @@ that the file chooser could not be opened. The shell is the first thing the user
 it must not be the thing that triggers an activation.
 
 Ordering the dispatcher first removes both failures: the backend set is resolved from an
-environment that already names ASURA, and the dispatcher is already on the bus when the
+environment that already names Toren, and the dispatcher is already on the bus when the
 user first clicks something.
 
 ### The portal configuration
 
 The dispatcher reads its backend preference from a per-desktop file whose name is derived
-from `XDG_CURRENT_DESKTOP`, lower-cased. For an ASURA session that is `asura-portals.conf`.
-The packaged base lives at `/usr/share/asura/portal/asura-portals.conf` and is
+from `XDG_CURRENT_DESKTOP`, lower-cased. For an Toren session that is `toren-portals.conf`.
+The packaged base lives at `/usr/share/asura/portal/toren-portals.conf` and is
 materialized to the registration path, so the overlay rules apply to it like everything
 else.
 
 ```ini
-# /usr/share/asura/portal/asura-portals.conf
-# materialized to /usr/share/xdg-desktop-portal/asura-portals.conf
+# /usr/share/asura/portal/toren-portals.conf
+# materialized to /usr/share/xdg-desktop-portal/toren-portals.conf
 [preferred]
 default=hyprland;gtk
 org.freedesktop.impl.portal.ScreenCast=hyprland
@@ -421,7 +419,7 @@ Reading it:
   never asks the session bus's Secret service. See
   [the portal seam](architecture.md#the-portal-seam) and [the Secret gap](#the-secret-gap).
 
-`asura doctor` must assert that this file is the one being read. A session that does not
+`toren doctor` must assert that this file is the one being read. A session that does not
 declare itself correctly falls back to the base layer's `portals.conf` and silently uses the
 wrong backends, which is the failure mode that is hardest to notice and the easiest to
 cause.
@@ -461,7 +459,7 @@ Two bus names reach the shell, and they are not the same name:
 - **`org.freedesktop.portal.Notification`** is the portal path, and the dispatcher routes
   it to a backend that implements the corresponding implementation interface. The GTK
   backend implements it, so by default a portal client gets a GTK window rather than the
-  shell's surface. Routing that path to the shell needs an ASURA-owned portal backend, which
+  shell's surface. Routing that path to the shell needs an Toren-owned portal backend, which
   is a decision the portal seam has not made yet.
 
 The shell also owns the *ordering* of notifications, their grouping, their urgency styling
@@ -529,13 +527,13 @@ as `SUPER SHIFT, 1`, and the difference is a separator and nothing else: the com
 constraint rather than a style choice. The two are kept in step by a check rather than by a
 convention anybody has to remember.
 
-`asura doctor` compares them in both directions. Every chord in the catalogue has to be bound,
+`toren doctor` compares them in both directions. Every chord in the catalogue has to be bound,
 every bind has to be in the catalogue, and every `call asura <function>` in the configuration
 has to name a function the shell's `IpcHandler` actually defines. A keybind that names a
 function the shell has not got runs, succeeds, and does nothing, and that is the quietest
 failure in the desktop.
 
-`asura binds` prints the catalogue as JSON. It is what the shell's cheat sheet reads — Super+K
+`toren binds` prints the catalogue as JSON. It is what the shell's cheat sheet reads — Super+K
 draws every chord, grouped by category, with each key as a cap — and it is the same list the
 doctor checks the configuration against.
 
@@ -551,21 +549,21 @@ lock would accept any password; neither was right.
 
 So the division is the one recorded in
 [`architecture.md`](architecture.md#the-shell): `hypridle` decides **when** —
-`asura-idle` runs it with the timeouts of `org.asura.desktop`'s `idle-*` keys — and
-`asura-shell lock` is the one command every trigger runs (the bind, hypridle's lock stage,
+`toren-idle` runs it with the timeouts of `org.asura.desktop`'s `idle-*` keys — and
+`toren-shell lock` is the one command every trigger runs (the bind, hypridle's lock stage,
 `loginctl lock-session`, before sleep). That command runs `hyprlock`, and the shell only draws
 the dim scrim (`Idle.qml`). The base layer carries hyprlock, so under the base-layer rule
-ASURA does not repackage it. Every competing locker is excluded, so the image has exactly one
+Toren does not repackage it. Every competing locker is excluded, so the image has exactly one
 and which one is in front never depends on start order. [`lock.md`](lock.md) has the details.
 
 The `org.freedesktop.ScreenSaver` interface on the session bus is no longer the shell's. Its
 `Inhibit` and `UnInhibit` methods are what the base layer's portal Inhibit backend calls,
 so an application that asks the portal to hold the screensaver while a video plays holds
-ASURA's lock as well — and the interface belongs to the locker, because the locker is the
+Toren's lock as well — and the interface belongs to the locker, because the locker is the
 thing that can authenticate. What the design fixes is only that the shell is not the thing
 answering it.
 
-Before a suspend, hypridle runs `asura-shell lock` again and sets `inhibit_sleep = 3`, which
+Before a suspend, hypridle runs `toren-shell lock` again and sets `inhibit_sleep = 3`, which
 delays the sleep until the session reports it is locked, so the machine does not suspend with
 the desktop showing. If hyprlock never starts, logind suspends after its own delay anyway.
 
@@ -577,16 +575,16 @@ unlocked.
 
 - **Detection is the compositor's, and hypridle is the one idle clock.** The compositor knows
   when the user last did something; no Wayland client can find that out for itself, so
-  hypridle asks it through the compositor's idle-notify protocol. The `asura-idle` runit
+  hypridle asks it through the compositor's idle-notify protocol. The `toren-idle` runit
   service runs hypridle with the three timeouts of `org.asura.desktop` (`idle-dim-seconds`,
   `idle-blank-seconds`, `idle-lock-seconds`; 0 means never). hypridle also honours D-Bus and
   elogind inhibitors, so a video or Keep Awake holds every stage.
 - **The shell draws the dim scrim** (`Idle.qml`) when hypridle says so, and locks nothing
   itself. Screen-off is `hyprctl dispatch dpms off`, and there is no suspend stage.
 - **The actions go through logind**, so the standard inhibitors apply. Locking is
-  `asura-shell lock`, which `loginctl lock-session` reaches too.
+  `toren-shell lock`, which `loginctl lock-session` reaches too.
 
-Idle is also the thing that makes the suspend path safe: `asura-shell`, the daemon, holds
+Idle is also the thing that makes the suspend path safe: `toren-shell`, the daemon, holds
 delay inhibitors across the sleep request, so a machine that suspends while unlocked is a
 machine that was asked to suspend with the screen already locked, not one that raced.
 
@@ -605,7 +603,7 @@ machine that was asked to suspend with the screen already locked, not one that r
    is no idle suspend stage: `org.asura.desktop` has no key for one.
 2. The request goes to logind, which takes a delay inhibitor and emits
    `PrepareForSleep(true)`.
-3. `asura-shell` answers the `true` half of the signal by running the lock while it holds
+3. `toren-shell` answers the `true` half of the signal by running the lock while it holds
    its own delay inhibitors, so the machine does not sleep with an unlocked screen. The
    locker does the locking; the daemon decides that it should happen.
 4. logind releases the inhibitor and the machine sleeps.
@@ -617,7 +615,7 @@ The greeter's power buttons call the display manager's own halt and reboot comma
 go through logind, which runs the shutdown inhibitors, and then the system stops.
 
 Nothing in the display manager's configuration has to change for this, which is the reason
-it is worth checking: a change there would mean writing outside the two directories ASURA
+it is worth checking: a change there would mean writing outside the two directories Toren
 owns.
 
 ---
@@ -657,7 +655,7 @@ mv ~/.config/asura/shell/shell.qml ~/.config/asura/shell/shell.qml.bak
 sv restart ~/.config/service/quickshell
 ```
 
-`asura doctor` reports drift between the base and the overlay.
+`toren doctor` reports drift between the base and the overlay.
 
 ### The shell is up but the daemon is not
 
@@ -666,7 +664,7 @@ things that read live state are wrong. The status area shows the last volume it 
 The sidebar's sections do not update, or they show the last thing they saw and never change.
 The volume slider moves the sink and the number does not follow.
 
-**Why.** The `asurad` runit service failed, or was never reached. The shell starts
+**Why.** The `torend` runit service failed, or was never reached. The shell starts
 regardless: it can draw a surface with nothing to subscribe to, and it does, because a
 shell that refuses to start because a state daemon is down is a session with no desktop in
 it at all. The daemon is the thing that fails quietly.
@@ -674,9 +672,9 @@ it at all. The daemon is the thing that fails quietly.
 **What to run.**
 
 ```bash
-sv status ~/.config/service/asurad
-cat ~/.local/state/asura/asurad.log
-ls -l "$XDG_RUNTIME_DIR/asura-shell.sock"
+sv status ~/.config/service/torend
+cat ~/.local/state/asura/torend.log
+ls -l "$XDG_RUNTIME_DIR/toren-shell.sock"
 ```
 
 The socket is the daemon's address, and it is in the per-user runtime directory rather than
@@ -684,7 +682,7 @@ under `/usr/share/asura/` — it is created at run time and it is not a file a p
 installs. A missing socket with a healthy unit is a daemon that has not bound it yet; a
 missing socket with a failed unit is the failure itself.
 
-**Recovery.** `sv restart ~/.config/service/asurad`. If the daemon was down when the
+**Recovery.** `sv restart ~/.config/service/torend`. If the daemon was down when the
 shell started, restart the shell as well, `sv restart ~/.config/service/quickshell`: in
 this Quickshell build a first `Socket` connect that fails fires no signal, so the services
 that connected once never retry. If the shell is showing nothing at all rather than something
@@ -709,12 +707,12 @@ sv status ~/.config/service/portal
 busctl --user list | grep -i portal
 ```
 
-To see who implements what on the image, and to check that ASURA's own preference file is
+To see who implements what on the image, and to check that Toren's own preference file is
 the one in play:
 
 ```bash
 grep -H '^Interfaces=' /usr/share/xdg-desktop-portal/portals/*.portal
-ls -l /usr/share/xdg-desktop-portal/asura-portals.conf
+ls -l /usr/share/xdg-desktop-portal/toren-portals.conf
 ```
 
 To check the file chooser itself:
@@ -732,7 +730,7 @@ ScreenCast and Screenshot.
 ### The secret gap
 
 The gap is closed: `xdg-desktop-portal-lxqt` implements `org.freedesktop.portal.Secret` and
-`asura-portals.conf` names it. This section is the failure mode for when it reopens.
+`toren-portals.conf` names it. This section is the failure mode for when it reopens.
 
 **What the user sees.** An application that asks for a password to store gets no error and
 no store. A Flatpak that uses the Secret interface — Firefox, Thunderbird, Evolution, VS
@@ -740,7 +738,7 @@ Code — has nowhere to keep a password. The request appears to succeed and the 
 gone.
 
 **Why.** The dispatcher looks for a portal backend that declares the interface. With
-`xdg-desktop-portal-lxqt` not installed, or `asura-portals.conf` not the file being read, it
+`xdg-desktop-portal-lxqt` not installed, or `toren-portals.conf` not the file being read, it
 finds none and returns success without exporting the portal at all. `gnome-keyring` does not
 substitute: it exposes `org.freedesktop.Secret.Service` on the session bus, and the
 dispatcher never asks it.
@@ -759,7 +757,7 @@ The absence of `org.freedesktop.portal.Secret` in the dispatcher's object tree i
 finding.
 
 **Recovery.** Install `xdg-desktop-portal-lxqt` (`sudo xbps-install -S xdg-desktop-portal-lxqt`)
-and make sure `asura-portals.conf` is the file in use (`asura doctor` reads each named
+and make sure `toren-portals.conf` is the file in use (`toren doctor` reads each named
 backend's `.portal` file and reports an interface pointed at a backend that cannot serve
 it), then `sv restart ~/.config/service/portal`. The image's own `gnome-keyring` PAM
 module, which unlocks the keyring at login so a prompt does not ask for a second password,
@@ -774,10 +772,10 @@ greeter.
 
 **Why, in order of likelihood.**
 
-1. The compositor never started, so `asura-session` never reached its `exec`, and the
+1. The compositor never started, so `toren-session` never reached its `exec`, and the
    display manager returned the user to the login screen. This is the safe failure, and it
    is safe by construction.
-2. The user bus is not up, so `asura-session` cannot publish the environment and the
+2. The user bus is not up, so `toren-session` cannot publish the environment and the
    session never starts.
 3. The session file is missing or its `Exec=` line points at a file that is not there.
 4. The shell failed to start after a successful compositor start. The desktop is empty, but
@@ -791,7 +789,7 @@ journalctl -b -u sddm.service
 cat ~/.local/state/asura/session.log
 ```
 
-The last one is ASURA's own session log, written by `asura-session` before it execs
+The last one is Toren's own session log, written by `toren-session` before it execs
 anything. It is the first thing to read, because it records the session's environment
 hand-off and the moment the compositor was started.
 
@@ -825,8 +823,8 @@ command.
 
 | Question | Why it matters |
 |---|---|
-| ~~The login screen's display server~~ | **Settled** — SDDM in Wayland greeter mode with a Weston kiosk compositor hosted by ASURA. The package manifest keeps the Xorg metapackage excluded. See [architecture.md](architecture.md#what-draws-the-login-screen). |
-| ~~The Secret portal~~ | **Settled** — `xdg-desktop-portal-lxqt`, named for Secret in `asura-portals.conf`; see [the portal seam](architecture.md#the-portal-seam). [The secret gap](#the-secret-gap) is the failure mode if it reopens. |
+| ~~The login screen's display server~~ | **Settled** — SDDM in Wayland greeter mode with a Weston kiosk compositor hosted by Toren. The package manifest keeps the Xorg metapackage excluded. See [architecture.md](architecture.md#what-draws-the-login-screen). |
+| ~~The Secret portal~~ | **Settled** — `xdg-desktop-portal-lxqt`, named for Secret in `toren-portals.conf`; see [the portal seam](architecture.md#the-portal-seam). [The secret gap](#the-secret-gap) is the failure mode if it reopens. |
 | The shell as a portal backend | The shell owns `org.freedesktop.Notifications`, so every ordinary application is served. The portal's own Notification interface still resolves to the GTK backend, because the shell is not a registered portal backend. Whether it becomes one decides whether a portal client sees the shell's surface or a GTK window. |
-| The `asura-session` script's scope | It is the session entry point today. Whether it also owns the pre-flight checks — the portal preference file, the PAM stack, the keyring — is not decided. The failure modes above are all "something was wrong and nobody was told", and that is the argument for it. |
+| The `toren-session` script's scope | It is the session entry point today. Whether it also owns the pre-flight checks — the portal preference file, the PAM stack, the keyring — is not decided. The failure modes above are all "something was wrong and nobody was told", and that is the argument for it. |
 | ~~Idle reporting to logind~~ | **Settled** — hypridle drives the timers from the `org.asura.desktop` idle keys (see [lock.md](lock.md)), so nothing relies on logind's own `IdleAction`. |

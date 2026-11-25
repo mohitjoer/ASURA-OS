@@ -1,0 +1,22 @@
+id: wifi-intel
+name: "Intel Wi-Fi & Bluetooth (iwlwifi)"
+description: "Driver firmware and regulatory domain configuration for Intel Wireless AX/BE adapters"
+layer: component
+
+match:
+  module:
+    - "iwlwifi"
+
+packages:
+  - linux-firmware-intel
+  - wireless-regdb
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel Documentation/networking/device_drivers/cellular/intel/iwlwifi.rst."
+  - "Loads firmware for Intel Wireless-AC and Wi-Fi 6/6E/7 (AX200, AX201, AX210, BE200)."

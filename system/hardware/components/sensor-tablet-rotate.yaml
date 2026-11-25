@@ -1,0 +1,22 @@
+id: sensor-tablet-rotate
+name: "Convertible Tablet & Auto-Rotate Sensors"
+description: "Accelerometer and tablet mode orientation reporting via iio-sensor-proxy"
+layer: component
+
+match:
+  module:
+    - "hid_sensor_hub"
+    - "iio_sensor_proxy"
+
+packages:
+  - iio-sensor-proxy
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel Documentation/iio/index.rst and iio-sensor-proxy."
+  - "Supports automatic display orientation on 2-in-1 convertible laptops (Yoga, Spectre, ZenBook Flip)."

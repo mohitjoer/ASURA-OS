@@ -46,7 +46,7 @@ ok(
 
 // The catalog fires asura-cmd-* helpers by bare name, so each one must be a
 // script the shell ships (W13 installs them into /usr/bin). Nothing here may
-// still call a Ryoku tool or a `qs -c` config, which do not exist in Asura.
+// still call a legacy tool or a `qs -c` config, which do not exist in Asura.
 const repoRoot = new URL("../../../../../../", import.meta.url);
 const missingHelpers = commands().filter(name => name.startsWith("asura-cmd-")
     && !existsSync(new URL("shell/scripts/" + name, repoRoot)));
@@ -56,8 +56,8 @@ ok(
         + (missingHelpers.join(", ") || "all present")
 );
 ok(
-    !JSON.stringify(CATALOG).match(/ryo|qs -c|"qs"/),
-    "no action calls a Ryoku tool or qs -c"
+    !JSON.stringify(CATALOG).match(/qs -c|"qs"/),
+    "no action calls a legacy tool or qs -c"
 );
 ok(commands().length === new Set(commands()).size && commands().includes("asura"), "commands() lists each command once");
 

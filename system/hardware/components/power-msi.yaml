@@ -1,0 +1,27 @@
+id: power-msi
+name: "MSI EC Battery Threshold"
+description: "Persists 80% battery charge threshold on MSI laptops via msi-ec"
+layer: component
+
+match:
+  module:
+    # msi-ec provides the charge limit; msi-wmi is hotkeys only.
+    - "msi_ec"
+
+packages: []
+
+kernel_parameters: []
+
+files:
+  udev:
+    - target: "/etc/udev/rules.d/99-msi-battery.rules"
+      content: |
+        # MSI EC battery charge threshold
+        SUBSYSTEM=="power_supply", KERNEL=="BAT[0-9]*", ATTR{charge_control_end_threshold}="80"
+      reason: "Persist 80% battery charge limit on MSI laptops (msi-ec: Linux kernel Documentation/ABI/testing/sysfs-platform-msi-ec)"
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel drivers/platform/x86/msi-wmi.c and msi-ec driver."
+  - "Configures battery health threshold on MSI Modern, Prestige, and Gaming laptops."

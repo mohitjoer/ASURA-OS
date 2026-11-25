@@ -209,11 +209,11 @@ Editor {
                         anchors.fill: parent
                         radius: parent.radius
                         color: Theme.stateLayer
-                        opacity: hover.hovered ? 1 : 0
+                        opacity: removeHover.hovered ? 1 : 0
                     }
 
                     HoverHandler {
-                        id: hover
+                        id: removeHover
                     }
 
                     TapHandler {
@@ -259,11 +259,11 @@ Editor {
                 anchors.fill: parent
                 radius: parent.radius
                 color: Theme.stateLayer
-                opacity: hover.hovered ? 1 : 0
+                opacity: addHover.hovered ? 1 : 0
             }
 
             HoverHandler {
-                id: hover
+                id: addHover
             }
 
             TapHandler {

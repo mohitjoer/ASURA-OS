@@ -56,7 +56,7 @@ Column {
 
     WelcomeButton {
         kind: "outline"
-        label: I18n.tr("Open Asura Settings")
+        label: I18n.tr("Open Toren Settings")
         onClicked: step.openSettings()
     }
 

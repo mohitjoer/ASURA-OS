@@ -1,0 +1,1 @@
+thinkpad_acpi 16384 0 - Live 0x0

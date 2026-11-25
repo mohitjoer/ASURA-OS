@@ -12,7 +12,7 @@ import qs.Ui.Singletons
 // tune the live bone dither (strength + invert). Everything writes to
 // ProfileStore at once, so the plate behind the editor updates live. A custom
 // pick is copied into ~/.config/asura/profile/ so it persists and can travel in
-// a .ryoprofile. The baked marble default and the gallery art are already 1-bit
+// a .asuraprofile. The baked marble default and the gallery art are already 1-bit
 // bone, so they show raw; only a custom (raw-colour) image runs the dither shader.
 Item {
     id: ed
@@ -39,7 +39,7 @@ Item {
         if (kind === "custom")
             return src.length > 0 ? ("file://" + ed.profileDir + "/" + src) : "";
         if (kind === "gallery")
-            return src.length > 0 ? (Ryodecors.dir + src) : "";
+            return src.length > 0 ? (Decors.dir + src) : "";
         return Qt.resolvedUrl("../art/profile-hero.png");
     }
 

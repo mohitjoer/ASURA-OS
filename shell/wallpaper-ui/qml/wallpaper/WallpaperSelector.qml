@@ -80,7 +80,7 @@ Scope {
     onLoadFailed: wallpaperSelector._stageWalls = ({})
   }
 
-  // A wall carries the stage badge when its Ryostage effect is on (Depth or
+  // A wall carries the stage badge when its Stage effect is on (Depth or
   // Parallax); off or unlisted walls show nothing.
   function _isStageWall(path) {
     var w = path && wallpaperSelector._stageWalls && wallpaperSelector._stageWalls[path]
@@ -188,7 +188,7 @@ Scope {
 
   // The theme and rice strips are read from the shell's library on every open
   // and again whenever their folders change while the picker is up, so a scheme
-  // or rice installed from Ryostore appears without closing and reopening.
+  // or rice installed from Asura Store appears without closing and reopening.
   // FolderListModel watches the directory natively (no inotifywait dependency);
   // its count flips as entries land or leave, and the debounce lets an install
   // finish its stage-and-rename before the catalog is asked.
@@ -2024,7 +2024,7 @@ Scope {
     // Momentary-detour header: entering themes/rices is not a sticky mode, so a
     // temporary banner announces the detour and one click walks it back to the
     // wallpaper carousel. In themes mode the focused theme's name (and creator,
-    // when the scheme came from RyoStore) rides just beneath it. Anchored over
+    // when the scheme came from Asura Store) rides just beneath it. Anchored over
     // the top of the carousel so it reads above the tiles.
     Column {
       id: detourHeader

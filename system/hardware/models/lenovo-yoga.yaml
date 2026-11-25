@@ -1,0 +1,27 @@
+id: lenovo-yoga
+name: "Lenovo Yoga 2-in-1"
+description: "Lenovo Yoga convertible hardware profile: tablet mode sensor orientation, conservation mode, and pen support"
+layer: family
+
+match:
+  sys_vendor: "LENOVO"
+  product_family: "*Yoga*"
+
+packages: []
+
+kernel_parameters: []
+
+files:
+  udev:
+    - target: "/etc/udev/rules.d/99-lenovo-battery.rules"
+      content: |
+        # Lenovo battery conservation mode (caps charge at 60-80% for battery longevity)
+        SUBSYSTEM=="platform", DRIVERS=="ideapad_acpi", ATTR{conservation_mode}="1"
+      reason: "Enable Lenovo battery conservation mode (Linux drivers/platform/x86/lenovo/ideapad-laptop.c)"
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel drivers/platform/x86/lenovo/ymc.c and ideapad-laptop.c."
+  - "Tablet mode switching: reports laptop vs tablet mode via Yoga Mode Control (ymc)."
+  - "Display auto-rotation: integrates with iio-sensor-proxy via sensor-tablet-rotate component."

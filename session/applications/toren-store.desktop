@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Toren Store
+GenericName=Software
+Comment=Find and install software
+Exec=asura-store open discover
+Terminal=false
+Icon=asura-store
+Categories=System;PackageManager;
+Keywords=store;software;apps;install;xbps;packages;plugins;themes;asura;toren;

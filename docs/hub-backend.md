@@ -1,24 +1,24 @@
 # The Hub backend
 
-`asura-hubd` is the data plane of ASURA Settings. The Hub's QML never edits a file: it runs
-`asura-hubd <verb>`, which prints JSON or changes one store, and that is the only writer of
+`toren-hubd` is the data plane of Toren Settings. The Hub's QML never edits a file: it runs
+`toren-hubd <verb>`, which prints JSON or changes one store, and that is the only writer of
 what it edits. It was originally ported from another project's hub with the same verbs and the same shapes;
-`desktop/cmd/asura-hubd/CONTRACT.md` lists every place that differs and every verb that is
+`desktop/cmd/toren-hubd/CONTRACT.md` lists every place that differs and every verb that is
 dropped, and is what the Hub pages are written against.
 
 | Piece | Where | Job |
 |---|---|---|
-| the verbs | `desktop/cmd/asura-hubd/*.go` | one file per area: `desktop`, `outputs`, `keybinds`, `rice`, `import`, `lighting`, `gpu`, `cpu`, `fastfetch`, `profile`, ... |
-| the compositor seam | `desktop/cmd/asura-hubd/internal/wm` | what the compositor can do, the neutral store, and the hyprlang it is rendered into |
+| the verbs | `desktop/cmd/toren-hubd/*.go` | one file per area: `desktop`, `outputs`, `keybinds`, `rice`, `import`, `lighting`, `gpu`, `cpu`, `fastfetch`, `profile`, ... |
+| the compositor seam | `desktop/cmd/toren-hubd/internal/wm` | what the compositor can do, the neutral store, and the hyprlang it is rendered into |
 | the stores | `~/.config/asura/` | `desktop.json` (window and input settings), `hub.toml` (Hub state), `outputs-applied.json`, `anim-preset` |
 | the output | `~/.config/asura/hyprland/` | `settings.conf` and `rebinds.conf`, generated; `user.conf`, the user's, wins |
 
 ## From a setting to the compositor
 
-The original project ran a provider binary per compositor and rendered Lua. ASURA runs Hyprland 0.53 only, so
+The original project ran a provider binary per compositor and rendered Lua. Toren runs Hyprland 0.53 only, so
 the provider is the `wm` package, called in process, and it renders hyprlang. A save writes
 `desktop.json`, renders it to `settings.conf` and `rebinds.conf`, mirrors both into
-`user_edits/hyprland/` so `asura materialize` cannot replace them with the packaged seeds, and
+`user_edits/hyprland/` so `toren materialize` cannot replace them with the packaged seeds, and
 reloads. A slider drag renders the same options as `hyprctl keyword` calls and writes nothing.
 
 Only what differs from the defaults is written. The defaults table (`store.go`) mirrors the

@@ -1,0 +1,20 @@
+id: gigabyte-laptop
+name: "Gigabyte Laptops (Aero, G5, G7)"
+description: "Gigabyte laptop hardware profile: gigabyte-wmi thermal and hotkey management"
+layer: vendor
+
+match:
+  sys_vendor: "GIGABYTE*"
+  chassis: "laptop"
+
+packages: []
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel drivers/platform/x86/gigabyte-wmi.c."
+  - "Gigabyte hotkeys and thermal modes via gigabyte-wmi."

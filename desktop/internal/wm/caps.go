@@ -4,7 +4,7 @@
 //
 // Asura ships one provider, Hyprland, and it runs in-process: the daemon and
 // the CLI import this package rather than fork a helper per question. The
-// Client keeps the shape Ryoku's out-of-process one had, including its
+// Client keeps the shape upstream's out-of-process one had, including its
 // executable-provider path (a `asura-wm-<name>` on PATH, selected with
 // ASURA_WM), so a second compositor is a new provider and not a rewrite of
 // every caller, and so the caching and cancellation rules are tested against a

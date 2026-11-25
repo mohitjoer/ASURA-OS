@@ -1,0 +1,20 @@
+id: dell-precision
+name: "Dell Precision Mobile Workstations"
+description: "Dell Precision mobile workstation hardware profile: sustained workload thermal modes"
+layer: family
+
+match:
+  sys_vendor: "Dell Inc."
+  product_family: "*Precision*"
+
+packages: []
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel Documentation/admin-guide/laptops/dell-laptop.rst."
+  - "Optimized for sustained CPU/GPU workstation power delivery."

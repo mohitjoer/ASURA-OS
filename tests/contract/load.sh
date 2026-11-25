@@ -21,6 +21,17 @@ mkdir -m 700 "$t/run"
 env -i PATH="$PATH" LANG=C.UTF-8 HOME="$t" XDG_RUNTIME_DIR="$t/run" XDG_CONFIG_HOME="$t/c" XDG_CACHE_HOME="$t/k" \
     XDG_STATE_HOME="$t/s" XDG_DATA_HOME="$t/d" QT_QPA_PLATFORM=offscreen \
     timeout -k 2 10 quickshell -p "$tree" >"$t/log" 2>&1 || true
-bad=$(grep -E 'is not installed|is not a type|unresolvable import|ReferenceError' "$t/log" | sort -u | head -20)
+# A type that fails to compile (a property the element does not have, a syntax
+# error) makes every type that uses it "unavailable" and the whole config fails
+# to load: the desktop's "Quickshell: Reload failed" was one wrong
+# property name in one file.
+#
+# Offscreen has no layer-shell, so a PanelWindow produces "No PanelWindow backend
+# loaded" which cascades into "Type ... unavailable" and "Failed to load configuration".
+# We allow that expected offscreen cascade while catching real syntax/property errors.
+bad=$(grep -E 'is not installed|is not a type|unresolvable import|ReferenceError|non-existent property|Cannot assign to|Syntax ?Error|Expected token' "$t/log" | sort -u | head -20)
+if [ -z "$bad" ] && ! grep -qF 'No PanelWindow backend loaded.' "$t/log"; then
+	bad=$(grep -E 'Failed to load configuration|Type [A-Za-z_.]+ unavailable' "$t/log" | sort -u | head -20)
+fi
 [ -z "$bad" ] || { echo "$bad"; echo "load: $tree does not resolve"; exit 1; }
 echo "load: ok, $tree resolves"

@@ -403,7 +403,7 @@ Item {
                 Barcode {
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: I18n.tr("ASURA-VM-") + Qt.formatDateTime(dash.now, "yyyyMMdd")
+                    text: I18n.tr("TOREN-VM-") + Qt.formatDateTime(dash.now, "yyyyMMdd")
                     unit: 1.0
                     barHeight: 16
                 }

@@ -1,20 +1,30 @@
 name: xbps-repo
 
+# ASURA's XBPS repository: the `asura` package (everything apply-repo.sh
+# installs) and its index.
+#
+# - Every pull request and push builds the package and installs it in a clean
+#   Void container, so a change that breaks the package fails here.
+# - A dev-unstable commit is published only after the ci workflow passed on it
+#   (the rule asura update follows): ci calls this workflow as its last stage,
+#   after every required job succeeded. Only when the XBPS_SIGNING_KEY secret
+#   exists: an unsigned repository is never published. It is served by GitHub
+#   Pages at https://<owner>.github.io/<repo>/current (docs/package-repo.md).
+# - Running it by hand (Run workflow) on dev-unstable also publishes, so a
+#   first publish does not wait for the next commit.
+# - Pages must allow deployments from dev-unstable (Settings, Environments,
+#   github-pages, Deployment branches).
+
 on:
-  push:
-    branches: [main, dev-unstable]
-    paths:
-      - 'packaging/xbps/**'
-      - 'desktop/**'
-      - 'session/**'
-      - 'system/**'
   pull_request:
     branches: [main, dev-unstable]
     paths:
       - 'packaging/xbps/**'
-      - 'desktop/**'
-      - 'session/**'
-      - 'system/**'
+      - 'installation/apply-repo.sh'
+      - '.github/workflows/xbps-repo.yml'
+  # Called by ci.yml as its last stage, after every required job passed on a
+  # dev-unstable push.
+  workflow_call:
   workflow_dispatch:
 
 permissions:
@@ -25,43 +35,118 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-packages:
-    name: XBPS — package pipeline
-    timeout-minutes: 15
+  build:
+    name: XBPS — build and install the package
+    # The Hyprland stack compiles from source here.
+    timeout-minutes: 150
     runs-on: ubuntu-24.04
+    env:
+      HAS_KEY: ${{ secrets.XBPS_SIGNING_KEY != '' }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
+      - name: Checkout the commit
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0   # the package version counts the branch's commits
 
       - name: Setup Go
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@v6
         with:
           go-version-file: desktop/go.mod
-          cache-dependency-path: |
-            system/hardware/go.mod
-            desktop/go.mod
+          cache-dependency-path: desktop/go.sum
 
-      - name: Build Go binaries
+      - name: Stage everything an update installs
         run: |
-          mkdir -p build/bin
-          cd desktop
-          for cmd in asura asura-sysd asura-userd asura-hubd asura-shell asura-wallpaper apm; do
-            CGO_ENABLED=0 go build -trimpath -ldflags "-s -w" -o "../build/bin/$cmd" "./cmd/$cmd"
-          done
+          sh installation/apply-repo.sh --no-packages . build/stage
+          test -x build/stage/usr/bin/asura
 
-      - name: Build Asura XBPS repository in Void container
+      - name: Write the signing key
+        if: env.HAS_KEY == 'true'
+        env:
+          XBPS_SIGNING_KEY_PEM: ${{ secrets.XBPS_SIGNING_KEY }}
         run: |
-          docker run --rm \
-            -v "$PWD":/workspace \
-            -w /workspace \
-            ghcr.io/void-linux/void-linux:latest-full-x86_64 \
-            /workspace/packaging/xbps/build-repo.sh /workspace/build/xbps-repo /workspace/build/bin
-          sudo chmod -R a+rwX build/xbps-repo
+          umask 077
+          printf '%s\n' "$XBPS_SIGNING_KEY_PEM" > build/signing-key.pem
 
-      - name: Upload XBPS repository artifact
-        uses: actions/upload-artifact@v7
+      - name: Build the package and the index (Void container)
+        run: |
+          set -o pipefail   # docker's exit status, not tee's
+          key=""
+          [ -f build/signing-key.pem ] && key=/workspace/build/signing-key.pem
+          # --privileged: xbps-src's uchroot needs it, as in Void's own CI. The
+          # container installs the tools Void's CI installs (xbps-src is a bash
+          # script). No apostrophes inside the single-quoted script below: one
+          # would end the quoting and run the rest on the runner instead.
+          docker run --rm --privileged -v "$PWD":/workspace -w /workspace -e XBPS_SIGNING_KEY="$key" -e GITHUB_ACTIONS \
+            ghcr.io/void-linux/void-glibc-full:latest sh -euc '
+              xbps-install -Syu xbps >/dev/null && xbps-install -yu >/dev/null && xbps-install -y bash sudo curl git >/dev/null
+              git config --global --add safe.directory /workspace
+              sh packaging/xbps/build-stack.sh build/repo/current
+              sh packaging/xbps/build-repo.sh build/repo/current build/stage' 2>&1 | tee build/container.log
+          rm -f build/signing-key.pem
+          sudo chown -R "$(id -u):$(id -g)" build
+
+      - name: Install the package in a clean Void container
+        run: |
+          set -o pipefail   # docker's exit status, not tee's
+          docker run --rm -v "$PWD/build/repo/current":/repo:ro \
+            ghcr.io/void-linux/void-glibc-full:latest sh -euc '
+              xbps-install -Syu xbps >/dev/null && xbps-install -yu >/dev/null
+              xbps-install -Sy \
+                --repository=/repo \
+                asura
+              xbps-query asura | sed -n "s/^pkgver: //p"
+              test -x /usr/bin/asura
+              test -f /usr/share/asura/shell-desktop/shell.qml
+              /usr/bin/asura version' 2>&1 | tee build/install.log
+
+      - name: Upload the repository
+        uses: actions/upload-artifact@v6
         with:
           name: asura-xbps-repo
-          path: build/xbps-repo/
+          path: build/repo/
           if-no-files-found: error
           retention-days: 7
+
+      - name: Upload the repository for Pages
+        if: env.HAS_KEY == 'true' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/dev-unstable'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/repo/
+
+      # The log needs a sign-in to read; annotations and the summary do not.
+      - name: Show why the job failed
+        if: failure()
+        run: |
+          rm -f build/signing-key.pem
+          # The install log if the install ran, else the build log.
+          log=build/install.log
+          [ -f "$log" ] || log=build/container.log
+          [ -f "$log" ] || exit 0
+          tail -n 40 "$log" | sed 's/\x1b\[[0-9;]*m//g' > build/tail.log
+          { echo "### The last lines of $log"; echo '```'; cat build/tail.log; echo; echo '```'; } >>"$GITHUB_STEP_SUMMARY"
+          sed 's/%/%25/g' build/tail.log | awk -v f="$log" '{ m = m (NR > 1 ? "%0A" : "") $0 } END { print "::error title=Last lines of " f "::" m }'
+
+  publish:
+    name: XBPS — publish to GitHub Pages
+    needs: build
+    # On dev-unstable only: as ci's last stage (so after ci passed), or by hand.
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/dev-unstable'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    env:
+      HAS_KEY: ${{ secrets.XBPS_SIGNING_KEY != '' }}
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}current
+    steps:
+      - name: Say why nothing is published
+        if: env.HAS_KEY != 'true'
+        run: echo "XBPS_SIGNING_KEY is not set, so nothing is published (docs/package-repo.md)"
+      - name: Deploy
+        id: deploy
+        if: env.HAS_KEY == 'true'
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,31 @@
+id: lenovo-legion
+name: "Lenovo Legion & IdeaPad Gaming"
+description: "Lenovo Legion gaming laptop hardware profile: conservation mode, thermal modes, and backlight"
+
+match:
+  sys_vendor: "LENOVO"
+  product_family: "*Legion*"
+
+packages: []
+
+kernel_parameters: []
+
+files:
+  udev:
+    - target: "/etc/udev/rules.d/99-lenovo-battery.rules"
+      content: |
+        # Lenovo battery conservation mode (caps charge at 60-80% for battery longevity)
+        SUBSYSTEM=="platform", DRIVERS=="ideapad_acpi", ATTR{conservation_mode}="1"
+      reason: "Enable Lenovo battery conservation mode"
+    - target: "/etc/udev/rules.d/90-lenovo-backlight.rules"
+      content: |
+        # Permissions for Lenovo keyboard backlight
+        SUBSYSTEM=="leds", KERNEL=="*::kbd_backlight", ACTION=="add", RUN+="/bin/chmod a+w /sys/class/leds/%k/brightness"
+      reason: "Grant write permissions to Lenovo keyboard backlight"
+
+services: []
+
+notes:
+  - "Battery conservation mode: stops charging around 60-80% via ideapad_acpi conservation_mode."
+  - "Thermal profiles: quiet, balanced, and performance profiles via ideapad_laptop platform_profile ('asura power profile')."
+  - "Legion Fn+Q mode switching integrates with asura power."

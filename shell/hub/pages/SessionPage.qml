@@ -84,6 +84,13 @@ Item {
             pg.hub.hyprEdit("desktop.env", []);
     }
 
+    function isRiskyKey(k) {
+        if (!k) return false;
+        var upper = k.trim().toUpperCase();
+        var risky = ["LD_PRELOAD", "LD_LIBRARY_PATH", "PATH", "PYTHONPATH", "SHELL", "SUDO_COMMAND", "IFS"];
+        return risky.indexOf(upper) !== -1;
+    }
+
     // ── a cluster footer: entry count on the left, Clear all + add on the right,
     // over a hairline. Shared by both lists so they read identically. ──
     component ClusterFoot: Item {
@@ -292,7 +299,7 @@ Item {
 
                         anchors.left: parent.left
                         anchors.right: parent.right
-                        height: Tokens.rowH
+                        height: pg.isRiskyKey(envRow.modelData.key) ? Tokens.rowH + 18 : Tokens.rowH
 
                         Rectangle {
                             visible: envRow.index > 0
@@ -304,7 +311,7 @@ Item {
                         Field {
                             id: keyField
                             anchors.left: parent.left; anchors.leftMargin: Tokens.s4
-                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.top: parent.top; anchors.topMargin: Math.round((Tokens.rowH - height) / 2)
                             width: envRow.keyW
                             tabular: true
                             placeholder: I18n.tr("NAME (e.g. MOZ_ENABLE_WAYLAND)")
@@ -318,7 +325,7 @@ Item {
                             id: valField
                             anchors.left: keyField.right; anchors.leftMargin: envRow.gap
                             anchors.right: envRemove.left; anchors.rightMargin: envRow.gap
-                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.top: keyField.top
                             tabular: true
                             placeholder: I18n.tr("value (e.g. 1)")
                             text: envRow.modelData.value
@@ -330,9 +337,16 @@ Item {
                         IconBtn {
                             id: envRemove
                             anchors.right: parent.right; anchors.rightMargin: Tokens.s4
-                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.top: keyField.top
                             glyph: "\u2212"
                             onAct: pg.removeEnv(envRow.index)
+                        }
+                        Text {
+                            visible: pg.isRiskyKey(envRow.modelData.key)
+                            anchors.left: parent.left; anchors.leftMargin: Tokens.s4
+                            anchors.top: keyField.bottom; anchors.topMargin: 2
+                            text: I18n.tr("\u26a0 Risky variable: modifying %1 can break login or shell utilities").arg(envRow.modelData.key)
+                            color: Tokens.inkMuted; font.family: Tokens.ui; font.pixelSize: Tokens.fMicro
                         }
                     }
                 }

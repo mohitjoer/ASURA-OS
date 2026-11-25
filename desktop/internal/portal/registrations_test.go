@@ -30,11 +30,8 @@ func installedTree(t *testing.T) RegistrationEnv {
 	// than find the same target in both. The binaries are the base layer's, not
 	// Asura's, and they are absent from this tree: the check saying so is the
 	// point.
-	writeFile(t, filepath.Join(root, "/usr/share/asura/units/asura-shell.service"),
-		"[Service]\nExecStart=/usr/bin/quickshell -p /usr/share/asura/shell\n")
-	writeFile(t, filepath.Join(root, "/usr/share/asura/units/asura-portal.service"),
-		"[Service]\nExecStart=/usr/libexec/xdg-desktop-portal\n")
 	mkdirAll(t, filepath.Join(root, "/usr/share/asura/shell"))
+	mkdirAll(t, filepath.Join(root, "/usr/share/asura/shell-desktop"))
 	mkdirAll(t, filepath.Join(root, "/usr/share/asura/portal"))
 
 	return RegistrationEnv{Root: root}
@@ -72,12 +69,8 @@ func mkdirAll(t *testing.T, path string) {
 // someone adding one line to a packaging script.
 func TestEveryRegistrationIsSanctioned(t *testing.T) {
 	allowed := map[string]bool{
-		"/usr/share/wayland-sessions/asura.desktop":                 true,
+		"/usr/share/wayland-sessions/toren.desktop":                 true,
 		"/usr/share/xdg-desktop-portal/asura-portals.conf":          true,
-		"/usr/lib/systemd/user/asura-shell.service":                 true,
-		"/usr/lib/systemd/user/asura-portal.service":                true,
-		"/usr/lib/systemd/user/asura-session.target":                true,
-		"/etc/sddm.conf.d/10-asura.conf":                            true,
 		"/usr/share/glib-2.0/schemas/org.asura.shell.gschema.xml":   true,
 		"/usr/share/glib-2.0/schemas/org.asura.desktop.gschema.xml": true,
 	}
@@ -115,7 +108,7 @@ func TestCheckRegistrationsPassesOnACompleteTree(t *testing.T) {
 func TestMissingRegistrationIsNamed(t *testing.T) {
 	env := installedTree(t)
 	if err := os.RemoveAll(filepath.Join(env.Root,
-		"/usr/share/wayland-sessions/asura.desktop")); err != nil {
+		"/usr/share/wayland-sessions/toren.desktop")); err != nil {
 		t.Fatal(err)
 	}
 
@@ -189,6 +182,9 @@ func TestExecStartTargetIsExtracted(t *testing.T) {
 // the binary it runs was never installed. Nothing warns about it at build time.
 func TestUnitPointingAtNothingIsFound(t *testing.T) {
 	env := installedTree(t)
+	mkdirAll(t, filepath.Join(env.Root, "/usr/share/asura/units"))
+	writeFile(t, filepath.Join(env.Root, "/usr/share/asura/units/asura-extra.service"),
+		"[Service]\nExecStart=/usr/bin/asura-extra\n")
 	findings := CheckUnits(env)
 
 	if len(findings) == 0 {
@@ -228,6 +224,7 @@ func TestUnitsPassWhenTheirBinariesExist(t *testing.T) {
 // systemd allows in front of the path is not part of the path.
 func TestShippedUnitsBeyondTheClosedListAreChecked(t *testing.T) {
 	env := installedTree(t)
+	mkdirAll(t, filepath.Join(env.Root, "/usr/share/asura/units"))
 	writeFile(t, filepath.Join(env.Root, "/usr/share/asura/units/asurad.service"),
 		"[Service]\nExecStart=-/usr/bin/asura-shell daemon\n")
 
@@ -240,6 +237,7 @@ func TestShippedUnitsBeyondTheClosedListAreChecked(t *testing.T) {
 		t.Fatalf("the new unit was not checked in both ways: %q", got)
 	}
 
+	mkdirAll(t, filepath.Join(env.Root, "/usr/lib/systemd/user"))
 	writeFile(t, filepath.Join(env.Root, "/usr/lib/systemd/user/asurad.service"), "[Unit]\n")
 	mkdirAll(t, filepath.Join(env.Root, "/usr/bin"))
 	writeFile(t, filepath.Join(env.Root, "/usr/bin/asura-shell"), "#!/bin/sh\n")

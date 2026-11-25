@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Neovim
+GenericName=Text Editor
+Comment=Edit text files in modern terminal
+Exec=ghostty --title="Neovim" -e nvim %F
+Icon=nvim
+Terminal=false
+Type=Application
+Categories=Utility;TextEditor;Development;
+Keywords=Text;editor;code;nvim;vim;development;
+StartupNotify=false
+MimeType=text/plain;text/x-chdr;text/x-csrc;text/x-c++hdr;text/x-c++src;text/x-rust;text/x-python;text/x-go;text/x-shellscript;application/json;application/xml;text/markdown;text/x-lua;application/toml;application/x-yaml;text/yaml;

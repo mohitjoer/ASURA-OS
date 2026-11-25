@@ -1,0 +1,22 @@
+id: intel-gpu-xe
+name: "Intel Arc / Lunar Lake Graphics (xe)"
+description: "Next-generation Intel graphics support using the modern Xe kernel driver"
+layer: component
+
+match:
+  module:
+    - "xe"
+
+packages:
+  - intel-video-accel
+  - mesa-dri
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel Documentation/gpu/xe/index.rst."
+  - "Native driver for Intel Arc Alchemist, Battlemage, and Lunar Lake integrated/discrete graphics."

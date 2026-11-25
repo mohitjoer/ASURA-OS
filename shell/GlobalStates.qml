@@ -32,6 +32,7 @@ Singleton {
     // One flag per surface that can be open at the same time as another.
     // A surface that cannot be open twice does not need a flag.
     property bool barOpen: false
+    property bool calendarOpen: false
     property bool overviewOpen: false
     property bool sidebarLeftOpen: false
     property bool sidebarRightOpen: false

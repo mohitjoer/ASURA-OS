@@ -23,7 +23,7 @@ reached directly (`hyprctl`, `asura-shell`), not through a wrapper.
 | `asura-cmd-folders` | Papirus icons, `gsettings` | `papirus-icon-theme` |
 | `asura-cmd-radio` | `mpv`, `jq`; `yt-dlp` for the YouTube stations | `mpv`, `mpv-mpris`, `yt-dlp` |
 | `asura-cmd-screenrecord` | `wf-recorder`, `slurp`, `pactl`; `gpu-screen-recorder` if installed | `wf-recorder`, `slurp` |
-| `asura-cmd-studiorecord`, `asura-cmd-edit-recording` | the recorder above, `ryomotion` | not in the archive |
+| `asura-cmd-studiorecord`, `asura-cmd-edit-recording` | the recorder above, `asura-motion` | not in the archive |
 | `asura-cmd-recording-saved` | `notify-send`, `ffprobe` | `libnotify-bin`, `ffmpeg` |
 | `asura-cmd-discord-compress` | `ffmpeg`, `ffprobe` | `ffmpeg` |
 | `stash-install.sh` | `pkexec` + `apt-get` for a `.deb`; `flatpak`, `bsdtar` optional | `pkexec`, `flatpak`, `libarchive-tools` |

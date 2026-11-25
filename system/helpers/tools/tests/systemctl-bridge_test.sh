@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-# Unit test for Asura OS systemctl and journalctl compatibility bridge
+# Unit test for Toren Linux systemctl and journalctl compatibility bridge
 SCRIPT_DIR="$(cd "$(dirname "$0")/../../../.." && pwd)"
 SYSTEMCTL="$SCRIPT_DIR/system/helpers/systemctl"
 JOURNALCTL="$SCRIPT_DIR/system/helpers/journalctl"

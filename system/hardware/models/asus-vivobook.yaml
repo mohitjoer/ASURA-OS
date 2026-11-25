@@ -1,0 +1,20 @@
+id: asus-vivobook
+name: "ASUS VivoBook Laptops"
+description: "ASUS VivoBook hardware profile: thermal profile and battery charge limit"
+layer: family
+
+match:
+  sys_vendor: "ASUSTeK COMPUTER INC."
+  product_family: "*VivoBook*"
+
+packages: []
+
+kernel_parameters: []
+
+files: []
+
+services: []
+
+notes:
+  - "Knowledge source: Linux kernel drivers/platform/x86/asus-wmi.c."
+  - "VivoBook balanced thermal profile and 80% battery longevity threshold."

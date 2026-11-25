@@ -29,7 +29,7 @@ Item {
   }
   function _saveConfigKey(path, value) { Config.saveKey(path, value) }
 
-  // ryowalls-shaped remote sources (scrape-based, no keys): one generic
+  // wallpaper-shaped remote sources (scrape-based, no keys): one generic
   // LibraryBrowser serves them all, keyed off these descriptors.
   readonly property var _libDefs: ({
     "moewalls":  { label: "MOEWALLS",  kana: "", search: "moewalls-search",  download: "moewalls-download",  post: true },
