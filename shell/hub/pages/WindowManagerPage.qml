@@ -93,9 +93,6 @@ Item {
         return out;
     }
 
-    // the rowless tab that carries the compositor itself
-    readonly property string aboutTab: I18n.tr("Compositor")
-
     function focusKey(k) { sp.focusKey(k) }
     SchemaPage {
         id: sp
@@ -110,74 +107,5 @@ Item {
         query: pg.hub ? pg.hub.query : ""
         onEdited: (k, v) => { if (pg.hub) pg.hub.hyprEdit(k, v); }
         onPickRequested: (r) => { if (pg.hub) pg.hub.openPick(r); }
-        // Which compositor is running and what it cannot do are about the
-        // compositor rather than about any group of settings, so they get a tab
-        // of their own instead of repeating above every tab.
-        tailTabs: [pg.aboutTab]
-
-        Column {
-            width: parent.width
-            spacing: Tokens.s5
-            visible: sp.tab === pg.aboutTab
-
-            CompositorControl {
-                width: parent.width
-            }
-
-            // A rarely-touched list: folded, and its header says what it holds, so the
-            // tab reads as a page rather than a wall of near-identical lines on
-            // first sight. It opens in place when asked.
-            SettingCard {
-                id: cannotSec
-                width: parent.width
-                visible: pg.cannotDo.length > 0
-                collapsible: true
-                expanded: false
-                title: I18n.tr("WHAT %1 CANNOT DO").arg(pg.pTitle.toUpperCase())
-                summary: pg.cannotDo.length + " " + I18n.tr("SETTINGS")
-
-                Column {
-                    width: cannotSec.width
-                    spacing: Tokens.s2
-
-                    Text {
-                        width: parent.width
-                        leftPadding: Tokens.s4; rightPadding: Tokens.s4; topPadding: Tokens.s3
-                        wrapMode: Text.WordWrap
-                        text: I18n.tr("These settings have no equivalent in Hyprland, so they are ignored.")
-                        color: Tokens.inkFaint
-                        font.family: Tokens.ui
-                        font.pixelSize: Tokens.fSmall
-                        lineHeight: 1.3
-                    }
-                    Repeater {
-                        model: pg.cannotDo
-                        Row {
-                            required property var modelData
-                            width: cannotSec.width
-                            spacing: Tokens.s2
-                            bottomPadding: Tokens.s1
-                            Text {
-                                text: "\u00b7"
-                                leftPadding: Tokens.s4
-                                color: Tokens.inkFaint
-                                font.family: Tokens.mono
-                                font.pixelSize: Tokens.fSmall
-                            }
-                            Text {
-                                width: cannotSec.width - Tokens.s6
-                                wrapMode: Text.WordWrap
-                                text: parent.modelData
-                                color: Tokens.inkMuted
-                                font.family: Tokens.ui
-                                font.pixelSize: Tokens.fSmall
-                                lineHeight: 1.3
-                            }
-                        }
-                    }
-                    Item { width: 1; height: Tokens.s2 }
-                }
-            }
-        }
     }
 }
