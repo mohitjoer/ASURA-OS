@@ -101,7 +101,7 @@ Rectangle {
     readonly property var groups: [
         { name: "OVERVIEW", items: [ { key: "profile", name: "Profile" }, { key: "global", name: "General" }, { key: "updates", name: "Updates" } ] },
         { name: "DEVICES", items: [
-            { key: "displays", name: "Displays", needs: { cap: "monitorConfig" } }, { key: "audio", name: "Audio" }, { key: "connections", name: "Connections" },
+            { key: "displays", name: "Displays", needs: { cap: "monitorConfig" } }, { key: "connections", name: "Connections" },
             { key: "input", name: "Input" }, { key: "gpu", name: "Graphics & Power" } ] },
         { name: "LOOK", items: [
             { key: "animations", name: "Animations" }, { key: "lockscreen", name: "Lockscreen" } ] },
