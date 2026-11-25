@@ -264,7 +264,7 @@ ContentPage {
                 }
             }
             ContentSubsection {
-                title: Translation.tr("Bar style")
+                title: Translation.tr("Bar silhouette & corners")
 
                 ConfigSelectionArray {
                     currentValue: Config.options.bar.cornerStyle

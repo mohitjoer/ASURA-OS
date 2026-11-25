@@ -89,7 +89,7 @@ ContentPage {
         ConfigRow {
             
             ContentSubsection {
-                title: Translation.tr("Corner style")
+                title: Translation.tr("Bar silhouette & corners")
                 Layout.fillWidth: true
 
                 ConfigSelectionArray {

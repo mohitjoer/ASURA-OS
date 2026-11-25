@@ -50,6 +50,18 @@ var rows = [
     {
         "tab": "Bar",
         "group": "SURFACE & CORNERS",
+        "key": "qsbar.cornerStyle",
+        "label": "Bar silhouette & corners",
+        "desc": "How the status bar silhouette is shaped: Hug screen edge, Float with gaps, or flat Rectangle.",
+        "ctl": "seg",
+        "opts": ["hug", "float", "rect"],
+        "optLabels": { "hug": "Hug", "float": "Float", "rect": "Rect" },
+        "value": "rect",
+        "src": "shell"
+    },
+    {
+        "tab": "Bar",
+        "group": "SURFACE & CORNERS",
         "key": "qsbar.panelTooltipBorderEnabled",
         "label": "Panel & tooltip borders",
         "desc": "Draw contact borders on popups and menus.",

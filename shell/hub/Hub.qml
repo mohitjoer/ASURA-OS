@@ -531,6 +531,7 @@ Rectangle {
         "qsbar.barPosition": "top", "qsbar.barShellStyle": "full", "qsbar.barScale": 1.0,
         "qsbar.barAutoHide": false, "qsbar.barBorderEnabled": true, "qsbar.barCornerRadius": 6,
         "qsbar.panelTooltipBorderEnabled": true, "qsbar.barShadowEnabled": false, "qsbar.barFrostEnabled": false,
+        "qsbar.cornerStyle": "rect",
         "qsbar.barGapTop": 0, "qsbar.barGapBottom": 0, "qsbar.barGapLeft": 0, "qsbar.barGapRight": 0,
         "qsbar.launcherLogoMode": "icon", "qsbar.launcherLogoText": "toren", "qsbar.launcherLogoIcon": "toren",
         "qsbar.workspaceStyle": "default", "qsbar.workspaceMode": "active",
