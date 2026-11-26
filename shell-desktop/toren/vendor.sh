@@ -115,6 +115,11 @@ modules/waffle/taskView/TaskViewContent.qml
 modules/waffle/taskView/TaskViewWindow.qml
 modules/ii/cheatsheet/Cheatsheet.qml
 services/HyprlandKeybinds.qml
+modules/common/Appearance.qml
+modules/common/widgets/FloatingActionButton.qml
+services/Cliphist.qml
+services/Notifications.qml
+services/Translation.qml
 "
 
 # Upstream's paths Toren leaves out: the desktop's own Settings app (Toren has

@@ -133,8 +133,9 @@ def providers():
             if os.path.isfile(os.path.join(runit_dir, s)):
                 bins.add(s)
 
-    for s in ("toren-hub", "toren-idle", "toren-pin", "toren-reload-cover", "toren-shot", "toren-vm", "toren-wallpaper-ui", "toren-welcome", "toren-greeter",
-              "toren-hub", "toren-idle", "toren-pin", "toren-reload-cover", "toren-shot", "toren-vm", "toren-wallpaper-ui", "toren-welcome", "toren-greeter"):
+    # the session launchers apply-repo.sh and the ISO install to /usr/bin
+    for s in ("toren-hub", "toren-idle", "toren-installer-ui", "toren-pin", "toren-reload-cover", "toren-shot", "toren-vm",
+              "toren-wallpaper-ui", "toren-welcome", "toren-greeter"):
         if os.path.isfile(os.path.join(ROOT, "session", s)):
             bins.add(s)
     session_scripts = os.path.join(ROOT, "session", "scripts")
