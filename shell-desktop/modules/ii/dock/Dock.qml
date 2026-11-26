@@ -44,7 +44,7 @@ Scope {
             screen: modelData
             visible: !GlobalStates.screenLocked
 
-            readonly property bool pointerHovered: islandHover.hovered || stripHover.hovered
+            readonly property bool pointerHovered: islandHover.hovered || stripHover.hovered || dockApps.buttonHovered
             property bool keepRevealed: false
 
             Timer {
@@ -129,10 +129,6 @@ Scope {
                     animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
                 }
 
-                HoverHandler {
-                    id: islandHover
-                }
-
                 StyledRectangularShadow {
                     target: dockVisualBackground
                 }
@@ -160,6 +156,15 @@ Scope {
                     DockApps {
                         id: dockApps
                         buttonPadding: dockRow.padding
+                    }
+                }
+
+                // Overlay above buttons so child MouseAreas cannot steal hover.
+                Item {
+                    anchors.fill: parent
+                    z: 100
+                    HoverHandler {
+                        id: islandHover
                     }
                 }
             }
