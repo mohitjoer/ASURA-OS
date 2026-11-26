@@ -418,7 +418,7 @@ components:
       - path: modules/ii/bar/ClockWidgetPopup.qml
         blob: c23edb7b4a34c032f5a1d291274867a57d4473d6
       - path: modules/ii/bar/ClockWidget.qml
-        blob: 1d4b9f8659cc3a1957b7cdcf5a83e6ac33f21588
+        blob: e247d9c2a1f6d90209be1bddba03027d3685d7af
       - path: modules/ii/bar/HyprlandXkbIndicator.qml
         blob: a6ca214aa1a57c4a29505a144af0dc9fc3336d8f
       - path: modules/ii/bar/LeftSidebarButton.qml
