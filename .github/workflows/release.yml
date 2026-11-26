@@ -102,12 +102,6 @@ jobs:
             echo "::error::built $(basename "$ISO"), expected $expected"
             exit 1
           fi
-          # GitHub rejects release assets of 2 GiB or more.
-          size=$(stat -c %s "$ISO")
-          if [ "$size" -ge 2147483648 ]; then
-            echo "::error::$expected is $size bytes; GitHub release assets must be under 2 GiB"
-            exit 1
-          fi
           mkdir -p dist
           mv "$ISO" "dist/$expected"
           (cd dist && sha256sum "$expected" >SHA256SUMS)
@@ -131,6 +125,38 @@ jobs:
           printf '%s\n' "${MINISIGN_PASSWORD:-}" | \
             minisign -S -s "$keyfile" -m dist/SHA256SUMS -x dist/SHA256SUMS.sig -t "Toren Linux $VERSION"
           echo "Signed SHA256SUMS"
+
+      - name: Upload ISO to SourceForge and enforce GitHub 2 GiB limit
+        env:
+          SF_USERNAME: ${{ secrets.SF_USERNAME }}
+          SF_SSH_KEY: ${{ secrets.SF_SSH_KEY }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -eu
+          expected="toren-linux-${VERSION}-x86_64.iso"
+          uploaded_sf=0
+          if [ -n "${SF_USERNAME:-}" ] && [ -n "${SF_SSH_KEY:-}" ]; then
+            keyfile="$RUNNER_TEMP/sf_key"
+            (umask 077 && printf '%s\n' "$SF_SSH_KEY" >"$keyfile")
+            trap 'rm -f "$keyfile"' EXIT
+            printf '%s\n' "-mkdir v${VERSION}" | sftp -i "$keyfile" -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -b - \
+              "${SF_USERNAME}@frs.sourceforge.net:/home/frs/project/toren-linux" || true
+            rsync -avP -e "ssh -i $keyfile -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new" \
+              dist/ "${SF_USERNAME}@frs.sourceforge.net:/home/frs/project/toren-linux/v${VERSION}/"
+            uploaded_sf=1
+            echo "Uploaded release files to SourceForge: v${VERSION}"
+          fi
+          # GitHub rejects release assets of 2 GiB or more.
+          size=$(stat -c %s "dist/$expected")
+          if [ "$size" -ge 2147483648 ]; then
+            if [ "$uploaded_sf" -eq 1 ]; then
+              echo "::notice::$expected is $size bytes (>= 2 GiB); hosted on SourceForge and omitted from GitHub release assets"
+              rm -f "dist/$expected"
+            else
+              echo "::error::$expected is $size bytes; GitHub release assets must be under 2 GiB and SF_USERNAME/SF_SSH_KEY are not set"
+              exit 1
+            fi
+          fi
 
       - name: Upload boot test logs
         if: always()
@@ -187,12 +213,20 @@ jobs:
           flags=""
           [ "$PRERELEASE" = true ] && flags="--prerelease"
           # shellcheck disable=SC2086
-          # docs/releases/<tag>.md is the release's notes when it exists;
-          # otherwise GitHub lists the merged pull requests.
-          notes="src/docs/releases/$TAG.md"
-          if [ -f "$notes" ]; then
-            flags="$flags --notes-file $notes"
-          else
+          notes_file="$RUNNER_TEMP/release-notes.md"
+          sf_url="https://sourceforge.net/projects/toren-linux/files/v${VERSION}/toren-linux-${VERSION}-x86_64.iso/download"
+          {
+            echo "## ISO Download"
+            echo ""
+            echo "- **Direct ISO (SourceForge)**: [toren-linux-${VERSION}-x86_64.iso](${sf_url})"
+            echo "- **Verify**: \`sha256sum -c SHA256SUMS\`"
+            echo ""
+            if [ -f "src/docs/releases/$TAG.md" ]; then
+              cat "src/docs/releases/$TAG.md"
+            fi
+          } >"$notes_file"
+          flags="$flags --notes-file $notes_file"
+          if [ ! -f "src/docs/releases/$TAG.md" ]; then
             flags="$flags --generate-notes"
           fi
           gh release create "$TAG" dist/* \
