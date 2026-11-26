@@ -60,17 +60,17 @@ Scope {
         // The popup card itself
         Item {
             id: popupCardWrapper
-            readonly property real barGap: 4
+            readonly property real barGap: 6
             anchors {
                 horizontalCenter: !Config.options.bar.vertical ? parent.horizontalCenter : undefined
                 left: Config.options.bar.vertical && !Config.options.bar.bottom ? parent.left : undefined
                 right: Config.options.bar.vertical && Config.options.bar.bottom ? parent.right : undefined
                 top: !Config.options.bar.bottom ? parent.top : undefined
                 bottom: Config.options.bar.bottom && !Config.options.bar.vertical ? parent.bottom : undefined
-                topMargin: !Config.options.bar.bottom ? (Appearance.sizes.barHeight + barGap - Appearance.sizes.elevationMargin) : 0
-                bottomMargin: (Config.options.bar.bottom && !Config.options.bar.vertical) ? (Appearance.sizes.barHeight + barGap - Appearance.sizes.elevationMargin) : 0
-                leftMargin: (Config.options.bar.vertical && !Config.options.bar.bottom) ? (Appearance.sizes.verticalBarWidth + barGap - Appearance.sizes.elevationMargin) : 0
-                rightMargin: (Config.options.bar.vertical && Config.options.bar.bottom) ? (Appearance.sizes.verticalBarWidth + barGap - Appearance.sizes.elevationMargin) : 0
+                topMargin: !Config.options.bar.bottom ? (barGap - Appearance.sizes.elevationMargin) : 0
+                bottomMargin: (Config.options.bar.bottom && !Config.options.bar.vertical) ? (barGap - Appearance.sizes.elevationMargin) : 0
+                leftMargin: (Config.options.bar.vertical && !Config.options.bar.bottom) ? (barGap - Appearance.sizes.elevationMargin) : 0
+                rightMargin: (Config.options.bar.vertical && Config.options.bar.bottom) ? (barGap - Appearance.sizes.elevationMargin) : 0
             }
             implicitWidth: popupCard.implicitWidth + Appearance.sizes.elevationMargin * 2
             implicitHeight: popupCard.implicitHeight + Appearance.sizes.elevationMargin * 2
@@ -82,8 +82,8 @@ Scope {
             Rectangle {
                 id: popupCard
                 anchors.centerIn: parent
-                implicitWidth: 430
-                implicitHeight: cardContentLayout.implicitHeight + 28
+                implicitWidth: 420
+                implicitHeight: cardContentLayout.implicitHeight + 32
                 radius: Appearance.rounding.windowRounding
                 color: Appearance.colors.colLayer0
                 border.width: 1
@@ -127,8 +127,8 @@ Scope {
                             }
                             StyledText {
                                 text: Qt.locale().toString(DateTime.clock.date, "dddd, MMMM dd, yyyy")
-                                font.pixelSize: Appearance.font.pixelSize.normal
-                                color: Appearance.colors.colOnLayer0
+                                font.pixelSize: Appearance.font.pixelSize.small
+                                color: Appearance.colors.colSubtext
                             }
                         }
 
@@ -138,8 +138,8 @@ Scope {
                         }
 
                         RippleButton {
-                            implicitWidth: 32
-                            implicitHeight: 32
+                            implicitWidth: 30
+                            implicitHeight: 30
                             buttonRadius: Appearance.rounding.full
                             colBackground: Appearance.colors.colLayer1
                             colBackgroundHover: Appearance.colors.colLayer1Hover
@@ -148,25 +148,21 @@ Scope {
                             contentItem: MaterialSymbol {
                                 anchors.centerIn: parent
                                 text: "close"
-                                iconSize: 18
+                                iconSize: 16
                                 color: Appearance.colors.colOnLayer1
                             }
                         }
                     }
 
-                    // Divider
+                    // Segmented tab bar
                     Rectangle {
-                        Layout.fillWidth: true
-                        implicitHeight: 1
-                        color: Appearance.colors.colOutlineVariant
-                    }
-
-                    // Main Content: Tabs Rail + Content Loader
-                    RowLayout {
                         id: tabsRowLayout
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 340
-                        spacing: 14
+                        implicitHeight: 38
+                        radius: Appearance.rounding.normal
+                        color: Appearance.colors.colLayer1
+                        border.width: 1
+                        border.color: Appearance.colors.colOutlineVariant
 
                         property int selectedTab: 0
                         property var tabs: [
@@ -190,45 +186,60 @@ Scope {
                             }
                         ]
 
-                        // Navigation rail
-                        Item {
-                            Layout.fillHeight: true
-                            implicitWidth: tabRail.implicitWidth
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.margins: 4
+                            spacing: 4
 
-                            NavigationRailTabArray {
-                                id: tabRail
-                                anchors.verticalCenter: parent.verticalCenter
-                                anchors.left: parent.left
-                                currentIndex: tabsRowLayout.selectedTab
-                                expanded: false
+                            Repeater {
+                                model: tabsRowLayout.tabs
+                                RippleButton {
+                                    required property int index
+                                    required property var modelData
+                                    readonly property bool active: tabsRowLayout.selectedTab === index
+                                    Layout.fillWidth: true
+                                    Layout.fillHeight: true
+                                    buttonRadius: Appearance.rounding.small
+                                    colBackground: active ? Appearance.colors.colSecondaryContainer : "transparent"
+                                    colBackgroundHover: active ? Appearance.colors.colSecondaryContainerHover : Appearance.colors.colLayer2Hover
+                                    onClicked: tabsRowLayout.selectedTab = index
 
-                                Repeater {
-                                    model: tabsRowLayout.tabs
-                                    NavigationRailButton {
-                                        required property int index
-                                        required property var modelData
-                                        showToggledHighlight: false
-                                        toggled: tabsRowLayout.selectedTab === index
-                                        buttonText: modelData.name
-                                        buttonIcon: modelData.icon
-                                        onPressed: {
-                                            tabsRowLayout.selectedTab = index;
+                                    contentItem: RowLayout {
+                                        anchors.centerIn: parent
+                                        spacing: 6
+                                        MaterialSymbol {
+                                            text: modelData.icon
+                                            iconSize: 16
+                                            fill: active ? 1 : 0
+                                            color: active ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnLayer1
+                                        }
+                                        StyledText {
+                                            text: modelData.name
+                                            font.pixelSize: Appearance.font.pixelSize.smaller
+                                            font.weight: active ? Font.DemiBold : Font.Medium
+                                            color: active ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnLayer1
                                         }
                                     }
                                 }
                             }
                         }
+                    }
 
-                        // Content View
-                        Item {
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
+                    // Framed content card
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 332
+                        radius: Appearance.rounding.normal
+                        color: Appearance.colors.colLayer1
+                        border.width: 1
+                        border.color: Appearance.colors.colOutlineVariant
+                        clip: true
 
-                            Loader {
-                                id: widgetLoader
-                                anchors.fill: parent
-                                source: tabsRowLayout.tabs[tabsRowLayout.selectedTab].widget
-                            }
+                        Loader {
+                            id: widgetLoader
+                            anchors.fill: parent
+                            anchors.margins: 10
+                            source: tabsRowLayout.tabs[tabsRowLayout.selectedTab].widget
                         }
                     }
                 }
