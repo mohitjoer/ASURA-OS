@@ -10,7 +10,7 @@
   "kind": "bar",
   "verificationStatus": "verified",
   "tags": ["monitoring", "telemetry", "sysmon", "hardware", "toren-native"],
-  "upstream": "https://github.com/mohitjoer/TOREN-OS",
+  "upstream": "https://github.com/mohitjoer/Toren-Linux",
   "metadata": {
     "hosts": ["topbarGlyph", "desktopWidget"],
     "verified": true,

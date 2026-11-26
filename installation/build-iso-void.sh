@@ -675,8 +675,8 @@ echo "build-iso-void: building Toren Go binaries..."
 	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/toren-wallpaper" ./cmd/toren-wallpaper
 	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/apm" ./cmd/apm
 	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/toren-agent" ./cmd/toren-agent
-	# Build Asura Store (prioritizing standalone repository https://github.com/Toren-Linux/toren-store)
-	STORE_SRC="${ASURA_STORE_SRC:-}"
+	# Build Toren Store (prioritizing standalone repository https://github.com/Toren-Linux/toren-store)
+	STORE_SRC="${TOREN_STORE_SRC:-${ASURA_STORE_SRC:-}}"
 	if [ -z "$STORE_SRC" ]; then
 		if [ -d "$REPO_ROOT/../toren-store" ]; then
 			STORE_SRC="$REPO_ROOT/../toren-store"

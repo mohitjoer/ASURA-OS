@@ -2,7 +2,7 @@
 #
 # The standalone toren-store repository (github.com/Toren-Linux/toren-store,
 # public) owns the backend and the window: the ISO builder builds the binary
-# from it whenever it is available (`ASURA_STORE_SRC`, with the checkout under
+# from it whenever it is available (`TOREN_STORE_SRC`, with the checkout under
 # the tree next to this one winning), and `desktop/cmd/toren-store/` and
 # `shell/store/` here are its byte-identical copies, with `desktop/catalog/`
 # carrying the same catalogue JSON so a desktop-tree build still finds a shop.

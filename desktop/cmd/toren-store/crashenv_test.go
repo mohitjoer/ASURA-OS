@@ -21,7 +21,7 @@ func TestCrashEnvScrub(t *testing.T) {
 	for _, name := range crashVars {
 		t.Setenv(name, "7")
 	}
-	t.Setenv("ASURA_STORE_CRASHENV_KEEP", "keep-me")
+	t.Setenv("TOREN_STORE_CRASHENV_KEEP", "keep-me")
 
 	scrubQuickshellCrashEnv()
 
@@ -41,7 +41,7 @@ func TestCrashEnvScrub(t *testing.T) {
 			t.Errorf("child still sees %s=%q; the scrub did not reach the environment", name, v)
 		}
 	}
-	if child["ASURA_STORE_CRASHENV_KEEP"] != "keep-me" {
-		t.Errorf("child lost ASURA_STORE_CRASHENV_KEEP=%q, want keep-me; the scrub was too broad", child["ASURA_STORE_CRASHENV_KEEP"])
+	if child["TOREN_STORE_CRASHENV_KEEP"] != "keep-me" {
+		t.Errorf("child lost TOREN_STORE_CRASHENV_KEEP=%q, want keep-me; the scrub was too broad", child["TOREN_STORE_CRASHENV_KEEP"])
 	}
 }

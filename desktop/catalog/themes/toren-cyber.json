@@ -8,7 +8,7 @@
   "version": "1.0.0",
   "license": "GPL-3.0",
   "tags": ["cyberpunk", "high-contrast", "neon", "official"],
-  "upstream": "https://github.com/TOREN-OS/theme-toren-cyber",
+  "upstream": "https://github.com/mohitjoer/Toren-Linux",
   "metadata": {
     "provider": "Official",
     "verified": true
