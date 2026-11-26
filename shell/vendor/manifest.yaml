@@ -549,10 +549,8 @@ components:
         blob: 99c1fb9a5d5d1de66f42640a597a83b2ba5e2af0
       - path: modules/ii/sidebarRight/notifications/NotificationStatusButton.qml
         blob: 2609b5f56709a18fbe827a77b6f86e5d47c28848
-      - path: modules/ii/sidebarRight/pomodoro/PomodoroTimer.qml
-        blob: b8dce71e13db37270e64872cbb5b02e8d43f8a57
       - path: modules/ii/sidebarRight/pomodoro/PomodoroWidget.qml
-        blob: a62a9616c1c72feeb2b642371fc78993370bc5fe
+        blob: dba1b7332341296883cf383c57784b3da5635498
       - path: modules/ii/sidebarRight/pomodoro/Stopwatch.qml
         blob: 8b1dbba1357be2c22d7337263c8337b28a34101f
       - path: modules/ii/sidebarRight/QuickSliders.qml
@@ -748,7 +746,7 @@ components:
       - path: services/TaskbarApps.qml
         blob: 6351896b802dc2168f23558b59c34e78dfa87212
       - path: services/TimerService.qml
-        blob: 69e5fe1c10407384fa21feaba6101162ebb039d1
+        blob: 0a3200220b02b5c319e26eeb15fee4f7ec59ccfd
       - path: services/Todo.qml
         blob: 93227cbbb2e2275f4bc84d7cac62eeb5a03a535e
       - path: services/Translation.qml
