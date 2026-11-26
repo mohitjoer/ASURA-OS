@@ -70,31 +70,35 @@ Item {
         Behavior on opacity { NumberAnimation { duration: Tokens.swap; easing.type: Tokens.ease } }
     }
     // hover wash, quieter than a cell's so a stack of rows does not strobe.
+    // In the card look the row is its own soft filled card.
     Rectangle {
         anchors.fill: parent
-        anchors.margins: 1
-        radius: Tokens.radius
-        color: hh.hovered ? Tokens.tint5 : "transparent"
+        anchors.margins: Tokens.cards ? 0 : 1
+        radius: Tokens.cards ? Tokens.radiusCard : Tokens.radius
+        color: Tokens.cards ? (hh.hovered ? Tokens.tint10 : Tokens.tint5)
+            : (hh.hovered ? Tokens.tint5 : "transparent")
         Behavior on color { ColorAnimation { duration: Tokens.snap } }
     }
     HoverHandler { id: hh }
 
     // the part between rows, inset so it reads as a rule not a box edge.
     Rectangle {
-        visible: row.divider
+        visible: row.divider && !Tokens.cards
         anchors { left: parent.left; right: parent.right; top: parent.top }
         anchors.leftMargin: row.padH; anchors.rightMargin: row.padH
         height: 1
         color: Tokens.lineSoft
     }
 
-    // changed reads as a solid ink edge; no colour is spent on it.
+    // changed reads as a solid edge (the accent in the card look).
     Rectangle {
         visible: row.changed
         anchors { left: parent.left; verticalCenter: parent.verticalCenter }
-        width: 2
+        anchors.leftMargin: Tokens.cards ? Tokens.px(3) : 0
+        width: Tokens.cards ? 3 : 2
+        radius: Tokens.cards ? 1.5 : 0
         height: parent.height - Tokens.s3
-        color: Tokens.ink
+        color: Tokens.cards ? Tokens.sun : Tokens.ink
     }
 
     // affordances at the top-right, used only for BANDED rows: the control sits

@@ -16,7 +16,7 @@ const powerUsage = `Usage: toren power <verb> [arguments...]
 Verbs:
   status                print current power supply state, governor, and profile
   profile [name]        get or set profile (balanced, performance, battery)
-  threshold [pct]       get or set battery charge stop threshold (e.g. 80)
+  threshold [pct|reset] get or set the battery charge limit (kept across reboots)
   sleep [mode]          get or set system suspend sleep mode (s2idle | deep)
   ac                    switch power settings to AC (balanced/performance)
   bat                   switch power settings to Battery (power-saving, D3cold)
@@ -42,6 +42,9 @@ func torenPower(args []string) int {
 		}
 		return getPowerProfile()
 	case "threshold":
+		if len(args) > 1 && args[1] == "reset" {
+			return resetBatteryThreshold()
+		}
 		if len(args) > 1 {
 			return setBatteryThreshold(args[1])
 		}
@@ -265,11 +268,30 @@ func setBatteryThreshold(arg string) int {
 		applied = true
 	}
 
+	// Kept, so it holds after a reboot and wins over Toren's default and any
+	// laptop fix (99-toren-charge-limit.rules runs toren-charge-limit-apply).
+	_ = powerPrivileged("sh", "-c", fmt.Sprintf("mkdir -p /etc/toren && echo %s > %s", valStr, chargeLimitFile))
+
 	if applied {
 		fmt.Printf("Battery charge limit set to %d%%\n", pct)
 	} else {
 		fmt.Printf("Battery charge limit requested (%d%%), no compatible sysfs node found on this machine.\n", pct)
 	}
+	return exitOK
+}
+
+// chargeLimitFile holds the user's own charge limit; without it the default
+// (99-battery-threshold.rules) and any laptop fix apply.
+const chargeLimitFile = "/etc/toren/charge-limit"
+
+// resetBatteryThreshold drops the user's charge limit; the default and any
+// laptop fix apply again from the next boot.
+func resetBatteryThreshold() int {
+	if err := powerPrivileged("rm", "-f", chargeLimitFile); err != nil {
+		fmt.Fprintln(os.Stderr, "toren power threshold reset:", err)
+		return exitFail
+	}
+	fmt.Println("Battery charge limit: back to the default from the next boot")
 	return exitOK
 }
 

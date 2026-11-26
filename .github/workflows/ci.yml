@@ -242,6 +242,11 @@ jobs:
       - name: shell-desktop loads
         shell: sh
         run: sh tests/contract/load.sh shell-desktop
+      # The settings window (Super+,) is its own Quickshell config, started by
+      # torend as `quickshell -p shell/hub.qml`; nothing else loads it in CI.
+      - name: Settings window loads (shell/hub.qml)
+        shell: sh
+        run: sh tests/contract/load.sh shell/hub.qml
 
   # ==========================================================================
   # PART 6: Release scripts syntax check

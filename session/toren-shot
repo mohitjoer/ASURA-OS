@@ -13,19 +13,10 @@ set -eu
 QUICKSHELL_BIN=${ASURA_QUICKSHELL:-/usr/bin/quickshell}
 ENTRY=/usr/share/toren/shell/shot.qml
 
-# Virtual machine graphics fallback:
-# Under virtualized GPU drivers (vmwgfx / VirtualBox VMSVGA), QtWayland fails
-# to allocate hardware EGL surfaces for layer-shell surfaces (producing
-# "wl_display error 1: invalid arguments for wl_surface.attach").
-# Force software OpenGL in VMs so screenshot overlays render reliably.
-if [ -z "${LIBGL_ALWAYS_SOFTWARE:-}" ]; then
-	if [ -n "${ASURA_IS_VM:-}" ] || \
-	   grep -qa "VirtualBox\|VMware\|QEMU\|KVM" /sys/class/dmi/id/product_name 2>/dev/null || \
-	   grep -qa "VirtualBox\|VMware\|QEMU\|KVM\|innotek" /sys/class/dmi/id/sys_vendor 2>/dev/null || \
-	   lspci 2>/dev/null | grep -qi "VMware\|VirtualBox\|QEMU"; then
-		export LIBGL_ALWAYS_SOFTWARE=1
-	fi
-fi
+# Software rendering in a virtual machine (one shared check):
+GFX=/usr/share/toren/session/toren-graphics-env
+# shellcheck source=/dev/null
+if [ -r "$GFX" ]; then . "$GFX"; fi
 
 if [ ! -x "$QUICKSHELL_BIN" ]; then
     echo "toren-shot: $QUICKSHELL_BIN is not installed." >&2

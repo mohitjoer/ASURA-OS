@@ -28,7 +28,8 @@ hl.config({
     },
 })
 
-hl.gesture({ fingers = 3, direction = "horizontal", action = "workspace" })
+-- The workspace swipe gesture is added in hyprland.lua, after the user's files,
+-- so the settings window can turn it off or change its fingers.
 
 -- Hyprland enables every touchpad again when it rereads its config, and `exec`
 -- (unlike exec-once) runs on every reload, so a pad turned off with the Fn key

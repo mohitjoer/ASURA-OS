@@ -5,7 +5,7 @@
 ```bash
 toren doctor --json     # every check as {"ok", "sections": [{"section", "ok", "lines"}]}
 gsettings get org.toren.shell desktop-shell   # 'desktop' (default) or 'toren'
-toren version -v        # which ASURA commit is applied
+toren version -v        # which Toren commit is applied
 ```
 
 Read the sections with `"ok": false` first; each line says what is wrong.
@@ -28,7 +28,33 @@ sv status ~/.config/service/quickshell
   is valid JSON (`jq . ~/.config/illogical-impulse/config.json`); the desktop ignores
   a file it cannot parse.
 - Apps that will not open from the dock or launcher: run the app's command in
-  a terminal to see its error.
+  a terminal to see its error. The dock starts apps from the desktop process,
+  so a broken session environment there (no `WAYLAND_DISPLAY`, no session bus)
+  shows in `quickshell.log`.
+
+### The settings window (Super+,) does not open
+
+Super+, runs `toren-shell hub open`, which asks the `torend` service to start
+`quickshell -p /usr/share/toren/shell/hub.qml`. The window's own output is not
+kept, so a window that dies at once looks like nothing happened.
+
+```bash
+sv status ~/.config/service/torend ~/.config/service/dbus
+toren-shell hub open; echo $?          # non-zero: torend is not answering
+pgrep -af hub.qml                      # a stale window holding the lock?
+quickshell -p /usr/share/toren/shell/hub.qml   # start it by hand: its errors print here
+```
+
+- `torend` down: `sv restart ~/.config/service/torend`, then read
+  `~/.local/state/toren/torend.log`.
+- A stale `hub.qml` process with no window holds the single-instance lock:
+  `pkill -f hub.qml`.
+- `wl_display ... invalid arguments for wl_surface.attach` in a virtual
+  machine: software rendering is off for that process. `toren-graphics-env`
+  turns it on for every service; an old install without it needs `toren update`.
+- Opening it by hand works but Super+, does not: the difference is the
+  service's environment; compare `cat /proc/$(pgrep -f 'toren-shell daemon')/environ | tr '\0' '\n'`
+  with the terminal's.
 
 The rest of this playbook (sections 1-3) covers runit services, logs, and
 Toren's own shell.
@@ -42,7 +68,9 @@ daemon failures, QML binding issues, and broken user configurations on Toren Lin
 
 ## 1. Checking Service & Crash Logs (Void Linux `runit`)
 
-Toren Linux uses `runit` for process supervision. There is no `systemctl` or `journalctl`.
+Toren Linux uses `runit` for process supervision, not systemd. `systemctl` and
+`journalctl` exist only as thin bridges to runit and the service logs (see the
+`systemd-bridge` skill); prefer `sv` and the log files.
 
 ### Inspecting User and System Services
 
@@ -52,9 +80,15 @@ Session services run under the user's `runsvdir` instance:
 # Check status of all active user session services
 sv status ~/.config/service/*
 
-# Typical user services:
-#   ~/.config/service/quickshell  (The visual desktop shell)
-#   ~/.config/service/torend      (Core desktop daemon & socket provider)
+# The user services:
+#   ~/.config/service/dbus             (the session bus; the others wait for it)
+#   ~/.config/service/quickshell       (the desktop shell)
+#   ~/.config/service/torend           (the desktop daemon; opens the settings window)
+#   ~/.config/service/toren-userd      (applies themes and fonts to GTK, Qt and Hyprland)
+#   ~/.config/service/toren-wallpaper  (wallpaper and colours)
+#   ~/.config/service/toren-idle       (dim, lock, screen off: hypridle)
+#   ~/.config/service/toren-updates    (update and reboot notices)
+#   ~/.config/service/pipewire, wireplumber, portal, portal-hyprland
 
 # Check system services (hardware, power, dbus, seatd)
 sudo sv status /var/service/*
@@ -66,8 +100,9 @@ sv restart ~/.config/service/torend
 
 ### Inspecting Crash Dumps & Logs
 
-System and kernel messages are kept by socklog under `/var/log/socklog/`
-(`journalctl` reads them). Quickshell crash environments and state files are
+System and kernel messages are kept by socklog under `/var/log/socklog/`.
+The desktop's own services log to `~/.local/state/toren/`: `quickshell.log`,
+`torend.log`, `toren-idle.log`, `toren-wallpaper.log`, `toren-updates.log`. Quickshell crash environments and state files are
 written to `~/.local/state/toren/`:
 
 ```bash
@@ -149,7 +184,7 @@ toren doctor --fix
 What `toren doctor` inspects:
 
 - **Portals**: Confirms `xdg-desktop-portal-hyprland` is active and `xdg-desktop-portal-gnome` is absent.
-- **Keybinds**: Verifies chords in `~/.config/toren/hyprland/rebinds.conf` against `binds.json`.
+- **Keybinds**: Verifies the user's rebinds (`~/.config/toren/hyprland/rebinds.lua`) against the catalogue, `binds.json`.
 - **Drift**: Pinpoints differences between `/usr/share/toren/` base templates and `~/.config/toren/user_edits/`.
 
 ---
@@ -174,9 +209,14 @@ To revert a specific broken override back to package defaults:
 # Drops the override from user_edits/ and restores the shipped base copy
 toren reset <relative/path/to/file>
 
-# Example: reset a corrupted hyprland config
-toren reset hyprland/hyprland.conf
+# `toren status` lists the edited files; reset one by the path it shows
+
+# Everything the desktop reads, back to Toren's defaults (backed up first)
+toren reset --desktop
 ```
+
+Shipped files that were deleted or edited by hand come back with
+`toren reinstall` (the installed commit, nothing newer).
 
 To refresh all shipped templates while preserving user overrides:
 

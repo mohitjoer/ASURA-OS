@@ -145,6 +145,7 @@ Item {
         spacing: Tokens.s3
 
         Row {
+            visible: !Tokens.cards   // the card look has no eyebrow line
             // the register row holds a fixed box, so the rule and the seal keep
             // their distance from the title on every page
             height: Tokens.s5

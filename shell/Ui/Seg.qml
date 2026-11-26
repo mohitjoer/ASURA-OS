@@ -79,9 +79,11 @@ Item {
                 readonly property bool on: seg.current === modelData
                 width: Math.max(seg.minSeg, lab.implicitWidth + seg.padSeg)
                 height: seg.segH
-                radius: Tokens.radius
-                color: on ? Tokens.bone : (tap.pressed ? Tokens.tint16 : (sh.hovered ? Tokens.tint10 : "transparent"))
-                border.width: Tokens.border
+                radius: Tokens.cards ? Tokens.px(8) : Tokens.radius
+                // the card look fills the chosen segment with the accent
+                color: on ? (Tokens.cards ? Tokens.sun : Tokens.bone)
+                    : (tap.pressed ? Tokens.tint16 : (sh.hovered ? Tokens.tint10 : (Tokens.cards ? Tokens.tint5 : "transparent")))
+                border.width: Tokens.cards ? 0 : Tokens.border
                 border.color: sh.hovered && !on ? Tokens.lineStrong : Tokens.line
                 Behavior on color { ColorAnimation { duration: Tokens.snap } }
 
@@ -89,9 +91,9 @@ Item {
                     id: lab
                     anchors.centerIn: parent
                     text: seg.glyphFor(parent.modelData) + I18n.tr(parent.modelData)
-                    color: parent.on ? Tokens.inkOnBone : Tokens.inkDim
+                    color: parent.on ? (Tokens.cards ? Tokens.onSun : Tokens.inkOnBone) : Tokens.inkDim
                     font.family: Tokens.ui
-                    font.pixelSize: 10
+                    font.pixelSize: Tokens.cards ? 11 : 10
                     font.weight: Font.Medium
                     font.letterSpacing: 0.6
                 }

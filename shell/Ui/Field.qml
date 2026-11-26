@@ -18,10 +18,11 @@ Rectangle {
     signal accepted()
 
     implicitHeight: toolbar ? 36 : 30
-    radius: Tokens.radius
-    color: "transparent"
-    border.width: input.activeFocus ? 2 : Tokens.border
-    border.color: input.activeFocus ? Tokens.ink : (hh.hovered ? Tokens.lineStrong : Tokens.line)
+    // the card look: a soft filled field, outlined in the accent while typing
+    radius: Tokens.cards ? Tokens.radiusCard : Tokens.radius
+    color: Tokens.cards ? (hh.hovered || input.activeFocus ? Tokens.tint10 : Tokens.tint5) : "transparent"
+    border.width: Tokens.cards ? (input.activeFocus ? 1 : 0) : (input.activeFocus ? 2 : Tokens.border)
+    border.color: Tokens.cards ? Tokens.sun : (input.activeFocus ? Tokens.ink : (hh.hovered ? Tokens.lineStrong : Tokens.line))
     Behavior on border.color { ColorAnimation { duration: Tokens.snap } }
 
     function clear() { input.text = "" }

@@ -100,16 +100,16 @@ func RegenerateFromStore() error {
 	return WriteGenerated(loadStore(DesktopStorePath()))
 }
 
-// pushKeywords applies hyprctl `keyword` commands in one batch. A batch is one
-// round trip instead of a hundred, and keeps a slider drag from falling behind.
+// pushKeywords applies `keyword` commands to the running compositor in one
+// round trip, which keeps a slider drag from falling behind. Hyprland 0.57's Lua
+// config has no keyword command, so they go as one Lua chunk to `hyprctl eval`.
 func pushKeywords(cmds []string) {
 	if len(cmds) == 0 {
 		return
 	}
-	for i, c := range cmds {
-		cmds[i] = strings.ReplaceAll(c, ";", " ")
+	if chunk := keywordsToLua(cmds); chunk != "" {
+		_, _ = ctl("eval", chunk)
 	}
-	_, _ = ctl("--batch", strings.Join(cmds, " ; "))
 }
 
 // hyprlandDesktopFields are the desktop.* top-level keys this provider turns into

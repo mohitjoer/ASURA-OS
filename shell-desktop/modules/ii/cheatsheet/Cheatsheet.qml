@@ -1,10 +1,11 @@
+// Toren overlay (shell-desktop/toren/vendor.sh OVERLAYS): the cheatsheet shows
+// the keybindings only, with no tab bar and no periodic table page.
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import Qt.labs.synchronizer
 import Qt5Compat.GraphicalEffects
 import Quickshell.Io
 import Quickshell
@@ -13,16 +14,6 @@ import Quickshell.Hyprland
 
 Scope { // Scope
     id: root
-    property var tabButtonList: [
-        {
-            "icon": "keyboard",
-            "name": Translation.tr("Keybinds")
-        },
-        {
-            "icon": "experiment",
-            "name": Translation.tr("Elements")
-        },
-    ]
 
     Loader {
         id: cheatsheetLoader
@@ -86,21 +77,6 @@ Scope { // Scope
                     if (event.key === Qt.Key_Escape) {
                         cheatsheetRoot.hide();
                     }
-                    if (event.modifiers === Qt.ControlModifier) {
-                        if (event.key === Qt.Key_PageDown) {
-                            tabBar.incrementCurrentIndex();
-                            event.accepted = true;
-                        } else if (event.key === Qt.Key_PageUp) {
-                            tabBar.decrementCurrentIndex();
-                            event.accepted = true;
-                        } else if (event.key === Qt.Key_Tab) {
-                            tabBar.setCurrentIndex((tabBar.currentIndex + 1) % root.tabButtonList.length);
-                            event.accepted = true;
-                        } else if (event.key === Qt.Key_Backtab) {
-                            tabBar.setCurrentIndex((tabBar.currentIndex - 1 + root.tabButtonList.length) % root.tabButtonList.length);
-                            event.accepted = true;
-                        }
-                    }
                 }
 
                 RippleButton { // Close button
@@ -133,29 +109,13 @@ Scope { // Scope
                     anchors.centerIn: parent
                     spacing: 10
 
-                    Toolbar {
-                        Layout.alignment: Qt.AlignHCenter
-                        enableShadow: false
-                        ToolbarTabBar {
-                            id: tabBar
-                            tabButtonList: root.tabButtonList
-
-                            Synchronizer on currentIndex {
-                                property alias source: swipeView.currentIndex
-                            }
-                        }
-                    }
-
                     SwipeView { // Content pages
                         id: swipeView
                         Layout.topMargin: 5
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         spacing: 10
-                        currentIndex: Persistent.states.cheatsheet.tabIndex
-                        onCurrentIndexChanged: {
-                            Persistent.states.cheatsheet.tabIndex = currentIndex;
-                        }
+                        interactive: false
 
                         implicitWidth: Math.max.apply(null, contentChildren.map(child => child.implicitWidth || 0))
                         implicitHeight: Math.max.apply(null, contentChildren.map(child => child.implicitHeight || 0))
@@ -171,7 +131,6 @@ Scope { // Scope
                         }
 
                         CheatsheetKeybinds {}
-                        CheatsheetPeriodicTable {}
                     }
                 }
             }

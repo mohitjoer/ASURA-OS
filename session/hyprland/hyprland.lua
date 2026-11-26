@@ -52,6 +52,11 @@ local function safe_source(file)
     end
 end
 
+-- settings.lua sets these to change the workspace swipe (below); cleared first
+-- so a reload that keeps the Lua state does not keep an old choice.
+TOREN_WORKSPACE_SWIPE = nil
+TOREN_WORKSPACE_SWIPE_FINGERS = nil
+
 safe_source("shell.lua")
 safe_source("monitors-auto.lua")
 safe_source("monitors-user.lua")
@@ -61,3 +66,10 @@ safe_source("rebinds.lua")
 safe_source("toren.lua")
 safe_source("user.lua")
 safe_source("vm-perf.lua")
+
+-- Swipe between workspaces. Added after the user's files: the settings window
+-- (Input page) turns it off with TOREN_WORKSPACE_SWIPE = false or changes the
+-- fingers with TOREN_WORKSPACE_SWIPE_FINGERS in settings.lua.
+if TOREN_WORKSPACE_SWIPE ~= false then
+    hl.gesture({ fingers = TOREN_WORKSPACE_SWIPE_FINGERS or 3, direction = "horizontal", action = "workspace" })
+end

@@ -45,6 +45,21 @@ put() {
 		cp -f "$_src" "$_dst"/
 	fi
 }
+# put_mirror SRC DEST-DIR: put, then delete the files under DEST-DIR that SRC
+# no longer has, so a file removed from the repository (the desktop's old
+# Settings app, say) does not stay on an updated system and keep running.
+# Only regular files are removed (a symlink the ISO adds, like
+# shell-desktop/asura, stays), then the directories left empty.
+put_mirror() {
+	put "$1" "$2"
+	_src="$REPO/$1"
+	_dst="$ROOT$2"
+	[ -d "$_src" ] && [ -d "$_dst" ] || return 0
+	(cd "$_dst" && find . -type f) | while IFS= read -r _f; do
+		[ -e "$_src/$_f" ] || [ -L "$_src/$_f" ] || rm -f "$_dst/$_f"
+	done
+	find "$_dst" -mindepth 1 -depth -type d -empty -delete 2>/dev/null || true
+}
 # copy SRC to an exact DEST path.
 put_as() {
 	[ -e "$REPO/$1" ] || return 0
@@ -60,8 +75,8 @@ put_bin() {
 
 # ── The desktop ─────────────────────────────────────────────────────────────
 log "desktop shells, Hyprland, apps"
-put shell /usr/share/toren/shell
-put shell-desktop /usr/share/toren/shell-desktop
+put_mirror shell /usr/share/toren/shell
+put_mirror shell-desktop /usr/share/toren/shell-desktop
 rm -f "$ROOT/usr/share/toren/shell-desktop/toren/vendor.sh" \
 	"$ROOT/usr/share/toren/shell-desktop/toren/manifest.txt"
 put session/hyprland /usr/share/toren/hyprland
@@ -93,6 +108,7 @@ put_as session/toren-safe.desktop /usr/share/toren/session/toren-safe.desktop
 put_as session/toren-safe.desktop /usr/share/wayland-sessions/toren-safe.desktop
 put_as session/binds.json /usr/share/toren/session/binds.json
 put_as session/runit/toren-user-services /usr/share/toren/session/toren-user-services
+put_as session/toren-graphics-env /usr/share/toren/session/toren-graphics-env
 put_bin session/runit/toren-user-services /usr/bin/toren-user-services
 put_as session/toren-store /usr/share/toren/session/toren-store
 put_as session/toren-portals.conf /usr/share/xdg-desktop-portal/toren-portals.conf
@@ -124,7 +140,7 @@ for hdir in audio display input perf pkg; do
 		put_bin "${f#"$REPO"/}" "/usr/bin/$(basename "$f")"
 	done
 done
-for h in prime-run fan-profile systemctl journalctl toren-gpu with-mimalloc; do
+for h in prime-run fan-profile systemctl journalctl toren-gpu with-mimalloc toren-charge-limit-apply; do
 	put_bin "system/helpers/$h" "/usr/bin/$h"
 done
 put_bin installation/toren-installer.sh /usr/bin/toren-installer

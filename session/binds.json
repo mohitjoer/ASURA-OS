@@ -46,7 +46,7 @@
     {
       "id": "menu",
       "category": "desktop",
-      "label": "Open the ASURA menu",
+      "label": "Open the Toren menu",
       "chord": "SUPER + ALT + Space",
       "kind": "shell",
       "action": "togglePopover",

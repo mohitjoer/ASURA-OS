@@ -110,6 +110,18 @@ func buildBindRows(cat []CatalogBind, o Overrides, live []liveBind) []BindRow {
 			for _, al := range NumpadAliases(ch) {
 				claimed[chordKey(al)] = true
 			}
+			// A digit family is bound on the number pad too (KP_<n>, and the
+			// keysym the same key sends with NumLock off). Those are the same
+			// shortcut, so the family's row stands for them rather than each
+			// showing up again as a bind of the compositor's own.
+			if c.Family {
+				if kp := numpadTwin(ch); kp != "" {
+					claimed[chordKey(kp)] = true
+					for _, al := range NumpadAliases(kp) {
+						claimed[chordKey(al)] = true
+					}
+				}
+			}
 			if !liveSet[k] {
 				bound = false
 			}
@@ -312,9 +324,53 @@ func customUnhonored(k Keybind) (string, bool) {
 	return fmt.Sprintf("Hyprland has no bind action for %q.", k.Action), true
 }
 
+// numpadTwin is a chord whose last key is a digit, with that digit moved to the
+// number pad ("SUPER + 3" -> "SUPER + KP_3"); "" when the last key is not a digit.
+func numpadTwin(chord string) string {
+	parts := strings.Split(chord, " + ")
+	last := parts[len(parts)-1]
+	if len(last) != 1 || last[0] < '0' || last[0] > '9' {
+		return ""
+	}
+	parts[len(parts)-1] = "KP_" + last
+	return strings.Join(parts, " + ")
+}
+
+// luaDispatcherName reads Hyprland 0.57's Lua-config form of a bind's
+// dispatcher, "HL.Dispatcher(exec_cmd)", as its name; "" for any other form.
+func luaDispatcherName(dispatcher string) string {
+	const pre = "HL.Dispatcher("
+	if strings.HasPrefix(dispatcher, pre) && strings.HasSuffix(dispatcher, ")") {
+		return strings.TrimSuffix(strings.TrimPrefix(dispatcher, pre), ")")
+	}
+	return ""
+}
+
 // describeDispatcher reads a dispatcher and its argument as a short phrase.
 func describeDispatcher(dispatcher, arg string) string {
 	arg = strings.TrimSpace(arg)
+	// A Lua-config bind reports its dispatcher by name and its argument as an
+	// internal reference number, which means nothing to a reader: name the
+	// action and leave the number out.
+	if name := luaDispatcherName(dispatcher); name != "" {
+		switch name {
+		case "exec_cmd":
+			return "Run a command"
+		case "window.close":
+			return "Close window"
+		case "window.float":
+			return "Float or tile"
+		case "window.fullscreen":
+			return "Fullscreen"
+		case "focus":
+			return "Move focus"
+		case "window.move":
+			return "Move window"
+		case "submap":
+			return "Enter a key mode"
+		}
+		return strings.ReplaceAll(strings.ReplaceAll(name, ".", " "), "_", " ")
+	}
 	switch dispatcher {
 	case "exec":
 		return "Run: " + arg

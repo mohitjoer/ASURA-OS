@@ -1,0 +1,15 @@
+#!/bin/sh
+# toren-charge-limit-apply BATTERY_SYSFS_DIR
+#
+# The user's own charge limit (`toren power threshold N`, Settings -> Desktop ->
+# System -> Charge limit), kept in /etc/toren/charge-limit. udev runs this for
+# each battery (99-toren-charge-limit.rules); udev runs RUN commands after
+# every rule has set its attributes, so the user's choice lands after Toren's
+# default (99-battery-threshold.rules) and any laptop fix. Without the file the
+# default and the laptop fix stay as they are.
+limit=$(cat /etc/toren/charge-limit 2>/dev/null) || exit 0
+case "$limit" in '' | *[!0-9]*) exit 0 ;; esac
+for f in "$1/charge_control_end_threshold" "$1/charge_stop_threshold"; do
+	[ -w "$f" ] && echo "$limit" >"$f"
+done
+exit 0

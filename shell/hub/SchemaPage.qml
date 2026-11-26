@@ -93,8 +93,9 @@ Item {
 
         Item {
             width: parent.width
-            // an eyebrow that only repeats the title is noise, not a register
-            visible: I18n.tr(page.eyebrow).toLowerCase() !== page.title.toLowerCase()
+            // an eyebrow that only repeats the title is noise, not a register;
+            // the card look has none (the sidebar already says where you are)
+            visible: !Tokens.cards && I18n.tr(page.eyebrow).toLowerCase() !== page.title.toLowerCase()
             height: 18
             Row {
                 id: ebrow
@@ -124,7 +125,8 @@ Item {
             text: page.title
             color: Tokens.ink
             font.family: Tokens.display
-            font.pixelSize: Tokens.fTitle
+            font.pixelSize: Tokens.cards ? Tokens.px(22) : Tokens.fTitle
+            font.weight: Tokens.cards ? Font.Bold : Font.Normal
         }
         Text {
             visible: page.blurb !== ""
@@ -132,14 +134,15 @@ Item {
             text: I18n.tr(page.blurb)
             color: Tokens.inkMuted
             font.family: Tokens.ui
-            font.pixelSize: Tokens.fBody
+            font.pixelSize: Tokens.cards ? Tokens.fSmall : Tokens.fBody
             wrapMode: Text.WordWrap
         }
         Item { width: 1; height: Tokens.s1 }
 
-        // a page with one tab does not need a tab bar
+        // a page with one tab does not need a tab bar; in the card look the
+        // tabs are rows in the sidebar, under the page's own row
         Tabs {
-            visible: page.tabs.length > 1
+            visible: !Tokens.cards && page.tabs.length > 1
             options: page.tabs
             current: sheet.tab
             onChose: (label) => sheet.tab = label

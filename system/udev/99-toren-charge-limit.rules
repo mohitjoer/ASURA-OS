@@ -1,0 +1,4 @@
+# The user's own battery charge limit, if they set one (toren power threshold).
+# RUN commands run after every rule, so this wins over the default and any
+# laptop fix. See /usr/bin/toren-charge-limit-apply.
+ACTION=="add", SUBSYSTEM=="power_supply", KERNEL=="BAT[0-9]*", RUN+="/usr/bin/toren-charge-limit-apply /sys%p"

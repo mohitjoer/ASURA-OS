@@ -96,7 +96,7 @@ var rows = [
     },
     {
         "tab": "",
-        "group": "TUNING \u00b7 THIS SESSION",
+        "group": "TUNING · THIS SESSION",
         "key": "",
         "label": "Power limit / TDP",
         "desc": "GPU power budget in watts, live for this session.",
@@ -105,7 +105,7 @@ var rows = [
     },
     {
         "tab": "",
-        "group": "TUNING \u00b7 THIS SESSION",
+        "group": "TUNING · THIS SESSION",
         "key": "",
         "label": "Performance level",
         "desc": "AMD performance level: auto, low, or high.",
@@ -114,7 +114,7 @@ var rows = [
     },
     {
         "tab": "",
-        "group": "TUNING \u00b7 THIS SESSION",
+        "group": "TUNING · THIS SESSION",
         "key": "",
         "label": "Persistence mode",
         "desc": "Keeps the NVIDIA driver loaded",
@@ -123,7 +123,7 @@ var rows = [
     },
     {
         "tab": "",
-        "group": "TUNING \u00b7 THIS SESSION",
+        "group": "TUNING · THIS SESSION",
         "key": "",
         "label": "Overclock, undervolt and fan control",
         "desc": "GPU clock and fan control; resets on reboot",
@@ -132,7 +132,7 @@ var rows = [
     },
     {
         "tab": "",
-        "group": "TUNING \u00b7 THIS SESSION",
+        "group": "TUNING · THIS SESSION",
         "key": "",
         "label": "Tuning presets",
         "desc": "Save and apply named tuning bundles.",
@@ -165,7 +165,7 @@ var rows = [
     },
     {
         "tab": "",
-        "group": "GPU PASSTHROUGH \u00b7 ADVANCED",
+        "group": "GPU PASSTHROUGH · ADVANCED",
         "key": "",
         "label": "Readiness checks",
         "desc": "",
@@ -174,7 +174,7 @@ var rows = [
     },
     {
         "tab": "",
-        "group": "GPU PASSTHROUGH \u00b7 ADVANCED",
+        "group": "GPU PASSTHROUGH · ADVANCED",
         "key": "",
         "label": "Disable passthrough",
         "desc": "",
@@ -183,7 +183,7 @@ var rows = [
     },
     {
         "tab": "",
-        "group": "GPU PASSTHROUGH \u00b7 ADVANCED",
+        "group": "GPU PASSTHROUGH · ADVANCED",
         "key": "",
         "label": "Review changes",
         "desc": "",
@@ -192,7 +192,7 @@ var rows = [
     },
     {
         "tab": "",
-        "group": "GPU PASSTHROUGH \u00b7 ADVANCED",
+        "group": "GPU PASSTHROUGH · ADVANCED",
         "key": "",
         "label": "Enable passthrough",
         "desc": "",
@@ -201,7 +201,7 @@ var rows = [
     },
     {
         "tab": "",
-        "group": "GPU PASSTHROUGH \u00b7 ADVANCED",
+        "group": "GPU PASSTHROUGH · ADVANCED",
         "key": "",
         "label": "Close",
         "desc": "",
@@ -210,7 +210,7 @@ var rows = [
     },
     {
         "tab": "",
-        "group": "GPU PASSTHROUGH \u00b7 ADVANCED",
+        "group": "GPU PASSTHROUGH · ADVANCED",
         "key": "",
         "label": "Recheck",
         "desc": "",
@@ -228,7 +228,7 @@ var rows = [
     },
     {
         "tab": "",
-        "group": "GPU PASSTHROUGH \u00b7 ADVANCED",
+        "group": "GPU PASSTHROUGH · ADVANCED",
         "key": "",
         "label": "Passthrough status",
         "desc": "",
@@ -237,7 +237,7 @@ var rows = [
     },
     {
         "tab": "",
-        "group": "GPU PASSTHROUGH \u00b7 ADVANCED",
+        "group": "GPU PASSTHROUGH · ADVANCED",
         "key": "",
         "label": "Readiness check details",
         "desc": "",
@@ -255,125 +255,11 @@ var rows = [
     },
     {
         "tab": "",
-        "group": "GPU PASSTHROUGH \u00b7 ADVANCED",
+        "group": "GPU PASSTHROUGH · ADVANCED",
         "key": "",
         "label": "Passthrough section intro",
         "desc": "",
         "ctl": "readout",
         "src": "static copy + page.dgpuName"
-    },
-    {
-        "tab": "",
-        "group": "IDLE",
-        "key": "idle.enabled",
-        "label": "Idle timeouts",
-        "desc": "Dim, lock, blank and suspend the machine when it sits idle.",
-        "ctl": "sw",
-        "src": "toren-hubd cpu set idle enabled (power.json, toren-idle apply)"
-    },
-    {
-        "tab": "",
-        "group": "IDLE",
-        "key": "idle.onDesktops",
-        "label": "Also on desktops",
-        "desc": "Run these timeouts on this desktop too, not only on laptops.",
-        "ctl": "sw",
-        "src": "toren-hubd cpu set idle onDesktops (power.json, toren-idle apply)"
-    },
-    {
-        "tab": "",
-        "group": "ON BATTERY",
-        "key": "idle.battery.dimSec",
-        "label": "Dim",
-        "desc": "Minutes idle on battery before the backlight dims; 0 never dims.",
-        "ctl": "step",
-        "src": "toren-hubd cpu set idle battery.dimSec (power.json, minutes)",
-        "unit": "min",
-        "lo": 0,
-        "hi": 60
-    },
-    {
-        "tab": "",
-        "group": "ON BATTERY",
-        "key": "idle.battery.lockSec",
-        "label": "Lock",
-        "desc": "Minutes idle on battery before the session locks; 0 never locks.",
-        "ctl": "step",
-        "src": "toren-hubd cpu set idle battery.lockSec (power.json, minutes)",
-        "unit": "min",
-        "lo": 0,
-        "hi": 120
-    },
-    {
-        "tab": "",
-        "group": "ON BATTERY",
-        "key": "idle.battery.screenOffSec",
-        "label": "Screen off",
-        "desc": "Minutes idle on battery before the screen powers off; 0 keeps it on.",
-        "ctl": "step",
-        "src": "toren-hubd cpu set idle battery.screenOffSec (power.json, minutes)",
-        "unit": "min",
-        "lo": 0,
-        "hi": 120
-    },
-    {
-        "tab": "",
-        "group": "ON BATTERY",
-        "key": "idle.battery.suspendSec",
-        "label": "Suspend",
-        "desc": "Minutes idle on battery before the machine suspends; 0 never suspends.",
-        "ctl": "step",
-        "src": "toren-hubd cpu set idle battery.suspendSec (power.json, minutes)",
-        "unit": "min",
-        "lo": 0,
-        "hi": 240
-    },
-    {
-        "tab": "",
-        "group": "PLUGGED IN",
-        "key": "idle.ac.dimSec",
-        "label": "Dim",
-        "desc": "Minutes idle on AC before the backlight dims; 0 never dims.",
-        "ctl": "step",
-        "src": "toren-hubd cpu set idle ac.dimSec (power.json, minutes)",
-        "unit": "min",
-        "lo": 0,
-        "hi": 60
-    },
-    {
-        "tab": "",
-        "group": "PLUGGED IN",
-        "key": "idle.ac.lockSec",
-        "label": "Lock",
-        "desc": "Minutes idle on AC before the session locks; 0 never locks.",
-        "ctl": "step",
-        "src": "toren-hubd cpu set idle ac.lockSec (power.json, minutes)",
-        "unit": "min",
-        "lo": 0,
-        "hi": 120
-    },
-    {
-        "tab": "",
-        "group": "PLUGGED IN",
-        "key": "idle.ac.screenOffSec",
-        "label": "Screen off",
-        "desc": "Minutes idle on AC before the screen powers off; 0 keeps it on.",
-        "ctl": "step",
-        "src": "toren-hubd cpu set idle ac.screenOffSec (power.json, minutes)",
-        "unit": "min",
-        "lo": 0,
-        "hi": 120
-    },
-    {
-        "tab": "",
-        "group": "PLUGGED IN",
-        "key": "idle.ac.suspendSec",
-        "label": "Suspend",
-        "desc": "Minutes idle on AC before the machine suspends; 0 never suspends.",
-        "ctl": "step",
-        "src": "toren-hubd cpu set idle ac.suspendSec (power.json, minutes)",
-        "unit": "min",
-        "lo": 0,
-        "hi": 240
     }
 ];

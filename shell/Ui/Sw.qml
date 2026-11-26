@@ -16,28 +16,30 @@ Rectangle {
         }
     }
 
-    implicitWidth: 54
+    implicitWidth: Tokens.cards ? 44 : 54
     implicitHeight: 24
-    radius: Tokens.radius
+    radius: Tokens.cards ? height / 2 : Tokens.radius
     // off sits on a faint tint with a dim knob, on brightens the track and fills
-    // the knob: two signals for one state, so it reads at a glance.
-    color: tap.pressed ? Tokens.tint16 : (sw.on ? Tokens.tint16 : Tokens.tint5)
-    border.width: Tokens.border
+    // the knob: two signals for one state, so it reads at a glance. The card
+    // look is a round switch whose track fills with the accent when on.
+    color: Tokens.cards ? (sw.on ? Tokens.sun : (tap.pressed ? Tokens.tint16 : Tokens.tint10))
+        : (tap.pressed ? Tokens.tint16 : (sw.on ? Tokens.tint16 : Tokens.tint5))
+    border.width: Tokens.cards ? 0 : Tokens.border
     border.color: activeFocus ? Tokens.bone : (hh.hovered ? Tokens.lineStrong : Tokens.line)
-    antialiasing: false
+    antialiasing: Tokens.cards
     Behavior on border.color { ColorAnimation { duration: Tokens.snap } }
     Behavior on color { ColorAnimation { duration: Tokens.snap } }
 
     Rectangle {
-        width: 25
-        height: 17
-        y: 3
+        width: Tokens.cards ? 18 : 25
+        height: Tokens.cards ? 18 : 17
+        y: Tokens.cards ? 3 : 3
         x: sw.on ? parent.width - width - 3 : 3
-        radius: Tokens.radius
-        antialiasing: false
+        radius: Tokens.cards ? height / 2 : Tokens.radius
+        antialiasing: Tokens.cards
         // off is a dim knob on a hairline track, not an empty outline: the state
         // has to be readable at a glance, which an outlined box is not.
-        color: sw.on ? Tokens.ink : Tokens.inkDim
+        color: Tokens.cards ? (sw.on ? Tokens.onSun : Tokens.inkDim) : (sw.on ? Tokens.ink : Tokens.inkDim)
         border.width: 0
         Behavior on x { NumberAnimation { duration: Tokens.snap; easing.type: Tokens.easeSnap } }
     }

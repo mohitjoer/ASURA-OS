@@ -49,7 +49,6 @@ default desktop they are hidden: that desktop keeps its own settings.
 | `connections`   | Connections      | `ConnectionsPage.qml`     | Wi-Fi networks, Bluetooth pairing                          |
 | `input`         | Input            | `InputPage.qml`           | Keyboard layout, repeat rate, touchpad gestures            |
 | `gpu`           | Graphics & Power | `GpuPage.qml`             | Power profiles, GPU performance, idle & lock screen timers |
-| `animations`    | Animations       | `AnimationsPage.qml`      | Compositor animation curves and bezier profiles            |
 | `lockscreen`    | Lockscreen       | `LockscreenPage.qml`      | Hyprlock appearance, clock format, lock timeouts           |
 | `windowmanager` | Window Manager   | `WindowManagerPage.qml`   | Window gaps, border radius, active border colors           |
 | `bar-studio`    | Bar Studio       | `BarStudioPage.qml`       | *Toren shell.* QS Bar styling, border radiuses, height                    |

@@ -23,7 +23,7 @@ def read_keys(path):
         while stack and stack[-1][1]>=ind: stack.pop()
         if m:
             stack.append((m.group(1),ind)); continue
-        m=re.match(r'property (bool|int|real|string|list<string>|var) (\w+): ([^/]+?)\s*(//\s*(.*))?$',s)
+        m=re.match(r'property (bool|int|real|string|list<string>|var) (\w+): ("(?:[^"\\]|\\.)*"|[^/]+?)\s*(//\s*(.*))?$',s)
         if m and stack:
             dotted=".".join(n for n,_ in stack if n!="options")+"."+m.group(2)
             out[dotted]={"type":m.group(1),"def":m.group(3).strip(),"note":(m.group(5) or "").strip()}
@@ -42,7 +42,11 @@ def row(tab, group, key, ctl, label, desc, **kw):
     t = keys[key]["type"]
     if t == "bool": dv = d == "true"
     elif t in ("int", "real"): dv = float(d) if "." in d else int(d)
-    else: dv = json.loads(d)
+    else:
+        try:
+            dv = json.loads(d)
+        except ValueError:
+            dv = ""  # an expression (e.g. a directory), not a literal
     r = {"tab": tab, "group": group, "key": key, "ctl": ctl, "label": label, "desc": desc, "def": dv}
     r.update(kw); R.append(r)
 
@@ -101,8 +105,62 @@ row("Look", "NIGHT LIGHT", "light.night.colorTemperature", "step", "Warmth", "Lo
 
 row("System", "VOLUME", "audio.protection.enable", "sw", "Limit volume jumps", "Stops the volume from jumping up suddenly")
 
+# Moved from the desktop's own Settings app (shell-desktop/settings.qml), so
+# the Hub is the only settings panel.
+row("Bar & dock", "SHAPE", "bar.borderless", "sw", "Plain items", "Draws the bar's items without the boxes that group them")
+row("Bar & dock", "WORKSPACES", "bar.workspaces.showAppIcons", "sw", "App icons", "Shows each workspace's main app instead of a dot")
+row("Bar & dock", "INDICATORS", "bar.indicators.notifications.showUnreadCount", "sw", "Unread count", "Shows how many notifications are waiting")
+row("Bar & dock", "INDICATORS", "bar.tooltips.clickToShow", "sw", "Tooltips on click", "Shows the bar's tooltips on click instead of on hover")
+row("Bar & dock", "TRAY", "tray.monochromeIcons", "sw", "Monochrome tray icons", "Tints the tray's app icons to the colour scheme")
+row("Bar & dock", "WEATHER", "bar.weather.fetchInterval", "step", "Weather refresh", "How often the weather is fetched", unit="min", **{"from": 5, "to": 120})
+
+row("Look", "FONTS", "appearance.fonts.main", "text", "Interface font", "The font of the bar, menus and panels", eg="Google Sans Flex")
+row("Look", "FONTS", "appearance.fonts.title", "text", "Title font", "Headings in panels and popups", eg="Google Sans Flex")
+row("Look", "FONTS", "appearance.fonts.monospace", "text", "Monospace font", "Code, numbers and the terminal-style parts", eg="JetBrains Mono NF")
+row("Look", "WALLPAPER", "toren.wallpaperPicker", "action", "Wallpaper", "Pick the wallpaper; the colours follow it",
+    store="action", actionLabel="Choose", run=["toren-wallpaper", "wallpaper", "ui"])
+row("Look", "WALLPAPER COLOURS", "appearance.wallpaperTheming.enableAppsAndShell", "sw", "Desktop and GTK apps", "Take their colours from the wallpaper")
+row("Look", "WALLPAPER COLOURS", "appearance.wallpaperTheming.enableQtApps", "sw", "Qt apps", "Take their colours from the wallpaper")
+row("Look", "WALLPAPER COLOURS", "appearance.wallpaperTheming.enableTerminal", "sw", "Terminal", "Takes its colours from the wallpaper")
+row("Look", "BACKGROUND", "background.parallax.enableWorkspace", "sw", "Parallax on workspaces", "The wallpaper slides a little as you change workspace")
+row("Look", "BACKGROUND", "background.parallax.workspaceZoom", "slid", "Parallax zoom", "How much the wallpaper is enlarged to slide", **{"lo": 1.0, "hi": 1.5})
+row("Look", "BACKGROUND", "background.widgets.weather.enable", "sw", "Weather on the desktop", "A weather widget drawn on the wallpaper")
+row("Look", "OVERVIEW", "overview.scale", "slid", "Overview size", "Each workspace's size in the overview, against the screen", **{"lo": 0.1, "hi": 0.4})
+row("Look", "OVERVIEW", "overview.centerIcons", "sw", "Centred app icons", "Draws each window's app icon in its middle")
+row("Look", "OVERVIEW", "overview.orderRightLeft", "sw", "Right to left", "Orders the workspaces from right to left")
+row("Look", "OVERVIEW", "overview.orderBottomUp", "sw", "Bottom to top", "Orders the rows from the bottom up")
+
+row("Tools", "SCREENSHOTS", "screenSnip.savePath", "text", "Screenshot folder", "Where screenshots are saved; empty copies them to the clipboard only", eg="~/Pictures/Screenshots")
+row("Tools", "SCREENSHOTS", "screenRecord.savePath", "text", "Recording folder", "Where screen recordings are saved; empty uses Videos", eg="~/Videos")
+row("Tools", "SCREENSHOTS", "regionSelector.targetRegions.windows", "sw", "Snap to windows", "The region selector offers whole windows")
+row("Tools", "SCREENSHOTS", "regionSelector.targetRegions.layers", "sw", "Snap to panels", "The region selector offers the bar and other panels")
+row("Tools", "SCREENSHOTS", "regionSelector.targetRegions.content", "sw", "Snap to content", "The region selector offers areas inside windows")
+row("Tools", "SCREENSHOTS", "regionSelector.rect.showAimLines", "sw", "Aim lines", "Guide lines across the screen while selecting")
+row("Tools", "SEARCH", "search.engineBaseUrl", "text", "Web search", "The address a web search opens; the query is added at the end", eg="https://duckduckgo.com/?q=")
+row("Tools", "SEARCH", "search.sloppy", "sw", "Forgiving search", "Finds apps even with typos (slower on many apps)")
+row("Tools", "SEARCH PREFIXES", "search.prefix.app", "text", "Apps", "Type this first to search only apps", eg=">")
+row("Tools", "SEARCH PREFIXES", "search.prefix.clipboard", "text", "Clipboard", "Type this first to search the clipboard", eg=";")
+row("Tools", "SEARCH PREFIXES", "search.prefix.emojis", "text", "Emoji", "Type this first to search emoji", eg=":")
+row("Tools", "SEARCH PREFIXES", "search.prefix.math", "text", "Calculator", "Type this first to calculate", eg="=")
+row("Tools", "SEARCH PREFIXES", "search.prefix.shellCommand", "text", "Command", "Type this first to run a shell command", eg="$")
+row("Tools", "SEARCH PREFIXES", "search.prefix.webSearch", "text", "Web", "Type this first to search the web", eg="?")
+
+row("Lock screen", "LOCK SCREEN", "lock.launchOnStartup", "sw", "Lock at login", "Starts the session locked")
+row("Lock screen", "SECURITY", "lock.security.unlockKeyring", "sw", "Unlock the keyring", "Unlocking the screen also unlocks saved passwords")
+
+row("System", "NOTIFICATIONS", "notifications.forceMonitor.enable", "sw", "One screen only", "Shows notifications on the screen named below")
+row("System", "NOTIFICATIONS", "notifications.forceMonitor.name", "text", "Screen", "The screen's name, as Displays lists it", eg="eDP-1")
+row("System", "CHARGING", "toren.chargeLimit", "step", "Charge limit",
+    "Stops charging at this level to keep the battery healthy; kept across reboots. Asks for your password",
+    store="charge-limit", unit="%", **{"from": 50, "to": 100, "def": 80})
+row("System", "WARNINGS", "battery.full", "step", "Full battery notice", "Tells you when the battery reaches this level (101 = never)", unit="%", **{"from": 50, "to": 101})
+row("System", "SUSPEND", "battery.suspend", "step", "Suspend at", "The level at which the computer suspends", unit="%", **{"from": 1, "to": 15})
+row("System", "VOLUME", "audio.protection.maxAllowedIncrease", "step", "Largest jump", "The most the volume can rise in one step", unit="%", **{"from": 1, "to": 50})
+row("System", "VOLUME", "audio.protection.maxAllowed", "step", "Highest volume", "The volume never goes above this", unit="%", **{"from": 10, "to": 150})
+row("System", "PERFORMANCE", "resources.updateInterval", "step", "Resource refresh", "How often CPU and memory are read for the bar", unit="ms", **{"from": 1000, "to": 10000})
+
 # tabs in this order; rows keep their order inside a tab
-TABS = ["Bar & dock", "Look", "Clock", "Lock screen", "System"]
+TABS = ["Bar & dock", "Look", "Clock", "Lock screen", "Tools", "System"]
 R.sort(key=lambda r: TABS.index(r["tab"]))
 
 out = ".pragma library\n\n"

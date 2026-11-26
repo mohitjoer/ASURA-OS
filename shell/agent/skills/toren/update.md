@@ -26,7 +26,10 @@ toren version --commit      # the commit this machine runs
 2. **Toren**: fetch `dev-unstable` (30 s limit; offline it uses the last
    fetch), choose the newest commit whose GitHub checks all passed, and apply
    it with `installation/apply-repo.sh` (files, Go tools, new packages). A
-   commit older than the one applied is never applied. What changed is listed.
+   file Toren no longer ships is removed from `/usr/share/toren/shell` and
+   `shell-desktop`, so nothing stale keeps loading. A commit older than the one
+   applied is never applied. What changed is listed. Then the one-time fixes
+   (`toren migrate`): system ones as root, then the user's; each runs once.
 3. **Flatpaks**.
 4. **Refresh**: the running desktop picks up the change without a logout
    (`toren refresh`: user services re-synced, Hyprland reloaded, the shell and
@@ -53,6 +56,11 @@ toren version --commit      # the commit this machine runs
   first).
 - A desktop notice says when an update is available or a reboot would finish
   one (the `toren-updates` user service runs `toren notify-updates`).
+
+## Repairing without updating
+
+`toren reinstall` applies the files of the commit already installed again:
+for shipped files that were deleted or edited by hand.
 
 ## Going back
 

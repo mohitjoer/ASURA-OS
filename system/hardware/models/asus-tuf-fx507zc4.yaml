@@ -23,7 +23,7 @@ files:
     - target: "/etc/udev/rules.d/80-nvidia-pm.rules"
       source: "system/udev/80-nvidia-pm.rules"
       reason: "Enable PCIe RTD3 runtime D3cold power management for NVIDIA GA107M RTX 3050"
-    - target: "/etc/udev/rules.d/99-battery-threshold.rules"
+    - target: "/etc/udev/rules.d/99-asus-battery.rules"
       source: "system/udev/99-battery-threshold.rules"
       reason: "Persist 80% charge threshold on ASUS BAT0 charge_control_end_threshold"
     - target: "/etc/udev/rules.d/90-asus-backlight.rules"

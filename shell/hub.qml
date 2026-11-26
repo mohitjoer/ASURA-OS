@@ -42,6 +42,12 @@ ShellRoot {
         // Honour this monitor's Interface scale (Displays page): scale the whole
         // settings UI via Tokens. The window fills its screen, so a smaller scale
         // packs the chrome tighter rather than leaving a margin.
+        // The settings window's own look: card rows and one monospace font
+        // throughout (Tokens.cards); only this process, not the shell.
+        Binding { target: Tokens; property: "cards"; value: true }
+        Binding { target: Tokens; property: "ui"; value: Tokens.mono }
+        Binding { target: Tokens; property: "display"; value: Tokens.mono }
+
         Binding {
             target: Tokens
             property: "uiScale"

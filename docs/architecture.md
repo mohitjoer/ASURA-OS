@@ -1171,10 +1171,9 @@ than assumed:
 > **What the ISO ships today is older.** Void's own repository has no Hyprland package.
 > `installation/build-iso-void.sh` installs prebuilt **Hyprland 0.49.0** and its libraries
 > (`HYPR_PKGS`) from the third-party `Makrennel/hyprland-void` repository, checksum-pinned in
-> `installation/binary-checksums.txt`. `packaging/xbps/hyprland/template` (0.53.3) is not
-> built by anything yet. Closing the gap between the 0.49.0 that ships and the 0.53.3 the
-> configuration, the Hub generator and this section target is open in
-> [`roadmap.md`](roadmap.md).
+> `installation/binary-checksums.txt`, as a fallback. Hyprland 0.57.2 and its stack are
+> built in the Toren package repository (`packaging/xbps/build-stack.sh`), and the session
+> picks the Lua or the legacy configuration by the installed version.
 
 `focusHistoryID` is also inverted relative to intuition, and this is the single
 easiest thing to get wrong in the whole feature. Hyprland's history vector is

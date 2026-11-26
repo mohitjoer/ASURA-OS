@@ -20,7 +20,10 @@ Item {
 
     default property alias content: body.data
 
-    readonly property int headerH: 46
+    readonly property int headerH: Tokens.cards ? Tokens.px(36) : 46
+    // the card look writes a group's name in sentence case ("Dock", not "DOCK")
+    readonly property string shownTitle: Tokens.cards && title.length
+        ? title.charAt(0).toUpperCase() + title.slice(1).toLowerCase() : title
     implicitHeight: headerH + bodyWrap.height
     height: implicitHeight
 
@@ -29,7 +32,7 @@ Item {
         anchors.fill: parent
         radius: Tokens.radius
         color: "transparent"
-        border.width: Tokens.border
+        border.width: Tokens.cards ? 0 : Tokens.border
         border.color: Tokens.line
     }
 
@@ -41,13 +44,14 @@ Item {
         height: card.headerH
 
         Row {
-            anchors { left: parent.left; leftMargin: Tokens.s4; verticalCenter: parent.verticalCenter }
+            anchors { left: parent.left; leftMargin: Tokens.cards ? Tokens.s1 : Tokens.s4; verticalCenter: parent.verticalCenter }
             spacing: Tokens.s2
             Text {
-                text: card.title
-                color: Tokens.inkDim
-                font.family: Tokens.ui; font.pixelSize: Tokens.fBody
-                font.weight: Font.Medium; font.letterSpacing: Tokens.trackLabel
+                text: card.shownTitle
+                color: Tokens.cards ? Tokens.inkMuted : Tokens.inkDim
+                font.family: Tokens.ui; font.pixelSize: Tokens.cards ? Tokens.fSmall : Tokens.fBody
+                font.weight: Tokens.cards ? Font.DemiBold : Font.Medium
+                font.letterSpacing: Tokens.cards ? 0 : Tokens.trackLabel
                 anchors.verticalCenter: parent.verticalCenter
             }
             Text {
@@ -72,7 +76,7 @@ Item {
         Text {
             id: caret
             visible: card.collapsible
-            anchors { right: parent.right; rightMargin: Tokens.s4; verticalCenter: parent.verticalCenter }
+            anchors { right: parent.right; rightMargin: Tokens.cards ? Tokens.s2 : Tokens.s4; verticalCenter: parent.verticalCenter }
             text: "\u25b8"
             color: hh.hovered ? (tap.pressed ? Tokens.ink : Tokens.inkDim)
                 : (card.expanded ? Tokens.inkFaint : Tokens.inkDim)
@@ -88,6 +92,7 @@ Item {
             anchors.leftMargin: Tokens.s4; anchors.rightMargin: Tokens.s4
             height: 1
             color: Tokens.lineSoft
+            visible: !Tokens.cards
             opacity: card.expanded ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: Tokens.snap } }
         }
@@ -111,7 +116,7 @@ Item {
         Column {
             id: body
             anchors { left: parent.left; right: parent.right; top: parent.top }
-            spacing: 0
+            spacing: Tokens.cards ? Tokens.px(6) : 0
         }
     }
 }

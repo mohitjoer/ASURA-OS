@@ -1,11 +1,12 @@
 # Settings
 
-- **The desktop's Settings app** (from the control centre, **Super + N**)
-  changes the bar, the dock, the control centre and appearance.
-- **Toren's settings** (**Super + comma**, the Hub) covers the system side:
-  keybinds, power, graphics, wallpaper and more.
+- **Settings** (**Super + comma**, or the gear in the control centre) is the
+  one place for everything: the desktop (bar, dock, look, clock, lock
+  screen, screenshots, search, battery and notifications, on the Desktop
+  page) and the system (displays, connections, input, keybinds, graphics and
+  power, windows, updates).
 - **Your desktop settings file** is `~/.config/illogical-impulse/config.json`;
-  the Settings app writes it, and the desktop reloads it when it changes.
+  Settings writes it, and the desktop reloads it when it changes.
 - **Hyprland** (gaps, borders, window rules, monitors, keyboard layout): put
   your changes in `~/.config/toren/hyprland/user.conf`; it is read after
   Toren's, so yours win. `hyprctl reload` applies them.

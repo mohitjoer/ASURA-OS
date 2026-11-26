@@ -1,0 +1,22 @@
+# shellcheck shell=sh
+# Sourced, not run: `. /usr/share/toren/session/toren-graphics-env`.
+#
+# The one place Toren decides on software rendering. In a virtual machine
+# (VirtualBox VMSVGA, VMware vmwgfx, QEMU/KVM virtio without 3D) QtWayland
+# cannot get a hardware EGL surface, and every Quickshell window dies at
+# start with "wl_display error 1: invalid arguments for wl_surface.attach".
+# Every service that shows a window (the desktop, the settings window that
+# torend starts, the wallpaper picker, the lock screen) sources this file
+# instead of keeping its own copy of the check.
+#
+# A value the user set wins: LIBGL_ALWAYS_SOFTWARE=0 keeps hardware rendering
+# even in a VM, and TOREN_IS_VM=1 forces the fallback.
+if [ -z "${LIBGL_ALWAYS_SOFTWARE:-}" ]; then
+	if [ -n "${TOREN_IS_VM:-${ASURA_IS_VM:-}}" ] ||
+		grep -qa 'VirtualBox\|VMware\|QEMU\|KVM' /sys/class/dmi/id/product_name 2>/dev/null ||
+		grep -qa 'VirtualBox\|VMware\|QEMU\|KVM\|innotek' /sys/class/dmi/id/sys_vendor 2>/dev/null ||
+		lspci 2>/dev/null | grep -qi 'VMware\|VirtualBox\|QEMU'; then
+		export LIBGL_ALWAYS_SOFTWARE=1
+		export TOREN_IS_VM=1 ASURA_IS_VM=1
+	fi
+fi

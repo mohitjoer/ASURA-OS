@@ -21,7 +21,6 @@ Item {
     id: root
     property int sidebarWidth: Appearance.sizes.sidebarWidth
     property int sidebarPadding: 8
-    property string settingsQmlPath: Quickshell.shellPath("settings.qml")
     property bool showAudioOutputDialog: false
     property bool showAudioInputDialog: false
     property bool showBluetoothDialog: false
@@ -274,7 +273,8 @@ Item {
                 buttonIcon: "settings"
                 onClicked: {
                     GlobalStates.sidebarRightOpen = false;
-                    Quickshell.execDetached(["qs", "-p", root.settingsQmlPath]);
+                    // Toren has one settings panel: the Hub, on the desktop's page.
+                    Quickshell.execDetached(["toren-shell", "hub", "open", "desktop-shell"]);
                 }
                 StyledToolTip {
                     text: Translation.tr("Settings")

@@ -23,10 +23,10 @@ run() { # active workspace, then the toren-workspace arguments; prints the dispa
   cat "$tmp/log"
 }
 
-[[ "$(run 12 focus 3)" == "workspace 13" ]] || fail "focus 3 on desktop 1 did not go to workspace 13"
-[[ "$(run 5 focus 10)" == "workspace 10" ]] || fail "focus 10 on desktop 0 did not go to workspace 10"
-[[ "$(run 25 move 1)" == "movetoworkspace 21" ]] || fail "move 1 on desktop 2 did not go to workspace 21"
-[[ "$(run 25 movesilent 4)" == "movetoworkspacesilent 24" ]] || fail "movesilent 4 on desktop 2 did not go to workspace 24"
+[[ "$(run 12 focus 3)" == 'hl.dsp.focus({ workspace = "13" })' ]] || fail "focus 3 on desktop 1 did not go to workspace 13"
+[[ "$(run 5 focus 10)" == 'hl.dsp.focus({ workspace = "10" })' ]] || fail "focus 10 on desktop 0 did not go to workspace 10"
+[[ "$(run 25 move 1)" == 'hl.dsp.window.move({ workspace = "21" })' ]] || fail "move 1 on desktop 2 did not go to workspace 21"
+[[ "$(run 25 movesilent 4)" == 'hl.dsp.window.move({ workspace = "24", follow = false })' ]] || fail "movesilent 4 on desktop 2 did not go to workspace 24"
 [[ "$(PATH="$tmp:$PATH" ACTIVE_WS=31 "$here/toren-workspace" desktop)" == "3" ]] || fail "workspace 31 is not desktop 3"
 "$here/toren-workspace" bogus 2>/dev/null && fail "an unknown command exited 0" || true
 

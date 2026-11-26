@@ -285,6 +285,7 @@ cp "$REPO_ROOT/session/toren-safe.desktop" "$INCLUDE_DIR/usr/share/toren/session
 cp "$REPO_ROOT/session/toren-safe.desktop" "$INCLUDE_DIR/usr/share/wayland-sessions/toren-safe.desktop"
 cp "$REPO_ROOT/session/binds.json" "$INCLUDE_DIR/usr/share/toren/session/binds.json"
 cp "$REPO_ROOT/session/runit/toren-user-services" "$INCLUDE_DIR/usr/share/toren/session/toren-user-services"
+cp "$REPO_ROOT/session/toren-graphics-env" "$INCLUDE_DIR/usr/share/toren/session/toren-graphics-env"
 cp "$REPO_ROOT/session/runit/toren-user-services" "$INCLUDE_DIR/usr/bin/toren-user-services"
 
 # Copy session store wrapper, portal configuration, and session CLI scripts
@@ -883,6 +884,7 @@ EOF
 
 # Stage Layer 3: mimalloc opt-in runner helper (avoid global ld.so.preload)
 cp "$REPO_ROOT/system/helpers/with-mimalloc" "$INCLUDE_DIR/usr/bin/with-mimalloc"
+install -m 0755 "$REPO_ROOT/system/helpers/toren-charge-limit-apply" "$INCLUDE_DIR/usr/bin/toren-charge-limit-apply"
 chmod 0755 "$INCLUDE_DIR/usr/bin/with-mimalloc"
 rm -f "$INCLUDE_DIR/etc/ld.so.preload"
 

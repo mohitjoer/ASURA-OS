@@ -220,31 +220,22 @@ Item {
 
         { "tab": "", "group": I18n.tr("EFFECTS"), "key": "lowPowerMode", "ctl": "sw", "src": "performance", "caps": "liveConfigEval",
           "label": I18n.tr("Low power mode"),
-          "desc": I18n.tr("Turns every effect switch here on at once.") },
-        { "tab": "", "group": I18n.tr("EFFECTS"), "key": "reduceMotion", "ctl": "sw", "src": "performance",
-          "label": I18n.tr("Reduce motion"),
-          "desc": I18n.tr("Shell transitions land instantly.") },
-        { "tab": "", "group": I18n.tr("EFFECTS"), "key": "disableBlur", "ctl": "sw", "src": "performance", "caps": "liveConfigEval",
-          "label": I18n.tr("Disable blur"),
-          "desc": I18n.tr("Drops the frosted-glass look everywhere.") },
-        { "tab": "", "group": I18n.tr("EFFECTS"), "key": "disableShadows", "ctl": "sw", "src": "performance", "caps": "liveConfigEval",
-          "label": I18n.tr("Disable shadows"),
-          "desc": I18n.tr("Surfaces draw without a shadow pass.") },
+          "desc": I18n.tr("Turns blur and shadows off until you turn this off again; the Window Manager page keeps your settings.") },
 
-        { "tab": "", "group": I18n.tr("MOTION"), "key": "liveWallpaper60", "ctl": "sw", "src": "performance",
+        { "tab": "", "group": I18n.tr("MOTION"), "key": "liveWallpaper60", "ctl": "sw", "src": "performance", "shell": "toren",
           "label": I18n.tr("60fps live wallpaper"),
           "desc": I18n.tr("Smoother video wallpaper, at a decode cost.") },
-        { "tab": "", "group": I18n.tr("MOTION"), "key": "pauseLiveWallpaperWhenFullscreen", "ctl": "sw", "src": "performance",
+        { "tab": "", "group": I18n.tr("MOTION"), "key": "pauseLiveWallpaperWhenFullscreen", "ctl": "sw", "src": "performance", "shell": "toren",
           "label": I18n.tr("Pause video wallpaper"),
           "desc": I18n.tr("Stops the video behind a fullscreen window.") },
 
-        { "tab": "", "group": I18n.tr("MEMORY"), "key": "unloadWidgetsWhenCovered", "ctl": "sw", "src": "performance",
+        { "tab": "", "group": I18n.tr("MEMORY"), "key": "unloadWidgetsWhenCovered", "ctl": "sw", "src": "performance", "shell": "toren",
           "label": I18n.tr("Hide covered widgets"),
           "desc": I18n.tr("Parks widgets while every monitor is covered.") },
-        { "tab": "", "group": I18n.tr("MEMORY"), "key": "unloadLauncherWhenIdle", "ctl": "sw", "src": "performance",
+        { "tab": "", "group": I18n.tr("MEMORY"), "key": "unloadLauncherWhenIdle", "ctl": "sw", "src": "performance", "shell": "toren",
           "label": I18n.tr("Unload the launcher"),
           "desc": I18n.tr("Frees ~250 MB a minute after closing.") },
-        { "tab": "", "group": I18n.tr("MEMORY"), "key": "unloadOverviewWhenIdle", "ctl": "sw", "src": "performance",
+        { "tab": "", "group": I18n.tr("MEMORY"), "key": "unloadOverviewWhenIdle", "ctl": "sw", "src": "performance", "shell": "toren",
           "label": I18n.tr("Unload the overview"),
           "desc": I18n.tr("Frees ~250 MB a minute after Super+Tab closes.") }
     ]
@@ -253,7 +244,12 @@ Item {
     // they only exist where the compositor evaluates its config live. Their caps
     // gate drops them on a compositor without it, the way SchemaPage filters a
     // row, instead of drawing a switch nothing on this desktop reads.
+    // Blur, shadows and motion are set on the Window Manager page; this page
+    // only turns them down (low power, the power profile). Rows only Toren's
+    // own shell reads (live wallpaper, unloading its surfaces) show only
+    // while that shell runs.
     readonly property var visibleSchema: pg.schema.filter(function (r) {
+        if (r.shell !== undefined && (!pg.hub || pg.hub.desktopShell !== r.shell)) return false;
         return Settings.supports(r.caps);
     })
 
@@ -284,6 +280,7 @@ Item {
         spacing: Tokens.s3
 
         Row {
+            visible: !Tokens.cards   // the card look has no eyebrow line
             // the register row holds a fixed box, so the rule and the seal keep
             // their distance from the title on every page
             height: Tokens.s5

@@ -93,7 +93,9 @@ Item {
     // a narrow ribbon of cards floating in a field of paper.
     readonly property int cardMax: 520
     function fitsColumns(n) { return (width - 28) >= (n * cardMax + (n - 1) * Tokens.s5) }
-    readonly property int capacity: fitsColumns(3) ? 3 : (fitsColumns(2) ? 2 : 1)
+    // The card look is one column of full-width setting cards, centred in the
+    // page, the way a settings list reads; the framed sheet keeps its grid.
+    readonly property int capacity: Tokens.cards ? 1 : (fitsColumns(3) ? 3 : (fitsColumns(2) ? 2 : 1))
     // The grid's geometry follows the PAGE WIDTH alone, never how many groups the
     // open tab happens to have. Deriving it from the tab's group count made a
     // one-group tab (BORDERS, MOTION) shrink the sheet to a narrow column in the
@@ -104,8 +106,12 @@ Item {
     // not get three columns, so the cards take the space instead of hugging the
     // left edge with one column empty beside them
     readonly property int columns: Math.max(1, Math.min(capacity, groups.length))
-    readonly property int cardW: Math.min(Tokens.cardWide,
-        Math.max(360, Math.floor(((flick.width - 14) - (columns - 1) * Tokens.s5) / columns)))
+    // From the PAGE width in the card look (sheet.width), never the flick's,
+    // which is sized from this: reading it back pinned the column to 360px.
+    readonly property int cardW: Tokens.cards
+        ? Math.max(320, Math.min(Tokens.px(860), width - 28))
+        : Math.min(Tokens.cardWide,
+            Math.max(360, Math.floor(((flick.width - 14) - (columns - 1) * Tokens.s5) / columns)))
     // The column's own geometry, so a page's head can sit on the same grid.
     readonly property real sheetWidth: col.width
     readonly property real sheetX: flick.x + col.x
@@ -479,6 +485,8 @@ Item {
                                                 // on the desktop, which no slider in here can be.
                                                 if (srow.r.key === "vizPlace")
                                                     Spawn.run(["toren-shell", "visualizer-place"]);
+                                                else if (srow.r.run && srow.r.run.length)
+                                                    Spawn.run(srow.r.run); // a row naming its own command
                                             }
                                         }
                                     }

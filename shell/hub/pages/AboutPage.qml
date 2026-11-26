@@ -40,6 +40,7 @@ Item {
         spacing: Tokens.s3
 
         Row {
+            visible: !Tokens.cards   // the card look has no eyebrow line
             height: Tokens.s5
             spacing: Tokens.s2
             Rectangle {

@@ -38,14 +38,15 @@ desktops have different files and settings.
 
 1. **Never edit shipped files.** `/usr/share/toren/` is replaced on every
    `toren update`. Change things through the user's files:
-   - the desktop settings: `~/.config/illogical-impulse/config.json` (or its
-     Settings app; it reloads the file on change),
-   - Hyprland: `~/.config/toren/hyprland/user.conf` (sourced after Toren's
-     config, so it wins),
+   - the desktop settings: `~/.config/illogical-impulse/config.json` (or the
+     settings window, Super+, → Desktop; the desktop reloads the file on change),
+   - Hyprland: `~/.config/toren/hyprland/user.lua` (loaded after Toren's
+     config, so it wins; `user.conf` only on a Hyprland older than 0.57),
    - Toren's settings: `toren config get|set SCHEMA KEY [VALUE]`.
-2. **Keybindings are Toren's** (`/usr/share/toren/hyprland/binds.conf`) and
+2. **Keybindings are Toren's** (`/usr/share/toren/hyprland/binds.lua`) and
    reach the desktop through `toren ipc call toren <function>`. Do not change
-   the user's shortcuts unless they ask.
+   the user's shortcuts unless they ask; a rebind made in Settings → Keybinds
+   is written to `~/.config/toren/hyprland/rebinds.lua`.
 3. **One writer per setting.** A setting has one owning tool; do not hand-edit
    the stores the daemons write (`shell.json`, `plugins.json`).
 4. **Prefer the command over the file.** `toren`, `toren-store`,
@@ -53,12 +54,18 @@ desktops have different files and settings.
 5. **Root changes need the user.** Anything under `/etc`, `/usr` or a system
    service (`sudo sv ...`, `sudo xbps-install ...`) is the user's call: say what
    you would run and why before running it.
+6. **Hyprland is 0.57 with a Lua config.** The old text commands fail:
+   `hyprctl keyword ...` does nothing and `hyprctl dispatch workspace 3` is an
+   error. Write a dispatch as Lua, `hyprctl dispatch 'hl.dsp.focus({ workspace = "3" })'`,
+   and an option change as `hyprctl eval 'hl.config({ general = { gaps_in = 4 } })'`.
+   Read state with `hyprctl -j clients|workspaces|monitors|binds` as before.
 
 ## Guides
 
 | Guide                                                              | Read it for                                                                                                                                       |
 | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`desktop.md`](desktop.md)                                         | The default desktop: bar, dock, workspaces, sidebars, overview, settings, Hyprland look, keybind functions, and how Toren manages overlays.       |
+| [`commands.md`](commands.md)                                       | Every `toren` command in one table: layouts, power and charge limit, GPU, kernels, services, packages, repair. |
 | [`update.md`](update.md)                                           | `toren update`: how a machine follows dev-unstable, the CI gate, `--check`/`--wait`/`--force`, system packages, refreshing the desktop, rollback. |
 | [`store.md`](store.md)                                             | Installing and removing apps, themes, bar styles and plugins with `toren-store`.                                                                  |
 | [`diagnostics.md`](diagnostics.md)                                 | Something is broken: `toren doctor` (and `--json`), logs, services, a desktop that will not load.                                                 |

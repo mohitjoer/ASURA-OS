@@ -104,6 +104,8 @@ Item {
         for (var i = 0; i < DesktopShellSchema.rows.length; i++) {
             var r = DesktopShellSchema.rows[i];
             if (r.store === "gtk-corners") { view[r.key] = pg.gtkRounded; continue; }
+            if (r.store === "action") continue;
+            if (r.store === "charge-limit") { view[r.key] = pg.chargeLimit; continue; }
             var v = pg.getPath(d, r.key);
             view[r.key] = pg.shown(r, v === undefined ? r.def : v);
         }
@@ -114,6 +116,12 @@ Item {
         var r = pg.rowFor(key);
         if (!r) return;
         if (r.store === "gtk-corners") { pg.setGtkRounded(v === true); return; }
+        if (r.store === "charge-limit") {
+            // root writes it (toren power threshold); pkexec asks for the password
+            setCharge.command = ["pkexec", "toren", "power", "threshold", String(v)];
+            setCharge.running = true;
+            return;
+        }
         var d = JSON.parse(JSON.stringify(pg.doc));
         pg.setPath(d, key, pg.stored(r, v));
         pg.doc = d;
@@ -150,6 +158,24 @@ Item {
             pg.draft = view;
         }
     }
+    // The battery charge limit the user chose (toren power threshold), or 80,
+    // Toren's default, when they have not.
+    property int chargeLimit: 80
+    FileView {
+        path: "/etc/toren/charge-limit"
+        watchChanges: true
+        printErrors: false
+        onFileChanged: reload()
+        onLoaded: {
+            var n = parseInt(text().trim());
+            pg.chargeLimit = isNaN(n) ? 80 : n;
+            var view = Object.assign({}, pg.draft);
+            view["toren.chargeLimit"] = pg.chargeLimit;
+            pg.draft = view;
+        }
+    }
+    Process { id: setCharge }
+
     FileView {
         id: gtk3Corners
         path: pg.configHome + "/gtk-3.0/toren-corners.css"

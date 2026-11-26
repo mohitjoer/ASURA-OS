@@ -118,16 +118,6 @@ Item {
     readonly property var advTune: (pg.tune || []).filter(t => t.risk === "advanced")
     readonly property var cpuTune: (pg.cpu || []).filter(t => t.gpu === "cpu")
     readonly property var batteryTune: (pg.cpu || []).filter(t => t.gpu === "battery")
-    // idle policy, also fronted by `toren-hubd cpu`: two toggles plus per-stage
-    // minute steppers split into battery and AC. Neutral across compositors.
-    readonly property var idleTune: (pg.cpu || []).filter(t => t.gpu === "idle")
-    readonly property var idleGeneral: pg.idleTune.filter(t => t.id === "enabled" || t.id === "onDesktops")
-    readonly property var idleBattery: pg.idleTune.filter(t => t.id.indexOf("battery.") === 0)
-    readonly property var idleAc: pg.idleTune.filter(t => t.id.indexOf("ac.") === 0)
-    readonly property bool idleOn: {
-        var e = (pg.idleTune || []).find(t => t.id === "enabled");
-        return e ? e.value === "on" : false;
-    }
     readonly property string thermalNow: {
         var t = (pg.tune || []).find(x => x.id === "thermal");
         return t ? t.value : "";
@@ -584,6 +574,7 @@ done
         spacing: Tokens.s3
 
         Row {
+            visible: !Tokens.cards   // the card look has no eyebrow line
             // the register row holds a fixed box, so the rule and the seal keep
             // their distance from the title on every page
             height: Tokens.s5
@@ -1077,56 +1068,7 @@ done
                     }
                 }
 
-                // ── IDLE ──
-                SettingCard {
-                    width: gfxCol.colWidth
-                    visible: pg.idleGeneral.length > 0
-                    title: I18n.tr("IDLE")
-
-                    Repeater {
-                        model: pg.idleGeneral
-                        delegate: TuneCell {
-                            required property var modelData
-                            tunable: modelData
-                            scope: "idle"
-                            divider: true
-                        }
-                    }
-                }
-
-                // ── ON BATTERY ── (folds away when idle is off)
-                SettingCard {
-                    width: gfxCol.colWidth
-                    visible: pg.idleOn && pg.idleBattery.length > 0
-                    title: I18n.tr("ON BATTERY")
-
-                    Repeater {
-                        model: pg.idleBattery
-                        delegate: TuneCell {
-                            required property var modelData
-                            tunable: modelData
-                            scope: "idle"
-                            divider: true
-                        }
-                    }
-                }
-
-                // ── PLUGGED IN ──
-                SettingCard {
-                    width: gfxCol.colWidth
-                    visible: pg.idleOn && pg.idleAc.length > 0
-                    title: I18n.tr("PLUGGED IN")
-
-                    Repeater {
-                        model: pg.idleAc
-                        delegate: TuneCell {
-                            required property var modelData
-                            tunable: modelData
-                            scope: "idle"
-                            divider: true
-                        }
-                    }
-                }
+                // Idle timers (dim, lock, screen off) live on the Lockscreen page.
 
                 // ── GPU PASSTHROUGH · ADVANCED ──
                 SettingCard {

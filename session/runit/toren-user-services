@@ -62,16 +62,10 @@ start_services() {
 		done
 	fi
 
-	# Detect virtual machine graphics fallback for user desktop services
-	if [ -z "${LIBGL_ALWAYS_SOFTWARE:-}" ]; then
-		if [ -n "${ASURA_IS_VM:-}" ] || \
-		   grep -qa "VirtualBox\|VMware\|QEMU\|KVM" /sys/class/dmi/id/product_name 2>/dev/null || \
-		   grep -qa "VirtualBox\|VMware\|QEMU\|KVM\|innotek" /sys/class/dmi/id/sys_vendor 2>/dev/null || \
-		   lspci 2>/dev/null | grep -qi "VMware\|VirtualBox\|QEMU"; then
-			export LIBGL_ALWAYS_SOFTWARE=1
-			export ASURA_IS_VM=1
-		fi
-	fi
+	# Software rendering in a virtual machine (one shared check):
+	GFX=/usr/share/toren/session/toren-graphics-env
+	# shellcheck source=/dev/null
+	if [ -r "$GFX" ]; then . "$GFX"; fi
 
 	# Update D-Bus activation environment so activated tools know Wayland & runtime
 	if command -v dbus-update-activation-environment >/dev/null 2>&1; then

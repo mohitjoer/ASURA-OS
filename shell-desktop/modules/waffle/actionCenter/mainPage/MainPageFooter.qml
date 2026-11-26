@@ -43,7 +43,7 @@ FooterRectangle {
 
         onClicked: {
             GlobalStates.sidebarLeftOpen = false;
-            Quickshell.execDetached(["qs", "-p", Quickshell.shellPath("settings.qml")]);
+            Quickshell.execDetached(["toren-shell", "hub", "open", "desktop-shell"]); // Toren: the one settings panel
         }
 
         contentItem: FluentIcon {

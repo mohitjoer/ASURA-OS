@@ -44,6 +44,12 @@ done
 
 T=$(mktemp -d)
 trap 'rm -rf "$T"' EXIT
+# A file left by an older Toren (removed from the repository since) is
+# deleted on update; a symlink the ISO adds stays.
+mkdir -p "$T/root/usr/share/toren/shell-desktop/modules/settings"
+echo old >"$T/root/usr/share/toren/shell-desktop/settings.qml"
+echo old >"$T/root/usr/share/toren/shell-desktop/modules/settings/BarConfig.qml"
+ln -s toren "$T/root/usr/share/toren/shell-desktop/asura"
 sh "$APPLY" --no-packages --no-build "$REPO_ROOT" "$T/root" >"$T/log" 2>&1 || { cat "$T/log"; exit 1; }
 for f in \
 	usr/share/toren/shell/shell.qml \
@@ -60,6 +66,10 @@ for f in \
 	etc/nftables.conf; do
 	[ -e "$T/root/$f" ] || { echo "apply-repo_test: $f was not installed" >&2; exit 1; }
 done
+for f in shell-desktop/settings.qml shell-desktop/modules/settings; do
+	[ ! -e "$T/root/usr/share/toren/$f" ] || { echo "apply-repo_test: the removed $f is still installed" >&2; exit 1; }
+done
+[ -L "$T/root/usr/share/toren/shell-desktop/asura" ] || { echo "apply-repo_test: the ISO's asura symlink was removed" >&2; exit 1; }
 # The desktop build tooling stays out of the system.
 [ ! -e "$T/root/usr/share/toren/shell-desktop/toren/vendor.sh" ] || { echo "apply-repo_test: vendor.sh was installed" >&2; exit 1; }
 [ -x "$T/root/usr/bin/toren-session" ] || { echo "apply-repo_test: toren-session is not executable" >&2; exit 1; }

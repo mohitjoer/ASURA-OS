@@ -16,12 +16,39 @@ the desktop is Toren's Quickshell desktop, shipped at
 - **Control menu** (right sidebar): quick toggles, volume and brightness
   sliders, notifications, calendar.
 - **Overview / launcher**: search apps, run commands, calculate.
+- **Power menu** (session screen): lock, log out, suspend, reboot, power off,
+  and a row that sets the current workspace's layout.
+- **Cheatsheet**: the keybindings, grouped (no other pages).
 - There is no left sidebar (AI chat and anime browser are not loaded).
+
+## Workspace layouts
+
+Each workspace has its own layout: `tile` (dwindle), `scroll`, `master`,
+`monocle` or `float`; a workspace with none follows the default (Settings →
+Window Manager → Layout). Change it with `toren layout set NAME` (or
+`next`/`prev`), from the power menu's layout row, or by clicking the layout mark
+after the bar's workspaces. The choice is kept in
+`~/.config/toren/layouts.json` and written to
+`~/.config/toren/hyprland/layouts.lua`; float floats the workspace's windows
+and switching away tiles back the ones it floated.
+
+## The settings window
+
+There is **one** settings window: Super+, (or the control menu's gear, or
+`toren-shell hub open [SECTION]`, or `toren-hub`). The desktop's own upstream
+Settings app is not shipped. A sidebar lists the sections with icons; groups
+of several fold open and shut, and the open page's tabs are rows under it. The
+**Desktop** section holds the desktop's options in six parts: Bar & dock, Look,
+Clock, Lock screen, Tools and System (system includes the battery charge limit).
+Other sections: Devices (Displays, Connections, Input, Graphics & Power),
+Lockscreen, Window Manager (gaps, borders, animations, default layout),
+Keys & apps (Keybinds, App Overrides, Window Rules), System (Performance,
+Session), About. Changes preview live; Save writes them, Revert drops them.
 
 ## Changing it
 
 **User settings** live in `~/.config/illogical-impulse/config.json`, which the
-desktop watches and reloads. The Settings app (from the control menu) edits the
+desktop watches and reloads. The settings window's Desktop section edits the
 same file. Useful keys:
 
 | Key                           | What it does                                                             |
@@ -35,7 +62,7 @@ same file. Useful keys:
 | `sidebar.quickSliders.enable` | volume/brightness sliders in the control menu                            |
 
 Edit it with a JSON tool that keeps the rest of the file (e.g. `jq`), or point
-the user to the Settings app.
+the user to Settings (Super+,), Desktop page.
 
 **Looks:** `toren theme set` lists named looks (wallpaper, light or dark,
 colours); `toren theme set NAME` applies one, recolouring the shell, terminal,
@@ -45,12 +72,23 @@ btop and GTK apps.
 opens the picker, `toren-wallpaper wallpaper random` picks one. The palette is
 written to `~/.local/state/quickshell/user/generated/colors.json`.
 
-**Hyprland** (gaps, borders, rules, monitors, input): Toren's config is
-`/usr/share/toren/hyprland/hyprland.conf`; put changes in
-`~/.config/toren/hyprland/user.conf`. The desktop's look (blur, animations, layer
-rules) is `/usr/share/toren/shell-desktop/toren/hyprland.conf`, loaded through
-`~/.config/toren/hyprland/shell.conf` while desktop is the shell. Apply with
-`hyprctl reload` or `toren refresh`.
+**Hyprland** (gaps, borders, rules, monitors, input) is 0.57 with a Lua config:
+Toren's is `/usr/share/toren/hyprland/hyprland.lua`, which then loads, from
+`~/.config/toren/hyprland/`, `shell.lua`, `monitors-auto.lua`,
+`monitors-user.lua`, `settings.lua` (written by the settings window),
+`layouts.lua` (`toren layout`), `rebinds.lua`, `toren.lua`, `user.lua` and
+`vm-perf.lua`, in that order; the last one wins. Put the user's own changes in
+`user.lua` (Lua, e.g. `hl.config({ general = { gaps_out = 8 } })`). The
+desktop's look (blur, animations, layer rules) is
+`/usr/share/toren/shell-desktop/toren/hyprland.lua`, loaded through `shell.lua`
+while desktop is the shell. Apply with `hyprctl reload` or `toren refresh`. The
+`.conf` files are only for a Hyprland older than 0.57. Commands to a running
+Hyprland are Lua too (rule 6 in [`SKILL.md`](SKILL.md)).
+
+**In a virtual machine** every service that shows a window (the desktop, the
+settings window, the wallpaper picker, the lock screen) uses software rendering
+(`LIBGL_ALWAYS_SOFTWARE=1`, decided once in
+`/usr/share/toren/session/toren-graphics-env`); a value the user sets wins.
 
 ## Keybind functions
 

@@ -19,7 +19,6 @@ import "schema/LauncherPage.js" as LauncherSchema
 import "schema/FastfetchPage.js" as FastfetchSchema
 import "schema/WidgetsPage.js" as WidgetsSchema
 import "schema/LockscreenPage.js" as LockscreenSchema
-import "schema/AnimationsPage.js" as AnimationsSchema
 import "schema/AddonsPage.js" as AddonsSchema
 import "schema/WindowRulesPage.js" as WindowRulesSchema
 import "schema/AppOverridesPage.js" as AppOverridesSchema
@@ -130,7 +129,7 @@ Rectangle {
             { key: "displays", name: "Displays", needs: { cap: "monitorConfig" } }, { key: "connections", name: "Connections" },
             { key: "input", name: "Input" }, { key: "gpu", name: "Graphics & Power" } ] },
         { name: "LOOK", items: [
-            { key: "animations", name: "Animations" }, { key: "lockscreen", name: "Lockscreen" } ] },
+            { key: "lockscreen", name: "Lockscreen" } ] },
         { name: "COMPOSITOR", items: [
             { key: "windowmanager", name: "Window Manager", needs: { provider: true } } ] },
         { name: "KEYS & APPS", items: [
@@ -153,7 +152,7 @@ Rectangle {
         "profile": "", "displays": "", "input": "", "keybinds": "",
         "connections": "", "gpu": "", "recording": "",
         "bar-studio": "", "desktop": "", "launcher": "", "fastfetch": "",
-        "widgets": "", "lockscreen": "", "animations": "",
+        "widgets": "", "lockscreen": "",
         "addons": "", "windowrules": "", "appoverrides": "",
         "session": "", "performance": "",
         "updates": "", "about": "", "global": "", "import": "", "windowmanager": "", "desktop-shell": ""
@@ -180,7 +179,6 @@ Rectangle {
         "fastfetch": "fetch neofetch terminal system info logo ascii emblem readout",
         "widgets": "desktop widget clock calendar weather face overlay wallpaper",
         "lockscreen": "lock screensaver signin greeter skin theme login",
-        "animations": "animation animations motion transition bezier curve speed feel wobbly disable enable toggle",
         "addons": "installed plugin addon extension manage enable remove update widget bundle extras store marketplace browse",
         "windowrules": "window rule float pin size place opacity class title override",
         "appoverrides": "app override per-app opacity blur corner class inherit opaque transparent",
@@ -204,7 +202,7 @@ Rectangle {
         "recording": RecordingSchema.rows,
         "launcher": LauncherSchema.rows, "fastfetch": FastfetchSchema.rows,
         "widgets": WidgetsSchema.rows, "lockscreen": LockscreenSchema.rows,
-        "animations": AnimationsSchema.rows, "addons": AddonsSchema.rows,
+        "addons": AddonsSchema.rows,
         "windowrules": WindowRulesSchema.rows, "appoverrides": AppOverridesSchema.rows,
         "session": SessionSchema.rows,
         "performance": PerformanceSchema.rows,
@@ -300,7 +298,7 @@ Rectangle {
         "mouse": "input pointer", "pointer": "input", "keyboard": "input", "touchpad": "input trackpad", "trackpad": "input touchpad",
         "clock": "widgets desktop",
         "update": "updates upgrade", "upgrade": "updates", "blur": "windows glass", "rounding": "windows corners", "corners": "windows rounding",
-        "animation": "animations motion", "motion": "animations", "gpu": "graphics", "graphics": "gpu"
+        "animation": "windowmanager motion", "motion": "windowmanager", "animations": "windowmanager", "gpu": "graphics", "graphics": "gpu"
     })
     // a query word expands to itself plus its synonyms, so a term is satisfied by
     // any one of them (and never dilutes multi-word coverage).
@@ -418,7 +416,7 @@ Rectangle {
     // `framed` pages keep the rail + bottom action bar; `ledger` pages also get
     // the right write-ledger column. Everything else is full-bleed.
     readonly property var framedSet: ({
-        "bar-studio": true, "desktop": true, "input": true, "animations": true, "global": true, "windowmanager": true,
+        "bar-studio": true, "desktop": true, "input": true, "global": true, "windowmanager": true,
         "windowrules": true, "appoverrides": true,
         "session": true
     })
@@ -508,7 +506,7 @@ Rectangle {
         return (prov && prov.length) ? base.concat(prov) : base;
     }
     function pageFile(s) {
-        var map = { "desktop-shell": "DesktopShellPage", "profile": "ProfilePage", "bar-studio": "BarStudioPage", "desktop": "DesktopPage", "session": "SessionPage", "windowrules": "WindowRulesPage", "appoverrides": "AppOverridesPage", "animations": "AnimationsPage", "input": "InputPage", "keybinds": "KeybindsPage", "displays": "DisplaysPage", "connections": "ConnectionsPage", "gpu": "GpuPage", "updates": "UpdatesPage", "recording": "RecordingPage", "performance": "PerformancePage", "launcher": "LauncherPage", "lockscreen": "LockscreenPage", "fastfetch": "FastfetchPage", "addons": "AddonsPage", "widgets": "WidgetsPage", "about": "AboutPage" };
+        var map = { "desktop-shell": "DesktopShellPage", "profile": "ProfilePage", "bar-studio": "BarStudioPage", "desktop": "DesktopPage", "session": "SessionPage", "windowrules": "WindowRulesPage", "appoverrides": "AppOverridesPage", "input": "InputPage", "keybinds": "KeybindsPage", "displays": "DisplaysPage", "connections": "ConnectionsPage", "gpu": "GpuPage", "updates": "UpdatesPage", "recording": "RecordingPage", "performance": "PerformancePage", "launcher": "LauncherPage", "lockscreen": "LockscreenPage", "fastfetch": "FastfetchPage", "addons": "AddonsPage", "widgets": "WidgetsPage", "about": "AboutPage" };
         map.global = "GlobalPage";
         map["import"] = "ImportPage";
         map.windowmanager = "WindowManagerPage";
@@ -1081,56 +1079,170 @@ Rectangle {
 
     Keys.onEscapePressed: {
         if (diffPop.open) diffPop.open = false;
-        else if (hub.query !== "") { hub.query = ""; searchField.clear(); }
+        else if (hub.query !== "" || hub.searchOpen) { hub.query = ""; searchField.clear(); hub.searchOpen = false; }
         else hub.requestQuit();
     }
     Keys.onPressed: (e) => {
         if (e.key === Qt.Key_K && (e.modifiers & Qt.ControlModifier)) {
-            searchField.grabFocus();
+            hub.searchOpen = true;
+            Qt.callLater(searchField.grabFocus);
             e.accepted = true;
         }
     }
 
     // ── rail ────────────────────────────────────────────────────────────
-    Item {
+    // A plain sidebar: "Settings" and a search button on top, then the
+    // sections, each with its icon. A group of several sections folds open
+    // and shut under its own icon and name; a group with one section shows just
+    // that section. The open section's tabs sit indented under it, so a page
+    // with tabs is browsed from the sidebar. The selected row is a soft pill in
+    // the accent colour (the wallpaper's primary).
+    property bool searchOpen: false
+    // the open page's SchemaPage (its tabs and current tab), found on each swap
+    property var pageSchema: null
+    readonly property var pageTabs: (hub.pageSchema && hub.pageSchema.tabs) ? hub.pageSchema.tabs : []
+    function schemaOf(it, depth) {
+        if (!it || depth > 3) return null;
+        if (it.tabs !== undefined && it.tab !== undefined && typeof it.focusKey === "function" && it.capsSchema !== undefined)
+            return it;
+        var kids = it.children || [];
+        for (var i = 0; i < kids.length; i++) {
+            var f = hub.schemaOf(kids[i], depth + 1);
+            if (f) return f;
+        }
+        return null;
+    }
+    readonly property var sectionIcon: ({
+        "desktop-shell": "desktop_windows", "bar-studio": "toolbar", "desktop": "wallpaper",
+        "widgets": "widgets", "launcher": "apps", "profile": "person", "global": "tune",
+        "updates": "system_update", "displays": "monitor", "connections": "wifi",
+        "input": "mouse", "gpu": "memory", "lockscreen": "lock",
+        "windowmanager": "select_window", "keybinds": "keyboard",
+        "appoverrides": "app_registration", "windowrules": "rule",
+        "performance": "speed", "session": "power_settings_new", "recording": "videocam",
+        "fastfetch": "terminal", "import": "download", "addons": "extension", "about": "info"
+    })
+    readonly property var groupIcon: ({
+        "DESKTOP": "desktop_windows", "OVERVIEW": "home", "DEVICES": "devices",
+        "LOOK": "palette", "COMPOSITOR": "select_window", "KEYS & APPS": "keyboard",
+        "SYSTEM": "settings", "EXTEND": "extension"
+    })
+    readonly property var tabIcon: ({
+        "Bar & dock": "dock_to_bottom", "Look": "palette", "Clock": "schedule",
+        "Lock screen": "lock", "Tools": "construction", "System": "settings"
+    })
+    function titleCase(s) {
+        s = String(s || "");
+        return s.length ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : s;
+    }
+    function railShown(i) {
+        return hub.needsMet(i) && i.rail !== false && (!i.adv || hub.advanced || hub.section === i.key);
+    }
+    function pickSection(key) {
+        hub.query = "";
+        searchField.clear();
+        hub.searchOpen = false;
+        hub.section = key;
+    }
+
+    // one sidebar row: icon, label, an optional chevron; `level` 1 is indented
+    component RailRow: Item {
+        id: rr
+        property string icon: ""
+        property string label: ""
+        property bool selected: false
+        property bool chevron: false
+        property bool open: false
+        property int level: 0
+        signal clicked()
+        width: parent ? parent.width : 0
+        height: Tokens.px(38)
+
+        Rectangle {
+            anchors.fill: parent
+            anchors.leftMargin: rr.level * Tokens.px(20)
+            anchors.topMargin: 1; anchors.bottomMargin: 1
+            radius: Tokens.radiusCard
+            color: rr.selected ? Qt.rgba(Tokens.sun.r, Tokens.sun.g, Tokens.sun.b, 0.2)
+                : (rrh.hovered ? Tokens.tint10 : "transparent")
+            Behavior on color { ColorAnimation { duration: Tokens.snap } }
+        }
+        Row {
+            anchors { left: parent.left; verticalCenter: parent.verticalCenter }
+            anchors.leftMargin: rr.level * Tokens.px(20) + Tokens.px(12)
+            spacing: Tokens.px(12)
+            Text {
+                text: rr.icon
+                visible: rr.icon !== ""
+                font.family: "Material Symbols Rounded"
+                font.pixelSize: rr.level > 0 ? Tokens.px(17) : Tokens.px(19)
+                color: rr.selected ? Tokens.sun : Tokens.inkDim
+                anchors.verticalCenter: parent.verticalCenter
+            }
+            Text {
+                text: rr.label
+                font.family: Tokens.ui
+                font.pixelSize: Tokens.px(13)
+                font.weight: rr.selected ? Font.DemiBold : Font.Normal
+                color: rr.selected ? Tokens.ink : Tokens.inkDim
+                anchors.verticalCenter: parent.verticalCenter
+            }
+        }
+        Text {
+            visible: rr.chevron
+            anchors { right: parent.right; rightMargin: Tokens.px(10); verticalCenter: parent.verticalCenter }
+            text: rr.open ? "expand_less" : "expand_more"
+            font.family: "Material Symbols Rounded"
+            font.pixelSize: Tokens.px(18)
+            color: Tokens.inkFaint
+        }
+        HoverHandler { id: rrh; cursorShape: Qt.PointingHandCursor }
+        TapHandler { onTapped: rr.clicked() }
+    }
+
+    Rectangle {
         id: rail
-        anchors { left: parent.left; top: parent.top; bottom: bar.top }
+        anchors { left: parent.left; top: parent.top; bottom: Tokens.cards ? parent.bottom : bar.top }
         width: Tokens.railW
-        Rectangle { anchors.right: parent.right; width: 1; height: parent.height; color: Tokens.line }
+        color: Tokens.tint5
 
         Column {
             id: railHead
             anchors { left: parent.left; right: parent.right; top: parent.top }
-            anchors.margins: Tokens.s5
-            spacing: Tokens.s4
+            anchors.margins: Tokens.s4
+            spacing: Tokens.s3
 
-            // the masthead as a poster plate: framed, register-ticked, with the
-            // seal and a /// mark. The reference sheet's title block, scaled down.
-            Rectangle {
+            Item {
                 width: parent.width
-                height: 64
-                color: "transparent"
-                radius: Tokens.radius
-                border.width: Tokens.border
-                border.color: Tokens.line
-                Row {
-                    anchors { left: parent.left; verticalCenter: parent.verticalCenter; leftMargin: Tokens.s4 }
-                    spacing: Tokens.s3
-                    TorenLogo {
-                        size: 26
-                        variant: "white"
-                        anchors.verticalCenter: parent.verticalCenter
+                height: Tokens.px(36)
+                Text {
+                    anchors { left: parent.left; leftMargin: Tokens.px(10); verticalCenter: parent.verticalCenter }
+                    text: I18n.tr("Settings")
+                    color: Tokens.ink
+                    font.family: Tokens.ui; font.pixelSize: Tokens.px(16); font.weight: Font.Bold
+                }
+                Rectangle {
+                    id: searchBtn
+                    anchors { right: parent.right; verticalCenter: parent.verticalCenter }
+                    width: Tokens.px(34); height: width
+                    radius: width / 2
+                    color: (hub.searchOpen || sbh.hovered) ? Tokens.tint10 : "transparent"
+                    Text {
+                        anchors.centerIn: parent
+                        text: hub.searchOpen ? "close" : "search"
+                        font.family: "Material Symbols Rounded"
+                        font.pixelSize: Tokens.px(20)
+                        color: Tokens.inkDim
                     }
-                    Column {
-                        spacing: 1
-                        anchors.verticalCenter: parent.verticalCenter
-                        Text {
-                            text: "TOREN"; color: Tokens.ink; font.family: Tokens.ui
-                            font.pixelSize: 14; font.weight: Font.DemiBold; font.letterSpacing: 2.4
-                        }
-                        Text {
-                            text: I18n.tr("SETTINGS"); color: Tokens.inkMuted
-                            font.family: Tokens.mono; font.pixelSize: 10; font.letterSpacing: 1.4
+                    HoverHandler { id: sbh; cursorShape: Qt.PointingHandCursor }
+                    TapHandler {
+                        onTapped: {
+                            if (hub.searchOpen) {
+                                hub.query = ""; searchField.clear(); hub.searchOpen = false;
+                            } else {
+                                hub.searchOpen = true;
+                                Qt.callLater(searchField.grabFocus);
+                            }
                         }
                     }
                 }
@@ -1138,6 +1250,7 @@ Rectangle {
             Field {
                 id: searchField
                 width: parent.width
+                visible: hub.searchOpen || hub.query !== ""
                 toolbar: true
                 placeholder: I18n.tr("Search settings…")
                 onEdited: (t) => hub.query = t
@@ -1148,18 +1261,14 @@ Rectangle {
         Flickable {
             id: navFlick
             anchors { left: parent.left; right: parent.right; top: railHead.bottom; bottom: parent.bottom }
-            anchors.margins: Tokens.s5
-            anchors.topMargin: Tokens.s4
-            anchors.bottomMargin: Tokens.s4
+            anchors.margins: Tokens.s4
+            anchors.topMargin: Tokens.s3
             contentHeight: nav.height
             clip: true
-            ScrollBar.vertical: ScrollRail { policy: ScrollBar.AsNeeded }
+            ScrollBar.vertical: ScrollRail { policy: navFlick.contentHeight > navFlick.height ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff }
             WheelScroll { }
 
-            // keep the active section on screen: jumping there by search, IPC or
-            // a config-restored section must never leave the selection clipped at
-            // the rail edge. Only scrolls when the item is actually off-screen,
-            // and animates the scroll, so an in-view click never jumps the rail.
+            // keep the selected row on screen after a search jump or an IPC open
             function reveal(it) {
                 var y = it.mapToItem(nav, 0, 0).y;
                 if (y >= contentY && y + it.height <= contentY + height)
@@ -1176,8 +1285,8 @@ Rectangle {
 
             Column {
                 id: nav
-                width: navFlick.width - 12
-                spacing: 0
+                width: navFlick.width - 10
+                spacing: Tokens.px(2)
 
                 Repeater {
                     model: hub.groups
@@ -1186,146 +1295,71 @@ Rectangle {
                         required property var modelData
                         required property int index
                         width: nav.width
-                        spacing: 0
+                        spacing: Tokens.px(2)
 
-                        // a breath between groups, so the rail reads as clusters
-                        // rather than one long list of rows
-                        Item { width: 1; height: grp.index === 0 ? 0 : Tokens.s2 }
-
-                        // which group holds the open section: its header lifts up
-                        // the ink ramp (faint -> dim) as a quiet "you are here",
-                        // monochrome, never a colour, so the bone-plate item stays
-                        // the one emphasis.
+                        readonly property var shownItems: grp.modelData.items.filter(function (i) { return hub.railShown(i); })
                         readonly property bool activeGroup: grp.modelData.items.some(function (i) { return i.key === hub.section; })
+                        // several sections fold under the group's name; one stands alone
+                        readonly property bool folds: grp.modelData.name !== "" && grp.shownItems.length > 1
+                        property bool open: grp.activeGroup
+                        onActiveGroupChanged: if (grp.activeGroup) grp.open = true
 
-                        Item {
-                            // the header shows only while the group has a visible
-                            // item: a section the active provider cannot back, or a
-                            // power-user (adv) section with Advanced off, drops out,
-                            // and a group whose every item drops out folds its header
-                            // away instead of leaving a bare label. The open section
-                            // always counts, so you never lose your place.
-                            readonly property bool anyShown: grp.modelData.items.some(function (i) {
-                                return hub.needsMet(i) && i.rail !== false && (!i.adv || hub.advanced || hub.section === i.key);
-                            })
-                            width: parent.width
-                            height: !anyShown ? 0 : (grp.modelData.name === "" ? Tokens.s4 : 34)
-                            visible: anyShown
-                            Item {
-                                anchors.fill: parent
-                                visible: grp.modelData.name !== ""
-                                Row {
-                                    id: grpLabelRow
-                                    anchors { left: parent.left; verticalCenter: parent.verticalCenter }
-                                    anchors.leftMargin: Tokens.s1
-                                    spacing: Tokens.s2
-                                    // the poster's plate numerals: each group carries
-                                    // its index, 01..05, in tabular mono.
-                                    Text {
-                                        text: (grp.index + 1 < 10 ? "0" : "") + (grp.index + 1)
-                                        color: grp.activeGroup ? Tokens.inkDim : Tokens.inkFaint
-                                        font.family: Tokens.mono; font.pixelSize: 9
-                                        anchors.verticalCenter: parent.verticalCenter
-                                    }
-                                    Text {
-                                        text: I18n.tr(grp.modelData.name); color: grp.activeGroup ? Tokens.inkDim : Tokens.inkFaint
-                                        font.family: Tokens.ui; font.pixelSize: 9
-                                        font.weight: Font.Medium; font.letterSpacing: 2
-                                        anchors.verticalCenter: parent.verticalCenter
-                                    }
-                                }
-                                Rectangle {
-                                    anchors {
-                                        left: grpLabelRow.right
-                                        right: grpTick.left
-                                        leftMargin: Tokens.s2
-                                        rightMargin: Tokens.s2
-                                        verticalCenter: parent.verticalCenter
-                                    }
-                                    height: 1
-                                    color: Tokens.lineSoft
-                                }
-                                Rectangle {
-                                    id: grpTick
-                                    anchors {
-                                        right: parent.right
-                                        rightMargin: Tokens.s3
-                                        verticalCenter: parent.verticalCenter
-                                        verticalCenterOffset: -2
-                                    }
-                                    width: 1; height: 5
-                                    color: grp.activeGroup ? Tokens.lineStrong : Tokens.line
-                                }
-                            }
+                        // a thin rule before the last, unnamed group (About)
+                        Rectangle {
+                            visible: grp.modelData.name === "" && grp.shownItems.length > 0
+                            width: parent.width; height: visible ? 1 : 0
+                            color: Tokens.lineSoft
+                        }
+
+                        RailRow {
+                            visible: grp.folds
+                            height: visible ? Tokens.px(38) : 0
+                            icon: hub.groupIcon[grp.modelData.name] || ""
+                            label: I18n.tr(hub.titleCase(grp.modelData.name))
+                            chevron: true
+                            open: grp.open
+                            onClicked: grp.open = !grp.open
                         }
 
                         Repeater {
-                            model: grp.modelData.items
-                            Item {
-                                id: navItem
+                            model: grp.shownItems
+                            Column {
+                                id: sec
                                 required property var modelData
-                                // Advanced off hides the power-user (adv) sections
-                                // from the rail while search still reaches them; a
-                                // section the active provider cannot back is hidden
-                                // outright and unreachable. The open section stays put
-                                // so turning Advanced off never strands you on a page
-                                // the rail no longer lists.
-                                readonly property bool shown: hub.needsMet(modelData) && modelData.rail !== false
-                                    && (!modelData.adv || hub.advanced || hub.section === modelData.key)
-                                width: nav.width
-                                height: shown ? 36 : 0
-                                visible: shown
-                                readonly property bool sel: hub.section === modelData.key
-                                onSelChanged: if (sel) navFlick.reveal(navItem)
-                                Component.onCompleted: if (sel) navFlick.reveal(navItem)
+                                width: grp.width
+                                spacing: Tokens.px(2)
+                                readonly property bool sel: hub.section === sec.modelData.key
+                                // the open page's tabs, under its row
+                                readonly property var tabs: (sec.sel && hub.pageTabs.length > 1) ? hub.pageTabs : []
+                                visible: !grp.folds || grp.open
+                                height: visible ? implicitHeight : 0
 
-                                Rectangle {
-                                    anchors.fill: parent
-                                    anchors.topMargin: 1; anchors.bottomMargin: 1
-                                    radius: Tokens.radius
-                                    color: navItem.sel ? Tokens.bone : (nh.hovered ? Tokens.tint10 : "transparent")
-                                    Behavior on color { ColorAnimation { duration: Tokens.snap } }
+                                RailRow {
+                                    id: secRow
+                                    level: grp.folds ? 1 : 0
+                                    icon: hub.sectionIcon[sec.modelData.key] || "settings"
+                                    label: I18n.tr(sec.modelData.name)
+                                    selected: sec.sel && sec.tabs.length === 0
+                                    chevron: sec.sel && sec.tabs.length > 0
+                                    open: true
+                                    onClicked: hub.pickSection(sec.modelData.key)
+                                    Component.onCompleted: if (sec.sel) navFlick.reveal(secRow)
                                 }
-                                // selection is typography, never a coloured bar:
-                                // the live section takes the sheet's // lead. On
-                                // the right, every item carries its kanji seal,
-                                // Latin and Japanese sitting side by side.
-                                Row {
-                                    anchors {
-                                        left: parent.left
-                                        leftMargin: Tokens.s3
-                                        verticalCenter: parent.verticalCenter
-                                    }
-                                    spacing: Tokens.s2
-                                    Text {
-                                        id: navLead
-                                        text: "//"
-                                        opacity: navItem.sel ? 1 : 0
-                                        color: Tokens.inkOnBoneDim
-                                        font.family: Tokens.mono; font.pixelSize: 11
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        Behavior on opacity { NumberAnimation { duration: Tokens.snap } }
-                                    }
-                                    Text {
-                                        id: navLatin
-                                        text: I18n.tr(navItem.modelData.name)
-                                        color: navItem.sel ? Tokens.inkOnBone : Tokens.inkDim
-                                        font.family: Tokens.ui; font.pixelSize: 14
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        elide: Text.ElideRight
-                                        Behavior on color { ColorAnimation { duration: Tokens.snap } }
+                                Connections {
+                                    target: sec
+                                    function onSelChanged() { if (sec.sel) navFlick.reveal(secRow); }
+                                }
+                                Repeater {
+                                    model: sec.tabs
+                                    RailRow {
+                                        required property string modelData
+                                        level: grp.folds ? 2 : 1
+                                        icon: hub.tabIcon[modelData] || ""
+                                        label: I18n.tr(modelData)
+                                        selected: hub.pageSchema !== null && hub.pageSchema.tab === modelData
+                                        onClicked: if (hub.pageSchema) hub.pageSchema.tab = modelData
                                     }
                                 }
-                                Text {
-                                    id: navKana
-                                    anchors { right: parent.right; rightMargin: Tokens.s3; verticalCenter: parent.verticalCenter }
-                                    text: hub.jpName[navItem.modelData.key] || ""
-                                    color: navItem.sel ? Tokens.inkOnBoneDim : Tokens.inkFaint
-                                    font.family: Tokens.jp; font.pixelSize: 12
-                                    Behavior on color { ColorAnimation { duration: Tokens.snap } }
-                                }
-                                HoverHandler { id: nh; cursorShape: Qt.PointingHandCursor }
-                                TapHandler { onTapped: { hub.query = ""; searchField.clear(); hub.section = navItem.modelData.key } }
                             }
                         }
                     }
@@ -1344,8 +1378,11 @@ Rectangle {
         readonly property bool full: hub.pageFile(hub.section) !== "" && !hub.framedSet[hub.section]
         anchors.top: parent.top
         anchors.bottom: pageArea.full ? parent.bottom : bar.top
-        anchors.topMargin: pageArea.full ? 0 : Tokens.s5
-        anchors.bottomMargin: pageArea.full ? 0 : Tokens.s3
+        // The card look gives every page the same breathing room: the title
+        // sits level with the sidebar's "Settings", and the last card stops
+        // short of the window's bottom edge.
+        anchors.topMargin: Tokens.cards ? Tokens.px(20) : (pageArea.full ? 0 : Tokens.s5)
+        anchors.bottomMargin: Tokens.cards ? Tokens.s5 : (pageArea.full ? 0 : Tokens.s3)
         // Framed pages fill the window beside the rail: the Hub opens
         // page-wide, and a page that refuses the width it was given wastes it.
         // Nothing needs a global cap -- a page that reads better on a shorter
@@ -1371,6 +1408,7 @@ Rectangle {
             onSrcChanged: pageHost.swap()
             Component.onCompleted: pageHost.swap()
             function swap() {
+                hub.pageSchema = null;
                 var incoming = pageHost.front === la ? lb : la;
                 if (incoming.source == pageHost.src && incoming.status === Loader.Ready)
                     pageHost.reveal(incoming);
@@ -1381,6 +1419,7 @@ Rectangle {
                 if (l.source != pageHost.src)
                     return;
                 pageHost.front = l;
+                hub.pageSchema = hub.schemaOf(l.item, 0);
                 la.opacity = la === l ? 1 : 0; la.z = la === l ? 1 : 0;
                 lb.opacity = lb === l ? 1 : 0; lb.z = lb === l ? 1 : 0;
             }
@@ -1452,13 +1491,14 @@ Rectangle {
         anchors.topMargin: Tokens.s5 - Math.round((height - 18) / 2); anchors.rightMargin: Tokens.s6
         z: 60
         width: ubLabel.implicitWidth + Tokens.s4 * 2
-        height: 26
+        height: Tokens.cards ? 30 : 26
         readonly property bool here: hub.section === "updates"
         Rectangle {
             anchors.fill: parent
-            radius: Tokens.radius
-            color: updatesBtn.here ? Tokens.bone : (ubh.hovered ? Tokens.paperLift : Tokens.paper)
-            border.width: Tokens.border
+            radius: Tokens.cards ? height / 2 : Tokens.radius
+            color: Tokens.cards ? (updatesBtn.here ? Qt.rgba(Tokens.sun.r, Tokens.sun.g, Tokens.sun.b, 0.2) : (ubh.hovered ? Tokens.tint16 : Tokens.tint10))
+                : (updatesBtn.here ? Tokens.bone : (ubh.hovered ? Tokens.paperLift : Tokens.paper))
+            border.width: Tokens.cards ? 0 : Tokens.border
             border.color: (updatesBtn.here || ubh.hovered) ? Tokens.lineStrong : Tokens.line
             antialiasing: false
             Behavior on color { ColorAnimation { duration: Tokens.snap } }
@@ -1467,10 +1507,10 @@ Rectangle {
         Text {
             id: ubLabel
             anchors.centerIn: parent
-            text: I18n.tr("UPDATES")
-            color: updatesBtn.here ? Tokens.inkOnBone : Tokens.inkDim
+            text: Tokens.cards ? I18n.tr("Updates") : I18n.tr("UPDATES")
+            color: (updatesBtn.here && !Tokens.cards) ? Tokens.inkOnBone : Tokens.inkDim
             font.family: Tokens.ui; font.pixelSize: Tokens.fSmall
-            font.weight: Font.Medium; font.letterSpacing: Tokens.trackLabel
+            font.weight: Font.Medium; font.letterSpacing: Tokens.cards ? 0 : Tokens.trackLabel
             Behavior on color { ColorAnimation { duration: Tokens.snap } }
         }
         // the one red accent: an update is waiting on the channel.
@@ -1496,12 +1536,13 @@ Rectangle {
         z: 60
         visible: hub.settingsFiles().length > 0
         width: fbLabel.implicitWidth + Tokens.s4 * 2
-        height: 26
+        height: Tokens.cards ? 30 : 26
         Rectangle {
             anchors.fill: parent
-            radius: Tokens.radius
-            color: filesPop.open ? Tokens.bone : (fbh.hovered ? Tokens.paperLift : Tokens.paper)
-            border.width: Tokens.border
+            radius: Tokens.cards ? height / 2 : Tokens.radius
+            color: Tokens.cards ? (filesPop.open ? Qt.rgba(Tokens.sun.r, Tokens.sun.g, Tokens.sun.b, 0.2) : (fbh.hovered ? Tokens.tint16 : Tokens.tint10))
+                : (filesPop.open ? Tokens.bone : (fbh.hovered ? Tokens.paperLift : Tokens.paper))
+            border.width: Tokens.cards ? 0 : Tokens.border
             border.color: (filesPop.open || fbh.hovered) ? Tokens.lineStrong : Tokens.line
             antialiasing: false
             Behavior on color { ColorAnimation { duration: Tokens.snap } }
@@ -1510,10 +1551,10 @@ Rectangle {
         Text {
             id: fbLabel
             anchors.centerIn: parent
-            text: I18n.tr("FILES")
-            color: filesPop.open ? Tokens.inkOnBone : Tokens.inkDim
+            text: Tokens.cards ? I18n.tr("Files") : I18n.tr("FILES")
+            color: (filesPop.open && !Tokens.cards) ? Tokens.inkOnBone : Tokens.inkDim
             font.family: Tokens.ui; font.pixelSize: Tokens.fSmall
-            font.weight: Font.Medium; font.letterSpacing: Tokens.trackLabel
+            font.weight: Font.Medium; font.letterSpacing: Tokens.cards ? 0 : Tokens.trackLabel
             Behavior on color { ColorAnimation { duration: Tokens.snap } }
         }
         HoverHandler { id: fbh; cursorShape: Qt.PointingHandCursor }
@@ -1524,7 +1565,7 @@ Rectangle {
     ActionBar {
         id: bar
         visible: !pageArea.full
-        anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
+        anchors { left: Tokens.cards ? rail.right : parent.left; right: parent.right; bottom: parent.bottom }
         dirty: hub.dirty
         onSaved: hub.save()
         onReverted: hub.revert()
@@ -1584,6 +1625,7 @@ Rectangle {
         hub.pendingFocusKey = (r.isPage || !r.key) ? "" : r.key;
         hub.query = "";
         searchField.clear();
+        hub.searchOpen = false;
         if (hub.pendingFocusKey !== "") { focusTimer.tries = 0; focusTimer.restart(); }
     }
     // bold the matched run in a result label (StyledText).

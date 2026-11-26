@@ -23,17 +23,37 @@ Item {
     signal reset()
     signal diffRequested()
 
-    implicitHeight: 60
+    implicitHeight: Tokens.cards ? 68 : 60
 
-    Rectangle { anchors.top: parent.top; width: parent.width; height: 1; color: Tokens.line }
+    // the card look writes the status in sentence case ("Saved · live on ...")
+    function sentence(t) {
+        t = String(t || "");
+        if (!Tokens.cards || t !== t.toUpperCase()) return t;
+        return t.charAt(0) + t.slice(1).toLowerCase();
+    }
+
+    Rectangle { visible: !Tokens.cards; anchors.top: parent.top; width: parent.width; height: 1; color: Tokens.line }
+    // the card look: the bar is a soft rounded card floating above the bottom
+    // edge, like the setting cards above it
+    Rectangle {
+        id: plate
+        visible: Tokens.cards
+        anchors.fill: parent
+        anchors.leftMargin: Tokens.s5; anchors.rightMargin: Tokens.s5
+        anchors.topMargin: Tokens.s2; anchors.bottomMargin: Tokens.s3
+        radius: Tokens.radiusCard
+        color: Tokens.tint5
+    }
 
     Row {
         anchors.verticalCenter: parent.verticalCenter
+        anchors.verticalCenterOffset: Tokens.cards ? Math.round((Tokens.s2 - Tokens.s3) / 2) : 0
         anchors.left: parent.left
-        anchors.leftMargin: Tokens.s5
+        anchors.leftMargin: Tokens.cards ? Tokens.s5 + Tokens.s4 : Tokens.s5
         spacing: Tokens.s3
 
         Text {
+            visible: !Tokens.cards
             anchors.verticalCenter: parent.verticalCenter
             text: "///"
             color: Tokens.inkFaint
@@ -41,11 +61,13 @@ Item {
             font.pixelSize: 10
         }
         Rectangle {
-            width: 6; height: 6
+            width: Tokens.cards ? 8 : 6; height: width
+            radius: Tokens.cards ? width / 2 : 0
             anchors.verticalCenter: parent.verticalCenter
             // no colour in the chrome: the unsaved heartbeat is ink, and the
-            // /// cluster beside it carries the sheet's mark.
-            color: Tokens.ink
+            // /// cluster beside it carries the sheet's mark. The card look
+            // lights it with the accent while there are unsaved changes.
+            color: Tokens.cards ? (bar.dirty > 0 ? Tokens.sun : Tokens.inkFaint) : Tokens.ink
             SequentialAnimation on opacity {
                 running: bar.dirty > 0
                 loops: Animation.Infinite
@@ -55,22 +77,24 @@ Item {
         }
         Text {
             anchors.verticalCenter: parent.verticalCenter
-            text: bar.dirty > 0
+            text: bar.sentence(bar.dirty > 0
                   ? (bar.dirty === 1 ? I18n.tr("%1 CHANGE · PREVIEWING · NOT SAVED") : I18n.tr("%1 CHANGES · PREVIEWING · NOT SAVED")).arg(bar.dirty)
-                  : I18n.tr(bar.cleanText)
+                  : I18n.tr(bar.cleanText))
             color: bar.dirty > 0 ? Tokens.ink : Tokens.inkDim
             font.family: Tokens.ui
-            font.pixelSize: 11
+            font.pixelSize: Tokens.cards ? 12 : 11
             font.weight: Font.Medium
-            font.letterSpacing: 1.6
+            font.letterSpacing: Tokens.cards ? 0 : 1.6
         }
         Text {
             visible: bar.dirty > 0
             anchors.verticalCenter: parent.verticalCenter
-            text: sdh.hovered ? I18n.tr("\u25b8 VIEW DIFF") : I18n.tr("\u00b7 VIEW DIFF")
-            color: sdh.hovered ? Tokens.ink : Tokens.inkFaint
-            font.family: Tokens.mono; font.pixelSize: 9
-            font.letterSpacing: 1.2
+            text: Tokens.cards ? I18n.tr("View changes")
+                : (sdh.hovered ? I18n.tr("\u25b8 VIEW DIFF") : I18n.tr("\u00b7 VIEW DIFF"))
+            color: Tokens.cards ? (sdh.hovered ? Tokens.ink : Tokens.sun) : (sdh.hovered ? Tokens.ink : Tokens.inkFaint)
+            font.family: Tokens.mono; font.pixelSize: Tokens.cards ? 12 : 9
+            font.underline: Tokens.cards && sdh.hovered
+            font.letterSpacing: Tokens.cards ? 0 : 1.2
         }
         HoverHandler { id: sdh; enabled: bar.dirty > 0; cursorShape: Qt.PointingHandCursor }
         TapHandler { enabled: bar.dirty > 0; onTapped: bar.diffRequested() }
@@ -78,12 +102,14 @@ Item {
 
     Row {
         anchors.verticalCenter: parent.verticalCenter
+        anchors.verticalCenterOffset: Tokens.cards ? Math.round((Tokens.s2 - Tokens.s3) / 2) : 0
         anchors.right: parent.right
-        anchors.rightMargin: Tokens.s6
-        spacing: Tokens.s3
+        anchors.rightMargin: Tokens.cards ? Tokens.s5 + Tokens.s2 : Tokens.s6
+        spacing: Tokens.cards ? Tokens.s2 : Tokens.s3
 
         Btn { text: I18n.tr("RESET TO DEFAULTS"); onAct: bar.reset() }
         Rectangle {
+            visible: !Tokens.cards
             width: 1; height: 22
             color: Tokens.line
             anchors.verticalCenter: parent.verticalCenter
