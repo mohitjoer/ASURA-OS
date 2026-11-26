@@ -74,6 +74,16 @@ jobs:
       - uses: actions/checkout@v5
         with:
           ref: refs/tags/${{ steps.version.outputs.tag }}
+          fetch-depth: 0
+
+      - name: Verify tagged commit is on main
+        run: |
+          set -eu
+          git fetch origin main
+          if ! git merge-base --is-ancestor HEAD origin/main; then
+            echo "::error::Releases may only be created and uploaded from commits on main"
+            exit 1
+          fi
 
       # Hosted runners have /dev/kvm but only root can open it by default.
       # With KVM the boot test runs in seconds instead of minutes of emulation.
