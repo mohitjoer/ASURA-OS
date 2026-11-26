@@ -760,50 +760,38 @@ else
 		fi
 	fi
 
+	# Wait briefly for kernel/udev partition nodes before resolving names
+	command -v udevadm >/dev/null 2>&1 && udevadm settle --timeout=5 2>/dev/null || true
+	sleep 1
+
+	# Any disk ending in a digit (nvme0n1, mmcblk0, loop5) uses 'p' before partition number
+	case "$TARGET_DISK" in
+		*[0-9]) _p="p" ;;
+		*)      _p="" ;;
+	esac
+
 	# Resolve partition names for clean install
 	if [ "$ENCRYPT_DISK" -eq 1 ]; then
 		if [ "$IS_UEFI" -eq 1 ]; then
-			if [ -b "${TARGET_DISK}p1" ]; then
-				PART_EFI="${TARGET_DISK}p1"
-				PART_BOOT="${TARGET_DISK}p2"
-				PART_ROOT_RAW="${TARGET_DISK}p3"
-			else
-				PART_EFI="${TARGET_DISK}1"
-				PART_BOOT="${TARGET_DISK}2"
-				PART_ROOT_RAW="${TARGET_DISK}3"
-			fi
+			PART_EFI="${TARGET_DISK}${_p}1"
+			PART_BOOT="${TARGET_DISK}${_p}2"
+			PART_ROOT_RAW="${TARGET_DISK}${_p}3"
 		else
-			if [ -b "${TARGET_DISK}p1" ]; then
-				PART_BOOT="${TARGET_DISK}p1"
-				PART_ROOT_RAW="${TARGET_DISK}p2"
-			else
-				PART_BOOT="${TARGET_DISK}1"
-				PART_ROOT_RAW="${TARGET_DISK}2"
-			fi
+			PART_BOOT="${TARGET_DISK}${_p}1"
+			PART_ROOT_RAW="${TARGET_DISK}${_p}2"
 			PART_EFI=""
 		fi
 	else
 		if [ "$IS_UEFI" -eq 1 ]; then
-			if [ -b "${TARGET_DISK}p1" ]; then
-				PART_EFI="${TARGET_DISK}p1"
-				PART_ROOT_RAW="${TARGET_DISK}p2"
-			else
-				PART_EFI="${TARGET_DISK}1"
-				PART_ROOT_RAW="${TARGET_DISK}2"
-			fi
+			PART_EFI="${TARGET_DISK}${_p}1"
+			PART_ROOT_RAW="${TARGET_DISK}${_p}2"
 		else
-			if [ -b "${TARGET_DISK}p1" ]; then
-				PART_ROOT_RAW="${TARGET_DISK}p1"
-			else
-				PART_ROOT_RAW="${TARGET_DISK}1"
-			fi
+			PART_ROOT_RAW="${TARGET_DISK}${_p}1"
 			PART_EFI=""
 		fi
 		PART_BOOT=""
 	fi
 fi
-
-sleep 1
 printf "${GREEN}✓ Partition table generated.${RESET}\n"
 
 printf "${WHITE}${BOLD}[2/5] Formatting filesystems...${RESET}\n"
