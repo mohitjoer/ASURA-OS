@@ -92,7 +92,7 @@ jobs:
           docker run --rm -v "$PWD/build/repo/current":/repo:ro \
             ghcr.io/void-linux/void-glibc-full:latest sh -euc '
               xbps-install -Syu xbps >/dev/null && xbps-install -yu >/dev/null
-              xbps-install -Sy \
+              printf "y\n" | xbps-install -Sy \
                 --repository=/repo \
                 toren
               xbps-query toren | sed -n "s/^pkgver: //p"
