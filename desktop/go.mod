@@ -13,6 +13,7 @@ require (
 	github.com/BurntSushi/toml v1.6.0
 	github.com/godbus/dbus/v5 v5.2.2
 	golang.org/x/sys v0.49.0
+	modernc.org/sqlite v1.63.0
 	toren/hardware v0.0.0
 )
 
@@ -25,7 +26,6 @@ require (
 	modernc.org/libc v1.80.1 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.12.1 // indirect
-	modernc.org/sqlite v1.63.0 // indirect
 )
 
 replace toren/hardware => ../system/hardware

@@ -47,11 +47,11 @@ type Index struct {
 
 // IndexStats summarizes the current index state.
 type IndexStats struct {
-	Root         string `json:"root"`
-	Files        int    `json:"files"`
-	Chunks       int    `json:"chunks"`
-	MaskedSecrets int   `json:"masked_secrets"`
-	IndexedAt    int64  `json:"indexed_at,omitempty"`
+	Root          string `json:"root"`
+	Files         int    `json:"files"`
+	Chunks        int    `json:"chunks"`
+	MaskedSecrets int    `json:"masked_secrets"`
+	IndexedAt     int64  `json:"indexed_at,omitempty"`
 }
 
 // IndexResult reports what an IndexWorkspace run did.
@@ -176,13 +176,13 @@ func (idx *Index) IndexWorkspace(ctx context.Context) (IndexResult, error) {
 
 	seen := map[string]bool{}
 	type pendingFile struct {
-		rel      string
-		sha      string
-		size     int64
-		mtimeNs  int64
-		lang     string
-		masked   string
-		maskRpt  MaskReport
+		rel     string
+		sha     string
+		size    int64
+		mtimeNs int64
+		lang    string
+		masked  string
+		maskRpt MaskReport
 	}
 
 	existing := map[string]string{}
