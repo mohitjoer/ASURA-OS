@@ -123,6 +123,7 @@ services/Translation.qml
 modules/ii/sidebarRight/calendar/CalendarWidget.qml
 modules/ii/sidebarRight/pomodoro/PomodoroWidget.qml
 services/TimerService.qml
+modules/ii/regionSelector/OptionsToolbar.qml
 "
 
 # Upstream's paths Toren leaves out: the desktop's own Settings app (Toren has

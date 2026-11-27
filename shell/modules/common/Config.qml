@@ -149,7 +149,7 @@ Singleton {
         // builder the recognition shares is whole, not half a file.
         property QtObject search: QtObject {
             property QtObject imageSearch: QtObject {
-                property string imageSearchEngineBaseUrl: ""
+                property string imageSearchEngineBaseUrl: "https://lens.google.com/uploadbyurl?url="
             }
         }
 
