@@ -549,6 +549,8 @@ components:
         blob: 99c1fb9a5d5d1de66f42640a597a83b2ba5e2af0
       - path: modules/ii/sidebarRight/notifications/NotificationStatusButton.qml
         blob: 2609b5f56709a18fbe827a77b6f86e5d47c28848
+      - path: modules/ii/sidebarRight/pomodoro/CountdownTimer.qml
+        blob: 89433959277f2e8fb97b7bdad3dcb19ac3db85b9
       - path: modules/ii/sidebarRight/pomodoro/PomodoroWidget.qml
         blob: dba1b7332341296883cf383c57784b3da5635498
       - path: modules/ii/sidebarRight/pomodoro/Stopwatch.qml
