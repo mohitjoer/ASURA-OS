@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"toren/desktop/internal/prowl"
 )
 
 const usage = `toren-agent: Toren Linux local coding agent harness integration
@@ -14,6 +15,7 @@ Usage:
   toren-agent wire --installed  Wire every supported agent that is installed (run at login)
   toren-agent ask QUESTION      Ask ASURA's assistant (opens OpenCode in a terminal)
   toren-agent chat MESSAGE      The same, for the shell's chat panel (JSON lines)
+  toren-agent prowl <cmd>       Run Prowl code index, MCP server, or Zero-LLM router (index|search|mcp|serve|route|setup)
 
 Supported agents:
   opencode    OpenCode CLI (~/.config/opencode/skills/toren)
@@ -71,6 +73,10 @@ func main() {
 		os.Exit(Chat(os.Args[2:], os.Stdout))
 	case "agent":
 		os.Exit(0) // the chat panel's engine picker: OpenCode is the only one
+	case "prowl":
+		os.Exit(prowl.Run(os.Args[2:], os.Stdout, os.Stderr))
+	case "index", "search", "mcp", "serve", "route", "setup":
+		os.Exit(prowl.Run(os.Args[1:], os.Stdout, os.Stderr))
 	case "-h", "--help", "help":
 		fmt.Print(usage)
 		os.Exit(0)
