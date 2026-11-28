@@ -9,22 +9,26 @@ import (
 	"strings"
 )
 
+// skillNames is the ordered list of Toren skill directories to wire for every agent.
+var skillNames = []string{"toren", "toren-create", "toren-prowl", "systemd-bridge"}
+
 // AgentInfo describes a supported local coding agent harness.
 type AgentInfo struct {
-	ID        string   `json:"id"`
-	Name      string   `json:"name"`
-	Binaries  []string `json:"binaries"`
-	InPath    bool     `json:"inPath"`
-	SkillPath string   `json:"skillPath"`
-	Wired     bool     `json:"wired"`
+	ID         string            `json:"id"`
+	Name       string            `json:"name"`
+	Binaries   []string          `json:"binaries"`
+	InPath     bool              `json:"inPath"`
+	SkillPath  string            `json:"skillPath"`  // primary (toren) skill path, kept for compat
+	SkillPaths map[string]string `json:"skillPaths"` // name → full path for all skill dirs
+	Wired      bool              `json:"wired"`      // true only if ALL skills are wired
 }
 
 // AgentDef defines how to resolve an agent's paths and detect its presence.
 type AgentDef struct {
-	ID        string
-	Name      string
-	Binaries  []string
-	SkillPath func() string
+	ID           string
+	Name         string
+	Binaries     []string
+	SkillsRoot   func() string // parent dir that contains the per-skill subdirs
 }
 
 func getHome() string {
@@ -48,84 +52,90 @@ func SupportedAgents() []AgentDef {
 			ID:       "opencode",
 			Name:     "OpenCode CLI",
 			Binaries: []string{"opencode"},
-			SkillPath: func() string {
-				return filepath.Join(getConfigHome(), "opencode", "skills", "toren")
+			SkillsRoot: func() string {
+				return filepath.Join(getConfigHome(), "opencode", "skills")
 			},
 		},
 		{
 			ID:       "pi",
 			Name:     "Pi coding agent",
 			Binaries: []string{"pi"},
-			SkillPath: func() string {
-				return filepath.Join(getHome(), ".pi", "agent", "skills", "toren")
+			SkillsRoot: func() string {
+				return filepath.Join(getHome(), ".pi", "agent", "skills")
 			},
 		},
 		{
 			ID:       "claude",
 			Name:     "Claude Code",
 			Binaries: []string{"claude"},
-			SkillPath: func() string {
-				return filepath.Join(getHome(), ".claude", "skills", "toren")
+			SkillsRoot: func() string {
+				return filepath.Join(getHome(), ".claude", "skills")
 			},
 		},
 		{
 			ID:       "gemini",
 			Name:     "Gemini CLI / Antigravity",
 			Binaries: []string{"gemini", "antigravity", "agy"},
-			SkillPath: func() string {
-				return filepath.Join(getHome(), ".gemini", "skills", "toren")
+			SkillsRoot: func() string {
+				return filepath.Join(getHome(), ".gemini", "skills")
 			},
 		},
 	}
 }
 
-// ResolveSkillSource locates the toren skill directory.
+// skillPathFor returns the full destination path for a given agent + skill name.
+func skillPathFor(d AgentDef, name string) string {
+	return filepath.Join(d.SkillsRoot(), name)
+}
+
+// resolveSkillsRoot locates the parent "skills" directory that contains all Toren skill subdirs.
 // Priority:
-// 1. ASURA_SKILLS_DIR environment override
-// 2. Packaged system skill at /usr/share/toren/shell/agent/skills/toren
-// 3. Repository checkout fallback (shell/agent/skills/toren)
-func ResolveSkillSource() (string, error) {
+// 1. ASURA_SKILLS_DIR environment override (the dir itself, or its parent)
+// 2. Packaged system path /usr/share/toren/shell/agent/skills
+// 3. Repository checkout fallback (shell/agent/skills relative to cwd / exe)
+func resolveSkillsRoot() (string, error) {
 	if env := os.Getenv("ASURA_SKILLS_DIR"); env != "" {
-		p := filepath.Join(env, "toren")
-		if isValidSkillDir(p) {
-			return p, nil
-		}
-		if isValidSkillDir(env) {
+		// env might point to the root itself or to the "toren" subdirectory
+		if hasSkillDir(env, "toren") {
 			return env, nil
 		}
+		parent := filepath.Dir(env)
+		if hasSkillDir(parent, "toren") {
+			return parent, nil
+		}
 	}
 
-	sysDir := "/usr/share/toren/shell/agent/skills/toren"
-	if isValidSkillDir(sysDir) {
-		return sysDir, nil
+	sysRoot := "/usr/share/toren/shell/agent/skills"
+	if hasSkillDir(sysRoot, "toren") {
+		return sysRoot, nil
 	}
 
-	candidates := []string{
-		"shell/agent/skills/toren",
-		"../shell/agent/skills/toren",
-		"../../shell/agent/skills/toren",
+	roots := []string{
+		"shell/agent/skills",
+		"../shell/agent/skills",
+		"../../shell/agent/skills",
 	}
 
 	if pwd, err := os.Getwd(); err == nil {
-		candidates = append(candidates,
-			filepath.Join(pwd, "shell", "agent", "skills", "toren"),
-			filepath.Join(pwd, "..", "shell", "agent", "skills", "toren"),
-			filepath.Join(pwd, "..", "..", "shell", "agent", "skills", "toren"),
+		roots = append(roots,
+			filepath.Join(pwd, "shell", "agent", "skills"),
+			filepath.Join(pwd, "..", "shell", "agent", "skills"),
+			filepath.Join(pwd, "..", "..", "shell", "agent", "skills"),
 		)
 	}
 
 	if exe, err := os.Executable(); err == nil {
 		exeDir := filepath.Dir(exe)
-		candidates = append(candidates,
-			filepath.Join(exeDir, "..", "shell", "agent", "skills", "toren"),
-			filepath.Join(exeDir, "..", "..", "shell", "agent", "skills", "toren"),
-			filepath.Join(exeDir, "..", "..", "..", "shell", "agent", "skills", "toren"),
+		roots = append(roots,
+			filepath.Join(exeDir, "..", "shell", "agent", "skills"),
+			filepath.Join(exeDir, "..", "..", "shell", "agent", "skills"),
+			filepath.Join(exeDir, "..", "..", "..", "shell", "agent", "skills"),
 		)
 	}
 
-	for _, c := range candidates {
-		clean := filepath.Clean(c)
-		if isValidSkillDir(clean) {
+	for _, r := range roots {
+		clean := filepath.Clean(r)
+		if hasSkillDir(clean, "toren") {
 			if abs, err := filepath.Abs(clean); err == nil {
 				return abs, nil
 			}
@@ -133,30 +143,30 @@ func ResolveSkillSource() (string, error) {
 		}
 	}
 
-	return "", fmt.Errorf("could not locate Toren skill directory (checked %s and repo fallbacks)", sysDir)
+	return "", fmt.Errorf("could not locate Toren skills root (checked %s and repo fallbacks)", sysRoot)
+}
+
+// hasSkillDir returns true if root/name/SKILL.md exists.
+func hasSkillDir(root, name string) bool {
+	_, err := os.Stat(filepath.Join(root, name, "SKILL.md"))
+	return err == nil
+}
+
+// ResolveSkillSource locates the primary "toren" skill directory (kept for compatibility).
+func ResolveSkillSource() (string, error) {
+	root, err := resolveSkillsRoot()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(root, "toren"), nil
 }
 
 func isValidSkillDir(dir string) bool {
-	skillFile := filepath.Join(dir, "SKILL.md")
-	f, err := os.Open(skillFile)
-	if err != nil {
-		return false
-	}
-	defer f.Close()
-
-	buf := make([]byte, 512)
-	n, _ := f.Read(buf)
-	content := string(buf[:n])
-	for _, line := range strings.Split(content, "\n") {
-		trimmed := strings.TrimSpace(line)
-		if trimmed == "name: toren" {
-			return true
-		}
-	}
-	return false
+	_, err := os.Stat(filepath.Join(dir, "SKILL.md"))
+	return err == nil
 }
 
-// isOurSkillLink checks if a link points to a valid toren skill directory.
+// isOurSkillLink checks if a symlink points into the Toren skills tree.
 func isOurSkillLink(link string) bool {
 	fi, err := os.Lstat(link)
 	if err != nil || fi.Mode()&os.ModeSymlink == 0 {
@@ -190,16 +200,8 @@ func symlinkForce(link, target string) (bool, error) {
 				return false, nil // Already wired identically
 			}
 		}
-		// If existing symlink is ours or broken, remove and replace
-		if isOurSkillLink(link) || readErr != nil {
-			if rmErr := os.Remove(link); rmErr != nil {
-				return false, rmErr
-			}
-		} else {
-			// Foreign symlink - replace only if pointing to non-existent or foreign
-			if rmErr := os.Remove(link); rmErr != nil {
-				return false, rmErr
-			}
+		if rmErr := os.Remove(link); rmErr != nil {
+			return false, rmErr
 		}
 	} else if !os.IsNotExist(err) {
 		return false, err
@@ -228,25 +230,34 @@ func DetectAgents() []AgentInfo {
 			}
 		}
 
-		skillPath := d.SkillPath()
-		wired := isOurSkillLink(skillPath)
+		root := d.SkillsRoot()
+		paths := make(map[string]string, len(skillNames))
+		allWired := true
+		for _, name := range skillNames {
+			p := filepath.Join(root, name)
+			paths[name] = p
+			if !isOurSkillLink(p) {
+				allWired = false
+			}
+		}
 
 		out = append(out, AgentInfo{
-			ID:        d.ID,
-			Name:      d.Name,
-			Binaries:  d.Binaries,
-			InPath:    inPath,
-			SkillPath: skillPath,
-			Wired:     wired,
+			ID:         d.ID,
+			Name:       d.Name,
+			Binaries:   d.Binaries,
+			InPath:     inPath,
+			SkillPath:  filepath.Join(root, "toren"), // compat field
+			SkillPaths: paths,
+			Wired:      allWired,
 		})
 	}
 
 	return out
 }
 
-// Wire links the Toren skill directory into one agent or all agents.
+// Wire links all Toren skill directories into one agent or all agents.
 func Wire(agentID string) (int, error) {
-	src, err := ResolveSkillSource()
+	root, err := resolveSkillsRoot()
 	if err != nil {
 		return 0, err
 	}
@@ -258,15 +269,25 @@ func Wire(agentID string) (int, error) {
 		if agentID != "" && d.ID != agentID {
 			continue
 		}
-		link := d.SkillPath()
-		created, err := symlinkForce(link, src)
-		if err != nil {
-			return count, fmt.Errorf("wiring %s (%s): %w", d.ID, link, err)
+		anyNew := false
+		for _, name := range skillNames {
+			src := filepath.Join(root, name)
+			link := skillPathFor(d, name)
+			created, werr := symlinkForce(link, src)
+			if werr != nil {
+				return count, fmt.Errorf("wiring %s/%s (%s): %w", d.ID, name, link, werr)
+			}
+			if created {
+				fmt.Printf("  wired   %s/%-18s -> %s\n", d.ID, name, tildeAbbrev(link))
+				anyNew = true
+			} else {
+				fmt.Printf("  current %s/%-18s -> %s\n", d.ID, name, tildeAbbrev(link))
+			}
 		}
-		if created {
-			fmt.Printf("wired %s -> %s\n", d.ID, tildeAbbrev(link))
+		if anyNew {
+			fmt.Printf("wired %s (%d skills)\n", d.ID, len(skillNames))
 		} else {
-			fmt.Printf("already wired %s -> %s\n", d.ID, tildeAbbrev(link))
+			fmt.Printf("already wired %s (%d skills)\n", d.ID, len(skillNames))
 		}
 		count++
 	}
@@ -278,7 +299,7 @@ func Wire(agentID string) (int, error) {
 	return count, nil
 }
 
-// Unwire removes the Toren skill symlink for one agent or all agents.
+// Unwire removes all Toren skill symlinks for one agent or all agents.
 func Unwire(agentID string) (int, error) {
 	defs := SupportedAgents()
 	count := 0
@@ -287,15 +308,22 @@ func Unwire(agentID string) (int, error) {
 		if agentID != "" && d.ID != agentID {
 			continue
 		}
-		link := d.SkillPath()
-		if isOurSkillLink(link) {
-			if err := os.Remove(link); err != nil {
-				return count, fmt.Errorf("unwiring %s (%s): %w", d.ID, link, err)
+		removed := 0
+		for _, name := range skillNames {
+			link := skillPathFor(d, name)
+			if isOurSkillLink(link) {
+				if err := os.Remove(link); err != nil {
+					return count, fmt.Errorf("unwiring %s/%s (%s): %w", d.ID, name, link, err)
+				}
+				fmt.Printf("  removed %s/%s (%s)\n", d.ID, name, tildeAbbrev(link))
+				removed++
 			}
-			fmt.Printf("unwired %s (removed %s)\n", d.ID, tildeAbbrev(link))
+		}
+		if removed > 0 {
+			fmt.Printf("unwired %s (%d skills removed)\n", d.ID, removed)
 			count++
 		} else {
-			fmt.Printf("not wired %s (%s)\n", d.ID, tildeAbbrev(link))
+			fmt.Printf("not wired %s\n", d.ID)
 		}
 	}
 
@@ -332,7 +360,7 @@ func Status(asJSON bool) error {
 		return enc.Encode(agents)
 	}
 
-	fmt.Printf("%-10s %-25s %-9s %-7s %s\n", "AGENT", "NAME", "IN PATH", "WIRED", "SKILL PATH")
+	fmt.Printf("%-10s %-25s %-9s %-7s %s\n", "AGENT", "NAME", "IN PATH", "WIRED", "SKILLS ROOT")
 	for _, a := range agents {
 		inPathStr := "no"
 		if a.InPath {
@@ -340,9 +368,20 @@ func Status(asJSON bool) error {
 		}
 		wiredStr := "no"
 		if a.Wired {
-			wiredStr = "yes"
+			wiredStr = "yes (all)"
+		} else {
+			// count which ones are wired
+			n := 0
+			for _, p := range a.SkillPaths {
+				if isOurSkillLink(p) {
+					n++
+				}
+			}
+			if n > 0 {
+				wiredStr = fmt.Sprintf("partial (%d/%d)", n, len(skillNames))
+			}
 		}
-		fmt.Printf("%-10s %-25s %-9s %-7s %s\n", a.ID, a.Name, inPathStr, wiredStr, tildeAbbrev(a.SkillPath))
+		fmt.Printf("%-10s %-25s %-9s %-16s %s\n", a.ID, a.Name, inPathStr, wiredStr, tildeAbbrev(filepath.Dir(a.SkillPath)))
 	}
 	return nil
 }

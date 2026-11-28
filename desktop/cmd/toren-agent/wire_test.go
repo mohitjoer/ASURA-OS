@@ -6,32 +6,32 @@ import (
 	"testing"
 )
 
-// setupTestEnv sets up an isolated temporary HOME and mock toren skills directory.
-func setupTestEnv(t *testing.T) (string, string) {
+// setupTestEnv sets up an isolated temporary HOME and mock Toren skills root with
+// all four skill directories.
+func setupTestEnv(t *testing.T) (tempHome string, skillsRoot string) {
 	t.Helper()
 
-	tempHome := t.TempDir()
+	tempHome = t.TempDir()
 	t.Setenv("HOME", tempHome)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(tempHome, ".config"))
 
-	skillsDir := t.TempDir()
-	torenSkillDir := filepath.Join(skillsDir, "toren")
-	if err := os.MkdirAll(torenSkillDir, 0o755); err != nil {
-		t.Fatal(err)
+	skillsRoot = t.TempDir()
+
+	// Create a SKILL.md stub in each skill subdirectory.
+	for _, name := range skillNames {
+		dir := filepath.Join(skillsRoot, name)
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			t.Fatal(err)
+		}
+		content := "---\nname: " + name + "\ndescription: Toren skill " + name + "\n---\n# " + name + "\n"
+		if err := os.WriteFile(filepath.Join(dir, "SKILL.md"), []byte(content), 0o644); err != nil {
+			t.Fatal(err)
+		}
 	}
 
-	skillMD := `---
-name: toren
-description: Toren OS agent skill
----
-# Toren
-`
-	if err := os.WriteFile(filepath.Join(torenSkillDir, "SKILL.md"), []byte(skillMD), 0o644); err != nil {
-		t.Fatal(err)
-	}
-
-	t.Setenv("ASURA_SKILLS_DIR", torenSkillDir)
-	return tempHome, torenSkillDir
+	// Point ASURA_SKILLS_DIR at the root so resolveSkillsRoot finds all skills.
+	t.Setenv("ASURA_SKILLS_DIR", skillsRoot)
+	return tempHome, skillsRoot
 }
 
 func assertSymlink(t *testing.T, linkPath, expectedTarget string) {
@@ -52,8 +52,18 @@ func assertSymlink(t *testing.T, linkPath, expectedTarget string) {
 	}
 }
 
+// assertAllSkillsWired checks that every skill in skillNames is a symlink
+// under the agent's skills root pointing into skillsRoot.
+func assertAllSkillsWired(t *testing.T, agentRoot string, skillsRoot string) {
+	t.Helper()
+	for _, name := range skillNames {
+		link := filepath.Join(agentRoot, name)
+		assertSymlink(t, link, filepath.Join(skillsRoot, name))
+	}
+}
+
 func TestWireAllAgents(t *testing.T) {
-	h, skillDir := setupTestEnv(t)
+	h, root := setupTestEnv(t)
 
 	n, err := Wire("")
 	if err != nil {
@@ -63,12 +73,12 @@ func TestWireAllAgents(t *testing.T) {
 		t.Fatalf("Wire(\"\") wired %d agents, want 4", n)
 	}
 
-	assertSymlink(t, filepath.Join(h, ".config", "opencode", "skills", "toren"), skillDir)
-	assertSymlink(t, filepath.Join(h, ".pi", "agent", "skills", "toren"), skillDir)
-	assertSymlink(t, filepath.Join(h, ".claude", "skills", "toren"), skillDir)
-	assertSymlink(t, filepath.Join(h, ".gemini", "skills", "toren"), skillDir)
+	assertAllSkillsWired(t, filepath.Join(h, ".config", "opencode", "skills"), root)
+	assertAllSkillsWired(t, filepath.Join(h, ".pi", "agent", "skills"), root)
+	assertAllSkillsWired(t, filepath.Join(h, ".claude", "skills"), root)
+	assertAllSkillsWired(t, filepath.Join(h, ".gemini", "skills"), root)
 
-	// Test idempotency: wiring again must succeed without error
+	// Test idempotency: wiring again must succeed without error.
 	n2, err := Wire("")
 	if err != nil {
 		t.Fatalf("second Wire(\"\") failed: %v", err)
@@ -76,11 +86,11 @@ func TestWireAllAgents(t *testing.T) {
 	if n2 != 4 {
 		t.Fatalf("second Wire(\"\") returned %d, want 4", n2)
 	}
-	assertSymlink(t, filepath.Join(h, ".claude", "skills", "toren"), skillDir)
+	assertAllSkillsWired(t, filepath.Join(h, ".claude", "skills"), root)
 }
 
 func TestWireSingleAgent(t *testing.T) {
-	h, skillDir := setupTestEnv(t)
+	h, root := setupTestEnv(t)
 
 	n, err := Wire("claude")
 	if err != nil {
@@ -90,11 +100,14 @@ func TestWireSingleAgent(t *testing.T) {
 		t.Fatalf("Wire(\"claude\") wired %d, want 1", n)
 	}
 
-	assertSymlink(t, filepath.Join(h, ".claude", "skills", "toren"), skillDir)
+	assertAllSkillsWired(t, filepath.Join(h, ".claude", "skills"), root)
 
-	// Other agents should not be wired yet
-	if _, err := os.Lstat(filepath.Join(h, ".config", "opencode", "skills", "toren")); !os.IsNotExist(err) {
-		t.Fatalf("opencode skill should not exist yet")
+	// Other agents should not be wired yet.
+	for _, name := range skillNames {
+		p := filepath.Join(h, ".config", "opencode", "skills", name)
+		if _, err := os.Lstat(p); !os.IsNotExist(err) {
+			t.Fatalf("opencode skill %s should not exist yet", name)
+		}
 	}
 }
 
@@ -105,40 +118,50 @@ func TestUnwireAgents(t *testing.T) {
 		t.Fatalf("initial Wire failed: %v", err)
 	}
 
-	// Unwire single agent
+	// Unwire single agent.
 	n, err := Unwire("opencode")
 	if err != nil {
 		t.Fatalf("Unwire(\"opencode\") failed: %v", err)
 	}
 	if n != 1 {
-		t.Fatalf("Unwire(\"opencode\") unwired %d, want 1", n)
+		t.Fatalf("Unwire(\"opencode\") unwired %d agents, want 1", n)
 	}
 
-	if _, err := os.Lstat(filepath.Join(h, ".config", "opencode", "skills", "toren")); !os.IsNotExist(err) {
-		t.Fatalf("opencode skill was not removed")
+	// All opencode skill links must be gone.
+	for _, name := range skillNames {
+		p := filepath.Join(h, ".config", "opencode", "skills", name)
+		if _, err := os.Lstat(p); !os.IsNotExist(err) {
+			t.Fatalf("opencode skill %s was not removed", name)
+		}
 	}
 
-	// Claude should still be wired
-	if _, err := os.Lstat(filepath.Join(h, ".claude", "skills", "toren")); err != nil {
-		t.Fatalf("claude skill should still exist")
+	// Claude should still have all skills wired.
+	for _, name := range skillNames {
+		p := filepath.Join(h, ".claude", "skills", name)
+		if _, err := os.Lstat(p); err != nil {
+			t.Fatalf("claude skill %s should still exist: %v", name, err)
+		}
 	}
 
-	// Unwire all remaining
+	// Unwire all remaining.
 	if _, err := Unwire(""); err != nil {
 		t.Fatalf("Unwire(\"\") failed: %v", err)
 	}
 
 	for _, d := range SupportedAgents() {
-		if _, err := os.Lstat(d.SkillPath()); !os.IsNotExist(err) {
-			t.Fatalf("skill for %s should be removed", d.ID)
+		for _, name := range skillNames {
+			p := skillPathFor(d, name)
+			if _, err := os.Lstat(p); !os.IsNotExist(err) {
+				t.Fatalf("skill %s for %s should be removed", name, d.ID)
+			}
 		}
 	}
 }
 
 func TestSymlinkSafetyWithForeignLink(t *testing.T) {
-	h, skillDir := setupTestEnv(t)
+	h, root := setupTestEnv(t)
 
-	// Create a foreign directory and symlink
+	// Create a foreign directory and symlink for the "toren" skill of claude.
 	foreignDir := t.TempDir()
 	claudeSkill := filepath.Join(h, ".claude", "skills", "toren")
 	if err := os.MkdirAll(filepath.Dir(claudeSkill), 0o755); err != nil {
@@ -148,7 +171,7 @@ func TestSymlinkSafetyWithForeignLink(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Unwire should NOT remove foreign link
+	// Unwire should NOT remove the foreign link (it's not a valid skill dir).
 	if _, err := Unwire("claude"); err != nil {
 		t.Fatalf("Unwire: %v", err)
 	}
@@ -156,22 +179,23 @@ func TestSymlinkSafetyWithForeignLink(t *testing.T) {
 		t.Fatalf("foreign symlink was unexpectedly removed")
 	}
 
-	// But Wire should replace it cleanly with ours
+	// Wire should replace the foreign link cleanly with ours.
 	if _, err := Wire("claude"); err != nil {
 		t.Fatalf("Wire over foreign link failed: %v", err)
 	}
-	assertSymlink(t, claudeSkill, skillDir)
+	assertAllSkillsWired(t, filepath.Join(h, ".claude", "skills"), root)
 }
 
 func TestSymlinkSafetyWithRealDir(t *testing.T) {
 	h, _ := setupTestEnv(t)
 
+	// Plant a real directory at the "toren" skill path for claude.
 	claudeSkill := filepath.Join(h, ".claude", "skills", "toren")
 	if err := os.MkdirAll(claudeSkill, 0o755); err != nil {
 		t.Fatal(err)
 	}
 
-	// If there's an actual directory there, symlinkForce should refuse to clobber
+	// symlinkForce should refuse to clobber a real directory.
 	_, err := Wire("claude")
 	if err == nil {
 		t.Fatalf("expected error when wiring over a real directory")
@@ -179,7 +203,7 @@ func TestSymlinkSafetyWithRealDir(t *testing.T) {
 }
 
 func TestDetectAgents(t *testing.T) {
-	_, _ = setupTestEnv(t)
+	h, root := setupTestEnv(t)
 
 	agents := DetectAgents()
 	if len(agents) != 4 {
@@ -195,6 +219,9 @@ func TestDetectAgents(t *testing.T) {
 	if _, err := Wire("gemini"); err != nil {
 		t.Fatal(err)
 	}
+
+	// Confirm gemini links point where we expect.
+	assertAllSkillsWired(t, filepath.Join(h, ".gemini", "skills"), root)
 
 	agentsAfter := DetectAgents()
 	for _, a := range agentsAfter {
