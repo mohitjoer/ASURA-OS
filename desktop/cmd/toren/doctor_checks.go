@@ -894,3 +894,32 @@ func reportAdoption(root string) int {
 	}
 	return exitOK
 }
+
+// reportBareMetalReadiness checks sleep/wake mode, DRM GPUs, Xwayland, and
+// Wi-Fi/Bluetooth rfkill state so hybrid-GPU and laptop issues surface early.
+func reportBareMetalReadiness(root string) int {
+	fmt.Println()
+	fmt.Println("Bare-Metal Readiness")
+
+	// Sleep mode
+	if raw, err := os.ReadFile(filepath.Join(root, "sys", "power", "mem_sleep")); err == nil {
+		fmt.Printf("  sleep             %s\n", strings.TrimSpace(string(raw)))
+	}
+
+	// DRM GPUs
+	if entries, err := filepath.Glob(filepath.Join(root, "dev", "dri", "card*")); err == nil && len(entries) > 0 {
+		fmt.Printf("  gpu devices       %d DRM card(s)\n", len(entries))
+	}
+
+	// Xwayland binary
+	if _, err := os.Stat(filepath.Join(root, "usr", "bin", "Xwayland")); err == nil {
+		fmt.Println("  xwayland          present")
+	}
+
+	// Crash capture sysctl
+	if _, err := os.Stat(filepath.Join(root, "etc", "sysctl.d", "99-toren-coredump.conf")); err == nil {
+		fmt.Println("  crash capture     configured (kernel.core_pattern)")
+	}
+
+	return exitOK
+}

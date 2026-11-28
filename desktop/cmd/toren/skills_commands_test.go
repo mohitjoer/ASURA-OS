@@ -21,6 +21,10 @@ var (
 		"toren-plugins":    true, // the folder new plugins are created in
 		"toren-shell.sock": true,
 	}
+	// Standalone org tools built into /usr/bin by installation/build-iso-void.sh.
+	shippedExternal = map[string]bool{
+		"toren-prowl": true,
+	}
 )
 
 func TestSkillsNameRealCommands(t *testing.T) {
@@ -37,6 +41,9 @@ func TestSkillsNameRealCommands(t *testing.T) {
 		t.Fatalf("no skills under %s", skills)
 	}
 	toolExists := func(name string) bool {
+		if shippedExternal[name] {
+			return true
+		}
 		candidates := []string{name}
 		if strings.HasPrefix(name, "toren-") {
 			candidates = append(candidates, "toren-"+strings.TrimPrefix(name, "toren-"))

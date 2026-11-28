@@ -645,6 +645,9 @@ if [ -d "$REPO_ROOT/system/tlp.d" ]; then
 	cp "$REPO_ROOT/system/tlp.d"/*.conf "$INCLUDE_DIR/etc/tlp.d/"
 fi
 cp "$REPO_ROOT/system/sysctl.d/99-toren-performance.conf" "$INCLUDE_DIR/etc/sysctl.d/99-toren-performance.conf"
+cp "$REPO_ROOT/system/sysctl.d/99-toren-coredump.conf" "$INCLUDE_DIR/etc/sysctl.d/99-toren-coredump.conf"
+cp "$REPO_ROOT/session/scripts/toren-crash-capture" "$INCLUDE_DIR/usr/bin/toren-crash-capture"
+chmod 755 "$INCLUDE_DIR/usr/bin/toren-crash-capture"
 cp "$REPO_ROOT/session/turnstile/turnstile.conf" "$INCLUDE_DIR/etc/turnstile/turnstile.conf"
 cp "$REPO_ROOT/system/xbps.d/toren.conf" "$INCLUDE_DIR/etc/xbps.d/toren.conf"
 # Default host firewall (block inbound, allow outbound), loaded by the nftables runit service

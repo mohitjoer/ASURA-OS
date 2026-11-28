@@ -1,0 +1,64 @@
+#!/bin/sh
+# Invoked by kernel.core_pattern: %p %u %g %s %t %e
+# Captures crash metadata (and bounded dump) and notifies the desktop user.
+set -u
+
+PID="${1:-0}"
+UID_NUM="${2:-0}"
+GID_NUM="${3:-0}"
+SIG="${4:-0}"
+STAMP="${5:-0}"
+EXE="${6:-unknown}"
+
+# Avoid recursion if the crash reporter or notify-send itself faults.
+case "$EXE" in
+	toren-crash-cap*|notify-send|gdb) exit 0 ;;
+esac
+
+# Only notify unprivileged user sessions (UID >= 1000).
+[ "$UID_NUM" -ge 1000 ] 2>/dev/null || exit 0
+
+CRASH_DIR="/tmp/toren-crashes"
+mkdir -p "$CRASH_DIR"
+chmod 1777 "$CRASH_DIR" 2>/dev/null || true
+
+SAFE_EXE=$(printf '%s' "$EXE" | tr -cd 'A-Za-z0-9._-')
+[ -n "$SAFE_EXE" ] || SAFE_EXE="app"
+REPORT="$CRASH_DIR/${SAFE_EXE}-${PID}-${STAMP}.txt"
+CORE_FILE="$CRASH_DIR/${SAFE_EXE}-${PID}-${STAMP}.core"
+
+# Save up to 8 MiB of the core dump from stdin for optional gdb inspection.
+dd of="$CORE_FILE" bs=65536 count=128 2>/dev/null || rm -f "$CORE_FILE"
+
+{
+	printf 'Executable: %s\n' "$EXE"
+	printf 'PID: %s\n' "$PID"
+	printf 'UID: %s GID: %s\n' "$UID_NUM" "$GID_NUM"
+	printf 'Signal: %s\n' "$SIG"
+	printf 'Timestamp: %s\n' "$STAMP"
+	if [ -r "/proc/$PID/cmdline" ]; then
+		printf 'Cmdline: %s\n' "$(tr '\0' ' ' <"/proc/$PID/cmdline" 2>/dev/null || true)"
+	fi
+	if command -v gdb >/dev/null 2>&1 && [ -s "$CORE_FILE" ] && [ -e "/proc/$PID/exe" ]; then
+		EXE_PATH=$(readlink -f "/proc/$PID/exe" 2>/dev/null || true)
+		if [ -n "$EXE_PATH" ] && [ -x "$EXE_PATH" ]; then
+			printf '\n--- Backtrace ---\n'
+			gdb -batch -n -ex "thread apply all bt" "$EXE_PATH" "$CORE_FILE" 2>/dev/null | head -n 120 || true
+		fi
+	fi
+} >"$REPORT" 2>/dev/null || true
+
+chown "$UID_NUM:$GID_NUM" "$REPORT" 2>/dev/null || true
+rm -f "$CORE_FILE" 2>/dev/null || true
+
+RUNTIME_DIR="/run/user/$UID_NUM"
+BUS_SOCK="$RUNTIME_DIR/bus"
+if [ -S "$BUS_SOCK" ] && command -v notify-send >/dev/null 2>&1; then
+	USER_NAME=$(id -nu "$UID_NUM" 2>/dev/null || true)
+	if [ -n "$USER_NAME" ] && command -v su >/dev/null 2>&1; then
+		su -s /bin/sh "$USER_NAME" -c \
+			"XDG_RUNTIME_DIR='$RUNTIME_DIR' DBUS_SESSION_BUS_ADDRESS='unix:path=$BUS_SOCK' notify-send -u critical -a '$EXE' -i dialog-error '$EXE crashed (signal $SIG)' 'Click to diagnose with AI agent. Report: $REPORT'" \
+			>/dev/null 2>&1 || true
+	fi
+fi
+exit 0
