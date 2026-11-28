@@ -39,13 +39,6 @@ dd of="$CORE_FILE" bs=65536 count=128 2>/dev/null || rm -f "$CORE_FILE"
 	if [ -r "/proc/$PID/cmdline" ]; then
 		printf 'Cmdline: %s\n' "$(tr '\0' ' ' <"/proc/$PID/cmdline" 2>/dev/null || true)"
 	fi
-	if command -v gdb >/dev/null 2>&1 && [ -s "$CORE_FILE" ] && [ -e "/proc/$PID/exe" ]; then
-		EXE_PATH=$(readlink -f "/proc/$PID/exe" 2>/dev/null || true)
-		if [ -n "$EXE_PATH" ] && [ -x "$EXE_PATH" ]; then
-			printf '\n--- Backtrace ---\n'
-			gdb -batch -n -ex "thread apply all bt" "$EXE_PATH" "$CORE_FILE" 2>/dev/null | head -n 120 || true
-		fi
-	fi
 } >"$REPORT" 2>/dev/null || true
 
 chown "$UID_NUM:$GID_NUM" "$REPORT" 2>/dev/null || true
