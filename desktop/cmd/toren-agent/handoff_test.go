@@ -86,3 +86,23 @@ func TestChatSpeaksThePanelProtocol(t *testing.T) {
 		}
 	}
 }
+
+func TestDiagnoseCrashHandoff(t *testing.T) {
+	orig := openInAssistant
+	defer func() { openInAssistant = orig }()
+
+	var gotPrompt string
+	openInAssistant = func(prompt string) (string, error) {
+		gotPrompt = prompt
+		return "handed off", nil
+	}
+
+	var out strings.Builder
+	code := DiagnoseCrash([]string{"--app", "toren-store", "--summary", "toren-store crashed", "SIGSEGV at 0x0"}, &out)
+	if code != 0 {
+		t.Fatalf("expected exit 0, got %d (%s)", code, out.String())
+	}
+	if !strings.Contains(gotPrompt, "toren-store") || !strings.Contains(gotPrompt, "SIGSEGV at 0x0") {
+		t.Fatalf("crash details missing from prompt: %q", gotPrompt)
+	}
+}

@@ -14,6 +14,7 @@ Usage:
   toren-agent wire --installed  Wire every supported agent that is installed (run at login)
   toren-agent ask QUESTION      Ask ASURA's assistant (opens OpenCode in a terminal)
   toren-agent chat MESSAGE      The same, for the shell's chat panel (JSON lines)
+  toren-agent diagnose-crash    Hand an app crash dump to the default agent for diagnosis
 
 Supported agents:
   opencode    OpenCode CLI (~/.config/opencode/skills/toren)
@@ -69,6 +70,8 @@ func main() {
 		os.Exit(Ask(os.Args[2:], os.Stdout))
 	case "chat":
 		os.Exit(Chat(os.Args[2:], os.Stdout))
+	case "diagnose-crash":
+		os.Exit(DiagnoseCrash(os.Args[2:], os.Stdout))
 	case "agent":
 		os.Exit(0) // the chat panel's engine picker: OpenCode is the only one
 	case "-h", "--help", "help":

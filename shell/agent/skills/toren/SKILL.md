@@ -70,6 +70,7 @@ desktops have different files and settings.
 | [`store.md`](store.md)                                             | Installing and removing apps, themes, bar styles and plugins with `toren-store`.                                                                  |
 | [`diagnostics.md`](diagnostics.md)                                 | Something is broken: `toren doctor` (and `--json`), logs, services, a desktop that will not load.                                                 |
 | [`prowl.md`](prowl.md)                                             | `toren-prowl`: cited SQLite code search, secret masking, MCP wiring, and Zero-LLM smart routing.                                                  |
+| [`create-skills.md`](create-skills.md)                             | Self-create new desktop apps, shell plugins, and themes from natural-language prompts.                                                            |
 | [`bar.md`](bar.md), [`gui.md`](gui.md), [`plugins.md`](plugins.md) | Only when `desktop-shell` is `toren`: Toren's own shell.                                                                                          |
 
 ## First look at a machine

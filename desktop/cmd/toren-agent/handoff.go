@@ -165,3 +165,60 @@ func WireInstalled() (int, error) {
 	}
 	return n, nil
 }
+
+// DiagnoseCrash formats an app crash dump/notification and hands it directly
+// to the user's default coding agent to diagnose and help report the bug.
+func DiagnoseCrash(args []string, out io.Writer) int {
+	var app, summary, dumpFile string
+	var rest []string
+	for i := 0; i < len(args); i++ {
+		switch args[i] {
+		case "--app":
+			if i+1 < len(args) {
+				i++
+				app = args[i]
+			}
+		case "--summary":
+			if i+1 < len(args) {
+				i++
+				summary = args[i]
+			}
+		case "--file":
+			if i+1 < len(args) {
+				i++
+				dumpFile = args[i]
+			}
+		default:
+			rest = append(rest, args[i])
+		}
+	}
+
+	var b strings.Builder
+	b.WriteString("Diagnose this app crash on Toren Linux, explain the root cause, suggest a fix, and draft a concise bug report:\n")
+	if app != "" {
+		fmt.Fprintf(&b, "App: %s\n", app)
+	}
+	if summary != "" {
+		fmt.Fprintf(&b, "Summary: %s\n", summary)
+	}
+	if len(rest) > 0 {
+		fmt.Fprintf(&b, "Details:\n%s\n", strings.Join(rest, " "))
+	}
+	if dumpFile != "" {
+		if raw, err := os.ReadFile(dumpFile); err == nil {
+			const maxDump = 16 * 1024
+			if len(raw) > maxDump {
+				raw = raw[:maxDump]
+			}
+			fmt.Fprintf(&b, "Crash dump (%s):\n%s\n", dumpFile, string(raw))
+		}
+	}
+
+	text, err := openInAssistant(strings.TrimSpace(b.String()))
+	if err != nil {
+		fmt.Fprintf(out, "toren-agent diagnose-crash: %v\n", err)
+		return 1
+	}
+	fmt.Fprintln(out, text)
+	return 0
+}

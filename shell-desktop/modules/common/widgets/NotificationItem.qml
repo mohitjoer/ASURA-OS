@@ -31,6 +31,20 @@ Item { // Notification item area
 
     implicitHeight: background.implicitHeight
 
+    readonly property bool isCrashNotification: /\b(crash|crashed|coredump|core dump|segfault|sigsegv|sigabrt|panic|fatal)\b/i.test(
+        (root.notificationObject?.summary ?? "") + " " + (root.notificationObject?.body ?? "")
+    )
+
+    function diagnoseCrash() {
+        Quickshell.execDetached([
+            "toren-agent", "diagnose-crash",
+            "--app", root.notificationObject?.appName ?? "",
+            "--summary", root.notificationObject?.summary ?? "",
+            root.notificationObject?.body ?? ""
+        ]);
+        root.destroyWithAnimation();
+    }
+
     function destroyWithAnimation(left = false) {
         root.qmlParent.resetDrag()
         background.anchors.leftMargin = background.anchors.leftMargin; // Break binding
@@ -73,6 +87,8 @@ Item { // Notification item area
         onClicked: (mouse) => {
             if (mouse.button === Qt.MiddleButton) {
                 root.destroyWithAnimation();
+            } else if (mouse.button === Qt.LeftButton && root.isCrashNotification) {
+                root.diagnoseCrash();
             }
         }
 
@@ -247,6 +263,14 @@ Item { // Notification item area
                         RowLayout {
                             id: actionRowLayout
                             Layout.alignment: Qt.AlignBottom
+
+                            NotificationActionButton {
+                                visible: root.isCrashNotification
+                                Layout.fillWidth: true
+                                buttonText: Translation.tr("Diagnose")
+                                urgency: notificationObject.urgency
+                                onClicked: root.diagnoseCrash()
+                            }
 
                             NotificationActionButton {
                                 Layout.fillWidth: true

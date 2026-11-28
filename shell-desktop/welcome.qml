@@ -679,6 +679,68 @@ ApplicationWindow {
                                 }
                             }
 
+                            Rectangle {
+                                Layout.fillWidth: true
+                                radius: Appearance.rounding.normal
+                                color: Appearance.m3colors.m3surfaceContainerHigh
+                                implicitHeight: ghLoginRow.implicitHeight + 24
+
+                                property bool ghLoggedIn: false
+
+                                Process {
+                                    id: ghStatusProc
+                                    running: true
+                                    command: ["gh", "auth", "status"]
+                                    onExited: (exitCode) => {
+                                        parent.ghLoggedIn = (exitCode === 0);
+                                    }
+                                }
+
+                                RowLayout {
+                                    id: ghLoginRow
+                                    anchors.fill: parent
+                                    anchors.margins: 12
+                                    spacing: 12
+
+                                    MaterialSymbol {
+                                        text: parent.parent.ghLoggedIn ? "check_circle" : "passkey"
+                                        iconSize: 22
+                                        color: parent.parent.ghLoggedIn ? Appearance.m3colors.m3tertiary : Appearance.m3colors.m3primary
+                                    }
+
+                                    ColumnLayout {
+                                        Layout.fillWidth: true
+                                        spacing: 2
+                                        StyledText {
+                                            text: parent.parent.parent.ghLoggedIn
+                                                ? Translation.tr("GitHub Connected")
+                                                : Translation.tr("Would you like to do GitHub login first?")
+                                            font.weight: Font.DemiBold
+                                            color: Appearance.colors.colOnLayer0
+                                        }
+                                        StyledText {
+                                            text: parent.parent.parent.ghLoggedIn
+                                                ? Translation.tr("GitHub CLI is signed in and ready for your coding agents.")
+                                                : Translation.tr("Sign in with GitHub CLI so coding agents and PR workflows work right away.")
+                                            font.pixelSize: Appearance.font.pixelSize.small
+                                            color: Appearance.colors.colSubtext
+                                            wrapMode: Text.WordWrap
+                                            Layout.fillWidth: true
+                                        }
+                                    }
+
+                                    RippleButton {
+                                        visible: !parent.parent.ghLoggedIn
+                                        buttonText: Translation.tr("Sign in to GitHub")
+                                        colBackground: Appearance.m3colors.m3primary
+                                        colText: Appearance.m3colors.m3onPrimary
+                                        onClicked: {
+                                            Quickshell.execDetached(["toren-app", "terminal", "--", "gh", "auth", "login"]);
+                                        }
+                                    }
+                                }
+                            }
+
                             Item { Layout.fillHeight: true }
                         }
                     }
