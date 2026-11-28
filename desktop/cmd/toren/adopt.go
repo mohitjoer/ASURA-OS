@@ -498,7 +498,7 @@ func runAdoptPrune(root string) int {
 	return exitOK
 }
 
-func generateRestoreScript(backupDir string, backedUp []string) string {
+func generateRestoreScript(_ string, backedUp []string) string {
 	var b strings.Builder
 	b.WriteString("#!/bin/sh\n")
 	b.WriteString("# Self-contained ASURA adoption rollback script\n")

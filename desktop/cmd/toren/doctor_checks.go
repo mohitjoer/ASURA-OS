@@ -371,7 +371,7 @@ func reportCoreServices(root string, fix bool) int {
 
 // reportUserAudioServices checks that PipeWire and WirePlumber user services
 // are configured or running under turnstiled.
-func reportUserAudioServices(root string, fix bool) int {
+func reportUserAudioServices(root string, _ bool) int {
 	fmt.Println()
 	fmt.Println("Audio Services (PipeWire & WirePlumber)")
 	audioServices := []string{"pipewire", "wireplumber"}

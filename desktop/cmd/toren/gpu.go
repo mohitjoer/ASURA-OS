@@ -93,9 +93,10 @@ func scanGPUs() []GPUInfo {
 
 		rStatus := strings.TrimSpace(string(runtimeStatus))
 		pState := "Unknown"
-		if rStatus == "suspended" {
+		switch rStatus {
+		case "suspended":
 			pState = "D3cold (Suspended, 0W idle)"
-		} else if rStatus == "active" {
+		case "active":
 			pState = "D0 (Active)"
 		}
 

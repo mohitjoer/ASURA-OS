@@ -164,7 +164,7 @@ func kernelSet(name string) int {
 	return exitOK
 }
 
-func setGrubDefaultKernel(name string) error {
+func setGrubDefaultKernel(_ string) error {
 	grubDefaultFile := "/etc/default/grub"
 	b, err := os.ReadFile(grubDefaultFile)
 	if err != nil {

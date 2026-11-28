@@ -121,6 +121,9 @@ func migrationAbout(path string) string {
 		}
 		return ""
 	}
+	if err := scanner.Err(); err != nil {
+		return ""
+	}
 	return ""
 }
 

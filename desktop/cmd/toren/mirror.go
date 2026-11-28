@@ -136,7 +136,8 @@ func mirrorConfig(url string, torenConf []string) string {
 	for _, line := range torenConf {
 		line = strings.TrimSpace(line)
 		if v, ok := strings.CutPrefix(line, "repository="); ok && !strings.Contains(v, "voidlinux") {
-			b.WriteString(line + "\n")
+			b.WriteString(line)
+			b.WriteByte('\n')
 		}
 	}
 	for _, repo := range mirrorRepos {
@@ -250,6 +251,9 @@ func readLines(path string) []string {
 	s := bufio.NewScanner(f)
 	for s.Scan() {
 		lines = append(lines, s.Text())
+	}
+	if err := s.Err(); err != nil {
+		return nil
 	}
 	return lines
 }

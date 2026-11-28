@@ -82,6 +82,9 @@ func firstHeading(path string) string {
 			return t
 		}
 	}
+	if err := s.Err(); err != nil {
+		return ""
+	}
 	return ""
 }
 
