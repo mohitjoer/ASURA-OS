@@ -717,9 +717,9 @@ echo "build-iso-void: building Toren Go binaries..."
 			PROWL_SRC="$PROWL_TMP/prowl"
 		fi
 	fi
-	if [ -n "$PROWL_SRC" ] && [ -d "$PROWL_SRC/cmd/prowl" ]; then
-		echo "build-iso-void: building prowl from standalone repo ($PROWL_SRC)..."
-		( cd "$PROWL_SRC" && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o "$INCLUDE_DIR/usr/bin/prowl" ./cmd/prowl )
+	if [ -n "$PROWL_SRC" ] && [ -d "$PROWL_SRC/cmd/toren-prowl" ]; then
+		echo "build-iso-void: building toren-prowl from standalone repo ($PROWL_SRC)..."
+		( cd "$PROWL_SRC" && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o "$INCLUDE_DIR/usr/bin/toren-prowl" ./cmd/toren-prowl )
 	fi
 	[ -n "$PROWL_TMP" ] && rm -rf "$PROWL_TMP" || true
 )
