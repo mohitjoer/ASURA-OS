@@ -208,25 +208,38 @@ RippleButton {
                         return root.iconName;
                     }
 
-                    // Check local shell assets first
-                    let localAsset = Quickshell.shellPath("assets/icons/" + root.iconName + ".svg");
-                    if (localAsset && localAsset.length > 0) {
-                        return "file://" + localAsset;
-                    }
-
-                    let guess = AppSearch.guessIcon(root.iconName);
-                    if (guess && guess.length > 0 && guess !== root.iconName && guess !== "image-missing") {
-                        let localGuess = Quickshell.shellPath("assets/icons/" + guess + ".svg");
-                        if (localGuess && localGuess.length > 0) {
-                            return "file://" + localGuess;
-                        }
+                    // Check local shell assets if they exist in assets/icons
+                    const localIcons = {
+                        "toren-hub": true, "toren-logo": true, "toren-logo-dark": true,
+                        "toren-settings": true, "toren-vm": true, "toren-installer": true,
+                        "toren-store": true, "cachyos-symbolic": true,
+                        "cloudflare-dns-symbolic": true, "crosshair-symbolic": true,
+                        "debian-symbolic": true, "deepseek-symbolic": true, "desktop-symbolic": true,
+                        "endeavouros-symbolic": true, "fedora-symbolic": true, "flatpak-symbolic": true,
+                        "gentoo-symbolic": true, "github-symbolic": true, "google-gemini-symbolic": true,
+                        "linux-symbolic": true, "manjaro-symbolic": true, "microsoft-symbolic": true,
+                        "mistral-symbolic": true, "nixos-symbolic": true, "nyarch-symbolic": true,
+                        "ollama-symbolic": true, "openai-symbolic": true, "opencode": true,
+                        "openrouter-symbolic": true, "preferences-system-network": true,
+                        "preferences-system": true, "spark-symbolic": true, "ubuntu-symbolic": true,
+                        "utilities-system-monitor": true, "utilities-terminal": true, "computer": true
+                    };
+                    if (localIcons[root.iconName]) {
+                        return Quickshell.shellPath("assets/icons/" + root.iconName + ".svg");
                     }
 
                     if (AppSearch.iconExists(root.iconName)) {
                         return Quickshell.iconPath(root.iconName);
                     }
-                    if (guess && guess.length > 0 && guess !== root.iconName && guess !== "image-missing" && AppSearch.iconExists(guess)) {
-                        return Quickshell.iconPath(guess);
+
+                    let guess = AppSearch.guessIcon(root.iconName);
+                    if (guess && guess.length > 0 && guess !== root.iconName && guess !== "image-missing") {
+                        if (localIcons[guess]) {
+                            return Quickshell.shellPath("assets/icons/" + guess + ".svg");
+                        }
+                        if (AppSearch.iconExists(guess)) {
+                            return Quickshell.iconPath(guess);
+                        }
                     }
 
                     const fallbacks = {
@@ -239,9 +252,8 @@ RippleButton {
                     };
                     const list = fallbacks[root.iconName] || [];
                     for (let fb of list) {
-                        let localFb = Quickshell.shellPath("assets/icons/" + fb + ".svg");
-                        if (localFb && localFb.length > 0) {
-                            return "file://" + localFb;
+                        if (localIcons[fb]) {
+                            return Quickshell.shellPath("assets/icons/" + fb + ".svg");
                         }
                         if (AppSearch.iconExists(fb)) {
                             return Quickshell.iconPath(fb);

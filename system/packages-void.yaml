@@ -159,6 +159,7 @@ session:
     - wlogout
     - hypridle
     - hyprlock
+    - gnome-keyring
 
 applications:
   packages:
@@ -227,6 +228,7 @@ power-and-hardware-services:
     - upower
     - acpid
     - brightnessctl
+    - ddcutil
     # Device power saving (USB autosuspend, Wi-Fi, SATA, PCIe runtime PM).
     # CPU governor, EPP and platform profile are excluded in system/tlp.d:
     # toren-sysd owns those.

@@ -154,7 +154,7 @@ func refreshMain(out, errOut io.Writer, run runner.Func) int {
 	}
 
 	// 4. Tell the user; no notification daemon is not an error.
-	_, _ = run("notify-send", "-a", "ASURA", "-i", "system-software-update", "ASURA updated", "The desktop was refreshed with the latest changes.")
+	_, _ = run("notify-send", "-a", "Toren", "-i", "/usr/share/toren/branding/toren-logo.svg", "Toren updated", "The desktop was refreshed with the latest changes.")
 	return code
 }
 

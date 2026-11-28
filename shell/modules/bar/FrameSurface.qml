@@ -59,22 +59,22 @@ Popout {
 
     readonly property bool sideMenu: root.edge === "left" || root.edge === "right"
 
-    // Side surfaces slide; top and bottom surfaces grow diagonally.
+    // Simple, fast fade/slide transition.
     transitions: [
         Transition {
             to: "open"
             NumberAnimation {
                 property: "prog"
-                duration: root.sideMenu ? Motion.menuSlide : Motion.diagonal
-                easing.type: root.sideMenu ? Motion.menuSlideCurve : Motion.diagonalCurve
+                duration: Motion.fast
+                easing.type: Easing.OutCubic
             }
         },
         Transition {
             from: "open"
             NumberAnimation {
                 property: "prog"
-                duration: root.sideMenu ? Motion.menuSlide : Motion.diagonal
-                easing.type: root.sideMenu ? Motion.menuSlideCurve : Motion.diagonalCurve
+                duration: Motion.fast
+                easing.type: Easing.OutCubic
             }
         }
     ]

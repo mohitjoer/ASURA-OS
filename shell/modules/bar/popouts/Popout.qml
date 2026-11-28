@@ -52,8 +52,8 @@ Item {
     // the open/close transition the size snaps so the reveal is purely the prog
     // curtain -- otherwise a low widget whose card is clamped to fit slides
     // vertically as the animating openH trips the edge clamp (the battery flicker).
-    Behavior on openW { enabled: root.heldOpen && root.prog > 0.98; NumberAnimation { duration: Motion.spatial; easing.type: Easing.BezierSpline; easing.bezierCurve: Motion.spatialCurve } }
-    Behavior on openH { enabled: root.heldOpen && root.prog > 0.98; NumberAnimation { duration: Motion.spatial; easing.type: Easing.BezierSpline; easing.bezierCurve: Motion.spatialCurve } }
+    Behavior on openW { enabled: root.heldOpen && root.prog > 0.98; NumberAnimation { duration: Motion.fast; easing.type: Easing.OutCubic } }
+    Behavior on openH { enabled: root.heldOpen && root.prog > 0.98; NumberAnimation { duration: Motion.fast; easing.type: Easing.OutCubic } }
     property real hoverW: 0                // hover-band span along the edge (0 = match body)
     property real hoverH: 0                // hover-band depth from the edge (0 = frameThickness)
     property real s: 1
@@ -165,22 +165,22 @@ Item {
     readonly property bool hugLeft: !noWeld && !centered && !vertical && width > 0 && bodyOpenW > 0 && alongX <= edgeInset + 0.5
     readonly property bool hugRight: !noWeld && !centered && !vertical && width > 0 && bodyOpenW > 0 && alongX >= width - bodyOpenW - edgeInset - 0.5
 
-    // body geometry in window coords; grows inward from the border.
-    readonly property real curW: Math.max(0, bodyOpenW * prog)
-    readonly property real curH: Math.max(0, bodyOpenH * prog)
-    // the gap holds the open body off the frame lip but drains with prog, so the
-    // close melt retracts fully into the frame edge instead of stranding a gap.
-    readonly property real bodyX: centered ? (width - curW) / 2
-                                 : atLeft ? frameThickness + edgeGap * prog
-                                 : atRight ? (width - frameThickness - curW - edgeGap * prog)
+    // body geometry in window coords; fixed at open size so it never reflows or
+    // resizes the blob/clip every frame, using a simple fade + slight slide.
+    readonly property real curW: bodyOpenW
+    readonly property real curH: bodyOpenH
+    readonly property real slidePx: 6 * s * (1 - prog)
+    readonly property real bodyX: (centered ? (width - curW) / 2
+                                 : atLeft ? frameThickness + edgeGap
+                                 : atRight ? (width - frameThickness - curW - edgeGap)
                                  : hugRight ? (width - curW)
                                  : hugLeft ? 0
-                                 : alongX + (bodyOpenW - curW) / 2
-    readonly property real bodyY: centered ? (height - curH) / 2
+                                 : alongX) + (atLeft ? -slidePx : atRight ? slidePx : 0)
+    readonly property real bodyY: (centered ? (height - curH) / 2
                                  : spanning ? 0
-                                 : atTop ? frameThickness + edgeGap * prog
-                                 : atBottom ? (height - frameThickness - curH - edgeGap * prog)
-                                 : alongY + (bodyOpenH - curH) / 2
+                                 : atTop ? frameThickness + edgeGap
+                                 : atBottom ? (height - frameThickness - curH - edgeGap)
+                                 : alongY) + (atTop ? -slidePx : atBottom ? slidePx : 0)
     readonly property real bodyW: curW
     readonly property real bodyH: spanning ? height : curH
 
@@ -227,16 +227,15 @@ Item {
             to: "open"
             NumberAnimation {
                 property: "prog"
-                duration: Motion.spatial
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Motion.spatialCurve
+                duration: Motion.fast
+                easing.type: Easing.OutCubic
             }
         },
         Transition {
             from: "open"
             NumberAnimation {
                 property: "prog"
-                duration: Motion.morph
+                duration: Motion.fast
                 easing.type: Easing.OutCubic
             }
         }
@@ -257,7 +256,7 @@ Item {
     // melt stalling and then snapping flush in one frame. buried >= smoothing,
     // the fillet residual is already zero when the shape drops out.
     // a centred body has no border to bury into, so it scales symmetrically.
-    readonly property real burial: centered ? 0 : (1 - Math.max(0, Math.min(1, prog))) * smoothing
+    readonly property real burial: 0
 
     // These surfaces never grow a welding neck into the border and never fuse
     // edge-first; they scale from their trigger point.
@@ -274,6 +273,7 @@ Item {
         // A closed zero-size popout can still pull a smooth-min nub into another
         // shape at the same trigger, so remove it from the field until it opens.
         visible: root.prog > 0.004
+        opacity: Math.max(0, Math.min(1, root.prog))
         // noWeld has no frame band to weld into (frame off, or a free-floating
         // islands), so it grows no neck -- but it stays a blob and still buries its
         // inner face on close (see `burial`), so it hits zero size cleanly instead
@@ -285,7 +285,7 @@ Item {
         topRightRadius: (!root.centered && (root.atTop || root.atRight || root.hugRight || root.spanning)) ? 0 : root.radius
         bottomLeftRadius: (!root.centered && (root.atBottom || root.atLeft || root.hugLeft || root.spanning)) ? 0 : root.radius
         bottomRightRadius: (!root.centered && (root.atBottom || root.atRight || root.hugRight || root.spanning)) ? 0 : root.radius
-        deformScale: 0.000015
+        deformScale: 0
         // no border pocket: the melt buries this rect in the band, and a sink
         // would recede the frame line around it until the zero-size drop-out
         // snaps it back (the close-time "dips past flush then pops" artifact)
@@ -299,8 +299,7 @@ Item {
         implicitHeight: root.spanning ? (root.height + 120) : (root.bodyH <= 0 ? 0 : Math.max(0, root.bodyH + neckH - (root.vertical ? 0 : root.burial)))
     }
 
-    // content at full size, revealed by a widening clip anchored to the border
-    // side -> curtain reveals edge-first; content never reflows.
+    // content at full size; simple fade + slide without per-frame resize or warp.
     Item {
         id: bodyClip
         x: root.bodyX
@@ -309,8 +308,8 @@ Item {
         height: root.bodyH
         clip: true
         visible: root.prog > 0.004
-        opacity: root.heldOpen ? 1 : 0
-        Behavior on opacity { NumberAnimation { duration: Motion.effects; easing.type: Easing.BezierSpline; easing.bezierCurve: Motion.effectsCurve } }
+        opacity: Math.max(0, Math.min(1, root.prog))
+        opacity: Math.max(0, Math.min(1, root.prog))
 
         HoverHandler { id: bodyHH }
 
@@ -318,9 +317,8 @@ Item {
             id: contentInner
             width: root.openW
             height: root.openH
-            x: root.atRight ? (bodyClip.width - root.openW) : 0
-            y: root.atBottom ? (bodyClip.height - root.openH) : 0
-            transform: Matrix4x4 { matrix: bodyBlob.deformMatrix }
+            x: 0
+            y: 0
         }
     }
 

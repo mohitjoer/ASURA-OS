@@ -975,12 +975,13 @@ Item {
 
             // arrangement hint, parked in the canvas corner off the reading path.
             Text {
-                anchors.left: parent.left; anchors.bottom: parent.bottom
+                anchors.left: parent.left; anchors.right: parent.right; anchors.bottom: parent.bottom
                 anchors.margins: Tokens.s3
                 text: I18n.tr("DRAG A DISPLAY TO ARRANGE IT \u00b7 EDGES SNAP")
                 color: Tokens.inkFaint; font.family: Tokens.ui
                 font.pixelSize: Tokens.fMicro; font.weight: Font.Medium
                 font.letterSpacing: Tokens.trackLabel
+                wrapMode: Text.WordWrap
             }
         }
 
@@ -991,7 +992,7 @@ Item {
             anchors.topMargin: Tokens.s3
             width: 392
             contentWidth: width
-            contentHeight: Math.max(ctlCol.height, height)
+            contentHeight: Math.max(ctlCol.height + Tokens.s4, height)
             clip: true
             boundsBehavior: Flickable.StopAtBounds
             ScrollBar.vertical: ScrollRail { policy: ScrollBar.AsNeeded }
@@ -1020,24 +1021,20 @@ Item {
                     SettingRow {
                         anchors.left: parent.left; anchors.right: parent.right
                         label: I18n.tr("MAIN DISPLAY")
-                        footH: 32
-                        Item {
-                            anchors.left: parent.left; anchors.right: parent.right
-                            anchors.verticalCenter: parent.verticalCenter
-                            Text {
-                                visible: { void pg.tick; return pg.sel ? pg.sel.name === pg.mainName : false; }
-                                anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
-                                text: I18n.tr("MAIN"); color: Tokens.ink; font.family: Tokens.ui
-                                font.pixelSize: Tokens.fMicro; font.weight: Font.Medium
-                                font.letterSpacing: Tokens.trackMark
-                            }
-                            Btn {
-                                visible: { void pg.tick; return pg.sel ? (pg.sel.name !== pg.mainName && !pg.sel.disabled) : false; }
-                                anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
-                                text: I18n.tr("SET AS MAIN")
-                                armed: true
-                                onAct: pg.setMain(pg.selected)
-                            }
+                        controlWidth: 112
+                        Text {
+                            visible: { void pg.tick; return pg.sel ? pg.sel.name === pg.mainName : false; }
+                            anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
+                            text: I18n.tr("MAIN"); color: Tokens.ink; font.family: Tokens.ui
+                            font.pixelSize: Tokens.fMicro; font.weight: Font.Medium
+                            font.letterSpacing: Tokens.trackMark
+                        }
+                        Btn {
+                            visible: { void pg.tick; return pg.sel ? (pg.sel.name !== pg.mainName && !pg.sel.disabled) : false; }
+                            anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
+                            text: I18n.tr("SET AS MAIN")
+                            armed: true
+                            onAct: pg.setMain(pg.selected)
                         }
                     }
 

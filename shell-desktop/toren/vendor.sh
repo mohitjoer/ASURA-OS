@@ -115,6 +115,15 @@ modules/waffle/taskView/TaskViewContent.qml
 modules/waffle/taskView/TaskViewWindow.qml
 modules/ii/cheatsheet/Cheatsheet.qml
 services/HyprlandKeybinds.qml
+modules/common/Appearance.qml
+modules/common/widgets/FloatingActionButton.qml
+services/Cliphist.qml
+services/Notifications.qml
+services/Translation.qml
+modules/ii/sidebarRight/calendar/CalendarWidget.qml
+modules/ii/sidebarRight/pomodoro/PomodoroWidget.qml
+services/TimerService.qml
+modules/ii/regionSelector/OptionsToolbar.qml
 "
 
 # Upstream's paths Toren leaves out: the desktop's own Settings app (Toren has
@@ -128,6 +137,7 @@ modules/settings/
 modules/ii/cheatsheet/CheatsheetPeriodicTable.qml
 modules/ii/cheatsheet/ElementTile.qml
 modules/ii/cheatsheet/periodic_table.js
+modules/ii/sidebarRight/pomodoro/PomodoroTimer.qml
 "
 
 log() { printf '%s\n' "$*" >&2; }

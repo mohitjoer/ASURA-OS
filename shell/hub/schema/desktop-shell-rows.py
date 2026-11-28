@@ -54,7 +54,6 @@ row("Bar & dock", "POSITION", "bar.bottom", "sw", "Bar at the bottom", "Moves th
 row("Bar & dock", "POSITION", "bar.autoHide.enable", "sw", "Hide the bar", "The bar slides away and comes back when the pointer reaches its edge")
 row("Bar & dock", "SHAPE", "bar.cornerStyle", "seg", "Bar silhouette & corners", "Hug: the bar meets the screen corners. Float: a raised strip. Rect: a flat rectangle",
     opts=["Hug", "Float", "Rect"], map={"Hug": 0, "Float": 1, "Rect": 2})
-row("Bar & dock", "SHAPE", "bar.showBackground", "sw", "Background", "Draws the bar's background; off leaves the items over the wallpaper")
 row("Bar & dock", "SHAPE", "bar.floatStyleShadow", "sw", "Shadow", "A shadow under the bar when its shape is Float")
 row("Bar & dock", "WEATHER", "bar.weather.enable", "sw", "Weather in the bar", "Shows the temperature and conditions next to the clock")
 row("Bar & dock", "WEATHER", "bar.weather.enableGPS", "sw", "Find my location", "Uses the network location; turn off to name a city below")
@@ -64,12 +63,12 @@ row("Bar & dock", "WEATHER", "bar.weather.useUSCS", "sw", "Fahrenheit", "US unit
 row("Bar & dock", "DOCK", "dock.enable", "sw", "Dock", "The app dock at the bottom of the screen")
 row("Bar & dock", "DOCK", "dock.pinnedOnStartup", "sw", "Always show", "Keeps the dock on screen instead of hiding it while a window is focused")
 row("Bar & dock", "DOCK", "dock.monochromeIcons", "sw", "Monochrome icons", "Tints the dock's icons to the colour scheme")
+row("Bar & dock", "DOCK", "appearance.transparency.enable", "sw", "Transparency", "Lets the wallpaper show through panels and menus")
 
 row("Look", "COLOURS", "appearance.palette.type", "seg", "Colour scheme", "How colours are taken from the wallpaper",
     opts=["Auto", "Tonal", "Neutral", "Vibrant", "Expressive", "Monochrome"],
     map={"Auto": "auto", "Tonal": "scheme-tonal-spot", "Neutral": "scheme-neutral", "Vibrant": "scheme-rainbow",
          "Expressive": "scheme-expressive", "Monochrome": "scheme-monochrome"})
-row("Look", "COLOURS", "appearance.transparency.enable", "sw", "Transparency", "Lets the wallpaper show through panels and menus")
 row("Look", "SCREEN", "appearance.fakeScreenRounding", "seg", "Rounded screen corners", "Draws rounded corners over the screen's edges",
     opts=["Off", "Always", "Not fullscreen"], map={"Off": 0, "Always": 1, "Not fullscreen": 2})
 row("Look", "APPS", "toren.gtkRoundedCorners", "sw", "Rounded app corners",
@@ -81,9 +80,6 @@ row("Look", "OVERVIEW", "overview.columns", "step", "Columns", "Workspaces per r
 row("Clock", "TIME", "time.format", "seg", "Time format", "How the bar and lock screen show the time",
     opts=["24-hour", "12-hour"], map={"24-hour": "hh:mm", "12-hour": "h:mm ap"})
 row("Clock", "TIME", "time.secondPrecision", "sw", "Seconds", "Shows seconds in the clock")
-row("Clock", "DESKTOP CLOCK", "background.widgets.clock.enable", "sw", "Clock on the desktop", "A large clock drawn on the wallpaper")
-row("Clock", "DESKTOP CLOCK", "background.widgets.clock.style", "seg", "Style", "Analogue dial or digits",
-    opts=["Analogue", "Digital"], map={"Analogue": "cookie", "Digital": "digital"})
 
 row("System", "NOTIFICATIONS", "notifications.timeout", "step", "Notification time", "How long a notification stays on screen", unit="ms", **{"from": 1000, "to": 30000})
 row("System", "NOTIFICATIONS", "osd.timeout", "step", "Volume and brightness popup", "How long the volume or brightness popup stays", unit="ms", **{"from": 500, "to": 5000})

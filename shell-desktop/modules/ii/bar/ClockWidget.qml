@@ -14,26 +14,21 @@ Item {
     RowLayout {
         id: rowLayout
         anchors.centerIn: parent
-        spacing: 4
+        spacing: 8
 
         StyledText {
-            font.pixelSize: Appearance.font.pixelSize.large
+            visible: root.showDate
+            font.pixelSize: Appearance.font.pixelSize.small
+            font.weight: Font.Medium
+            color: Appearance.colors.colOnLayer1
+            text: Qt.locale().toString(DateTime.clock.date, "MMM d")
+        }
+
+        StyledText {
+            font.pixelSize: Appearance.font.pixelSize.small
+            font.weight: Font.DemiBold
             color: Appearance.colors.colOnLayer1
             text: DateTime.time
-        }
-
-        StyledText {
-            visible: root.showDate
-            font.pixelSize: Appearance.font.pixelSize.small
-            color: Appearance.colors.colOnLayer1
-            text: "•"
-        }
-
-        StyledText {
-            visible: root.showDate
-            font.pixelSize: Appearance.font.pixelSize.small
-            color: Appearance.colors.colOnLayer1
-            text: DateTime.longDate
         }
     }
 }

@@ -109,6 +109,10 @@ set_wallpaper_path() {
     if [ -f "$SHELL_CONFIG_FILE" ]; then
         jq --arg path "$path" '.background.wallpaperPath = $path' "$SHELL_CONFIG_FILE" > "$SHELL_CONFIG_FILE.tmp" && mv "$SHELL_CONFIG_FILE.tmp" "$SHELL_CONFIG_FILE"
     fi
+    if [ -n "$path" ] && [ -e "$path" ]; then
+        mkdir -p "${XDG_CONFIG_HOME:-$HOME/.config}/toren/current"
+        ln -sf "$path" "${XDG_CONFIG_HOME:-$HOME/.config}/toren/current/background"
+    fi
 }
 
 set_thumbnail_path() {
@@ -305,9 +309,9 @@ main() {
 
     detect_scheme_type_from_image() {
         local img="$1"
-        source "$(eval echo $ILLOGICAL_IMPULSE_VIRTUAL_ENV)/bin/activate"
+        source "$(eval echo $ILLOGICAL_IMPULSE_VIRTUAL_ENV)/bin/activate" 2>/dev/null || true
         "$SCRIPT_DIR"/scheme_for_image.py "$img" 2>/dev/null | tr -d '\n'
-        deactivate
+        deactivate 2>/dev/null || true
     }
 
     while [[ $# -gt 0 ]]; do

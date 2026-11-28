@@ -24,6 +24,47 @@ Toolbar {
     signal dismiss()
 
     ToolbarTabBar {
+        id: actionTabBar
+        visible: root.action !== RegionSelection.SnipAction.Record && root.action !== RegionSelection.SnipAction.RecordWithSound
+        tabButtonList: [
+            {"icon": "content_copy", "name": Translation.tr("Copy")},
+            {"icon": "edit", "name": Translation.tr("Edit")},
+            {"icon": "image_search", "name": Translation.tr("Lens")},
+            {"icon": "document_scanner", "name": Translation.tr("OCR")}
+        ]
+        currentIndex: {
+            switch (root.action) {
+                case RegionSelection.SnipAction.Copy: return 0;
+                case RegionSelection.SnipAction.Edit: return 1;
+                case RegionSelection.SnipAction.Search: return 2;
+                case RegionSelection.SnipAction.CharRecognition: return 3;
+                default: return 0;
+            }
+        }
+        onCurrentIndexChanged: {
+            if (!visible) return;
+            const actions = [
+                RegionSelection.SnipAction.Copy,
+                RegionSelection.SnipAction.Edit,
+                RegionSelection.SnipAction.Search,
+                RegionSelection.SnipAction.CharRecognition
+            ];
+            if (currentIndex >= 0 && currentIndex < actions.length) {
+                root.action = actions[currentIndex];
+            }
+        }
+    }
+
+    Rectangle {
+        visible: actionTabBar.visible
+        Layout.fillHeight: true
+        Layout.topMargin: 6
+        Layout.bottomMargin: 6
+        implicitWidth: 1
+        color: Appearance.colors.colOutlineVariant
+    }
+
+    ToolbarTabBar {
         id: tabBar
         tabButtonList: [
             {"icon": "activity_zone", "name": Translation.tr("Rect")},

@@ -137,8 +137,7 @@ Rectangle {
             { key: "windowrules", name: "Window Rules", adv: true } ] },
         { name: "SYSTEM", items: [
             { key: "performance", name: "Performance" }, { key: "session", name: "Session" },
-            { key: "recording", name: "Recording", needs: { shell: "toren" } }, { key: "fastfetch", name: "Fastfetch", adv: true },
-            { key: "import", name: "Import config", adv: true, wired: true } ] },
+            { key: "recording", name: "Recording", needs: { shell: "toren" } }, { key: "fastfetch", name: "Fastfetch", adv: true } ] },
         { name: "EXTEND", items: [
             { key: "addons", name: "Add-ons", needs: { shell: "toren" } } ] },
         { name: "", items: [ { key: "about", name: "About" } ] }
@@ -155,7 +154,7 @@ Rectangle {
         "widgets": "", "lockscreen": "",
         "addons": "", "windowrules": "", "appoverrides": "",
         "session": "", "performance": "",
-        "updates": "", "about": "", "global": "", "import": "", "windowmanager": "", "desktop-shell": ""
+        "updates": "", "about": "", "global": "", "windowmanager": "", "desktop-shell": ""
     })
 
     // Extra search vocabulary per section: the words a user actually types that
@@ -185,7 +184,6 @@ Rectangle {
         "session": "session login startup autostart launch run command boot environment variable env var export",
         "performance": "performance battery power saving save lowpower potato lag cpu gpu ram memory idle freeze reduce motion fps",
         "updates": "update upgrade version channel commit behind check origin",
-        "import": "import bring migrate dotfiles config existing kitty fish fastfetch drop folder git backup undo restore adopt",
         "about": "about toren os linux version hardware specs distribution system license thanks contributor"
     })
 
@@ -508,7 +506,6 @@ Rectangle {
     function pageFile(s) {
         var map = { "desktop-shell": "DesktopShellPage", "profile": "ProfilePage", "bar-studio": "BarStudioPage", "desktop": "DesktopPage", "session": "SessionPage", "windowrules": "WindowRulesPage", "appoverrides": "AppOverridesPage", "input": "InputPage", "keybinds": "KeybindsPage", "displays": "DisplaysPage", "connections": "ConnectionsPage", "gpu": "GpuPage", "updates": "UpdatesPage", "recording": "RecordingPage", "performance": "PerformancePage", "launcher": "LauncherPage", "lockscreen": "LockscreenPage", "fastfetch": "FastfetchPage", "addons": "AddonsPage", "widgets": "WidgetsPage", "about": "AboutPage" };
         map.global = "GlobalPage";
-        map["import"] = "ImportPage";
         map.windowmanager = "WindowManagerPage";
         return map[s] ? Qt.resolvedUrl("pages/" + map[s] + ".qml") : "";
     }
@@ -592,7 +589,6 @@ Rectangle {
     function settingsFiles() {
         var s = hub.section;
         if (hub.pageFile(s) === "") return [];
-        if (s === "import") return [];
         var ce = hub.cfgDir;
         var home = Quickshell.env("HOME") || "";
         var out = [];

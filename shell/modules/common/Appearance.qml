@@ -388,6 +388,7 @@ Singleton {
             property string iconMaterial: "Material Symbols Rounded"
             property string iconNerd: Theme.fontFamily
             property string monospace: Theme.fontMonoFamily
+            property string mono: monospace
             property string reading: Theme.fontFamily
             property string expressive: Theme.fontFamily
         }
@@ -403,6 +404,7 @@ Singleton {
             property int smallie: Theme.typeLabelSize
             property int small: Theme.typeBodySize
             property int normal: Theme.typeBodySize
+            property int medium: normal
             property int large: Theme.typeHeadlineSize
             property int larger: 19
             property int huge: Theme.typeTitleSize

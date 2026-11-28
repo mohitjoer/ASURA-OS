@@ -310,7 +310,7 @@ if [ -d "$REPO_ROOT/public/wallpapers" ]; then
 	cp "$REPO_ROOT/public/wallpapers"/* "$INCLUDE_DIR/etc/skel/Pictures/Wallpapers/"
 fi
 
-for s in toren-hub toren-idle toren-pin toren-reload-cover toren-shot toren-vm toren-wallpaper-ui toren-welcome toren-greeter; do
+for s in toren-hub toren-idle toren-installer-ui toren-pin toren-reload-cover toren-shot toren-vm toren-wallpaper-ui toren-welcome toren-greeter; do
 	if [ -f "$REPO_ROOT/session/$s" ]; then
 		cp "$REPO_ROOT/session/$s" "$INCLUDE_DIR/usr/bin/"
 	fi
@@ -675,8 +675,8 @@ echo "build-iso-void: building Toren Go binaries..."
 	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/toren-wallpaper" ./cmd/toren-wallpaper
 	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/apm" ./cmd/apm
 	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/toren-agent" ./cmd/toren-agent
-	# Build Asura Store (prioritizing standalone repository https://github.com/Toren-Linux/toren-store)
-	STORE_SRC="${ASURA_STORE_SRC:-}"
+	# Build Toren Store (prioritizing standalone repository https://github.com/Toren-Linux/toren-store)
+	STORE_SRC="${TOREN_STORE_SRC:-${ASURA_STORE_SRC:-}}"
 	if [ -z "$STORE_SRC" ]; then
 		if [ -d "$REPO_ROOT/../toren-store" ]; then
 			STORE_SRC="$REPO_ROOT/../toren-store"
@@ -732,6 +732,7 @@ cp -a "$INCLUDE_DIR/usr/share/toren"/* "$INCLUDE_DIR/etc/skel/.config/toren/"
 cat >"$INCLUDE_DIR/etc/skel/.config/ghostty/config" <<'EOF'
 config-file = ?~/.config/toren/apps/ghostty/config
 config-file = ?/usr/share/toren/apps/ghostty/config
+config-file = ?~/.config/ghostty/colors
 working-directory = home
 EOF
 

@@ -180,7 +180,7 @@ components:
       - path: modules/common/widgets/Favicon.qml
         blob: 04e92859246f5ba0d1a31590735b354c774aef61
       - path: modules/common/widgets/FloatingActionButton.qml
-        blob: 1b26692108c6029d313fe0e1d7f25884477a9ada
+        blob: 42c12412d2b8d85f5aa3a94609d7ce7f326e3e28
       - path: modules/common/widgets/FlowButtonGroup.qml
         blob: ec9526ef2bea0c8c55067a3637c799ae43f20ea7
       - path: modules/common/widgets/FocusedScrollMouseArea.qml
@@ -228,7 +228,7 @@ components:
       - path: modules/common/widgets/NotificationActionButton.qml
         blob: 89b857682c2b2945627cdd3b20d3021411699894
       - path: modules/common/widgets/NotificationAppIcon.qml
-        blob: 351da2b450abef888b00f92663d0b077cf5ade03
+        blob: 079d9ac6452b60ba34a393cc70cb43c2208b2555
       - path: modules/common/widgets/NotificationGroupExpandButton.qml
         blob: aced621ecb57e89537776725b527cd36b9b7076f
       - path: modules/common/widgets/NotificationGroup.qml
@@ -418,7 +418,7 @@ components:
       - path: modules/ii/bar/ClockWidgetPopup.qml
         blob: c23edb7b4a34c032f5a1d291274867a57d4473d6
       - path: modules/ii/bar/ClockWidget.qml
-        blob: 1d4b9f8659cc3a1957b7cdcf5a83e6ac33f21588
+        blob: e247d9c2a1f6d90209be1bddba03027d3685d7af
       - path: modules/ii/bar/HyprlandXkbIndicator.qml
         blob: a6ca214aa1a57c4a29505a144af0dc9fc3336d8f
       - path: modules/ii/bar/LeftSidebarButton.qml
@@ -438,7 +438,7 @@ components:
       - path: modules/ii/bar/StyledPopupHeaderRow.qml
         blob: f5c7ba445b1a1e288af5a3e0a9773ea4bd1bd487
       - path: modules/ii/bar/StyledPopup.qml
-        blob: 650d770b6304caa070e0d261ca1c7988fecf9936
+        blob: 3a037c74faa4f8f6edc4fdb8f284e23372ed4f8f
       - path: modules/ii/bar/StyledPopupValueRow.qml
         blob: de8ac579e06eb56db2e2bbf32e73e311de908863
       - path: modules/ii/bar/SysTrayItem.qml
@@ -460,13 +460,13 @@ components:
       - path: modules/ii/bar/Workspaces.qml
         blob: 34b2c573aaf26a9a0b8addf28cd0589c0304e814
       - path: modules/ii/cheatsheet/CheatsheetKeybindsCategory.qml
-        blob: 724daee543ea65b4cb7911bbcc0b5abe73b12a2e
+        blob: 35b661416de2881934c3207fa86670f628d95e62
       - path: modules/ii/cheatsheet/CheatsheetKeybinds.qml
-        blob: 337230aba3d06c5eebf37ea94266df5f17a5a41a
+        blob: 47c0a1a6df44e2e270fcbb2b75020ced54187d4e
       - path: modules/ii/cheatsheet/CheatsheetPeriodicTable.qml
         blob: 6262ed77ae24e9c7c6c2169c67d1f0a382c19ea5
       - path: modules/ii/cheatsheet/Cheatsheet.qml
-        blob: 79b238027b49abc09793c150c90fff3ce836086d
+        blob: b44cefc332689f96aa0d01bc5465a7e2f9126090
       - path: modules/ii/cheatsheet/ElementTile.qml
         blob: e05b76a9c31bb5c5db803bf22cab55cdfd71c10c
       - path: modules/ii/cheatsheet/periodic_table.js
@@ -549,10 +549,10 @@ components:
         blob: 99c1fb9a5d5d1de66f42640a597a83b2ba5e2af0
       - path: modules/ii/sidebarRight/notifications/NotificationStatusButton.qml
         blob: 2609b5f56709a18fbe827a77b6f86e5d47c28848
-      - path: modules/ii/sidebarRight/pomodoro/PomodoroTimer.qml
-        blob: b8dce71e13db37270e64872cbb5b02e8d43f8a57
+      - path: modules/ii/sidebarRight/pomodoro/CountdownTimer.qml
+        blob: 89433959277f2e8fb97b7bdad3dcb19ac3db85b9
       - path: modules/ii/sidebarRight/pomodoro/PomodoroWidget.qml
-        blob: a62a9616c1c72feeb2b642371fc78993370bc5fe
+        blob: dba1b7332341296883cf383c57784b3da5635498
       - path: modules/ii/sidebarRight/pomodoro/Stopwatch.qml
         blob: 8b1dbba1357be2c22d7337263c8337b28a34101f
       - path: modules/ii/sidebarRight/QuickSliders.qml
@@ -678,7 +678,7 @@ components:
       - path: services/Brightness.qml
         blob: 939bc37d85b03828714ceeb3f2d2c5a6ae5f251e
       - path: services/Cliphist.qml
-        blob: 615e949fbe7312e6e9d764db1e53491dfe13cbe0
+        blob: 7e49e9ab45b6f11d132c2d9da25e96059136cffc
       - path: services/ConflictKiller.qml
         blob: 547a4d3e288c2c6d95d76138e1e2e8d3b36cd718
       - path: services/DateTime.qml
@@ -732,7 +732,7 @@ components:
       - path: services/network/WifiAccessPoint.qml
         blob: 55ee811f579d946db6dd081a0d9ccd99b822416c
       - path: services/Notifications.qml
-        blob: a45b86007542dd4b1b6b6a8b11636f5410d3e573
+        blob: 5d79474dda1f8a95b62af29577cc6b3b4aee116c
       - path: services/PolkitService.qml
         blob: 758f0b0b87b0655c004bf35ee57017795c06bc9d
       - path: services/Privacy.qml
@@ -748,11 +748,11 @@ components:
       - path: services/TaskbarApps.qml
         blob: 6351896b802dc2168f23558b59c34e78dfa87212
       - path: services/TimerService.qml
-        blob: 69e5fe1c10407384fa21feaba6101162ebb039d1
+        blob: 0a3200220b02b5c319e26eeb15fee4f7ec59ccfd
       - path: services/Todo.qml
         blob: 93227cbbb2e2275f4bc84d7cac62eeb5a03a535e
       - path: services/Translation.qml
-        blob: fe8f8d75cb33a510a95874e1da387ce3b31f058b
+        blob: 0c33307732b2456febc70bee7910602d8a6577a5
       - path: services/TrayService.qml
         blob: 31966345ce909c5d0eeff69eb2821c5398f9e3e7
       - path: services/Updates.qml

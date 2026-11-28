@@ -230,11 +230,12 @@ var (
 type svState int
 
 const (
-	svUnknown  svState = iota
-	svRunning          // run:
-	svFlapping         // down, but runit wants it up: it keeps exiting
-	svStopped          // down, and nothing wants it up
-	svMissing          // not enabled (no supervise directory)
+	svUnknown           svState = iota
+	svRunning                   // run:
+	svFlapping                  // down, but runit wants it up: it keeps exiting
+	svStopped                   // down, and nothing wants it up
+	svMissing                   // not enabled (no supervise directory)
+	svEnabledUnverified         // symlinked, but supervise/ok is unreadable without root
 )
 
 // parseSvStatus reads the first clause of `sv status` output, the service's
@@ -288,6 +289,9 @@ func reportCoreServices(root string, fix bool) int {
 		st := parseSvStatus(string(out))
 		if st == svUnknown || (st == svMissing && os.Geteuid() != 0) {
 			if enabled(svc) {
+				if os.Geteuid() != 0 {
+					return svEnabledUnverified
+				}
 				return svRunning
 			}
 			return svMissing
@@ -300,6 +304,8 @@ func reportCoreServices(root string, fix bool) int {
 		switch st := state(svc); {
 		case st == svRunning:
 			fmt.Printf("  • %-16s running\n", svc)
+		case st == svEnabledUnverified:
+			fmt.Printf("  • %-16s enabled (run with sudo for live status)\n", svc)
 		case defErr != nil && optional:
 			fmt.Printf("  • %-16s not installed (optional)\n", svc)
 		case st == svMissing && optional:
@@ -308,6 +314,8 @@ func reportCoreServices(root string, fix bool) int {
 			problems++
 			fmt.Printf("  • %-16s CRASHING: runit keeps restarting it\n", svc)
 			fmt.Printf("    see why: sudo sv down %s; sudo sh -x /etc/sv/%s/run; sudo sv up %s\n", svc, svc, svc)
+		case st == svStopped && optional:
+			fmt.Printf("  • %-16s stopped (optional)\n", svc)
 		case st == svStopped:
 			problems++
 			fmt.Printf("  • %-16s stopped (start: sudo sv up %s)\n", svc, svc)

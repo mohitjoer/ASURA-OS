@@ -15,7 +15,7 @@ Column {
     required property string categoryName
     readonly property bool isCategorized: categoryName?.length > 0
     property int maxBindWidth: 0
-    property real columnSpacing: 40
+    property real columnSpacing: 24
     property real titleSpacing: 7
 
     // Excellent symbol explaination and source :

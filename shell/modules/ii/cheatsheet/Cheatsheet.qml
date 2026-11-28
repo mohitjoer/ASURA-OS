@@ -79,8 +79,10 @@ Scope { // Scope
                 border.color: Appearance.colors.colLayer0Border
                 radius: Appearance.rounding.windowRounding
                 property real padding: 20
-                implicitWidth: cheatsheetColumnLayout.implicitWidth + padding * 2
-                implicitHeight: cheatsheetColumnLayout.implicitHeight + padding * 2
+                readonly property real maxW: (cheatsheetRoot.screen?.width ?? 1280) - 48
+                readonly property real maxH: (cheatsheetRoot.screen?.height ?? 800) - 64
+                implicitWidth: Math.min(cheatsheetColumnLayout.implicitWidth + padding * 2, maxW)
+                implicitHeight: Math.min(cheatsheetColumnLayout.implicitHeight + padding * 2, maxH)
 
                 Keys.onPressed: event => { // Esc to close
                     if (event.key === Qt.Key_Escape) {
@@ -157,8 +159,8 @@ Scope { // Scope
                             Persistent.states.cheatsheet.tabIndex = currentIndex;
                         }
 
-                        implicitWidth: Math.max.apply(null, contentChildren.map(child => child.implicitWidth || 0))
-                        implicitHeight: Math.max.apply(null, contentChildren.map(child => child.implicitHeight || 0))
+                        implicitWidth: Math.min(swipeView.currentItem ? swipeView.currentItem.implicitWidth : 800, cheatsheetBackground.maxW - cheatsheetBackground.padding * 2)
+                        implicitHeight: Math.min(swipeView.currentItem ? swipeView.currentItem.implicitHeight : 560, cheatsheetBackground.maxH - cheatsheetBackground.padding * 2 - 56)
 
                         clip: true
                         layer.enabled: true

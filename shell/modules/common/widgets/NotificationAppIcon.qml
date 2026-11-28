@@ -27,10 +27,17 @@ MaterialShape { // App icon
     ]
     shape: isUrgent ? urgentShapes[Math.floor(Math.random() * urgentShapes.length)] : MaterialShape.Shape.Circle
 
+    readonly property string resolvedAppIcon: {
+        if (!root.appIcon || root.appIcon === "") return "";
+        if (root.appIcon.startsWith("/") || root.appIcon.startsWith("file://"))
+            return root.appIcon;
+        return Quickshell.iconPath(root.appIcon, "");
+    }
+
     color: isUrgent ? Appearance.colors.colPrimaryContainer : Appearance.colors.colSecondaryContainer
     Loader {
         id: materialSymbolLoader
-        active: root.appIcon == "" && root.image == ""
+        active: root.image == "" && (root.resolvedAppIcon == "" || (appIconLoader.item && appIconLoader.item.status === Image.Error))
         anchors.fill: parent
         sourceComponent: MaterialSymbol {
             text: {
@@ -48,13 +55,14 @@ MaterialShape { // App icon
     }
     Loader {
         id: appIconLoader
-        active: root.image == "" && root.appIcon != ""
+        active: root.image == "" && root.resolvedAppIcon != ""
         anchors.centerIn: parent
         sourceComponent: IconImage {
             id: appIconImage
             implicitSize: root.appIconSize
             asynchronous: true
-            source: Quickshell.iconPath(root.appIcon, "image-missing")
+            source: root.resolvedAppIcon
+            visible: status !== Image.Error
         }
     }
     Loader {
@@ -85,13 +93,14 @@ MaterialShape { // App icon
             }
             Loader {
                 id: notifImageAppIconLoader
-                active: root.appIcon != ""
+                active: root.resolvedAppIcon != ""
                 anchors.bottom: parent.bottom
                 anchors.right: parent.right
                 sourceComponent: IconImage {
                     implicitSize: root.smallAppIconSize
                     asynchronous: true
-                    source: Quickshell.iconPath(root.appIcon, "image-missing")
+                    source: root.resolvedAppIcon
+                    visible: status !== Image.Error
                 }
             }
         }

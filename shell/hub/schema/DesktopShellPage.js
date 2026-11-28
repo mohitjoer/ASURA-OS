@@ -47,15 +47,6 @@ var rows = [
     {
         "tab": "Bar & dock",
         "group": "SHAPE",
-        "key": "bar.showBackground",
-        "ctl": "sw",
-        "label": "Background",
-        "desc": "Draws the bar's background; off leaves the items over the wallpaper",
-        "def": true
-    },
-    {
-        "tab": "Bar & dock",
-        "group": "SHAPE",
         "key": "bar.floatStyleShadow",
         "ctl": "sw",
         "label": "Shadow",
@@ -125,6 +116,15 @@ var rows = [
         "label": "Monochrome icons",
         "desc": "Tints the dock's icons to the colour scheme",
         "def": true
+    },
+    {
+        "tab": "Bar & dock",
+        "group": "DOCK",
+        "key": "appearance.transparency.enable",
+        "ctl": "sw",
+        "label": "Transparency",
+        "desc": "Lets the wallpaper show through panels and menus",
+        "def": false
     },
     {
         "tab": "Bar & dock",
@@ -207,15 +207,6 @@ var rows = [
             "Expressive": "scheme-expressive",
             "Monochrome": "scheme-monochrome"
         }
-    },
-    {
-        "tab": "Look",
-        "group": "COLOURS",
-        "key": "appearance.transparency.enable",
-        "ctl": "sw",
-        "label": "Transparency",
-        "desc": "Lets the wallpaper show through panels and menus",
-        "def": false
     },
     {
         "tab": "Look",
@@ -473,32 +464,6 @@ var rows = [
         "label": "Seconds",
         "desc": "Shows seconds in the clock",
         "def": false
-    },
-    {
-        "tab": "Clock",
-        "group": "DESKTOP CLOCK",
-        "key": "background.widgets.clock.enable",
-        "ctl": "sw",
-        "label": "Clock on the desktop",
-        "desc": "A large clock drawn on the wallpaper",
-        "def": false
-    },
-    {
-        "tab": "Clock",
-        "group": "DESKTOP CLOCK",
-        "key": "background.widgets.clock.style",
-        "ctl": "seg",
-        "label": "Style",
-        "desc": "Analogue dial or digits",
-        "def": "cookie",
-        "opts": [
-            "Analogue",
-            "Digital"
-        ],
-        "map": {
-            "Analogue": "cookie",
-            "Digital": "digital"
-        }
     },
     {
         "tab": "Lock screen",

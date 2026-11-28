@@ -118,7 +118,7 @@ put session/units /usr/share/toren/session/units
 put session/units /usr/lib/systemd/user
 put session/grub /usr/share/toren/session/grub
 put session/sddm /usr/share/toren/session/sddm
-for s in toren-hub toren-idle toren-pin toren-reload-cover toren-shot toren-vm toren-wallpaper-ui toren-welcome toren-greeter; do
+for s in toren-hub toren-idle toren-installer-ui toren-pin toren-reload-cover toren-shot toren-vm toren-wallpaper-ui toren-welcome toren-greeter; do
 	put_bin "session/$s" "/usr/bin/$s"
 	put_as "session/$s" "/usr/share/toren/session/$s"
 done

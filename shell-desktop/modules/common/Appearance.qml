@@ -219,6 +219,7 @@ Singleton {
             property string iconMaterial: "Material Symbols Rounded"
             property string iconNerd: Config.options.appearance.fonts.iconNerd
             property string monospace: Config.options.appearance.fonts.monospace
+            property string mono: monospace
             property string reading: Config.options.appearance.fonts.reading
             property string expressive: Config.options.appearance.fonts.expressive
         }
@@ -240,6 +241,7 @@ Singleton {
             property int smallie: 13
             property int small: 15
             property int normal: 16
+            property int medium: normal
             property int large: 17
             property int larger: 19
             property int huge: 22

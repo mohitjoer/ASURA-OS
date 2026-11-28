@@ -95,14 +95,13 @@ Item {
         id: logoImg
         visible: rootMod.isTorenLogo
         anchors.centerIn: parent
-        width: 16
-        height: 16
-        sourceSize.width: 32
-        sourceSize.height: 32
+        width: 18
+        height: 18
+        sourceSize.width: 36
+        sourceSize.height: 36
         fillMode: Image.PreserveAspectFit
         source: Qt.resolvedUrl("../../../../../assets/toren-logo-on-dark.svg")
         smooth: true
-        mipmap: true
         opacity: (ma.containsMouse || root.controlVisible) ? 1.0 : 0.9
         Behavior on opacity { NumberAnimation { duration: 150 } }
     }

@@ -2,7 +2,7 @@
 Name=Install Toren Linux
 GenericName=System Installer
 Comment=Install Toren Linux permanently to your laptop or desktop drive
-Exec=ghostty --title="Install Toren Linux" -e toren install
+Exec=toren-installer-ui
 Icon=toren-installer
 Terminal=false
 Type=Application

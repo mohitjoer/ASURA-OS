@@ -8,6 +8,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Bluetooth
 import Quickshell.Hyprland
+import Quickshell.Io
 
 import qs.modules.ii.sidebarRight.quickToggles
 import qs.modules.ii.sidebarRight.quickToggles.classicStyle
@@ -92,6 +93,146 @@ Item {
                 styleName: "android"
                 sourceComponent: AndroidQuickPanel {
                     editMode: root.editMode
+                }
+            }
+
+            Rectangle {
+                id: layoutCard
+                Layout.fillWidth: true
+                radius: Appearance.rounding.normal
+                color: Appearance.colors.colLayer1
+                implicitHeight: layoutCol.implicitHeight + 16
+
+                readonly property int workspaceId: Hyprland.focusedMonitor?.activeWorkspace?.id ?? 0
+                property var layouts: ({})
+                readonly property string current: layoutCard.layouts[String(layoutCard.workspaceId)] ?? "default"
+
+                FileView {
+                    path: (Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/toren/layouts.json"
+                    watchChanges: true
+                    printErrors: false
+                    onFileChanged: reload()
+                    onLoaded: {
+                        try {
+                            layoutCard.layouts = JSON.parse(text()).workspaces ?? {};
+                        } catch (e) {
+                            layoutCard.layouts = {};
+                        }
+                    }
+                    onLoadFailed: layoutCard.layouts = {}
+                }
+
+                ColumnLayout {
+                    id: layoutCol
+                    anchors.fill: parent
+                    anchors.margins: 8
+                    spacing: 6
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 6
+
+                        MaterialSymbol {
+                            text: {
+                                switch (layoutCard.current) {
+                                    case "tile": return "dashboard";
+                                    case "scroll": return "view_week";
+                                    case "master": return "view_quilt";
+                                    case "monocle": return "crop_square";
+                                    case "float": return "filter_none";
+                                    default: return "dashboard";
+                                }
+                            }
+                            iconSize: 18
+                            color: Appearance.colors.colPrimary
+                        }
+
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: Translation.tr("Workspace %1 Layout").arg(layoutCard.workspaceId)
+                            font.pixelSize: Appearance.font.pixelSize.small
+                            font.weight: Font.DemiBold
+                            color: Appearance.colors.colOnLayer1
+                        }
+
+                        StyledText {
+                            text: {
+                                switch (layoutCard.current) {
+                                    case "tile": return Translation.tr("Tiling");
+                                    case "scroll": return Translation.tr("Scrolling");
+                                    case "master": return Translation.tr("Master");
+                                    case "monocle": return Translation.tr("Monocle");
+                                    case "float": return Translation.tr("Floating");
+                                    default: return Translation.tr("Default");
+                                }
+                            }
+                            font.pixelSize: Appearance.font.pixelSize.smaller
+                            color: Appearance.colors.colSubtext
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 4
+
+                        Repeater {
+                            model: [
+                                { id: "tile", icon: "dashboard", label: Translation.tr("Tile") },
+                                { id: "scroll", icon: "view_week", label: Translation.tr("Scroll") },
+                                { id: "master", icon: "view_quilt", label: Translation.tr("Master") },
+                                { id: "monocle", icon: "crop_square", label: Translation.tr("Monocle") },
+                                { id: "float", icon: "filter_none", label: Translation.tr("Float") }
+                            ]
+                            delegate: Rectangle {
+                                id: btn
+                                required property var modelData
+                                required property int index
+                                Layout.fillWidth: true
+                                implicitHeight: 32
+                                radius: Appearance.rounding.small
+                                readonly property bool isSelected: layoutCard.current === modelData.id || (layoutCard.current === "default" && modelData.id === "tile")
+
+                                color: isSelected
+                                    ? Appearance.colors.colPrimary
+                                    : (btnMouse.containsMouse ? Appearance.colors.colLayer1Hover : Appearance.colors.colSecondaryContainer)
+
+                                Behavior on color {
+                                    animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
+                                }
+
+                                RowLayout {
+                                    anchors.centerIn: parent
+                                    spacing: 3
+                                    MaterialSymbol {
+                                        text: modelData.icon
+                                        iconSize: 15
+                                        color: btn.isSelected ? Appearance.colors.colOnPrimary : Appearance.colors.colOnSecondaryContainer
+                                    }
+                                    StyledText {
+                                        text: modelData.label
+                                        font.pixelSize: Appearance.font.pixelSize.smaller
+                                        font.weight: btn.isSelected ? Font.Bold : Font.Normal
+                                        color: btn.isSelected ? Appearance.colors.colOnPrimary : Appearance.colors.colOnSecondaryContainer
+                                    }
+                                }
+
+                                MouseArea {
+                                    id: btnMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        Quickshell.execDetached(["toren", "layout", "set", modelData.id]);
+                                    }
+                                }
+
+                                StyledToolTip {
+                                    extraVisibleCondition: btnMouse.containsMouse
+                                    text: modelData.label
+                                }
+                            }
+                        }
+                    }
                 }
             }
 

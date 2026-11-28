@@ -8,7 +8,7 @@ import QtQuick.Layouts
 Item {
     id: root
     property var tabButtonList: [
-        {"name": Translation.tr("Pomodoro"), "icon": "search_activity"},
+        {"name": Translation.tr("Timer"), "icon": "hourglass_empty"},
         {"name": Translation.tr("Stopwatch"), "icon": "timer"}
     ]
 
@@ -23,14 +23,14 @@ Item {
             event.accepted = true
         } else if (event.key === Qt.Key_Space || event.key === Qt.Key_S) { // Pause/resume with Space or S
             if (tabBar.currentIndex === 0) {
-                TimerService.togglePomodoro()
+                TimerService.toggleCountdown()
             } else {
                 TimerService.toggleStopwatch()
             }
             event.accepted = true
         } else if (event.key === Qt.Key_R) { // Reset with R
             if (tabBar.currentIndex === 0) {
-                TimerService.resetPomodoro()
+                TimerService.resetCountdown()
             } else {
                 TimerService.stopwatchReset()
             }
@@ -68,7 +68,7 @@ Item {
             currentIndex: tabBar.currentIndex
 
             // Tabs
-            PomodoroTimer {}
+            CountdownTimer {}
             Stopwatch {}
         }
     }
