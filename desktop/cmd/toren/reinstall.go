@@ -11,7 +11,7 @@ func init() {
 }
 
 // reinstallPlan returns the command that will be executed to apply the commit.
-func reinstallPlan(repoDir, commit, root string) []string {
+func reinstallPlan(repoDir, _, root string) []string {
 	return applyRepoArgs(repoDir, root)
 }
 

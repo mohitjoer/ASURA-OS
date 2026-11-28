@@ -29,8 +29,7 @@ const (
 )
 
 var (
-	quirksAppliedStateFile = appliedStateJSONFile
-	quirksPrivileged       = runPrivileged
+	quirksPrivileged = runPrivileged
 )
 
 // resolveHardwareDirs finds the models and components directories.
@@ -481,7 +480,7 @@ func runQuirksApply(args []string) int {
 	return exitOK
 }
 
-func runQuirksRemove(args []string) int {
+func runQuirksRemove(_ []string) int {
 	state, err := getAppliedState()
 	if err != nil || state == nil {
 		fmt.Println("No hardware quirks are currently applied.")
