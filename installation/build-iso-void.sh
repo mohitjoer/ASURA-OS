@@ -704,6 +704,24 @@ echo "build-iso-void: building Toren Go binaries..."
 	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/toren-vm-mon" ./cmd/toren-vm/mon
 	CGO_ENABLED=0 go build -o "$INCLUDE_DIR/usr/bin/toren-vm-ssh" ./cmd/toren-vm/remote
 	cp -f "$REPO_ROOT/desktop/cmd/toren-vm/toren-vmd" "$INCLUDE_DIR/usr/bin/toren-vmd"
+
+	# Build Prowl from standalone org repository (https://github.com/Toren-Linux/prowl)
+	PROWL_SRC="${TOREN_PROWL_SRC:-}"
+	PROWL_TMP=""
+	if [ -z "$PROWL_SRC" ] && [ -d "$REPO_ROOT/../prowl" ]; then
+		PROWL_SRC="$REPO_ROOT/../prowl"
+	fi
+	if [ -z "$PROWL_SRC" ]; then
+		PROWL_TMP=$(mktemp -d)
+		if git clone --depth 1 https://github.com/Toren-Linux/prowl.git "$PROWL_TMP/prowl" 2>/dev/null; then
+			PROWL_SRC="$PROWL_TMP/prowl"
+		fi
+	fi
+	if [ -n "$PROWL_SRC" ] && [ -d "$PROWL_SRC/cmd/prowl" ]; then
+		echo "build-iso-void: building prowl from standalone repo ($PROWL_SRC)..."
+		( cd "$PROWL_SRC" && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o "$INCLUDE_DIR/usr/bin/prowl" ./cmd/prowl )
+	fi
+	[ -n "$PROWL_TMP" ] && rm -rf "$PROWL_TMP" || true
 )
 find "$INCLUDE_DIR/usr/bin" -type f -exec chmod 0755 {} +
 # Symlinks
