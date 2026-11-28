@@ -29,3 +29,16 @@ func TestXbpsPackageNameValidation(t *testing.T) {
 		}
 	}
 }
+
+func TestFlatpakIDGrammar(t *testing.T) {
+	for _, valid := range []string{"org.mozilla.firefox", "com.discordapp.Discord", "md.obsidian.Obsidian"} {
+		if !isFlatpakID(valid) {
+			t.Errorf("expected %q to be valid flatpak ID", valid)
+		}
+	}
+	for _, invalid := range []string{"firefox", "vlc", "../bad.id", "two.parts"} {
+		if isFlatpakID(invalid) {
+			t.Errorf("expected %q to be rejected as flatpak ID", invalid)
+		}
+	}
+}

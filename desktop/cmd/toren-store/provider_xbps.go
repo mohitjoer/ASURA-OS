@@ -72,6 +72,20 @@ func (xbpsProvider) Load(ctx context.Context, _ bool) ([]Item, SourceState, erro
 			Installed:        isInst,
 		})
 	}
+	if have("flatpak") {
+		fpInstalled := flatpakInstalled(ctx)
+		for _, fp := range seedAppsFlatpak {
+			instVer := fpInstalled[fp.id]
+			items = append(items, Item{
+				ID:               fp.id,
+				Category:         "apps",
+				Name:             fp.title,
+				Summary:          fp.summary,
+				InstalledVersion: instVer,
+				Installed:        instVer != "",
+			})
+		}
+	}
 	sort.Slice(items, func(i, j int) bool {
 		return items[i].Name < items[j].Name
 	})
@@ -122,6 +136,7 @@ func (xbpsProvider) Search(ctx context.Context, query string) ([]Item, error) {
 			InstalledVersion: installed[pkgName],
 		})
 	}
+	items = append(items, flatpakSearch(ctx, query, flatpakInstalled(ctx))...)
 	items = rankXbpsSearch(items, strings.ToLower(query))
 	if len(items) > 60 {
 		items = items[:60]
@@ -157,6 +172,9 @@ func rankXbpsSearch(items []Item, joined string) []Item {
 }
 
 func (xbpsProvider) Install(ctx context.Context, id string) error {
+	if isFlatpakID(id) {
+		return flatpakInstall(ctx, id)
+	}
 	if !xbpsPkgName.MatchString(id) {
 		return fmt.Errorf("invalid package name %q", id)
 	}
@@ -164,6 +182,9 @@ func (xbpsProvider) Install(ctx context.Context, id string) error {
 }
 
 func (xbpsProvider) Remove(ctx context.Context, id string) error {
+	if isFlatpakID(id) {
+		return flatpakRemove(ctx, id)
+	}
 	if !xbpsPkgName.MatchString(id) {
 		return fmt.Errorf("invalid package name %q", id)
 	}
