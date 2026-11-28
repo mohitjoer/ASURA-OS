@@ -137,7 +137,7 @@ hardware profile for your specific machine, and an updater that can roll back.
 | Control tools    | Go — `toren`, `toren-sysd` (root daemon at `/run/toren/sysd.sock`), `toren-userd` (session daemon), `toren-shell`, `toren-hubd`, `toren-wallpaper`, and `apm`                             |
 | Settings store   | GSettings schemas + dconf, one writer per setting                                                                                                                                         |
 | GPU & Power      | `toren gpu` (PCI inspection & `prime-run` offload), `toren power` (profiles & NVIDIA RTX 3050 D3cold management)                                                                          |
-| Terminal         | Ghostty — strictly supported, configured by Toren, never kitty                                                                                                                            |
+| Terminal         | Ghostty (shipped default, configured by Toren), with full support for kitty, alacritty, wezterm, foot, konsole, gnome-terminal, and other terminals via `toren-app` |
 | User shell       | zsh + starship                                                                                                                                                                            |
 | Editor           | Neovim                                                                                                                                                                                    |
 | Boot chain       | GRUB EFI                                                                                                                                                                                  |

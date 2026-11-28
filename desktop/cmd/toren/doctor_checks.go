@@ -137,8 +137,11 @@ func recommendedAbsent(run runner.Func) ([]string, int, error) {
 				continue
 			}
 		case "ghostty":
-			if _, err := exec.LookPath("ghostty"); err == nil {
-				continue
+			for _, term := range []string{"ghostty", "kitty", "alacritty", "wezterm", "foot", "konsole", "gnome-terminal", "xterm"} {
+				if _, err := exec.LookPath(term); err == nil {
+					bin = term
+					break
+				}
 			}
 		}
 		if _, lookErr := exec.LookPath(bin); lookErr == nil {
