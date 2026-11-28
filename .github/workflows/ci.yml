@@ -442,7 +442,7 @@ jobs:
         contract-tests,
         iso,
       ]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/dev-unstable'
+    if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/dev-unstable' && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
     permissions:
       contents: read
       pages: write
